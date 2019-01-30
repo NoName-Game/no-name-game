@@ -1,13 +1,13 @@
-package bot
+package game
 
 import "github.com/jinzhu/gorm"
 
 //******************************
-// User
+// Player
 //******************************
 
-//User - user struct
-type User struct {
+//Player struct
+type Player struct {
 	gorm.Model
 	Username string
 }
