@@ -1,10 +1,23 @@
-hash: fe841a5119f8c8720370ad383fd60dc528af8d2b32992f664e2357c18ba529d2
-updated: 2019-01-29T14:32:45.181721+01:00
+hash: b089ab3940d5b4214037fd56a772f2b708a91b6b385dc2e9c4afe0ee7979a84e
+updated: 2019-01-30T17:35:15.110301+01:00
 imports:
 - name: github.com/go-telegram-bot-api/telegram-bot-api
   version: 5781187bc20cbb9910ba867eafe318479be119b6
+- name: github.com/jinzhu/gorm
+  version: 472c70caa40267cb89fd8facb07fe6454b578626
+  subpackages:
+  - dialects/postgres
+- name: github.com/jinzhu/inflection
+  version: 04140366298a54a039076d798123ffa108fff46c
 - name: github.com/joho/godotenv
   version: 23d116af351c84513e1946b527c88823e476be13
+  subpackages:
+  - autoload
+- name: github.com/lib/pq
+  version: 9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee
+  subpackages:
+  - hstore
+  - oid
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 testImports: []

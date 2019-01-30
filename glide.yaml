@@ -4,3 +4,5 @@ import:
   version: v5.0.0-rc1
 - package: github.com/joho/godotenv
   version: v1.3.0
+- package: github.com/jinzhu/gorm
+  version: v1.9.2

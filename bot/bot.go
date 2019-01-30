@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/joho/godotenv/autoload"
+	"gitlab.com/Valkyrie00/no-name/config"
 )
 
 var (
@@ -28,6 +29,14 @@ func init() {
 	}
 
 	log.Println(fmt.Sprintf("Bot connected: %s", bot.Self.UserName))
+
+	// Da mettere in game fare migrations
+	migrations()
+}
+
+// Migrate the schema
+func migrations() {
+	config.Database.AutoMigrate(User{})
 }
 
 //Handler - Updates Handler
