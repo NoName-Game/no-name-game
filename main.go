@@ -1,17 +1,17 @@
-// main.go
 package main
 
 import (
 	"log"
 
 	"gitlab.com/Valkyrie00/no-name/bot"
+	"gitlab.com/Valkyrie00/no-name/web"
 )
 
 func main() {
-	// PingServer
-	log.Println("LOAD - Ping Server")
-	go server()
+	// Server - Only for ping
+	go web.Run()
 
+	// Bot - NoName Game
 	log.Println("LOAD - Bot")
 	bot.Handler()
 }
