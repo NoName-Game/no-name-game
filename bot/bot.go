@@ -15,8 +15,8 @@ func GetUpdates() tgbotapi.UpdatesChannel {
 	return config.TBot.GetUpdatesChan(u)
 }
 
-// SendNewMessage - send new message
-func SendNewMessage(chattable tgbotapi.MessageConfig) tgbotapi.Message {
+// SendMessage - send message
+func SendMessage(chattable tgbotapi.MessageConfig) tgbotapi.Message {
 	message, err := config.TBot.Send(chattable)
 	if err != nil {
 		log.Println("Cant send message.")
