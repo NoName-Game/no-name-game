@@ -39,7 +39,9 @@ func Run() {
 		log.Println(player)
 		// ***************************
 
-		msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		bot.SendMessage(msg)
+		routing(update)
+
+		// msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// bot.SendMessage(msg)
 	}
 }
