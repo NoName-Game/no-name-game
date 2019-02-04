@@ -1,6 +1,6 @@
 package game
 
-import "gitlab.com/Valkyrie00/no-name/config"
+import "bitbucket.org/no-name-game/no-name/config"
 
 func bootstrap() {
 	migrations()

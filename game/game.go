@@ -3,7 +3,7 @@ package game
 import (
 	"log"
 
-	"gitlab.com/Valkyrie00/no-name/bot"
+	"bitbucket.org/no-name-game/no-name/bot"
 )
 
 var (

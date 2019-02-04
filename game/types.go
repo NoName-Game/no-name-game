@@ -1,8 +1,8 @@
 package game
 
 import (
+	"bitbucket.org/no-name-game/no-name/config"
 	"github.com/jinzhu/gorm"
-	"gitlab.com/Valkyrie00/no-name/config"
 )
 
 //******************************
