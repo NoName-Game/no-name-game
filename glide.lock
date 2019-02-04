@@ -1,5 +1,5 @@
-hash: b089ab3940d5b4214037fd56a772f2b708a91b6b385dc2e9c4afe0ee7979a84e
-updated: 2019-01-30T17:35:15.110301+01:00
+hash: e7ec3f4643308db4d9e9cc9571afae33e06ee127f9646ea80a3497d7f628915e
+updated: 2019-02-04T13:38:57.315502+01:00
 imports:
 - name: github.com/go-telegram-bot-api/telegram-bot-api
   version: 5781187bc20cbb9910ba867eafe318479be119b6

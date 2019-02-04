@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gitlab.com/Valkyrie00/no-name/game"
-	"gitlab.com/Valkyrie00/no-name/web"
+	"bitbucket.org/no-name-game/no-name/game"
+	"bitbucket.org/no-name-game/no-name/web"
 )
 
 func main() {

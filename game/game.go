@@ -5,9 +5,9 @@ import (
 	"log"
 	"strconv"
 
+	"bitbucket.org/no-name-game/no-name/bot"
+	"bitbucket.org/no-name-game/no-name/config"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"gitlab.com/Valkyrie00/no-name/bot"
-	"gitlab.com/Valkyrie00/no-name/config"
 )
 
 var (
