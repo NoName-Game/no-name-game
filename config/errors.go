@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 
 	"github.com/getsentry/raven-go"
@@ -9,16 +10,22 @@ import (
 
 const filepath = "log.json"
 
-//Inizialize the logger
-func initialize() {
-	raven.SetDSN(os.Getenv("SENTRY_DSN"))
-	//Formato data
+//Initialize the logger
+func init() {
+	sentryDSN := os.Getenv("SENTRY_DSN")
+	if sentryDSN == "" {
+		ErrorHandler("$SENTRY_DSN must be set", errors.New("sentryDSN Missing"))
+	}
+
+	raven.SetDSN(sentryDSN)
+
+	//DateFormatter
 	log.SetFormatter(&log.JSONFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
-	//Creo file log se non esiste
+
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		//does not exist
+		//File does not exist
 		file, err := os.Create(filepath)
 		log.SetOutput(file)
 		if err != nil {
@@ -31,19 +38,19 @@ func initialize() {
 		}
 		log.SetOutput(file)
 	}
-	//fmt.Println("Error Handling inizializzato")
 }
 
 // ErrorHandler logs a new Error.
 //
 // message is a custom text.
 func ErrorHandler(message string, err error) {
-	initialize()
 	if err != nil {
-		//Fatal Error
+		//Report to Sentry
 		raven.CaptureErrorAndWait(err, nil) //Invio errore potenzialmente Panicoso (Crusca fatti da parte) a Sentry
+
+		//Log file
 		log.WithFields(log.Fields{
 			"Message": message,
-		}).Panic(err) //Loggo su file
+		}).Panic(err)
 	}
 }

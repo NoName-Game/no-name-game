@@ -1,6 +1,8 @@
 hash: f2f88fe634663e7685570706ed397ee0b8328946140973896c250be280853a86
-updated: 2019-02-05T23:54:04.402294+01:00
+updated: 2019-02-06T00:01:20.508496+01:00
 imports:
+- name: github.com/certifi/gocertifi
+  version: abcd5707844888d7088866f25df3a7a2ac337dc4
 - name: github.com/getsentry/raven-go
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
 - name: github.com/go-telegram-bot-api/telegram-bot-api
@@ -22,6 +24,8 @@ imports:
   subpackages:
   - hstore
   - oid
+- name: github.com/pkg/errors
+  version: ffb6e22f01932bf7ac35e0bad9be11f01d1c8685
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/technoweenie/multipartstreamer
