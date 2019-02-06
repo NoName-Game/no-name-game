@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -11,7 +12,7 @@ import (
 var bundle *i18n.Bundle
 
 func init() {
-	langFiles := []string{"en-US.yaml", "it-IT.yaml"}
+	langFiles := []string{"en-US/en-US.yaml", "it-IT/it-IT.yaml"}
 	var err error
 
 	// Create a Bundle to use for the lifetime of your application
@@ -50,13 +51,15 @@ func CreateLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
 
 //Return text from key translated to locale.
 //
+//You can use printf's placeholders!
 //Available locales: it-IT, en-US
-func getTranslation(key, locale string) (string, error) {
+func getTranslation(key, locale string, args ...interface{}) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{
 			MessageID: key,
 		},
 	)
+	msg = fmt.Sprintf(msg, args...)
 	return msg, err
 }
