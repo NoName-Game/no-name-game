@@ -1,8 +1,13 @@
 package game
 
-import "bitbucket.org/no-name-game/no-name/config"
+import (
+	"errors"
+
+	"bitbucket.org/no-name-game/no-name/config"
+)
 
 func bootstrap() {
+	config.ErrorHandler("Bootstrap", errors.New("Bootstrap"))
 	migrations()
 }
 
