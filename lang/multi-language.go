@@ -51,7 +51,7 @@ func CreateLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
 //Return text from key translated to locale.
 //
 //Available locales: it-IT, en-US
-func getMessage(key, locale string) (string, error) {
+func getTranslation(key, locale string) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{
