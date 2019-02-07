@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const logFilePath = "storage/logs/log.json"
+const logFilePath = "storage/logs/log.txt"
 
 //Initialize the logger
 func init() {
@@ -32,16 +32,14 @@ func bootSentry() {
 
 func bootLog() {
 	//Log file does not exist
-	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-		_, err := os.Create(logFilePath)
-		if err != nil {
-			ErrorHandler("", err)
-		}
+
+	file, err := os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	if err != nil {
+		ErrorHandler("Error when opening file", err)
 	}
-	file, _ := os.OpenFile(logFilePath, os.O_APPEND|os.O_WRONLY, 0666)
 
 	//DateFormatter
-	log.SetFormatter(&log.JSONFormatter{
+	log.SetFormatter(&log.TextFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
 
