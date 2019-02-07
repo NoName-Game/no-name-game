@@ -10,20 +10,26 @@ import (
 
 var (
 	funcs = map[string]interface{}{
-		"test": testerFunc,
+		"the-answer-is": theAnswerIs,
 	}
 )
 
+// Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	var route string
 	if update.Message != nil {
 		route = parseMessage(update.Message)
 	}
 
-	Call(funcs, route, update)
+	//TODO: Controllare lo stato dell'utente.
+
+	// Check if command exist.
+	if _, ok := funcs[route]; ok {
+		Call(funcs, route, update)
+	}
 }
 
-// Call - Method to call another func
+// Call - Method to call another func and check needed parameters
 func Call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(m[name])
 	if len(params) != f.Type().NumIn() {
@@ -40,6 +46,7 @@ func Call(m map[string]interface{}, name string, params ...interface{}) (result 
 	return
 }
 
+// Parse message text, if command it's like telegram format the message will be parsed and return simple text without "/" char
 func parseMessage(message *tgbotapi.Message) string {
 	parsed := message.Text
 	if message.IsCommand() == true {
@@ -49,6 +56,7 @@ func parseMessage(message *tgbotapi.Message) string {
 	return parsed
 }
 
-func testerFunc(update tgbotapi.Update) {
-	log.Println("Here Yeeee")
+// EsterEgg for debug
+func theAnswerIs(update tgbotapi.Update) {
+	log.Println(42)
 }
