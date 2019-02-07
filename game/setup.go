@@ -1,14 +1,25 @@
 package game
 
 import (
-	"errors"
-
 	"bitbucket.org/no-name-game/no-name/config"
 )
 
 func bootstrap() {
-	config.ErrorHandler("Bootstrap", errors.New("Bootstrap"))
+	//*************
+	// Errors Log
+	//*************
+	config.ErrorsUp()
+
+	//*************
+	// Database
+	//*************
+	config.DatabaseUp()
 	migrations()
+
+	//*************
+	// Bot
+	//*************
+	config.BotUp()
 }
 
 // Migrate the schema

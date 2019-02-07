@@ -14,7 +14,8 @@ var (
 	TBot *tgbotapi.BotAPI
 )
 
-func init() {
+//BotUp - BotUp
+func BotUp() {
 	telegramAPIKey := os.Getenv("TELEGRAM_APIKEY")
 	if telegramAPIKey == "" {
 		ErrorHandler("$TELEGRAM_APIKEY must be set", errors.New("TelegramApiKey Missing"))
@@ -22,7 +23,10 @@ func init() {
 
 	var err error
 	TBot, err = tgbotapi.NewBotAPI(telegramAPIKey)
-	TBot.Debug = true
+	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+		TBot.Debug = true
+	}
+
 	if err != nil {
 		ErrorHandler("tgbotapi.NewBotAPI(telegramAPIKey) return Error!", err)
 	}

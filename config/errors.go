@@ -2,16 +2,17 @@ package config
 
 import (
 	"errors"
+	"log"
 	"os"
 
 	raven "github.com/getsentry/raven-go"
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
-const logFilePath = "storage/logs/log.txt"
+const logFilePath = "storage/logs/errors.log"
 
-//Initialize the logger
-func init() {
+//ErrorsUp - ErrorsUp
+func ErrorsUp() {
 	if sentryDebug := os.Getenv("SENTRY_DEBUG"); sentryDebug != "false" {
 		bootSentry()
 	}
@@ -19,6 +20,10 @@ func init() {
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
 		bootLog()
 	}
+
+	log.Println("************************************************")
+	log.Println("Errors Log: OK!")
+	log.Println("************************************************")
 }
 
 func bootSentry() {
@@ -32,18 +37,17 @@ func bootSentry() {
 
 func bootLog() {
 	//Log file does not exist
-
 	file, err := os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		ErrorHandler("Error when opening file", err)
 	}
 
 	//DateFormatter
-	log.SetFormatter(&log.TextFormatter{
+	logrus.SetFormatter(&logrus.TextFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
 
-	log.SetOutput(file)
+	logrus.SetOutput(file)
 }
 
 // ErrorHandler logs a new Error.
@@ -58,7 +62,7 @@ func ErrorHandler(message string, err error) {
 
 		//Report Log
 		if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"Message": message,
 			}).Panic(err)
 		}
