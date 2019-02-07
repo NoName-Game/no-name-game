@@ -1,10 +1,13 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"bitbucket.org/no-name-game/no-name/config"
 )
 
 var (
@@ -14,7 +17,7 @@ var (
 func init() {
 	port = os.Getenv("SERVE_PORT")
 	if port == "" {
-		panic("$SERVE_PORT must be set")
+		config.ErrorHandler("$SERVE_PORT must be set", errors.New("$SERVE_PORT not setted"))
 	}
 }
 

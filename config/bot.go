@@ -1,10 +1,11 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -13,17 +14,21 @@ var (
 	TBot *tgbotapi.BotAPI
 )
 
-func init() {
+//BotUp - BotUp
+func BotUp() {
 	telegramAPIKey := os.Getenv("TELEGRAM_APIKEY")
 	if telegramAPIKey == "" {
-		log.Panicln("$TELEGRAM_APIKEY must be set")
+		ErrorHandler("$TELEGRAM_APIKEY must be set", errors.New("TelegramApiKey Missing"))
 	}
 
 	var err error
 	TBot, err = tgbotapi.NewBotAPI(telegramAPIKey)
-	TBot.Debug = true
+	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+		TBot.Debug = true
+	}
+
 	if err != nil {
-		log.Panic(err)
+		ErrorHandler("tgbotapi.NewBotAPI(telegramAPIKey) return Error!", err)
 	}
 
 	log.Println("************************************************")
