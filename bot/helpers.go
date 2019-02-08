@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // NewMessage creates a new Message.
@@ -13,7 +13,7 @@ func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
 			ChatID:           chatID,
 			ReplyToMessageID: 0,
 		},
-		Text: text,
+		Text:                  text,
 		DisableWebPagePreview: false,
 	}
 }
