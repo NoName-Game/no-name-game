@@ -24,5 +24,5 @@ func bootstrap() {
 
 // Migrate the schema
 func migrations() {
-	config.Database.AutoMigrate(Player{})
+	config.Database.AutoMigrate(Player{}, PlayerState{})
 }

@@ -18,6 +18,7 @@ func init() {
 func Run() {
 	updates := bot.GetUpdates()
 	for update := range updates {
+
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}

@@ -42,3 +42,25 @@ func (p *Player) findByUsername(username string) *Player {
 
 	return p
 }
+
+// PlayerState -
+type PlayerState struct {
+	gorm.Model
+	PlayerID int
+	Function string
+	Stage    int
+	Payload  string
+}
+
+// Create player
+func (s *PlayerState) create() *PlayerState {
+	config.Database.Create(s)
+
+	return s
+}
+
+func (s *PlayerState) update() *PlayerState {
+	config.Database.Save(s)
+
+	return s
+}
