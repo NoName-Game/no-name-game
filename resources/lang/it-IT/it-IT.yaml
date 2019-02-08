@@ -1,0 +1,4 @@
+#key: Text
+#You can use printf's placeholders!
+sample_text: "Testo di prova"
+text_with_placeholders: "Ciao, %s"
