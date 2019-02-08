@@ -1,4 +1,4 @@
-package lang
+package config
 
 import (
 	"fmt"
@@ -9,14 +9,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var bundle *i18n.Bundle
+var (
+	bundle    *i18n.Bundle
+	langFiles = []string{
+		"resources/lang/en-US/en-US.yaml",
+		"resources/lang/it-IT/it-IT.yaml",
+	}
+)
 
-func init() {
-	langFiles := []string{"en-US/en-US.yaml", "it-IT/it-IT.yaml"}
+// LanguageUp - LanguageUp
+func LanguageUp() {
 	var err error
 
 	// Create a Bundle to use for the lifetime of your application
-	bundle, err = CreateLocalizerBundle(langFiles)
+	bundle, err = createLocalizerBundle(langFiles)
 	if err != nil {
 		//ErrorHandling"Error initialising localization"
 		panic(err)
@@ -24,7 +30,7 @@ func init() {
 }
 
 // CreateLocalizerBundle reads language files and registers them in i18n bundle
-func CreateLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
+func createLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
 	// Bundle stores a set of messages
 	bundle := &i18n.Bundle{DefaultLanguage: language.Italian}
 
@@ -49,11 +55,11 @@ func CreateLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
 	return bundle, nil
 }
 
-//Return text from key translated to locale.
+// GetTranslation - Return text from key translated to locale.
 //
-//You can use printf's placeholders!
-//Available locales: it-IT, en-US
-func getTranslation(key, locale string, args ...interface{}) (string, error) {
+// You can use printf's placeholders!
+// Available locales: it-IT, en-US
+func GetTranslation(key, locale string, args ...interface{}) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{

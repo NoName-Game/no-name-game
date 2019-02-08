@@ -13,6 +13,11 @@ func bootstrap() {
 	config.ErrorsUp()
 
 	//*************
+	// i18n
+	//*************
+	config.LanguageUp()
+
+	//*************
 	// Database
 	//*************
 	config.DatabaseUp()
