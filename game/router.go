@@ -10,23 +10,50 @@ import (
 
 var (
 	funcs = map[string]interface{}{
-		"the-answer-is": theAnswerIs,
+		"the-answer-is":    theAnswerIs,
+		"test-multi-state": testMultiState,
 	}
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
-	var route string
+
 	if update.Message != nil {
-		route = parseMessage(update.Message)
+		if ok := checkUser(update.Message); ok {
+			var route string
+
+			route = parseMessage(update.Message)
+			if player.State.Function != "" {
+				route = player.State.Function
+			}
+
+			// panic(player.State.Function)
+
+			// Check if command exist.
+			if _, ok := funcs[route]; ok {
+
+				log.Println("HERE", route)
+
+				Call(funcs, route, update)
+			}
+		}
+	}
+}
+
+func checkUser(message *tgbotapi.Message) bool {
+	player = findPlayerByUsername(message.From.UserName)
+
+	panic(player.ID)
+
+	if player.ID < 1 {
+		player = Player{
+			Username: message.From.UserName,
+			State:    PlayerState{},
+		}
+		player.create()
 	}
 
-	//TODO: Controllare lo stato dell'utente.
-
-	// Check if command exist.
-	if _, ok := funcs[route]; ok {
-		Call(funcs, route, update)
-	}
+	return true
 }
 
 // Call - Method to call another func and check needed parameters

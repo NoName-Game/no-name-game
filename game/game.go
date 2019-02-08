@@ -29,14 +29,6 @@ func Run() {
 			continue
 		}
 
-		// Block to test DB
-		// First or create
-		player.findByUsername(update.Message.From.UserName)
-		if player.ID < 1 {
-			player = Player{Username: update.Message.From.UserName}
-			player.create()
-		}
-
 		log.Println(player)
 		// ***************************
 

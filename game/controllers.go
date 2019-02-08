@@ -5,36 +5,16 @@ import (
 	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/bot"
-	"bitbucket.org/no-name-game/no-name/config"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// Multistate
-func testMultistate(message *tgbotapi.Message) {
-	var state PlayerState
-	config.Database.Where("player_id = ?", message.From.ID).First(&state)
+func setPlayerState() {
 
-	if state.ID < 1 {
-		state = PlayerState{PlayerID: message.From.ID, Function: "Tutorial"}
-		state.create()
-	}
-
-	// DA RICONTROLLARE
-	if state.Function != "" && state.Function != "Start" {
-		switch state.Function {
-		case "Sintesi":
-			sintesi(message, state)
-		}
-	} else {
-		switch message.Text {
-		case "Sintesi":
-			sintesi(message, state)
-		}
-	}
-	///////////////////////////
 }
 
-func sintesi(message *tgbotapi.Message, playerState PlayerState) {
+func testMultiState(update tgbotapi.Update) {
+	message := update.Message
+
 	//Payload function
 	type functionPayload struct {
 		Rosso int
@@ -42,20 +22,20 @@ func sintesi(message *tgbotapi.Message, playerState PlayerState) {
 	}
 
 	var payloadPLayer functionPayload
-	rawPayload := []byte(playerState.Payload)
+	rawPayload := []byte(player.State.Payload)
 	err := json.Unmarshal(rawPayload, &payloadPLayer)
 	if err != nil {
 		// error back to menu
 	}
 
-	switch playerState.Stage {
+	switch player.State.Stage {
 	case 0:
-		playerState.Function = "Sintesi"
-		playerState.Stage = 1
+		player.State.Function = "Sintesi"
+		player.State.Stage = 1
 		payloadUpdated, _ := json.Marshal(functionPayload{})
-		playerState.Payload = string(payloadUpdated)
+		player.State.Payload = string(payloadUpdated)
 
-		playerState.update()
+		player.update()
 
 		msg := bot.NewMessage(message.Chat.ID, "Ho solo settato lo state ora, quanto mana BLU vuoi?")
 		bot.SendMessage(msg)
@@ -64,10 +44,10 @@ func sintesi(message *tgbotapi.Message, playerState PlayerState) {
 		//Mana Blu
 		payloadPLayer.Blu, _ = strconv.Atoi(message.Text)
 		payloadUpdated, _ := json.Marshal(payloadPLayer)
-		playerState.Payload = string(payloadUpdated)
-		playerState.Stage = 2
+		player.State.Payload = string(payloadUpdated)
+		player.State.Stage = 2
 
-		playerState.update()
+		player.update()
 
 		msg := bot.NewMessage(message.Chat.ID, "quanto mana ROSSO vuoi?")
 		bot.SendMessage(msg)
@@ -75,19 +55,19 @@ func sintesi(message *tgbotapi.Message, playerState PlayerState) {
 		//Mana Rosso
 		payloadPLayer.Rosso, _ = strconv.Atoi(message.Text)
 		payloadUpdated, _ := json.Marshal(payloadPLayer)
-		playerState.Payload = string(payloadUpdated)
-		playerState.Stage = 3
+		player.State.Payload = string(payloadUpdated)
+		player.State.Stage = 3
 
-		playerState.update()
+		player.State.update()
 
 		msg := bot.NewMessage(message.Chat.ID, "Sei sicuro di voler concludere?")
 		bot.SendMessage(msg)
 	case 3:
-		playerState.Function = "Start"
-		playerState.Payload = string("")
-		playerState.Stage = 0
+		player.State.Function = "Start"
+		player.State.Payload = string("")
+		player.State.Stage = 0
 
-		playerState.update()
+		player.State.update()
 
 		msg := bot.NewMessage(message.Chat.ID, "Bravo hai concluso ora puoi andare al'inizio.")
 		bot.SendMessage(msg)

@@ -13,6 +13,7 @@ import (
 type Player struct {
 	gorm.Model
 	Username string
+	State    PlayerState
 }
 
 // Create player
@@ -36,17 +37,15 @@ func (p *Player) delete() *Player {
 	return p
 }
 
-// FindByUsername -find player by username
-func (p *Player) findByUsername(username string) *Player {
-	config.Database.Where("username = ?", username).First(p)
-
-	return p
+// FindByUsername - find player by username
+func findPlayerByUsername(player Player, username string) {
+	config.Database.Where("username = ?", username).First(&player)
 }
 
 // PlayerState -
 type PlayerState struct {
 	gorm.Model
-	PlayerID int
+	PlayerID uint
 	Function string
 	Stage    int
 	Payload  string
