@@ -1,5 +1,5 @@
-hash: f2f88fe634663e7685570706ed397ee0b8328946140973896c250be280853a86
-updated: 2019-02-06T00:01:20.508496+01:00
+hash: bff19c6d3e1ff825d6f9433e83b3a15d09e4b7aa30bd202b4787caf04c961a7b
+updated: 2019-02-09T00:18:46.040704+01:00
 imports:
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
@@ -24,6 +24,12 @@ imports:
   subpackages:
   - hstore
   - oid
+- name: github.com/nicksnyder/go-i18n
+  version: 9c0db6e2b3a591b2dfabb8ef487e53cd080c57bf
+  subpackages:
+  - v2/i18n
+  - v2/internal
+  - v2/internal/plural
 - name: github.com/pkg/errors
   version: ffb6e22f01932bf7ac35e0bad9be11f01d1c8685
 - name: github.com/sirupsen/logrus
@@ -39,4 +45,13 @@ imports:
   subpackages:
   - unix
   - windows
+- name: golang.org/x/text
+  version: e6919f6577db79269a6443b9dc46d18f2238fb5d
+  subpackages:
+  - internal/language
+  - internal/language/compact
+  - internal/tag
+  - language
+- name: gopkg.in/yaml.v2
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 testImports: []

@@ -10,3 +10,7 @@ import:
   version: v0.2.0
 - package: github.com/sirupsen/logrus
   version: v1.3.0
+- package: github.com/nicksnyder/go-i18n
+  version: v2.0.0-beta.6
+  subpackages:
+  - v2/i18n
