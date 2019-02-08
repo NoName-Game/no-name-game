@@ -40,9 +40,9 @@ func Run() {
 		log.Println(player)
 		// ***************************
 
-		testMultistate(update.Message)
+		routing(update)
 
-		msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		bot.SendMessage(msg)
+		// msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// bot.SendMessage(msg)
 	}
 }
