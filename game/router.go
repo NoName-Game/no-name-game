@@ -27,8 +27,6 @@ func routing(update tgbotapi.Update) {
 				route = player.State.Function
 			}
 
-			// panic(player.State.Function)
-
 			// Check if command exist.
 			if _, ok := funcs[route]; ok {
 
@@ -42,8 +40,6 @@ func routing(update tgbotapi.Update) {
 
 func checkUser(message *tgbotapi.Message) bool {
 	player = findPlayerByUsername(message.From.UserName)
-
-	panic(player.ID)
 
 	if player.ID < 1 {
 		player = Player{

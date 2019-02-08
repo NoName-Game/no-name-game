@@ -38,8 +38,11 @@ func (p *Player) delete() *Player {
 }
 
 // FindByUsername - find player by username
-func findPlayerByUsername(player Player, username string) {
-	config.Database.Where("username = ?", username).First(&player)
+func findPlayerByUsername(username string) Player {
+	var player Player
+	config.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
+
+	return player
 }
 
 // PlayerState -
