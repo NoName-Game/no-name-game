@@ -18,6 +18,7 @@ func init() {
 func Run() {
 	updates := bot.GetUpdates()
 	for update := range updates {
+
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
@@ -28,18 +29,12 @@ func Run() {
 			continue
 		}
 
-		// Block to test DB
-		// First or create
-		player.findByUsername(update.Message.From.UserName)
-		if player.ID < 1 {
-			player = Player{Username: update.Message.From.UserName}
-			player.create()
-		}
-
 		log.Println(player)
 		// ***************************
 
-		msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		bot.SendMessage(msg)
+		routing(update)
+
+		// msg := bot.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// bot.SendMessage(msg)
 	}
 }
