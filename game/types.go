@@ -18,21 +18,21 @@ type Player struct {
 
 // Create player
 func (p *Player) create() *Player {
-	config.Database.Create(p)
+	config.Database.Create(&p)
 
 	return p
 }
 
 // Update player
 func (p *Player) update() *Player {
-	config.Database.Save(p)
+	config.Database.Save(&p)
 
 	return p
 }
 
 // Delete player
 func (p *Player) delete() *Player {
-	config.Database.Delete(p)
+	config.Database.Delete(&p)
 
 	return p
 }
@@ -54,15 +54,16 @@ type PlayerState struct {
 	Payload  string
 }
 
-// Create player
+// Create Player State
 func (s *PlayerState) create() *PlayerState {
-	config.Database.Create(s)
+	config.Database.Create(&s)
 
 	return s
 }
 
+// Create Player State
 func (s *PlayerState) update() *PlayerState {
-	config.Database.Save(s)
+	config.Database.Save(&s)
 
 	return s
 }

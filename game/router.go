@@ -2,7 +2,6 @@ package game
 
 import (
 	"errors"
-	"log"
 	"reflect"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -17,7 +16,6 @@ var (
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
-
 	if update.Message != nil {
 		if ok := checkUser(update.Message); ok {
 			var route string
@@ -29,27 +27,10 @@ func routing(update tgbotapi.Update) {
 
 			// Check if command exist.
 			if _, ok := funcs[route]; ok {
-
-				log.Println("HERE", route)
-
 				Call(funcs, route, update)
 			}
 		}
 	}
-}
-
-func checkUser(message *tgbotapi.Message) bool {
-	player = findPlayerByUsername(message.From.UserName)
-
-	if player.ID < 1 {
-		player = Player{
-			Username: message.From.UserName,
-			State:    PlayerState{},
-		}
-		player.create()
-	}
-
-	return true
 }
 
 // Call - Method to call another func and check needed parameters
@@ -70,16 +51,11 @@ func Call(m map[string]interface{}, name string, params ...interface{}) (result 
 }
 
 // Parse message text, if command it's like telegram format the message will be parsed and return simple text without "/" char
-func parseMessage(message *tgbotapi.Message) string {
-	parsed := message.Text
+func parseMessage(message *tgbotapi.Message) (parsed string) {
+	parsed = message.Text
 	if message.IsCommand() == true {
 		parsed = message.Command()
 	}
 
-	return parsed
-}
-
-// EsterEgg for debug
-func theAnswerIs(update tgbotapi.Update) {
-	log.Println(42)
+	return
 }

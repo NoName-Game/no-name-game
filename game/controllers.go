@@ -2,54 +2,54 @@ package game
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/bot"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func getPlayerStatePayload(player *Player, funcInterface interface{}) {
-	err := json.Unmarshal([]byte(player.State.Payload), &funcInterface)
-	if err != nil {
-		// error back to menu
-	}
-}
+//********************
+//
+//		TEST
+//
+//********************
 
-func setPlayerState(player *Player, state PlayerState) {
-	player.State.Function = state.Function
-	player.State.Stage = state.Stage
-	player.State.Payload = state.Payload
-
-	player.State.update()
-}
-
+// Only for testing multi-state
 func testMultiState(update tgbotapi.Update) {
 	message := update.Message
 
 	//Payload function
-	type functionPayload struct {
-		Rosso int
-		Blu   int
+	type payloadStrct struct {
+		Red   int
+		Green int
+		Blue  int
 	}
 
-	var payloadPLayer functionPayload
+	var payloadPLayer payloadStrct
 	getPlayerStatePayload(&player, &payloadPLayer)
 
 	switch player.State.Stage {
 	case 0:
-		payloadUpdated, _ := json.Marshal(functionPayload{})
+		payloadUpdated, _ := json.Marshal(payloadStrct{})
+
 		setPlayerState(&player, PlayerState{
 			Function: "test-multi-state",
 			Stage:    1,
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "Ho solo settato lo state ora, quanto mana BLU vuoi?")
+		msg := bot.NewMessage(message.Chat.ID, "State setted, How much of R?")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("1"),
+			),
+		)
 		bot.SendMessage(msg)
 
 	case 1:
-		//Mana Blu
-		payloadPLayer.Blu, _ = strconv.Atoi(message.Text)
+		//R
+		payloadPLayer.Red, _ = strconv.Atoi(message.Text)
 		payloadUpdated, _ := json.Marshal(payloadPLayer)
 
 		setPlayerState(&player, PlayerState{
@@ -58,11 +58,16 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "quanto mana ROSSO vuoi?")
+		msg := bot.NewMessage(message.Chat.ID, "Stage 2 setted, How much of G?")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("0"),
+			),
+		)
 		bot.SendMessage(msg)
 	case 2:
-		//Mana Rosso
-		payloadPLayer.Rosso, _ = strconv.Atoi(message.Text)
+		//G
+		payloadPLayer.Green, _ = strconv.Atoi(message.Text)
 		payloadUpdated, _ := json.Marshal(payloadPLayer)
 
 		setPlayerState(&player, PlayerState{
@@ -71,12 +76,41 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "Sei sicuro di voler concludere?")
+		msg := bot.NewMessage(message.Chat.ID, "Stage 2 setted, How much of B?")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("1"),
+			),
+		)
 		bot.SendMessage(msg)
 	case 3:
+		//B
+		payloadPLayer.Blue, _ = strconv.Atoi(message.Text)
+		payloadUpdated, _ := json.Marshal(payloadPLayer)
+
+		setPlayerState(&player, PlayerState{
+			Function: "test-multi-state",
+			Stage:    4,
+			Payload:  string(payloadUpdated),
+		})
+
+		msg := bot.NewMessage(message.Chat.ID, "Finish?")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("YES!"),
+			),
+		)
+		bot.SendMessage(msg)
+	case 4:
 		setPlayerState(&player, PlayerState{})
 
-		msg := bot.NewMessage(message.Chat.ID, "Bravo hai concluso ora puoi andare al'inizio.")
+		msg := bot.NewMessage(message.Chat.ID, "End")
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		bot.SendMessage(msg)
 	}
+}
+
+// EsterEgg for debug
+func theAnswerIs(update tgbotapi.Update) {
+	log.Println(42)
 }
