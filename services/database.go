@@ -1,4 +1,4 @@
-package config
+package services
 
 import (
 	"log"
@@ -21,6 +21,10 @@ func DatabaseUp() {
 	Database, err = gorm.Open("postgres", connectionParameters)
 	if err != nil {
 		ErrorHandler("Error when connecting Database", err)
+	}
+
+	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+		Database.LogMode(true)
 	}
 	// defer Database.Close()
 

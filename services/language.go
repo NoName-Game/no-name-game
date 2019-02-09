@@ -1,4 +1,4 @@
-package config
+package services
 
 import (
 	"fmt"
@@ -66,6 +66,7 @@ func GetTranslation(key, locale string, args ...interface{}) (string, error) {
 			MessageID: key,
 		},
 	)
+
 	msg = fmt.Sprintf(msg, args...)
 	return msg, err
 }

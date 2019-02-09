@@ -1,8 +1,9 @@
-package game
+package app
 
 import (
 	"encoding/json"
 
+	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -36,4 +37,15 @@ func setPlayerState(player *Player, state PlayerState) {
 	player.State.Payload = state.Payload
 
 	player.update()
+}
+
+// trans - late shortCut
+func trans(key, locale string, args ...interface{}) (message string) {
+	if len(args) <= 0 {
+		message, _ = services.GetTranslation(key, locale)
+		return
+	}
+
+	message, _ = services.GetTranslation(key, locale, args)
+	return
 }

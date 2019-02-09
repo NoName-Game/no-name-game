@@ -1,4 +1,4 @@
-package config
+package services
 
 import (
 	"errors"
@@ -11,8 +11,8 @@ import (
 
 const logFilePath = "storage/logs/errors.log"
 
-//ErrorsUp - ErrorsUp
-func ErrorsUp() {
+//LoggingUp - LoggingUp
+func LoggingUp() {
 	if sentryDebug := os.Getenv("SENTRY_DEBUG"); sentryDebug != "false" {
 		bootSentry()
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/no-name-game/no-name/game"
+	"bitbucket.org/no-name-game/no-name/app"
 	"bitbucket.org/no-name-game/no-name/web"
 )
 
@@ -10,5 +10,5 @@ func main() {
 	go web.Run()
 
 	// Game - NoName
-	game.Run()
+	app.Run()
 }

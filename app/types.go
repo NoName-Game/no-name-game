@@ -1,7 +1,7 @@
-package game
+package app
 
 import (
-	"bitbucket.org/no-name-game/no-name/config"
+	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/jinzhu/gorm"
 )
 
@@ -18,21 +18,21 @@ type Player struct {
 
 // Create player
 func (p *Player) create() *Player {
-	config.Database.Create(&p)
+	services.Database.Create(&p)
 
 	return p
 }
 
 // Update player
 func (p *Player) update() *Player {
-	config.Database.Save(&p)
+	services.Database.Save(&p)
 
 	return p
 }
 
 // Delete player
 func (p *Player) delete() *Player {
-	config.Database.Delete(&p)
+	services.Database.Delete(&p)
 
 	return p
 }
@@ -40,7 +40,7 @@ func (p *Player) delete() *Player {
 // FindByUsername - find player by username
 func findPlayerByUsername(username string) Player {
 	var player Player
-	config.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
+	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
 
 	return player
 }
@@ -56,14 +56,14 @@ type PlayerState struct {
 
 // Create Player State
 func (s *PlayerState) create() *PlayerState {
-	config.Database.Create(&s)
+	services.Database.Create(&s)
 
 	return s
 }
 
 // Create Player State
 func (s *PlayerState) update() *PlayerState {
-	config.Database.Save(&s)
+	services.Database.Save(&s)
 
 	return s
 }

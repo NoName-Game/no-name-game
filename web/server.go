@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/no-name-game/no-name/config"
+	"bitbucket.org/no-name-game/no-name/services"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 func init() {
 	port = os.Getenv("SERVE_PORT")
 	if port == "" {
-		config.ErrorHandler("$SERVE_PORT must be set", errors.New("$SERVE_PORT not setted"))
+		services.ErrorHandler("$SERVE_PORT must be set", errors.New("$SERVE_PORT not setted"))
 	}
 }
 
