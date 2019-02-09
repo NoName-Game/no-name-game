@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/bot"
+	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -39,13 +39,13 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "State setted, How much of R?")
+		msg := services.NewMessage(message.Chat.ID, "State setted, How much of R?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
 			),
 		)
-		bot.SendMessage(msg)
+		services.SendMessage(msg)
 
 	case 1:
 		//R
@@ -58,13 +58,13 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "Stage 2 setted, How much of G?")
+		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of G?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("0"),
 			),
 		)
-		bot.SendMessage(msg)
+		services.SendMessage(msg)
 	case 2:
 		//G
 		payloadPLayer.Green, _ = strconv.Atoi(message.Text)
@@ -76,13 +76,13 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "Stage 2 setted, How much of B?")
+		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of B?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
 			),
 		)
-		bot.SendMessage(msg)
+		services.SendMessage(msg)
 	case 3:
 		//B
 		payloadPLayer.Blue, _ = strconv.Atoi(message.Text)
@@ -94,19 +94,19 @@ func testMultiState(update tgbotapi.Update) {
 			Payload:  string(payloadUpdated),
 		})
 
-		msg := bot.NewMessage(message.Chat.ID, "Finish?")
+		msg := services.NewMessage(message.Chat.ID, "Finish?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("YES!"),
 			),
 		)
-		bot.SendMessage(msg)
+		services.SendMessage(msg)
 	case 4:
 		setPlayerState(&player, PlayerState{})
 
-		msg := bot.NewMessage(message.Chat.ID, "End")
+		msg := services.NewMessage(message.Chat.ID, "End")
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		bot.SendMessage(msg)
+		services.SendMessage(msg)
 	}
 }
 

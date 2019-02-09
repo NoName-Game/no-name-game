@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	// TBot - Telegram bot
-	TBot *tgbotapi.BotAPI
+	// BotAPI - Telegram bot
+	botAPI *tgbotapi.BotAPI
 )
 
 //BotUp - BotUp
@@ -22,9 +22,9 @@ func BotUp() {
 	}
 
 	var err error
-	TBot, err = tgbotapi.NewBotAPI(telegramAPIKey)
+	botAPI, err = tgbotapi.NewBotAPI(telegramAPIKey)
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-		TBot.Debug = true
+		botAPI.Debug = true
 	}
 
 	if err != nil {
@@ -32,6 +32,38 @@ func BotUp() {
 	}
 
 	log.Println("************************************************")
-	log.Println("Bot connected: " + TBot.Self.UserName)
+	log.Println("Bot connected: " + botAPI.Self.UserName)
 	log.Println("************************************************")
+}
+
+// GetUpdates - return new updates
+func GetUpdates() tgbotapi.UpdatesChannel {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	return botAPI.GetUpdatesChan(u)
+}
+
+// NewMessage creates a new Message.
+//
+// chatID is where to send it, text is the message text.
+func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
+	return tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID:           chatID,
+			ReplyToMessageID: 0,
+		},
+		Text: text,
+		DisableWebPagePreview: false,
+	}
+}
+
+// SendMessage - send message
+func SendMessage(chattable tgbotapi.MessageConfig) tgbotapi.Message {
+	message, err := botAPI.Send(chattable)
+	if err != nil {
+		log.Println("Cant send message.")
+	}
+
+	return message
 }
