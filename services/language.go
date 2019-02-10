@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -12,8 +13,8 @@ import (
 var (
 	bundle    *i18n.Bundle
 	langFiles = []string{
-		"resources/lang/en-US/en-US.yaml",
-		"resources/lang/it-IT/it-IT.yaml",
+		"resources/lang/en.yaml",
+		"resources/lang/it.yaml",
 	}
 )
 
@@ -27,6 +28,10 @@ func LanguageUp() {
 		//ErrorHandling"Error initialising localization"
 		panic(err)
 	}
+
+	log.Println("************************************************")
+	log.Println("Languages: OK!")
+	log.Println("************************************************")
 }
 
 // CreateLocalizerBundle reads language files and registers them in i18n bundle

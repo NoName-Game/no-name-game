@@ -1,6 +1,8 @@
 package app
 
-import "bitbucket.org/no-name-game/no-name/services"
+import (
+	"bitbucket.org/no-name-game/no-name/services"
+)
 
 var (
 	player Player
