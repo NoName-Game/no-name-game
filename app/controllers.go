@@ -19,6 +19,9 @@ import (
 func testMultiState(update tgbotapi.Update) {
 	message := update.Message
 
+	//FIXME: Partendo da qui, andare a cercare tramite metod se il player ha uno stato per questa funzione
+	// state := nil
+
 	//Payload function
 	type payloadStrct struct {
 		Red   int

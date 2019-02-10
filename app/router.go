@@ -21,9 +21,9 @@ func routing(update tgbotapi.Update) {
 			var route string
 
 			route = parseMessage(update.Message)
-			if player.State.Function != "" {
-				route = player.State.Function
-			}
+			// if player.State.Function != "" {
+			// 	route = player.State.Function
+			// }
 
 			// Check if command exist.
 			if _, ok := funcs[route]; ok {

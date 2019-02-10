@@ -13,7 +13,7 @@ import (
 type Player struct {
 	gorm.Model
 	Username   string
-	State      PlayerState
+	State      []PlayerState
 	Language   Language
 	LanguageID uint
 }
