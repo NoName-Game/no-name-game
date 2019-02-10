@@ -19,10 +19,23 @@ func bootstrap() {
 	// Database
 	//*************
 	services.DatabaseUp()
-	services.Database.AutoMigrate(Player{}, PlayerState{})
+	migrations()
+	seeders()
 
 	//*************
 	// Bot
 	//*************
 	services.BotUp()
+}
+
+func migrations() {
+	services.Database.AutoMigrate(
+		Player{},
+		PlayerState{},
+		Language{},
+	)
+}
+
+func seeders() {
+	seederLanguage()
 }

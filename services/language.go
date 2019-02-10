@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	bundle    *i18n.Bundle
-	langFiles = []string{
-		"resources/lang/en.yaml",
-		"resources/lang/it.yaml",
+	bundle *i18n.Bundle
+	//Langs -
+	Langs = []string{
+		"en",
+		"it",
 	}
 )
 
@@ -23,7 +24,7 @@ func LanguageUp() {
 	var err error
 
 	// Create a Bundle to use for the lifetime of your application
-	bundle, err = createLocalizerBundle(langFiles)
+	bundle, err = createLocalizerBundle(Langs)
 	if err != nil {
 		//ErrorHandling"Error initialising localization"
 		panic(err)
@@ -35,7 +36,7 @@ func LanguageUp() {
 }
 
 // CreateLocalizerBundle reads language files and registers them in i18n bundle
-func createLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
+func createLocalizerBundle(Langs []string) (*i18n.Bundle, error) {
 	// Bundle stores a set of messages
 	bundle := &i18n.Bundle{DefaultLanguage: language.Italian}
 
@@ -44,17 +45,17 @@ func createLocalizerBundle(langFiles []string) (*i18n.Bundle, error) {
 
 	var translations []byte
 	var err error
-	for _, file := range langFiles {
+	for _, file := range Langs {
 
 		// Read our language yaml file
-		translations, err = ioutil.ReadFile(file)
+		translations, err = ioutil.ReadFile("resources/lang/" + file + ".yaml")
 		if err != nil {
 			//ErrorHandling"Unable to read translation file"
 			return nil, err
 		}
 
 		// It parses the bytes in buffer to add translations to the bundle
-		bundle.MustParseMessageFileBytes(translations, file)
+		bundle.MustParseMessageFileBytes(translations, "resources/lang/"+file+".yaml")
 	}
 
 	return bundle, nil
