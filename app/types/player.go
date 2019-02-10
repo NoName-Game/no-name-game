@@ -5,10 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-//******************************
-// Player
-//******************************
-
 //Player struct
 type Player struct {
 	gorm.Model
@@ -43,27 +39,4 @@ func findPlayerByUsername(username string) Player {
 	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
 
 	return player
-}
-
-// PlayerState -
-type PlayerState struct {
-	gorm.Model
-	PlayerID uint
-	Function string
-	Stage    int
-	Payload  string
-}
-
-// Create Player State
-func (s *PlayerState) create() *PlayerState {
-	services.Database.Create(&s)
-
-	return s
-}
-
-// Create Player State
-func (s *PlayerState) update() *PlayerState {
-	services.Database.Save(&s)
-
-	return s
 }
