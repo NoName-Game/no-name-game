@@ -12,8 +12,10 @@ import (
 //Player struct
 type Player struct {
 	gorm.Model
-	Username string
-	State    PlayerState
+	Username   string
+	State      PlayerState
+	Language   Language
+	LanguageID uint
 }
 
 // Create player
@@ -66,4 +68,25 @@ func (s *PlayerState) update() *PlayerState {
 	services.Database.Save(&s)
 
 	return s
+}
+
+// Language -
+type Language struct {
+	gorm.Model
+	Language string
+}
+
+// FindByUsername - find player by username
+func getDefaultLangID(lang string) Language {
+	var language Language
+	services.Database.Set("gorm:auto_preload", true).Where("language = ?", lang).First(&language)
+
+	return language
+}
+
+func seederLanguage() {
+	for _, lang := range services.Langs {
+		newLanguage := Language{Language: lang}
+		services.Database.Where(Language{Language: lang}).FirstOrCreate(&newLanguage)
+	}
 }
