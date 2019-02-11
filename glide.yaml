@@ -14,3 +14,5 @@ import:
   version: v2.0.0-beta.6
   subpackages:
   - v2/i18n
+- package: github.com/go-redis/redis
+  version: v6.15.1

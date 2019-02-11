@@ -22,6 +22,8 @@ func bootstrap() {
 	migrations()
 	seeders()
 
+	services.RedisUp()
+
 	//*************
 	// Bot
 	//*************
