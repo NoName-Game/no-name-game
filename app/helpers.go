@@ -23,22 +23,22 @@ func checkUser(message *tgbotapi.Message) bool {
 }
 
 // Helper - Unmarshal payload state
-func getPlayerStatePayload(player *Player, funcInterface interface{}) {
-	err := json.Unmarshal([]byte(player.State.Payload), &funcInterface)
+func unmarshalPayload(payload string, funcInterface interface{}) {
+	err := json.Unmarshal([]byte(payload), &funcInterface)
 	if err != nil {
 		// config.ErrorHandler("Unmarshal payload error"+strconv.FormatUint(uint64(player.State.ID), 10),
 		// 	errors.New("Unmarshal payload error"+strconv.FormatUint(uint64(player.State.ID), 10)))
 	}
 }
 
-// Helper - set state of player in DB
-func setPlayerState(player *Player, state PlayerState) {
-	player.State.Function = state.Function
-	player.State.Stage = state.Stage
-	player.State.Payload = state.Payload
+// // Helper - set state of player in DB
+// func setPlayerState(player *Player, state PlayerState) {
+// 	player.State.Function = state.Function
+// 	player.State.Stage = state.Stage
+// 	player.State.Payload = state.Payload
 
-	player.update()
-}
+// 	player.update()
+// }
 
 // trans - late shortCut
 func trans(key, locale string, args ...interface{}) (message string) {

@@ -3,7 +3,9 @@ package app
 import (
 	"errors"
 	"reflect"
+	"strconv"
 
+	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -21,6 +23,13 @@ func routing(update tgbotapi.Update) {
 			var route string
 
 			route = parseMessage(update.Message)
+
+			//FIXME:
+			routeCache, _ := services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
+			if routeCache != "" {
+				route = routeCache
+			}
+
 			// if player.State.Function != "" {
 			// 	route = player.State.Function
 			// }
