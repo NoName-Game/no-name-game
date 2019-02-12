@@ -6,6 +6,23 @@ import (
 
 var (
 	player Player
+
+	//===================================
+	// Routes
+	routes = map[string]interface{}{
+		"the-answer-is":    theAnswerIs,
+		"test-multi-state": testMultiState,
+		"test-multi-stage": testMultiStage,
+		"back":             backAll,
+	}
+
+	breakerRoutes = []string{
+		"back",
+	}
+
+	// End routes
+	//=====================================
+
 )
 
 func init() {

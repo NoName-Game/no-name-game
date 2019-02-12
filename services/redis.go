@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/go-redis/redis"
@@ -20,10 +19,6 @@ func RedisUp() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-
-	pong, err := Redis.Ping().Result()
-	fmt.Println(pong, err)
-	// Output: PONG <nil>
 
 	log.Println("************************************************")
 	log.Println("Redis connection: OK!")

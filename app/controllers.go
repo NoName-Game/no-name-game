@@ -16,11 +16,7 @@ import (
 //********************
 
 func backAll(update tgbotapi.Update) {
-	//FIXME:
-	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
-	if err != nil {
-		panic(err)
-	}
+	delRedisState(player)
 
 	message := update.Message
 	msg := services.NewMessage(message.Chat.ID, "Home")
@@ -28,35 +24,68 @@ func backAll(update tgbotapi.Update) {
 	services.SendMessage(msg)
 }
 
-// Only for testing multi-state
-func testMultiState(update tgbotapi.Update) {
+// Only for testing multi-stage
+func testMultiStage(update tgbotapi.Update) {
 	message := update.Message
+	routeName := "test-multi-stage"
 
-	state := player.getStateByFunction("test-multi-state")
+	state := player.getStateByFunction(routeName)
 	if state.ID < 1 {
-		state.Function = "test-multi-state"
+		state.Function = routeName
 		state.PlayerID = player.ID
 		state.create()
 	}
+	setRedisState(player, routeName)
 
-	//FIXME:
-	err := services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), "test-multi-state", 0).Err()
-	if err != nil {
-		panic(err)
+	switch state.Stage {
+	case 0:
+		state.Stage = 1
+		state.update()
+
+		msg := services.NewMessage(message.Chat.ID, "This is stage 0.")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Go to stage 1"),
+			),
+		)
+		services.SendMessage(msg)
+
+	case 1:
+		state.delete()
+		delRedisState(player)
+
+		msg := services.NewMessage(message.Chat.ID, "This is stage 1. Bye.")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
+		)
+		services.SendMessage(msg)
 	}
 
-	// log.Println("here", state)
+}
 
-	//FIXME: Partendo da qui, andare a cercare tramite metod se il player ha uno stato per questa funzione
-	// Aggiungere una colonna che indichi che questo status è bloccante e non è pobbisibile avviare altri stati
-	// Aggiungere una colonna che indichi tra quanto tempo è possibile accedere a questa funzione
-
-	//Payload function
+// Only for testing multi-state
+func testMultiState(update tgbotapi.Update) {
+	message := update.Message
+	routeName := "test-multi-state"
 	type payloadStruct struct {
 		Red   int
 		Green int
 		Blue  int
 	}
+
+	state := player.getStateByFunction(routeName)
+	if state.ID < 1 {
+		state.Function = routeName
+		state.PlayerID = player.ID
+		state.create()
+	}
+	setRedisState(player, routeName)
+
+	//FIXME: Partendo da qui, andare a cercare tramite metod se il player ha uno stato per questa funzione
+	// Aggiungere una colonna che indichi che questo status è bloccante e non è pobbisibile avviare altri stati
+	// Aggiungere una colonna che indichi tra quanto tempo è possibile accedere a questa funzione
 
 	var payload payloadStruct
 	unmarshalPayload(state.Payload, &payload)
@@ -73,9 +102,6 @@ func testMultiState(update tgbotapi.Update) {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
 			),
 		)
 		services.SendMessage(msg)
@@ -94,9 +120,6 @@ func testMultiState(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("0"),
 			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-			),
 		)
 		services.SendMessage(msg)
 	case 2:
@@ -112,9 +135,6 @@ func testMultiState(update tgbotapi.Update) {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
 			),
 		)
 		services.SendMessage(msg)
@@ -132,22 +152,18 @@ func testMultiState(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("YES!"),
 			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-			),
 		)
 		services.SendMessage(msg)
 	case 4:
 		state.delete()
-
-		//FIXME:
-		err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
-		if err != nil {
-			panic(err)
-		}
+		delRedisState(player)
 
 		msg := services.NewMessage(message.Chat.ID, "End")
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
+		)
 		services.SendMessage(msg)
 	}
 }

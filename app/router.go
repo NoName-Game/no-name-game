@@ -3,43 +3,26 @@ package app
 import (
 	"errors"
 	"reflect"
-	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-)
-
-var (
-	funcs = map[string]interface{}{
-		"the-answer-is":    theAnswerIs,
-		"test-multi-state": testMultiState,
-		"back":             backAll,
-	}
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
 		if ok := checkUser(update.Message); ok {
-			var route string
+			route := parseMessage(update.Message)
 
-			route = parseMessage(update.Message)
-
-			//FIXME:
-			if route != "back" {
-				routeCache, _ := services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
+			if inArray(route, breakerRoutes) != true {
+				routeCache := getRedisState(player)
 				if routeCache != "" {
 					route = routeCache
 				}
 			}
 
-			// if player.State.Function != "" {
-			// 	route = player.State.Function
-			// }
-
 			// Check if command exist.
-			if _, ok := funcs[route]; ok {
-				Call(funcs, route, update)
+			if _, ok := routes[route]; ok {
+				Call(routes, route, update)
 			}
 		}
 	}
