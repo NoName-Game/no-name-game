@@ -13,6 +13,7 @@ var (
 	funcs = map[string]interface{}{
 		"the-answer-is":    theAnswerIs,
 		"test-multi-state": testMultiState,
+		"back":             backAll,
 	}
 )
 
@@ -25,9 +26,11 @@ func routing(update tgbotapi.Update) {
 			route = parseMessage(update.Message)
 
 			//FIXME:
-			routeCache, _ := services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
-			if routeCache != "" {
-				route = routeCache
+			if route != "back" {
+				routeCache, _ := services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
+				if routeCache != "" {
+					route = routeCache
+				}
 			}
 
 			// if player.State.Function != "" {

@@ -15,6 +15,19 @@ import (
 //
 //********************
 
+func backAll(update tgbotapi.Update) {
+	//FIXME:
+	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
+	if err != nil {
+		panic(err)
+	}
+
+	message := update.Message
+	msg := services.NewMessage(message.Chat.ID, "Home")
+	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+	services.SendMessage(msg)
+}
+
 // Only for testing multi-state
 func testMultiState(update tgbotapi.Update) {
 	message := update.Message
@@ -61,6 +74,9 @@ func testMultiState(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
 			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
 		)
 		services.SendMessage(msg)
 
@@ -78,6 +94,9 @@ func testMultiState(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("0"),
 			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
 		)
 		services.SendMessage(msg)
 	case 2:
@@ -94,6 +113,9 @@ func testMultiState(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
 			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
 		)
 		services.SendMessage(msg)
 	case 3:
@@ -109,6 +131,9 @@ func testMultiState(update tgbotapi.Update) {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("YES!"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
 			),
 		)
 		services.SendMessage(msg)
