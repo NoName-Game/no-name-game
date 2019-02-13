@@ -12,7 +12,5 @@ import:
     version: v1.3.0
   - package: github.com/nicksnyder/go-i18n
     version: master
-    subpackages:
-      - v2/i18n
   - package: github.com/go-redis/redis
     version: v6.15.1
