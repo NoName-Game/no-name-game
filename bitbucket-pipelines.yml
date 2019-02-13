@@ -3,10 +3,13 @@ image: golang:1.7
 pipelines:
   default:
     - step:
-        script: # Modify the commands below to build your repository.
-          - BASE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_OWNER}"
-          - mkdir -p ${BASE_PATH}
-          - export IMPORT_PATH="${BASE_PATH}/${BITBUCKET_REPO_SLUG}"
-          - ln -s ${PWD} ${IMPORT_PATH}
-          - cd ${IMPORT_PATH}/no-name
+        script:
+          - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/no-name
+
+          # Manage dependencies
+          - cd /go/src/bitbucket.org/no-name-game/no-name
+          - curl https://glide.sh/get | sh
+          - ${GOPATH}/bin/glide install
+
+          # Build and test
           - go build -v
