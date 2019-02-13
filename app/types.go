@@ -13,7 +13,7 @@ import (
 type Player struct {
 	gorm.Model
 	Username   string
-	State      PlayerState
+	State      []PlayerState
 	Language   Language
 	LanguageID uint
 }
@@ -39,6 +39,17 @@ func (p *Player) delete() *Player {
 	return p
 }
 
+func (p *Player) getStateByFunction(function string) PlayerState {
+	var playerState PlayerState
+	for _, state := range p.State {
+		if state.Function == function {
+			return state
+		}
+	}
+
+	return playerState
+}
+
 // FindByUsername - find player by username
 func findPlayerByUsername(username string) Player {
 	var player Player
@@ -50,10 +61,11 @@ func findPlayerByUsername(username string) Player {
 // PlayerState -
 type PlayerState struct {
 	gorm.Model
-	PlayerID uint
-	Function string
-	Stage    int
-	Payload  string
+	PlayerID  uint
+	Function  string
+	Stage     int
+	Payload   string
+	Completed bool `gorm:"default: false"`
 }
 
 // Create Player State
@@ -70,13 +82,19 @@ func (s *PlayerState) update() *PlayerState {
 	return s
 }
 
+func (s *PlayerState) delete() *PlayerState {
+	services.Database.Delete(&s)
+
+	return s
+}
+
 // Language -
 type Language struct {
 	gorm.Model
 	Language string
 }
 
-// FindByUsername - find player by username
+// getDefaultLangID - get Default Lang ID
 func getDefaultLangID(lang string) Language {
 	var language Language
 	services.Database.Set("gorm:auto_preload", true).Where("language = ?", lang).First(&language)
