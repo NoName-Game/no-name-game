@@ -1,5 +1,5 @@
-hash: f7ee589aa20f3910231fe49cd6678035b403d95f2c349165074eeb7d551edef3
-updated: 2019-02-12T00:38:35.724731+01:00
+hash: 261c50619fdbbe6ea507407b8ba6ad3c2218675c633edb784b5fbeeb2bf12b9a
+updated: 2019-02-14T00:50:18.790941+01:00
 imports:
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
@@ -7,6 +7,13 @@ imports:
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
 - name: github.com/go-redis/redis
   version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
+  subpackages:
+  - internal
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+  - internal/proto
+  - internal/util
 - name: github.com/go-telegram-bot-api/telegram-bot-api
   version: 5781187bc20cbb9910ba867eafe318479be119b6
 - name: github.com/jinzhu/gorm
@@ -27,7 +34,7 @@ imports:
   - hstore
   - oid
 - name: github.com/nicksnyder/go-i18n
-  version: 9c0db6e2b3a591b2dfabb8ef487e53cd080c57bf
+  version: 7a73c96f2026ad7c4b56c7a323fb1466374589a5
   subpackages:
   - v2/i18n
   - v2/internal
