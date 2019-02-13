@@ -1,10 +1,12 @@
-hash: bff19c6d3e1ff825d6f9433e83b3a15d09e4b7aa30bd202b4787caf04c961a7b
-updated: 2019-02-09T00:18:46.040704+01:00
+hash: f7ee589aa20f3910231fe49cd6678035b403d95f2c349165074eeb7d551edef3
+updated: 2019-02-12T00:38:35.724731+01:00
 imports:
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
 - name: github.com/getsentry/raven-go
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
+- name: github.com/go-redis/redis
+  version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
 - name: github.com/go-telegram-bot-api/telegram-bot-api
   version: 5781187bc20cbb9910ba867eafe318479be119b6
 - name: github.com/jinzhu/gorm
