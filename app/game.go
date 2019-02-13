@@ -9,17 +9,19 @@ var (
 
 	//===================================
 	// Routes
+	//
 	routes = map[string]interface{}{
 		"the-answer-is":    theAnswerIs,
 		"test-multi-state": testMultiState,
 		"test-multi-stage": testMultiStage,
-		"back":             backAll,
+		"back":             back,
+		"clears":           clears,
 	}
 
 	breakerRoutes = []string{
-		"back",
+		"back", "clears",
 	}
-
+	//
 	// End routes
 	//=====================================
 
@@ -35,7 +37,7 @@ func Run() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, trans("miss_username", "en-US"))
+				msg := services.NewMessage(update.Message.Chat.ID, trans("miss_username", "en"))
 				services.SendMessage(msg)
 				continue
 			}

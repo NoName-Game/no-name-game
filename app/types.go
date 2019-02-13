@@ -61,10 +61,11 @@ func findPlayerByUsername(username string) Player {
 // PlayerState -
 type PlayerState struct {
 	gorm.Model
-	PlayerID uint
-	Function string
-	Stage    int
-	Payload  string
+	PlayerID  uint
+	Function  string
+	Stage     int
+	Payload   string
+	Completed bool `gorm:"default: false"`
 }
 
 // Create Player State

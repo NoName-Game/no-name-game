@@ -58,6 +58,34 @@ func delRedisState(player Player) {
 	}
 }
 
+// Helper - create and set redis state
+func startAndCreateState(route string) (state PlayerState) {
+	state = player.getStateByFunction(route)
+	if state.ID < 1 {
+		state.Function = route
+		state.PlayerID = player.ID
+		state.create()
+	}
+
+	setRedisState(player, route)
+	return
+}
+
+// Helper - finish and set completed in playerstate
+func finishAndCompleteState(state PlayerState) {
+	state.Completed = true
+	state.update().delete()
+	delRedisState(player)
+}
+
+// Helper - delete redis and db state
+func deleteRedisAndDbState(player Player) {
+	rediState := getRedisState(player)
+	state := player.getStateByFunction(rediState)
+	state.delete()
+	delRedisState(player)
+}
+
 // trans - late shortCut
 func trans(key, locale string, args ...interface{}) (message string) {
 	if len(args) <= 0 {
