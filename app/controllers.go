@@ -41,7 +41,7 @@ func testMultiStage(update tgbotapi.Update) {
 	// Init Func!
 	//====================================
 	message := update.Message
-	routeName := "test-multi-stage"
+	routeName = "test-multi-stage"
 	state := startAndCreateState(routeName)
 
 	//====================================
