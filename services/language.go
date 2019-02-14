@@ -26,8 +26,7 @@ func LanguageUp() {
 	// Create a Bundle to use for the lifetime of your application
 	bundle, err = createLocalizerBundle(Langs)
 	if err != nil {
-		//ErrorHandling"Error initialising localization"
-		panic(err)
+		ErrorHandler("Error initialising localization", err)
 	}
 
 	log.Println("************************************************")

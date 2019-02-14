@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/services"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //====================================
@@ -281,6 +281,68 @@ func testMultiState(update tgbotapi.Update) {
 		)
 		services.SendMessage(msg)
 	}
+}
+
+func botStarted(update tgbotapi.Update) {
+	message := update.Message
+	routeName := "start"
+	state := startAndCreateState(routeName)
+
+	//====================================
+	// Validator
+	//====================================
+	validationFlag := false
+	validationMessage := "Wrong input, please repeat or exit."
+	switch state.Stage {
+	case 1:
+		if message.Text == "English" {
+			player.Language.Language = "en"
+			player.LanguageID = 1
+			player.update()
+			validationFlag = true
+		} else if message.Text == "Italiano" {
+			player.Language.Language = "it"
+			player.LanguageID = 2
+			player.update()
+			validationFlag = true
+		}
+	}
+	if false == validationFlag {
+		if state.Stage != 0 {
+			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			services.SendMessage(validatorMsg)
+		}
+	}
+
+	//====================================
+	// Stage
+	//====================================
+	switch state.Stage {
+	case 0:
+		msg := services.NewMessage(message.Chat.ID, "Select Language")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("English"),
+				tgbotapi.NewKeyboardButton("Italiano"),
+			),
+		)
+		state.Stage = 1
+		state.update()
+		services.SendMessage(msg)
+	case 1:
+		if true == validationFlag {
+			//====================================
+			// IMPORTANT!
+			//====================================
+			finishAndCompleteState(state)
+			//====================================
+			textToSend, _ := services.GetTranslation("complete", player.Language.Language)
+			msg := services.NewMessage(message.Chat.ID, textToSend)
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			services.SendMessage(msg)
+		}
+	}
+	//====================================
 }
 
 // EsterEgg for debug

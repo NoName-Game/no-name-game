@@ -16,6 +16,7 @@ var (
 		"test-multi-stage": testMultiStage,
 		"back":             back,
 		"clears":           clears,
+		"start":            botStarted,
 	}
 
 	breakerRoutes = []string{
