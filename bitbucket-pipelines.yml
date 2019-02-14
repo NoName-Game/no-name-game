@@ -1,20 +1,16 @@
 image: golang:1.11
 
 pipelines:
-  default:
-    - step:
-        script:
-          - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/no-name
+  pull-requests:
+    "**":
+      - step:
+          script:
+            - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/no-name
 
-          # Manage dependencies
-          - cd /go/src/bitbucket.org/no-name-game/no-name
-          - curl https://glide.sh/get | sh
-          - ${GOPATH}/bin/glide install
+            # Manage dependencies
+            - cd /go/src/bitbucket.org/no-name-game/no-name
+            - curl https://glide.sh/get | sh
+            - ${GOPATH}/bin/glide install
 
-          # Style checks
-          - go get -u github.com/alecthomas/gometalinter
-          - ${GOPATH}/bin/gometalinter --install
-          - ${GOPATH}/bin/gometalinter --vendor --tests --cyclo-over=50 --disable-all --enable=vet --enable=goimports --enable=vetshadow --enable=golint --enable=ineffassign --enable=goconst --enable=dupl --enable=gocyclo .
-
-          # Build and test
-          - go build -v
+            # Build and test
+            - go build -v
