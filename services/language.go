@@ -13,9 +13,9 @@ import (
 var (
 	bundle *i18n.Bundle
 	//Langs -
-	Langs = []string{
-		"en",
-		"it",
+	Langs = map[string]string{
+		"en": "English",
+		"it": "Italian",
 	}
 )
 
@@ -35,7 +35,7 @@ func LanguageUp() {
 }
 
 // CreateLocalizerBundle reads language files and registers them in i18n bundle
-func createLocalizerBundle(Langs []string) (*i18n.Bundle, error) {
+func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 	// Bundle stores a set of messages
 	bundle := &i18n.Bundle{DefaultLanguage: language.Italian}
 
@@ -44,7 +44,7 @@ func createLocalizerBundle(Langs []string) (*i18n.Bundle, error) {
 
 	var translations []byte
 	var err error
-	for _, file := range Langs {
+	for file := range Langs {
 
 		// Read our language yaml file
 		translations, err = ioutil.ReadFile("resources/lang/" + file + ".yaml")

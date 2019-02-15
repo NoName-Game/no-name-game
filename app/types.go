@@ -91,20 +91,37 @@ func (s *PlayerState) delete() *PlayerState {
 // Language -
 type Language struct {
 	gorm.Model
-	Language string
+	Slug  string
+	Value string
 }
 
-// getDefaultLangID - get Default Lang ID
-func getDefaultLangID(lang string) Language {
+// getAllLangs - get all languages
+func getAllLangs() []Language {
+	var languages []Language
+	services.Database.Find(&languages)
+
+	return languages
+}
+
+// getLangByValue - get language by value
+func getLangByValue(lang string) Language {
 	var language Language
-	services.Database.Set("gorm:auto_preload", true).Where("language = ?", lang).First(&language)
+	services.Database.Set("gorm:auto_preload", true).Where("value = ?", lang).First(&language)
+
+	return language
+}
+
+// getLangBySlug - get language by slug
+func getLangBySlug(lang string) Language {
+	var language Language
+	services.Database.Set("gorm:auto_preload", true).Where("slug = ?", lang).First(&language)
 
 	return language
 }
 
 func seederLanguage() {
-	for _, lang := range services.Langs {
-		newLanguage := Language{Language: lang}
-		services.Database.Where(Language{Language: lang}).FirstOrCreate(&newLanguage)
+	for slug, lang := range services.Langs {
+		newLanguage := Language{Value: lang, Slug: slug}
+		services.Database.Where(Language{Slug: slug}).FirstOrCreate(&newLanguage)
 	}
 }

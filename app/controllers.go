@@ -295,13 +295,14 @@ func botStarted(update tgbotapi.Update) {
 	validationMessage := "Wrong input, please repeat or exit."
 	switch state.Stage {
 	case 1:
+		//FIXME: fare la ricerca tramite metodo se esiste quella lingua passata e recuperare l'ID e se esiste settarla, altrmimenti va in errrore.
 		if message.Text == "English" {
-			player.Language.Language = "en"
+			// player.Language.Language = "en"
 			player.LanguageID = 1
 			player.update()
 			validationFlag = true
 		} else if message.Text == "Italiano" {
-			player.Language.Language = "it"
+			// player.Language.Language = "it"
 			player.LanguageID = 2
 			player.update()
 			validationFlag = true
@@ -319,7 +320,11 @@ func botStarted(update tgbotapi.Update) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		msg := services.NewMessage(message.Chat.ID, "Select Language")
+		msg := services.NewMessage(message.Chat.ID, "Select language")
+		//FIXME: Estrarre da databese le lingue disponibili e comporre
+		//languages := getAllLangs()
+		//=============
+
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("English"),
@@ -336,7 +341,7 @@ func botStarted(update tgbotapi.Update) {
 			//====================================
 			finishAndCompleteState(state)
 			//====================================
-			textToSend, _ := services.GetTranslation("complete", player.Language.Language)
+			textToSend, _ := services.GetTranslation("complete", player.Language.Value)
 			msg := services.NewMessage(message.Chat.ID, textToSend)
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
