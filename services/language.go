@@ -49,7 +49,7 @@ func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 		// Read our language yaml file
 		translations, err = ioutil.ReadFile("resources/lang/" + file + ".yaml")
 		if err != nil {
-			//ErrorHandling"Unable to read translation file"
+			ErrorHandler("Unable to read translation file", err)
 			return nil, err
 		}
 

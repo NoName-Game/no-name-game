@@ -306,6 +306,11 @@ func botStarted(update tgbotapi.Update) {
 			player.LanguageID = 2
 			player.update()
 			validationFlag = true
+		} */
+		if lang := getLangByValue(message.Text); lang.Value != "" {
+			//Il languaggio esiste.
+			validationFlag = true
+			player.Language = lang
 		}
 	}
 	if false == validationFlag {
@@ -324,13 +329,6 @@ func botStarted(update tgbotapi.Update) {
 		//FIXME: Estrarre da databese le lingue disponibili e comporre
 		//languages := getAllLangs()
 		//=============
-
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("English"),
-				tgbotapi.NewKeyboardButton("Italiano"),
-			),
-		)
 		state.Stage = 1
 		state.update()
 		services.SendMessage(msg)
