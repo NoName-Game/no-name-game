@@ -8,7 +8,7 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //====================================
@@ -265,63 +265,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 	}
 }
 
-func botStarted(update tgbotapi.Update) {
-	message := update.Message
-	routeName := "start"
-	state := startAndCreateState(routeName)
-
-	//====================================
-	// Validator
-	//====================================
-	validationFlag := false
-	validationMessage := "Wrong input, please repeat or exit."
-	switch state.Stage {
-	case 1:
-		if lang := getLangByValue(message.Text); lang.Value != "" {
-			//Il languaggio esiste.
-			validationFlag = true
-			player.Language = lang
-			player.update()
-		}
-	}
-	if false == validationFlag {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			services.SendMessage(validatorMsg)
-		}
-	}
-
-	//====================================
-	// Stage
-	//====================================
-	switch state.Stage {
-	case 0:
-		msg := services.NewMessage(message.Chat.ID, "Select language")
-		keyboard := make([]tgbotapi.KeyboardButton, len(getAllLangs()))
-		for i, lang := range getAllLangs() {
-			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Value)
-		}
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
-		state.Stage = 1
-		state.update()
-		services.SendMessage(msg)
-	case 1:
-		if true == validationFlag {
-			//========================
-			// IMPORTANT!
-			//====================================
-			finishAndCompleteState(state)
-			//====================================
-			textToSend, _ := services.GetTranslation("complete", player.Language.Slug)
-			msg := services.NewMessage(message.Chat.ID, textToSend)
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			services.SendMessage(msg)
-		}
-	}
-	//====================================
-}
-
 // TheAnswerIs - TheAnswerIs
-func TheAnswerIs(update tgbotapi.Update) {
+func TheAnswerIs(update tgbotapi.Update, player models.Player) {
 	log.Println(42)
 }

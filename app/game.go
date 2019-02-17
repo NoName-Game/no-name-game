@@ -16,6 +16,7 @@ var (
 		"test-multi-stage": controllers.TestMultiStage, // testing.go
 		"back":             controllers.Back,           // back.go
 		"clears":           controllers.Clears,         // clears.go
+		"start":            controllers.StartTutorial,  // tutorial.go
 	}
 
 	breakerRoutes = []string{
