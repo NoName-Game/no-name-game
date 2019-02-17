@@ -1,10 +1,12 @@
-package app
+package controllers
 
 import (
 	"encoding/json"
 	"log"
 	"strconv"
 
+	"bitbucket.org/no-name-game/no-name/app/helpers"
+	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -15,34 +17,14 @@ import (
 //====================================
 //====================================
 
-// Back delete only redis state, but not delete state stored in DB.
-func back(update tgbotapi.Update) {
-	delRedisState(player)
-
-	message := update.Message
-	msg := services.NewMessage(message.Chat.ID, "LOG: Deleted only redis state without completion.")
-	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-	services.SendMessage(msg)
-}
-
-// Clears - Delete redist state and remove row from DB.
-func clears(update tgbotapi.Update) {
-	deleteRedisAndDbState(player)
-
-	message := update.Message
-	msg := services.NewMessage(message.Chat.ID, "LOG: Deleted redis/DB row.")
-	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-	services.SendMessage(msg)
-}
-
-// Only for testing multi-stage
-func testMultiStage(update tgbotapi.Update) {
+// TestMultiStage - Only for testing multi-stage
+func TestMultiStage(update tgbotapi.Update, player models.Player) {
 	//====================================
 	// Init Func!
 	//====================================
 	message := update.Message
 	routeName := "test-multi-stage"
-	state := startAndCreateState(routeName)
+	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	//====================================
 	// Validator
@@ -53,13 +35,13 @@ func testMultiStage(update tgbotapi.Update) {
 	case 0:
 		if message.Text == "Go to stage 1" {
 			state.Stage = 1
-			state.update()
+			state.Update()
 			validationFlag = false
 		}
 	case 1:
 		if message.Text == "YES!" {
 			state.Stage = 2
-			state.update()
+			state.Update()
 			validationFlag = false
 		}
 	}
@@ -103,7 +85,7 @@ func testMultiStage(update tgbotapi.Update) {
 		//====================================
 		// IMPORTANT!
 		//====================================
-		finishAndCompleteState(state)
+		helpers.FinishAndCompleteState(state, player)
 		//====================================
 
 		msg := services.NewMessage(message.Chat.ID, "Completed! :)")
@@ -116,8 +98,8 @@ func testMultiStage(update tgbotapi.Update) {
 	}
 }
 
-// Only for testing multi-state
-func testMultiState(update tgbotapi.Update) {
+// TestMultiState - Only for testing multi-state
+func TestMultiState(update tgbotapi.Update, player models.Player) {
 	//====================================
 	// Init Func!
 	//====================================
@@ -129,9 +111,9 @@ func testMultiState(update tgbotapi.Update) {
 
 	message := update.Message
 	routeName := "test-multi-state"
-	state := startAndCreateState(routeName)
+	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload payloadStruct
-	unmarshalPayload(state.Payload, &payload)
+	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	//====================================
 	// Validator
@@ -143,27 +125,27 @@ func testMultiState(update tgbotapi.Update) {
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 1
-			state.update()
+			state.Update()
 			validationFlag = true
 		}
 	case 1:
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 2
-			state.update()
+			state.Update()
 			validationFlag = true
 		}
 	case 2:
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 3
-			state.update()
+			state.Update()
 			validationFlag = true
 		}
 	case 3:
 		if message.Text == "YES!" {
 			state.Stage = 4
-			state.update()
+			state.Update()
 			validationFlag = true
 		}
 	}
@@ -182,7 +164,7 @@ func testMultiState(update tgbotapi.Update) {
 	case 0:
 		payloadUpdated, _ := json.Marshal(payloadStruct{})
 		state.Payload = string(payloadUpdated)
-		state.update()
+		state.Update()
 
 		msg := services.NewMessage(message.Chat.ID, "State setted, How much of R?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -205,7 +187,7 @@ func testMultiState(update tgbotapi.Update) {
 			payload.Red, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state.update()
+			state.Update()
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of G?")
@@ -228,7 +210,7 @@ func testMultiState(update tgbotapi.Update) {
 			payload.Green, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state.update()
+			state.Update()
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of B?")
@@ -251,7 +233,7 @@ func testMultiState(update tgbotapi.Update) {
 			payload.Blue, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state.update()
+			state.Update()
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Finish?")
@@ -270,7 +252,7 @@ func testMultiState(update tgbotapi.Update) {
 		//====================================
 		// IMPORTANT!
 		//====================================
-		finishAndCompleteState(state)
+		helpers.FinishAndCompleteState(state, player)
 		//====================================
 
 		msg := services.NewMessage(message.Chat.ID, "Completed :)")
@@ -283,7 +265,7 @@ func testMultiState(update tgbotapi.Update) {
 	}
 }
 
-// EsterEgg for debug
-func theAnswerIs(update tgbotapi.Update) {
+// TheAnswerIs - TheAnswerIs
+func TheAnswerIs(update tgbotapi.Update) {
 	log.Println(42)
 }

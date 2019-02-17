@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
@@ -32,12 +33,12 @@ func bootstrap() {
 
 func migrations() {
 	services.Database.AutoMigrate(
-		Player{},
-		PlayerState{},
-		Language{},
+		models.Player{},
+		models.PlayerState{},
+		models.Language{},
 	)
 }
 
 func seeders() {
-	seederLanguage()
+	models.SeederLanguage()
 }
