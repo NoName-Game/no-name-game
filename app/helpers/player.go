@@ -12,7 +12,7 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 	if player.ID < 1 {
 		player = models.Player{
 			Username: message.From.UserName,
-			Language: models.GetDefaultLangID("en"),
+			Language: models.GetLangBySlug("en"),
 		}
 
 		player.Create()

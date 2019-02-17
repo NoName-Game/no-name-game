@@ -266,6 +266,6 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 }
 
 // TheAnswerIs - TheAnswerIs
-func TheAnswerIs(update tgbotapi.Update) {
+func TheAnswerIs(update tgbotapi.Update, player models.Player) {
 	log.Println(42)
 }

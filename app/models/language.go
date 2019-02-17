@@ -8,21 +8,39 @@ import (
 // Language -
 type Language struct {
 	gorm.Model
-	Language string
+	Slug  string
+	Value string
 }
 
-// GetDefaultLangID - get Default Lang ID
-func GetDefaultLangID(lang string) Language {
+// GetAllLangs - get all languages
+func GetAllLangs() []Language {
+	var languages []Language
+	services.Database.Find(&languages)
+
+	return languages
+}
+
+// GetLangByValue - get language by value
+func GetLangByValue(lang string) Language {
 	var language Language
-	services.Database.Set("gorm:auto_preload", true).Where("language = ?", lang).First(&language)
+	services.Database.Set("gorm:auto_preload", true).Where("value = ?", lang).First(&language)
+
+	return language
+}
+
+// GetLangBySlug - get language by slug
+func GetLangBySlug(lang string) Language {
+	var language Language
+	services.Database.Set("gorm:auto_preload", true).Where("slug = ?", lang).First(&language)
 
 	return language
 }
 
 // SeederLanguage - SeederLanguage
 func SeederLanguage() {
-	for _, lang := range services.Langs {
-		newLanguage := Language{Language: lang}
-		services.Database.Where(Language{Language: lang}).FirstOrCreate(&newLanguage)
+	for slug, lang := range services.Langs {
+		newLanguage := Language{Value: lang, Slug: slug}
+		services.Database.Where(Language{Slug: slug}).FirstOrCreate(&newLanguage)
 	}
+
 }
