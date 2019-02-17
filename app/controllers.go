@@ -296,7 +296,7 @@ func botStarted(update tgbotapi.Update) {
 	switch state.Stage {
 	case 1:
 		//FIXME: fare la ricerca tramite metodo se esiste quella lingua passata e recuperare l'ID e se esiste settarla, altrmimenti va in errrore.
-		if message.Text == "English" {
+		/*if message.Text == "English" {
 			// player.Language.Language = "en"
 			player.LanguageID = 1
 			player.update()
@@ -311,6 +311,8 @@ func botStarted(update tgbotapi.Update) {
 			//Il languaggio esiste.
 			validationFlag = true
 			player.Language = lang
+			player.LanguageID = lang.ID
+			player.update()
 		}
 	}
 	if false == validationFlag {
@@ -329,17 +331,22 @@ func botStarted(update tgbotapi.Update) {
 		//FIXME: Estrarre da databese le lingue disponibili e comporre
 		//languages := getAllLangs()
 		//=============
+		keyboard := make([]tgbotapi.KeyboardButton, len(getAllLangs()))
+		for i, lang := range getAllLangs() {
+			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Value)
+		}
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		state.Stage = 1
 		state.update()
 		services.SendMessage(msg)
 	case 1:
 		if true == validationFlag {
-			//====================================
+			//========================
 			// IMPORTANT!
 			//====================================
 			finishAndCompleteState(state)
 			//====================================
-			textToSend, _ := services.GetTranslation("complete", player.Language.Value)
+			textToSend, _ := services.GetTranslation("complete", player.Language.Slug)
 			msg := services.NewMessage(message.Chat.ID, textToSend)
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
