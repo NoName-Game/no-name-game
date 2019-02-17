@@ -295,23 +295,10 @@ func botStarted(update tgbotapi.Update) {
 	validationMessage := "Wrong input, please repeat or exit."
 	switch state.Stage {
 	case 1:
-		//FIXME: fare la ricerca tramite metodo se esiste quella lingua passata e recuperare l'ID e se esiste settarla, altrmimenti va in errrore.
-		/*if message.Text == "English" {
-			// player.Language.Language = "en"
-			player.LanguageID = 1
-			player.update()
-			validationFlag = true
-		} else if message.Text == "Italiano" {
-			// player.Language.Language = "it"
-			player.LanguageID = 2
-			player.update()
-			validationFlag = true
-		} */
 		if lang := getLangByValue(message.Text); lang.Value != "" {
 			//Il languaggio esiste.
 			validationFlag = true
 			player.Language = lang
-			player.LanguageID = lang.ID
 			player.update()
 		}
 	}
@@ -328,9 +315,6 @@ func botStarted(update tgbotapi.Update) {
 	switch state.Stage {
 	case 0:
 		msg := services.NewMessage(message.Chat.ID, "Select language")
-		//FIXME: Estrarre da databese le lingue disponibili e comporre
-		//languages := getAllLangs()
-		//=============
 		keyboard := make([]tgbotapi.KeyboardButton, len(getAllLangs()))
 		for i, lang := range getAllLangs() {
 			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Value)
