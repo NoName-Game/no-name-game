@@ -1,22 +1,21 @@
 package app
 
 import (
+	"bitbucket.org/no-name-game/no-name/app/controllers"
+	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
 var (
-	player Player
-
 	//===================================
 	// Routes
 	//
 	routes = map[string]interface{}{
-		"the-answer-is":    theAnswerIs,
-		"test-multi-state": testMultiState,
-		"test-multi-stage": testMultiStage,
-		"back":             back,
-		"clears":           clears,
-		"start":            botStarted,
+		"the-answer-is":    controllers.TheAnswerIs,    // testing.go
+		"test-multi-state": controllers.TestMultiState, // testing.go
+		"test-multi-stage": controllers.TestMultiStage, // testing.go
+		"back":             controllers.Back,           // back.go
+		"clears":           controllers.Clears,         // clears.go
 	}
 
 	breakerRoutes = []string{
@@ -25,7 +24,6 @@ var (
 	//
 	// End routes
 	//=====================================
-
 )
 
 func init() {
@@ -38,7 +36,7 @@ func Run() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, trans("miss_username", "en"))
+				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username", "en"))
 				services.SendMessage(msg)
 				continue
 			}

@@ -4,17 +4,18 @@ import (
 	"errors"
 	"reflect"
 
+	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if ok := checkUser(update.Message); ok {
+		if player := helpers.CheckUser(update.Message); player.ID > 1 {
 			route := parseMessage(update.Message)
 
-			if inArray(route, breakerRoutes) != true {
-				routeCache := getRedisState(player)
+			if helpers.InArray(route, breakerRoutes) != true {
+				routeCache := helpers.GetRedisState(player)
 				if routeCache != "" {
 					route = routeCache
 				}
@@ -22,7 +23,7 @@ func routing(update tgbotapi.Update) {
 
 			// Check if command exist.
 			if _, ok := routes[route]; ok {
-				Call(routes, route, update)
+				Call(routes, route, update, player)
 			}
 		}
 	}
