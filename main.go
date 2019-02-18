@@ -1,14 +1,23 @@
 package main
 
-import (
-	"bitbucket.org/no-name-game/no-name/app"
-	"bitbucket.org/no-name-game/no-name/web"
+import "log"
+
+var (
+	starNames = []string{
+		"Acamar", "Achernar", "Achird", "Acrab",
+	}
 )
 
 func main() {
-	// Server - Only for ping
-	go web.Run()
+	// // Server - Only for ping
+	// go web.Run()
 
-	// Game - NoName
-	app.Run()
+	// // Game - NoName
+	// app.Run()
+
+	generate()
+}
+
+func generate() {
+	log.Println("hello")
 }
