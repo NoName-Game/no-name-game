@@ -5,13 +5,13 @@ import (
 	"reflect"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if player := helpers.CheckUser(update.Message); player.ID > 1 {
+		if player := helpers.CheckUser(update.Message); player.ID >= 1 {
 			route := parseMessage(update.Message)
 
 			if helpers.InArray(route, breakerRoutes) != true {
