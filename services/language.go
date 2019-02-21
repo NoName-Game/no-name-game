@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -74,4 +75,17 @@ func GetTranslation(key, locale string, args ...interface{}) (string, error) {
 
 	msg = fmt.Sprintf(msg, args...)
 	return msg, err
+}
+
+// GenerateTextArray - generate text's array from a common word in key.
+func GenerateTextArray(common string, lang string, args ...interface{}) []string {
+	var texts []string
+	var counter int = 0
+	keyText := common + "_" + strconv.Itoa(counter)
+	for text, err := GetTranslation(keyText, lang, args...); err != nil; {
+		texts = append(texts, text)
+		counter++
+		keyText = common + "_" + strconv.Itoa(counter)
+	}
+	return texts
 }
