@@ -81,11 +81,14 @@ func GetTranslation(key, locale string, args ...interface{}) (string, error) {
 func GenerateTextArray(common string, lang string, args ...interface{}) []string {
 	var texts []string
 	var counter int = 0
-	keyText := common + "_" + strconv.Itoa(counter)
-	for text, err := GetTranslation(keyText, lang, args...); err != nil; {
-		texts = append(texts, text)
-		counter++
-		keyText = common + "_" + strconv.Itoa(counter)
+	for {
+		keyText := common + "_" + strconv.Itoa(counter)
+		if text, _ := GetTranslation(keyText, lang); text != "" {
+			texts = append(texts, text)
+			counter++
+		} else {
+			break
+		}
 	}
 	return texts
 }

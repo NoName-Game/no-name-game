@@ -1,8 +1,9 @@
 #key: Text
 #You can use printf's placeholders!
 sample_text: "Testo di prova"
+start_game: "Inizia a giocare!"
 text_with_placeholders: "Ciao, %s"
 complete: "Fatto!"
-tutorial_0: "[■■ 20%]"
-tutorial_1: "[■■■■■■ 60%]"
-tutorial_2: "[■■■■■■■■■■ 100%]\nSistema ripristinato, IA operativa"
+tutorial_0: "[■■ 20%%]"
+tutorial_1: "[■■■■■■ 60%%]"
+tutorial_2: "[■■■■■■■■■■ 100%%]\nSistema ripristinato, IA operativa"

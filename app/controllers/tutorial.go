@@ -37,7 +37,9 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 			player.Update()
 		}
 	case 2:
-		validationFlag = true
+		if text, _ := services.GetTranslation("start_game", player.Language.Slug); text == message.Text {
+			validationFlag = true
+		}
 	}
 	if false == validationFlag {
 		if state.Stage != 0 {
@@ -66,7 +68,8 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 			state.Update()
 			textToSend, _ := services.GetTranslation("complete", player.Language.Slug)
 			msg := services.NewMessage(message.Chat.ID, textToSend)
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			text, _ := services.GetTranslation("start_game", player.Language.Slug)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text)))
 			services.SendMessage(msg)
 		}
 	case 2:
