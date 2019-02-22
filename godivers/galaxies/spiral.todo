@@ -84,8 +84,7 @@ func generateArms() {
 			clsScaleDev := armClusterScaleDeviation * float64(size)
 			clsScaleMin := minArmClusterScale * float64(size)
 			clsScaleMax := maxArmClusterScale * float64(size)
-			//TODO: Normale con scale
-			// cSize := NormallyDistributedSingle(clsScaleDev, (clsScaleMin*0.5 + clsScaleMax*0.5), clsScaleMin, clsScaleMax)
+			cSize := Distribution(clsScaleDev, (clsScaleMin*0.5 + clsScaleMax*0.5), clsScaleMin, clsScaleMax)
 
 			// TODO fare
 			// var stars = new Sphere(cSize, densityMean: 0.00025f, deviationX: 1, deviationY: 1, deviationZ: 1).Generate(random);
