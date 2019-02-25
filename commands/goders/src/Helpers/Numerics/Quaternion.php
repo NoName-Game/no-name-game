@@ -1,7 +1,6 @@
 <?php
 namespace Goders\Helpers\Numerics;
 
-
 class Quaternion
 {
     /** @var float */
@@ -25,6 +24,7 @@ class Quaternion
         $this->w = $w;
     }
 
+    // https://referencesource.microsoft.com/#System.Numerics/System/Numerics/Quaternion.cs
     public static function createFromAxisAngle(Vector3 $axis, float $angle)
     {
         $ans = new Quaternion(0.0, 0.0, 0.0, 1.0);

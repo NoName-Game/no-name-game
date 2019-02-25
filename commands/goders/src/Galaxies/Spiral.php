@@ -83,15 +83,10 @@ class Spiral extends AbstractGalaxyStruct
         $centralVoidSizeSqr = $centralVoidSize * $centralVoidSize;
 
         foreach ($this->generateArms() as $star) {
-            var_dump($star);
-            die;
+            if ($star->position->lengthSquared() > $centralVoidSizeSqr) {
+                $stars[] = $star;
+            }
         }
-        //if (star.Position.LengthSquared() > centralVoidSizeSqr)
-        // yield return star;
-        // };
-
-        echo "fine arms";
-        die;
 
         foreach ($this->generateCenter() as $star) {
             if ($star->position->lengthSquared() > $centralVoidSizeSqr) {
@@ -105,8 +100,7 @@ class Spiral extends AbstractGalaxyStruct
             }
         }
 
-        var_dump($stars);
-        die;
+        return $stars;
     }
 
     public function generateBackground()
@@ -172,13 +166,13 @@ class Spiral extends AbstractGalaxyStruct
                 $clsScaleMax = $this->maxArmClusterScale * $this->size;
                 $cSize = $this->normallyDistributedSingle($clsScaleDev, $clsScaleMin * 0.5 + $clsScaleMax * 0.5, $clsScaleMin, $clsScaleMax);
 
-                // var stars = new Sphere(cSize, densityMea n: 0.00025f, deviationX: 1,  deviationY: 1, deviationZ: 1).Generate(rand o m);
                 $sphereStars = new Sphere((float)$cSize, 0.00025, 0.000001, 1.0, 1.0, 1.0);
                 foreach ($sphereStars->generate() as $star) {
-                    var_dump($star);
-                    die;
+                    $stars[] = $star->offset($center)->swirl(new Vector3(0, 1, 0), $this->swirl);
                 }
             }
         }
+
+        return $stars;
     }
 }

@@ -5,8 +5,8 @@ use Goders\Galaxies\AbstractGalaxyStruct;
 
 class Galaxy
 {
-    public function generate(AbstractGalaxyStruct $galaxyStructType)
+    public static function generate(AbstractGalaxyStruct $galaxyStructType)
     {
-        $galaxyStructType->generate();
+        return $galaxyStructType->generate();
     }
 }
