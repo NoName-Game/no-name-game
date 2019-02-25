@@ -11,15 +11,22 @@ import (
 )
 
 type Items struct {
-	gorm.Model
 	Items []Item `json:"items"`
 }
 
 type Item struct {
 	gorm.Model
-	Name   string `json:"name"`
-	Rarity Rarity `json:"rarity"`
+	Name        string `json:"name"`
+	Rarity      Rarity `json:"-"`
+	Rarity_slug string `json:"rarity"`
 	// TODO: Add more information about item
+}
+
+func GetItemByName(name string) Item {
+	var item Item
+	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&item)
+
+	return item
 }
 
 func SeederItems() {
@@ -35,8 +42,7 @@ func SeederItems() {
 
 	json.Unmarshal(byteValue, &items)
 	for _, item := range items.Items {
-		// FIXME: Non so al momento come inserire nel file json l'oggetto rarità
-		newItem := Item{Name: item.Name, Rarity: GetRarityBySlug(item.Rarity.Slug)}
+		newItem := Item{Name: item.Name, Rarity: GetRarityBySlug(item.Rarity_slug), Rarity_slug: item.Rarity_slug}
 		services.Database.Where(Item{Name: item.Name}).FirstOrCreate(&newItem)
 	}
 }
