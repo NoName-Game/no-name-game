@@ -5,38 +5,34 @@ abstract class AbstractGalaxyStruct
 {
     abstract public function generate();
 
-    // public function normallyDistributedSingle($n1, $n2)
-    // {
-    //     return 0.2;
-    // }
-
-    public function normallyDistributed($n1, $n2, $n3, $n4)
+    // https://arxiv.org/pdf/0907.4010.pdf
+    public function normallyDistributed($standardDeviation, $mean, $min, $max)
     {
-        return 0.2;
+        $nMax = ($max - $mean) / $standardDeviation;
+        $nMin = ($min - $mean) / $standardDeviation;
+        $nRange = $nMax - $nMin;
+        $nMaxSq = $nMax * $nMax;
+        $nMinSq = $nMin * $nMin;
+        $subFrom = $nMinSq;
 
-        // static float Normall yDistributedSingle(this Random random, float standardDeviation, float mean, float min, float max) {
-        // var nMax = (max - mean) / standardDeviation;
-        // var nMin = (min - mean) / standardDeviation;
-        // var nRange = nMax - nMin;
-        // var nMaxSq = nMax * nMax;
-        // var nMinSq = nMin * nMin;
-        // var subFrom = nMinSq;
-        // if (nMin < 0 && 0 < nMax) subFrom = 0;
-        // else if (nMax < 0) subFrom = nMaxSq;
+        if ($nMin < 0 && 0 < $nMax) {
+            $subFrom = 0;
+        } elseif ($nMax < 0) {
+            $subFrom = $nMaxSq;
+        }
 
-        // var sigma = 0.0;
-        // double u;
-        // float z;
-        // do  {
-        //     z = nRange * (float)random.NextDouble() + nMin; // uniform[no r mMin, normMax]
-        //     sigma = Math.Exp((subFr o m - z * z) / 2);
-        //     u = random.NextDouble();
-        // } while (u > sigma);
+        $sigma = 0.0;
 
-        // return z * standardDeviation + mean;
-        // }
+        do {
+            $z = $nRange * $this->randomFloat() + $nMin; // uniform[no r mMin, normMax]
+            $sigma = exp(($subFrom - $z * $z) / 2);
+            $u = $this->randomFloat();
+        } while ($u > $sigma);
+
+        return $z * $standardDeviation + $mean;
     }
 
+    // https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform - Normal distriution single
     public function normallyDistributedSingle($standardDeviation, $mean)
     {
         $x = $this->randomFloat();

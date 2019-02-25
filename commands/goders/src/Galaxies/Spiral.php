@@ -1,7 +1,8 @@
 <?php
 namespace Goders\Galaxies;
 
-use pocketmine\math\Vector3;
+use Goders\Helpers\Numerics\Vector3;
+use Goders\Helpers\Numerics\Quaternion;
 
 class Spiral extends AbstractGalaxyStruct
 {
@@ -81,10 +82,16 @@ class Spiral extends AbstractGalaxyStruct
         }
         $centralVoidSizeSqr = $centralVoidSize * $centralVoidSize;
 
-        // foreach ($this->generateArms() as $star) {
+        foreach ($this->generateArms() as $star) {
+            var_dump($star);
+            die;
+        }
         //if (star.Position.LengthSquared() > centralVoidSizeSqr)
         // yield return star;
         // };
+
+        echo "fine arms";
+        die;
 
         foreach ($this->generateCenter() as $star) {
             if ($star->position->lengthSquared() > $centralVoidSizeSqr) {
@@ -142,7 +149,7 @@ class Spiral extends AbstractGalaxyStruct
         $stars = [];
 
         $arms = rand($this->minimumArms, $this->maximumArms);
-        $armAngle = ((pi()   * 2) / $arms);
+        $armAngle = ((pi() * 2) / $arms);
 
         $maxClusters = ($this->size / $this->spacing) / $arms;
 
@@ -157,7 +164,7 @@ class Spiral extends AbstractGalaxyStruct
                 $dist = abs($this->normallyDistributedSingle($this->size * 0.4, 0));
 
                 //Center of the cluster
-                // var center = Vector3.Transform(new Vector3(0, 0, dist), Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), angle));
+                $center = Vector3::transform(new Vector3(0, 0, $dist), Quaternion::createFromAxisAngle(new Vector3(0, 1, 0), (float)$angle));
 
                 //Size of the clust e r
                 $clsScaleDev = $this->armClusterScaleDeviation * $this->size;

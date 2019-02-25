@@ -2,7 +2,7 @@
 namespace Goders\Galaxies;
 
 use Goders\Galaxies\AbstractGalaxyStruct;
-use pocketmine\math\Vector3;
+use Goders\Helpers\Numerics\Vector3;
 
 class Cluster extends AbstractGalaxyStruct
 {

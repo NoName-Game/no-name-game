@@ -3,7 +3,7 @@ namespace Goders\Galaxies;
 
 use Goders\Galaxies\AbstractGalaxyStruct;
 use Goders\Star;
-use pocketmine\math\Vector3;
+use Goders\Helpers\Numerics\Vector3;
 
 class Sphere extends AbstractGalaxyStruct
 {

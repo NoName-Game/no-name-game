@@ -1,7 +1,7 @@
 <?php
 namespace Goders;
 
-use pocketmine\math\Vector3;
+use Goders\Helpers\Numerics\Vector3;
 
 class Star
 {
