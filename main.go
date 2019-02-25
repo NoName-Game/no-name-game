@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bitbucket.org/no-name-game/no-name/godivers"
+	"bitbucket.org/no-name-game/no-name/web"
 )
 
 func main() {
-	godivers.GodEffect()
+	web.Run()
 }
