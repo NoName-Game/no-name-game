@@ -7,4 +7,8 @@ use Goders\Galaxy;
 use Goders\Galaxies\Spiral;
 
 $stars = Galaxy::generate(new Spiral());
-var_dump($stars);
+
+echo json_encode($stars);
+die;
+
+// var_dump($stars);
