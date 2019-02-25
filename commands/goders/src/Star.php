@@ -1,9 +1,11 @@
 <?php
 namespace Goders;
 
+use pocketmine\math\Vector3;
+
 class Star
 {
-    /** @var array */
+    /** @var Vector3 */
     public $position;
 
     /** @var string */
@@ -15,18 +17,16 @@ class Star
     /** @var float */
     public $temperature;
 
-    public function __construct(array $position, string $name, float $temp = 0)
+    public function __construct(Vector3 $position, string $name, float $temp = 0)
     {
         $this->position = $position;
         $this->name = $name;
         $this->temperature = $temp;
     }
 
-    public function offset(array $offset)
+    public function offset(Vector3 $offset)
     {
-        foreach ($offset as $key => $value) {
-            $this->position[$key] = $this->position[$key] + $value;
-        }
+        $this->position->add($offset);
 
         return $this;
     }

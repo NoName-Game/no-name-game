@@ -1,9 +1,10 @@
 <?php
 namespace Goders\Galaxies;
 
+use pocketmine\math\Vector3;
+
 class Spiral extends AbstractGalaxyStruct
 {
-
     /** @var int */
     public $size;
 
@@ -43,7 +44,7 @@ class Spiral extends AbstractGalaxyStruct
 
     public function __construct()
     {
-        $this->size = 750;
+        $this->size = 750; //750
         $this->spacing = 5;
 
         $this->minimumArms = 3;
@@ -73,13 +74,66 @@ class Spiral extends AbstractGalaxyStruct
 
     public function generate()
     {
+        $stars = [];
         $centralVoidSize = $this->normallyDistributedSingle($this->centralVoidSizeDeviation, $this->centralVoidSizeMean);
         if ($centralVoidSize < 0) {
             $centralVoidSize = 0;
         }
         $centralVoidSizeSqr = $centralVoidSize * $centralVoidSize;
 
-        $this->generateArms();
+        // foreach ($this->generateArms() as $star) {
+        //if (star.Position.LengthSquared() > centralVoidSizeSqr)
+        // yield return star;
+        // };
+
+        foreach ($this->generateCenter() as $star) {
+            if ($star->position->lengthSquared() > $centralVoidSizeSqr) {
+                $stars[] = $star;
+            }
+        }
+
+        foreach ($this->generateBackground() as $star) {
+            if ($star->position->lengthSquared() > $centralVoidSizeSqr) {
+                $stars[] = $star;
+            }
+        }
+
+        var_dump($stars);
+        die;
+    }
+
+    public function generateBackground()
+    {
+        $sphere = new Sphere((float)$this->size, 0.000001, 0.0000001, 0.35, 0.125, 0.35);
+        return $sphere->generate();
+    }
+
+    public function generateCenter()
+    {
+        $stars = [];
+        $sphere = new Sphere(
+            (float)($this->size * $this->centerClusterScale),
+            $this->centerClusterDensityMean,
+            $this->centerClusterDensityDeviation,
+            $this->centerClusterScale,
+            $this->centerClusterScale,
+            $this->centerClusterScale
+        );
+
+        $cluster = new Cluster(
+            $sphere,
+            (float)$this->centerClusterCountMean,
+            (float)$this->centerClusterCountDeviation,
+            (float)($this->size * $this->centerClusterPositionDeviation),
+            (float)($this->size * $this->centerClusterPositionDeviation),
+            (float)($this->size * $this->centerClusterPositionDeviation)
+        );
+
+        foreach ($cluster->generate() as $star) {
+            $stars[] = $star;
+        }
+
+        return $stars;
     }
 
 

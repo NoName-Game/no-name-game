@@ -3,6 +3,7 @@ namespace Goders\Galaxies;
 
 use Goders\Galaxies\AbstractGalaxyStruct;
 use Goders\Star;
+use pocketmine\math\Vector3;
 
 class Sphere extends AbstractGalaxyStruct
 {
@@ -20,8 +21,8 @@ class Sphere extends AbstractGalaxyStruct
     private $deviationY;
     private $deviationZ;
 
-    /** @var array */
-    protected $stars;
+    // /** @var array */
+    // protected $stars;
 
     public function __construct(
         float $size,
@@ -41,27 +42,28 @@ class Sphere extends AbstractGalaxyStruct
 
     public function generate()
     {
+        $stars = [];
         $density = max(0, $this->normallyDistributedSingle($this->densityDeviation, $this->densityMean));
-        $countMax = max(0, $this->size * $this->size * $this->size * $density);
-        if ($countMax <= 0) {
-            return;
+        $countMax = max(0, ($this->size * $this->size * $this->size * $density));
+
+        if ($countMax > 0) {
+            $count = mt_rand(0.1, $countMax);
+            for ($i = 0; $i < $count; $i++) {
+
+                $pos = new Vector3(
+                    $this->normallyDistributedSingle($this->deviationX * $this->size, 0),
+                    $this->normallyDistributedSingle($this->deviationY * $this->size, 0),
+                    $this->normallyDistributedSingle($this->deviationZ * $this->size, 0)
+                );
+
+                $d = $pos->length() / $this->size;
+                $m = $d * 2000 + (1 - $d) * 1500;
+                $temperature = $this->normallyDistributed(4000, $m, 1000, 40000);
+
+                $stars[] = new Star($pos, "Name-" . time(), (float)$temperature);
+            }
         }
 
-        $count = rand(0, $countMax);
-        for ($i = 0; $i < $count; $i++) {
-            $pos = [
-                $this->normallyDistributedSingle($this->deviationX * $this->size, 0),
-                $this->normallyDistributedSingle($this->deviationY * $this->size, 0),
-                $this->normallyDistributedSingle($this->deviationZ * $this->size, 0),
-            ];
-
-            $d = count($pos) / $this->size;
-            $m = $d * 2000 + (1 - $d) * 1500;
-            $temperature = $this->normallyDistributed(4000, $m, 1000, 40000);
-
-            $this->stars[] = new Star($pos, "Name-" . time(), (float)$temperature);
-        }
-
-        return $this->stars;
+        return $stars;
     }
 }

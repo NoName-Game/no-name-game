@@ -2,6 +2,7 @@
 namespace Goders\Galaxies;
 
 use Goders\Galaxies\AbstractGalaxyStruct;
+use pocketmine\math\Vector3;
 
 class Cluster extends AbstractGalaxyStruct
 {
@@ -18,9 +19,6 @@ class Cluster extends AbstractGalaxyStruct
     private $deviationX;
     private $deviationY;
     private $deviationZ;
-
-    /** @var array */
-    protected $stars;
 
     public function __construct(
         AbstractGalaxyStruct $basis,
@@ -40,21 +38,22 @@ class Cluster extends AbstractGalaxyStruct
 
     public function generate()
     {
+        $stars = [];
         $count = max(0, $this->normallyDistributedSingle($this->countDeviation, $this->countMean));
-        if ($count <= 0) {
-            return;
-        }
+        if ($count > 0) {
+            for ($i = 0; $i < $count; $i++) {
+                $center = new Vector3(
+                    $this->normallyDistributedSingle($this->deviationX, 0),
+                    $this->normallyDistributedSingle($this->deviationY, 0),
+                    $this->normallyDistributedSingle($this->deviationZ, 0)
+                );
 
-        for ($i = 0; $i < $count; $i++) {
-            $center = [
-                $this->normallyDistributedSingle($this->deviationX * $this->size, 0),
-                $this->normallyDistributedSingle($this->deviationY * $this->size, 0),
-                $this->normallyDistributedSingle($this->deviationZ * $this->size, 0),
-            ];
-
-            foreach ($this->basis->generate() as $star) {
-                $this->stars = $star->offset($center);
+                foreach ($this->basis->generate() as $star) {
+                    $stars[] = $star->offset($center);
+                }
             }
         }
+
+        return $stars;
     }
 }
