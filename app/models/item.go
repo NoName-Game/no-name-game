@@ -18,7 +18,7 @@ type Items struct {
 type Item struct {
 	gorm.Model
 	Name   string `json:"name"`
-	Rarity string `json:"rarity"`
+	Rarity Rarity `json:"rarity"`
 	// TODO: Add more information about item
 }
 
@@ -35,7 +35,8 @@ func SeederItems() {
 
 	json.Unmarshal(byteValue, &items)
 	for _, item := range items.Items {
-		newItem := Item{Name: item.Name, Rarity: item.Rarity}
+		// FIXME: Non so al momento come inserire nel file json l'oggetto rarità
+		newItem := Item{Name: item.Name, Rarity: GetRarityBySlug(item.Rarity.Slug)}
 		services.Database.Where(Item{Name: item.Name}).FirstOrCreate(&newItem)
 	}
 }
