@@ -9,26 +9,24 @@ import (
 )
 
 // Run -
-func Run() {
+func Run() (stars galaxies.Stars) {
 	log.Println("Start")
 
-	generateCenter()
+	return generateCenter()
 }
 
-func generateCenter() {
-	var stars galaxies.Stars
-
-	size := 750.0
-	centerClusterScale := 0.19
-	centerClusterDensityMean := 0.00005
-	centerClusterDensityDeviation := 0.000005
+func generateCenter() (stars galaxies.Stars) {
+	size := 1000.0                            // 750.0
+	centerClusterScale := 0.19                // 0.19
+	centerClusterDensityMean := 0.00005       // 0.00005
+	centerClusterDensityDeviation := 0.000005 // 0.000005
 	// centerClusterSizeDeviation := 0.00125
 
-	centerClusterCountMean := 20.0
-	centerClusterCountDeviation := 3.0
-	centerClusterPositionDeviation := 0.075
+	centerClusterCountMean := 20.0          // 20.0
+	centerClusterCountDeviation := 3.0      // 3.0
+	centerClusterPositionDeviation := 0.075 //0.075
 
-	swilr := math.Pi * 4
+	swilr := (math.Pi * 4) * 5
 
 	sphere := galaxies.Sphere{
 		Size:             size * centerClusterScale,
@@ -49,9 +47,9 @@ func generateCenter() {
 	}
 
 	for _, star := range cluster.Generate() {
-		star.Swirl(mgl64.Vec3{0, 1, 0}, swilr*5)
+		star.Swirl(mgl64.Vec3{0, 1, 0}, swilr)
 		stars = append(stars, star)
 	}
 
-	log.Println(stars)
+	return stars
 }

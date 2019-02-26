@@ -2,9 +2,9 @@ package galaxies
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/go-gl/mathgl/mgl64"
-	randplus "k8s.io/apimachinery/pkg/util/rand"
 )
 
 // Sphere - Sphere
@@ -19,13 +19,11 @@ type Sphere struct {
 
 // Generate - generate sphere
 func (s Sphere) Generate() (stars Stars) {
-	// var stars Stars
-
 	density := math.Max(0, NormallyDistributedSingle(s.DensityDeviation, s.DensityMean))
 	countMax := math.Max(0, (s.Size * s.Size * s.Size * density))
 
 	if countMax > 0 {
-		count := randplus.Intn(int(countMax))
+		count := rand.Intn(int(countMax))
 		for i := 0; i < count; i++ {
 			pos := mgl64.Vec3{
 				NormallyDistributedSingle(s.DeviationX*s.Size, 0),
@@ -41,24 +39,4 @@ func (s Sphere) Generate() (stars Stars) {
 	}
 
 	return
-
-	// for _, star := range stars {
-	// 	log.Println(star)
-	// }
-
 }
-
-// for ($i = 0; $i < $count; $i++) {
-
-//     $pos = new Vector3(
-//         $this->normallyDistributedSingle($this->deviationX * $this->size, 0),
-//         $this->normallyDistributedSingle($this->deviationY * $this->size, 0),
-//         $this->normallyDistributedSingle($this->deviationZ * $this->size, 0)
-//     );
-
-//     $d = $pos->length() / $this->size;
-//     $m = $d * 2000 + (1 - $d) * 1500;
-//     $temperature = $this->normallyDistributed(4000, $m, 1000, 40000);
-
-//     $stars[] = new Star($pos, "Name-" . time(), (float)$temperature);
-// }
