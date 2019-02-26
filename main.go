@@ -1,9 +1,7 @@
 package main
 
-import (
-	"bitbucket.org/no-name-game/no-name/web"
-)
+import "bitbucket.org/no-name-game/no-name/commands/godeffect"
 
 func main() {
-	web.Run()
+	godeffect.Run()
 }

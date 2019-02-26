@@ -2,35 +2,37 @@ package galaxies
 
 import (
 	"math"
+
+	"github.com/go-gl/mathgl/mgl64"
 )
 
-// ClusterGenerator - ClusterGenerator
-func ClusterGenerator(countMean float64, countDeviation float64, deviationX float64, deviationY float64, deviationZ float64) {
-
-
-	count := math.Max(0, NormallyDistributedSingle(countDeviation, countMean));
-if count > 0 {
-	for i := 0; i < count; i++ {
-		center := []float64{
-			NormallyDistributedSingle(deviationX, 0),
-			NormallyDistributedSingle(deviationY, 0),
-			NormallyDistributedSingle(deviationZ, 0),
-		}
-
-
-	}
+// Cluster - Cluster
+type Cluster struct {
+	Basis          Sphere
+	CountMean      float64
+	CountDeviation float64
+	DeviationX     float64
+	DeviationY     float64
+	DeviationZ     float64
 }
 
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 center = new Vector3(
-                    random.NormallyDistributedSingle(_deviationX, 0),
-                    random.NormallyDistributedSingle(_deviationY, 0),
-                    random.NormallyDistributedSingle(_deviationZ, 0)
-                );
+// Generate - generate sphere
+func (c Cluster) Generate() (stars Stars) {
+	count := math.Max(0, NormallyDistributedSingle(c.CountDeviation, c.CountMean))
+	if count > 0 {
+		for i := 0; i < int(count); i++ {
+			center := mgl64.Vec3{
+				NormallyDistributedSingle(c.DeviationX, 0),
+				NormallyDistributedSingle(c.DeviationY, 0),
+				NormallyDistributedSingle(c.DeviationZ, 0),
+			}
 
-                foreach (var star in _basis.Generate(random))
-                    yield return star.Offset(center);
-            }
+			for _, star := range c.Basis.Generate() {
+				star.Offset(center)
+				stars = append(stars, star)
+			}
+		}
+	}
 
+	return
 }

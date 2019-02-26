@@ -1,10 +1,14 @@
-hash: 261c50619fdbbe6ea507407b8ba6ad3c2218675c633edb784b5fbeeb2bf12b9a
-updated: 2019-02-14T00:50:18.790941+01:00
+hash: 6cf753a62d1c78660129d6fe75f6c15bc0c2565fc11b3bd0c3cf72751213194f
+updated: 2019-02-26T16:49:46.069125+01:00
 imports:
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
 - name: github.com/getsentry/raven-go
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
+- name: github.com/go-gl/mathgl
+  version: cdf14b6b8f8a4a1bfb003dd5119205c5f711d85a
+  subpackages:
+  - mgl64
 - name: github.com/go-redis/redis
   version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
   subpackages:
@@ -49,6 +53,10 @@ imports:
   version: eb0de9b17e854e9b1ccd9963efafc79862359959
   subpackages:
   - ssh/terminal
+- name: golang.org/x/image
+  version: 31aff87c08e9a5e5d524279a564f96968336f886
+  subpackages:
+  - math/f64
 - name: golang.org/x/sys
   version: 4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31
   subpackages:
@@ -63,4 +71,8 @@ imports:
   - language
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+- name: k8s.io/apimachinery
+  version: dcb391cde5ca0298013d43336817d20b74650702
+  subpackages:
+  - pkg/util/rand
 testImports: []
