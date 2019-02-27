@@ -12,7 +12,27 @@ import (
 func Run() (stars galaxies.Stars) {
 	log.Println("Start")
 
-	return generateCenter()
+	return generateFlex()
+	// return generateGrid()
+	// return generateCenter()
+}
+
+func generateFlex() (stars galaxies.Stars) {
+	flex := galaxies.Flex{
+		Size:    100.0,
+		Spacing: 10.0,
+	}
+
+	return flex.Generate()
+}
+
+func generateGrid() (stars galaxies.Stars) {
+	grid := galaxies.Grid{
+		Size:    100.0,
+		Spacing: 10.0,
+	}
+
+	return grid.Generate()
 }
 
 func generateCenter() (stars galaxies.Stars) {
