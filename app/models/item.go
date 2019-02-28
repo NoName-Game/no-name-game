@@ -6,8 +6,6 @@ import (
 	"os"
 
 	"bitbucket.org/no-name-game/no-name/services"
-
-	"github.com/jinzhu/gorm"
 )
 
 type Items struct {
@@ -15,7 +13,7 @@ type Items struct {
 }
 
 type Item struct {
-	gorm.Model
+	ID          uint   `gorm:"primary_key"`
 	Name        string `json:"name"`
 	Rarity      Rarity `json:"-"`
 	Rarity_slug string `json:"rarity"`

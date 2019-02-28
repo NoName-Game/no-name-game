@@ -9,7 +9,7 @@ import (
 type Player struct {
 	gorm.Model
 	Username   string
-	Inventory  Inventory
+	Inventory  string
 	State      []PlayerState
 	Language   Language
 	LanguageID uint
@@ -18,21 +18,21 @@ type Player struct {
 // Create player
 func (p *Player) Create() *Player {
 	services.Database.Create(&p)
-	p.Inventory.Create()
+
 	return p
 }
 
 // Update player
 func (p *Player) Update() *Player {
 	services.Database.Save(&p)
-	p.Inventory.Update()
+
 	return p
 }
 
 // Delete player
 func (p *Player) Delete() *Player {
 	services.Database.Delete(&p)
-	p.Inventory.Delete()
+
 	return p
 }
 
