@@ -27,6 +27,13 @@ func GetItemByName(name string) Item {
 	return item
 }
 
+func GetItemByID(id uint) Item {
+	var item Item
+	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&item)
+
+	return item
+}
+
 func SeederItems() {
 	jsonFile, err := os.Open("resources/seeders/items.json")
 	// if we os.Open returns an error then handle it
