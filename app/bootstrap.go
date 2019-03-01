@@ -38,6 +38,7 @@ func migrations() {
 		models.Language{},
 		models.Rarity{},
 		models.Item{},
+		models.Inventory{},
 	)
 }
 
