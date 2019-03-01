@@ -1,32 +1,30 @@
-{
-    "rarities": [
-      {
-        "value" : "Very Common",
-        "slug" : "VC"
-      },
-      {
-        "value" : "Common",
-        "slug" : "C"
-      },
-      {
-          "value" : "Uncommon",
-          "slug" : "U"
-      },
-      {
-          "value" : "Rare",
-          "slug" : "R"
-      },
-      {
-        "value" : "Ultra Rare",
-        "slug" : "UR"
-      },
-      {
-        "value" : "Legendary",
-        "slug" : "L"
-      },
-      {
-        "value" : "Experimental",
-        "slug" : "X"
-      }
-    ]
+[
+  {
+    "value": "Very Common",
+    "slug": "VC"
+  },
+  {
+    "value": "Common",
+    "slug": "C"
+  },
+  {
+    "value": "Uncommon",
+    "slug": "U"
+  },
+  {
+    "value": "Rare",
+    "slug": "R"
+  },
+  {
+    "value": "Ultra Rare",
+    "slug": "UR"
+  },
+  {
+    "value": "Legendary",
+    "slug": "L"
+  },
+  {
+    "value": "Experimental",
+    "slug": "X"
   }
+]
