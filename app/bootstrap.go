@@ -36,9 +36,14 @@ func migrations() {
 		models.Player{},
 		models.PlayerState{},
 		models.Language{},
+		models.Rarity{},
+		models.Item{},
+		models.Inventory{},
 	)
 }
 
 func seeders() {
 	models.SeederLanguage()
+	models.SeederRarities()
+	models.SeederItems()
 }
