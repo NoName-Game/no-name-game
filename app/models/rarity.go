@@ -12,8 +12,8 @@ import (
 // Rarity - Rarity struct
 type Rarity struct {
 	gorm.Model
-	Value string
-	Slug  string
+	Name string
+	Slug string
 }
 
 // Rarities - Rarity slice
@@ -22,7 +22,7 @@ type Rarities []Rarity
 // GetRarityBySlug - Get rarity by Slug
 func GetRarityBySlug(slug string) Rarity {
 	var rarity Rarity
-	services.Database.Set("gorm:auto_preload", true).Where("value = ?", slug).First(&rarity)
+	services.Database.Set("gorm:auto_preload", true).Where("slug = ?", slug).First(&rarity)
 
 	return rarity
 }
@@ -37,11 +37,11 @@ func SeederRarities() {
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-	var rarities Rarities
+	var rarities []map[string]string
 
 	json.Unmarshal(byteValue, &rarities)
 	for _, rarity := range rarities {
-		newRarity := Rarity{Value: rarity.Value, Slug: rarity.Slug}
-		services.Database.Where(Rarity{Value: rarity.Value}).FirstOrCreate(&newRarity)
+		newRarity := Rarity{Name: rarity["name"], Slug: rarity["slug"]}
+		services.Database.Where(Rarity{Name: rarity["name"]}).FirstOrCreate(&newRarity)
 	}
 }

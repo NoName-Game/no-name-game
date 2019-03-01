@@ -6,20 +6,22 @@ import (
 	"os"
 
 	"bitbucket.org/no-name-game/no-name/services"
+	"github.com/jinzhu/gorm"
 )
 
-type Items struct {
-	Items []Item `json:"items"`
-}
-
+// Item - Item struct
 type Item struct {
-	ID          uint   `gorm:"primary_key"`
-	Name        string `json:"name"`
-	Rarity      Rarity `json:"-"`
-	Rarity_slug string `json:"rarity"`
+	gorm.Model
+	Name     string `json:"name"`
+	Rarity   Rarity
+	RarityID uint
 	// TODO: Add more information about item
 }
 
+// Items - Items struct
+type Items []Item
+
+// GetItemByName - Get item by name
 func GetItemByName(name string) Item {
 	var item Item
 	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&item)
@@ -27,6 +29,7 @@ func GetItemByName(name string) Item {
 	return item
 }
 
+// GetItemByID - Get item by ID
 func GetItemByID(id uint) Item {
 	var item Item
 	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&item)
@@ -34,6 +37,7 @@ func GetItemByID(id uint) Item {
 	return item
 }
 
+// SeederItems - Seeder items
 func SeederItems() {
 	jsonFile, err := os.Open("resources/seeders/items.json")
 	// if we os.Open returns an error then handle it
@@ -43,11 +47,11 @@ func SeederItems() {
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-	var items Items
+	var items []map[string]string
 
 	json.Unmarshal(byteValue, &items)
-	for _, item := range items.Items {
-		newItem := Item{Name: item.Name, Rarity: GetRarityBySlug(item.Rarity_slug), Rarity_slug: item.Rarity_slug}
-		services.Database.Where(Item{Name: item.Name}).FirstOrCreate(&newItem)
+	for _, item := range items {
+		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"])}
+		services.Database.Where(Item{Name: item["name"]}).FirstOrCreate(&newItem)
 	}
 }
