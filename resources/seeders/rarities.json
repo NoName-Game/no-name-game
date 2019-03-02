@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Very Common",
+    "slug": "VC"
+  },
+  {
+    "name": "Common",
+    "slug": "C"
+  },
+  {
+    "name": "Uncommon",
+    "slug": "U"
+  },
+  {
+    "name": "Rare",
+    "slug": "R"
+  },
+  {
+    "name": "Ultra Rare",
+    "slug": "UR"
+  },
+  {
+    "name": "Legendary",
+    "slug": "L"
+  },
+  {
+    "name": "Experimental",
+    "slug": "X"
+  }
+]
