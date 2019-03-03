@@ -19,3 +19,4 @@ import:
   subpackages:
   - pkg/util/rand
 - package: github.com/AvraamMavridis/randomcolor
+- package: github.com/mb-14/gomarkov

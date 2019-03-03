@@ -530,24 +530,26 @@ function streamStar(nextSeed = false) {
     $.each(dataN, function(k1, star) {
       console.log(star);
       stars.push({
-        x: star.Position[0],
-        y: star.Position[1],
-        z: star.Position[2]
+        x: star.X,
+        y: star.Y,
+        z: star.Z
       });
 
       starsColor.push(new THREE.Color(star.Color)); //0xff0000*/
 
       $(".Slist").append(
         '<li data-seed="' +
-          star.Temperature +
+          star.ID +
           '" data-posX="' +
-          star.Position[0] +
+          star.X +
           '" data-posY="' +
-          star.Position[1] +
+          star.Y +
           '" data-posZ="' +
-          star.Position[2] +
+          star.Z +
           '">' +
-          star.Temperature +
+          star.Name +
+          " - " +
+          star.ID +
           "</li>"
       );
     });

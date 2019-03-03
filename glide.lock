@@ -1,5 +1,5 @@
-hash: c9d5086a4f97af563a8d479127835a0465d230a311f605b478737c94dbf329c2
-updated: 2019-03-02T15:59:05.389074+01:00
+hash: 71e049c4500a06c36ec07da763b64d594a44ef964d941a3c3525e892311c2241
+updated: 2019-03-03T23:11:44.536008+01:00
 imports:
 - name: github.com/AvraamMavridis/randomcolor
   version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
@@ -39,6 +39,8 @@ imports:
   subpackages:
   - hstore
   - oid
+- name: github.com/mb-14/gomarkov
+  version: 044dd0dcb5e7875ec824df72259c523d03aa4f49
 - name: github.com/nicksnyder/go-i18n
   version: 7a73c96f2026ad7c4b56c7a323fb1466374589a5
   subpackages:

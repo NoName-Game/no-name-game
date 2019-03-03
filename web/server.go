@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/no-name-game/no-name/commands/godeffect"
+	"bitbucket.org/no-name-game/no-name/app/commands/godeffect"
+	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
@@ -31,9 +32,17 @@ func Run() {
 		fmt.Fprintf(w, "Pong")
 	})
 
+	http.HandleFunc("/omg", func(w http.ResponseWriter, r *http.Request) {
+		godeffect.OMG()
+		fmt.Fprintf(w, "Created")
+	})
+
 	http.HandleFunc("/galaxy", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(&w)
-		results := godeffect.Run()
+
+		results := models.Stars{}
+		services.Database.Find(&results)
+
 		response, err := json.Marshal(results)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

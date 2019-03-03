@@ -1,4 +1,4 @@
-package galaxies
+package helpers
 
 import (
 	"math"
