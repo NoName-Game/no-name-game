@@ -18,3 +18,4 @@ import:
 - package: k8s.io/apimachinery
   subpackages:
   - pkg/util/rand
+- package: github.com/AvraamMavridis/randomcolor

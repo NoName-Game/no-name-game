@@ -1,8 +1,7 @@
 package galaxies
 
 import (
-	"math"
-	"math/rand"
+	"log"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -19,17 +18,21 @@ type Sphere struct {
 
 // Generate - generate sphere
 func (s Sphere) Generate() (stars Stars) {
-	density := math.Max(0, NormallyDistributedSingle(s.DensityDeviation, s.DensityMean))
-	countMax := math.Max(0, (s.Size * s.Size * s.Size * density))
+	// density := math.Max(0, NormallyDistributedSingle(s.DensityDeviation, s.DensityMean))
+	// density := 10.0
+	// countMax := math.Max(0, (s.Size * s.Size * s.Size * density))
+	countMax := 10.0
 
 	if countMax > 0 {
-		count := rand.Intn(int(countMax))
-		for i := 0; i < count; i++ {
+		// count := rand.Intn(int(countMax))
+		for i := 0; i < int(countMax); i++ {
 			pos := mgl64.Vec3{
 				NormallyDistributedSingle(s.DeviationX*s.Size, 0),
 				NormallyDistributedSingle(s.DeviationY*s.Size, 0),
 				NormallyDistributedSingle(s.DeviationZ*s.Size, 0),
 			}
+
+			log.Println(pos)
 
 			dimension := pos.Len() / s.Size
 			mass := dimension*2000 + (1-dimension)*1500

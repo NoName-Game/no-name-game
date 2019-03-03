@@ -12,6 +12,7 @@ type Star struct {
 	Size        float64
 	Position    mgl64.Vec3
 	Temperature float64
+	Color       string
 }
 
 // Stars - slice of star

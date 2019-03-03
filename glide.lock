@@ -1,6 +1,8 @@
-hash: 6cf753a62d1c78660129d6fe75f6c15bc0c2565fc11b3bd0c3cf72751213194f
-updated: 2019-02-26T16:49:46.069125+01:00
+hash: c9d5086a4f97af563a8d479127835a0465d230a311f605b478737c94dbf329c2
+updated: 2019-03-02T15:59:05.389074+01:00
 imports:
+- name: github.com/AvraamMavridis/randomcolor
+  version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
 - name: github.com/getsentry/raven-go

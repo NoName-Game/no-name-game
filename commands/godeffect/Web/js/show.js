@@ -527,40 +527,27 @@ function streamStar(nextSeed = false) {
   );
 
   $.getJSON("http://localhost:8080/galaxy", function(dataN) {
-    $.each(dataN, function(key, val) {
-      console.log(key, val);
+    $.each(dataN, function(k1, star) {
+      console.log(star);
       stars.push({
-        x: val.Position[0],
-        y: val.Position[1],
-        z: val.Position[2]
+        x: star.Position[0],
+        y: star.Position[1],
+        z: star.Position[2]
       });
 
-      starsColor.push(
-        new THREE.Color(
-          parseInt(
-            "0x" +
-              Math.floor(Math.random() * 255) +
-              0 +
-              Math.floor(Math.random() * 255) +
-              0 +
-              Math.floor(Math.random() * 255) +
-              0,
-            16
-          )
-        )
-      ); //0xff0000*/
+      starsColor.push(new THREE.Color(star.Color)); //0xff0000*/
 
       $(".Slist").append(
         '<li data-seed="' +
-          val.Temperature +
+          star.Temperature +
           '" data-posX="' +
-          val.Position[0] +
+          star.Position[0] +
           '" data-posY="' +
-          val.Position[1] +
+          star.Position[1] +
           '" data-posZ="' +
-          val.Position[2] +
+          star.Position[2] +
           '">' +
-          val.Temperature +
+          star.Temperature +
           "</li>"
       );
     });
