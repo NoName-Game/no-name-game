@@ -11,8 +11,9 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 	player = models.FindPlayerByUsername(message.From.UserName)
 	if player.ID < 1 {
 		player = models.Player{
-			Username: message.From.UserName,
-			Language: models.GetLangBySlug("en"),
+			Username:  message.From.UserName,
+			Language:  models.GetLangBySlug("en"),
+			Inventory: models.Inventory{Items: ""},
 		}
 
 		player.Create()

@@ -8,10 +8,12 @@ import (
 //Player struct
 type Player struct {
 	gorm.Model
-	Username   string
-	State      []PlayerState
-	Language   Language
-	LanguageID uint
+	Username    string
+	State       []PlayerState
+	Language    Language
+	LanguageID  uint
+	Inventory   Inventory
+	InventoryID uint
 }
 
 // Create player

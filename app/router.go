@@ -11,7 +11,7 @@ import (
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if player := helpers.CheckUser(update.Message); player.ID > 1 {
+		if player := helpers.CheckUser(update.Message); player.ID >= 1 {
 			route := parseMessage(update.Message)
 
 			if helpers.InArray(route, breakerRoutes) != true {

@@ -1,0 +1,10 @@
+[
+  {
+    "name": "TestItem1",
+    "rarity": "UR"
+  },
+  {
+    "name": "TestItem2",
+    "rarity": "L"
+  }
+]
