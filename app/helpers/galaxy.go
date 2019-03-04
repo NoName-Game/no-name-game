@@ -7,7 +7,7 @@ import (
 
 // NewGalaxyChunk - Generate new portion of
 func NewGalaxyChunk(deviation int) bool {
-	size := 7.0
+	size := 10.0
 	sphere := galaxies.Sphere{
 		Size:      size,
 		Density:   20,
@@ -17,7 +17,6 @@ func NewGalaxyChunk(deviation int) bool {
 	for _, star := range sphere.Generate() {
 		newStar := models.Star{
 			Name:        star.Name,
-			Size:        star.Size,
 			X:           star.Position[0],
 			Y:           star.Position[1],
 			Z:           star.Position[2],

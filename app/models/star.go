@@ -9,7 +9,6 @@ import (
 type Star struct {
 	gorm.Model
 	Name        string
-	Size        float64
 	X           float64
 	Y           float64
 	Z           float64

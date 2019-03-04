@@ -1,15 +1,13 @@
 package godeffect
 
 import (
-	"log"
-
 	"bitbucket.org/no-name-game/no-name/app/commands/godeffect/galaxies"
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
 // OMG - Simulate user registration
 func OMG() {
-	nUsers := 100
+	nUsers := 10
 	for deviation := 1; deviation <= nUsers; deviation++ {
 		size := 10.0
 		sphere := galaxies.Sphere{
@@ -19,12 +17,8 @@ func OMG() {
 		}
 
 		for _, star := range sphere.Generate() {
-
-			log.Println(star)
-
 			newStar := models.Star{
 				Name:        star.Name,
-				Size:        star.Size,
 				X:           star.Position[0],
 				Y:           star.Position[1],
 				Z:           star.Position[2],

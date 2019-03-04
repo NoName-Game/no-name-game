@@ -1,6 +1,8 @@
 package galaxies
 
 import (
+	"math"
+
 	"bitbucket.org/no-name-game/no-name/app/commands/godeffect/helpers"
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -22,16 +24,21 @@ func (s Sphere) Generate() (stars Stars) {
 				helpers.NormallyDistributedSingle(s.Deviation*s.Size, 0),
 			}
 
-			dimension := pos.Len() / s.Size
-			mass := dimension*2000 + (1-dimension)*1500
-			temperature := helpers.Distribution(4000, mass, 1000, 40000)
+			d := pos.Len() / s.Size
+			m := d*2000 + (1-d)*1500
+			temperature := helpers.Distribution(4000, m, 1000, 40000)
+			swilr := (math.Pi * 4) * 5
 
-			stars = append(stars, Star{
-				Name:        helpers.GenerateStarName(),
-				Size:        s.Size,
+			newStar := Star{
 				Position:    pos,
 				Temperature: temperature,
-			})
+			}
+
+			newStar.GenerateName()
+			newStar.ConvertTemperature()
+			newStar.Swirl(mgl64.Vec3{0, 1, 0}, swilr)
+
+			stars = append(stars, newStar)
 		}
 	}
 
