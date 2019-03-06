@@ -10,7 +10,7 @@ func NewGalaxyChunk(deviation int) bool {
 	size := 10.0
 	sphere := galaxies.Sphere{
 		Size:      size,
-		Density:   20,
+		Density:   10,
 		Deviation: float64(deviation),
 	}
 
