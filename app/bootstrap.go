@@ -36,6 +36,8 @@ func migrations() {
 		models.Star{},
 		models.Player{},
 		models.PlayerState{},
+		models.PlayerStar{},
+		models.PlayerPosition{},
 		models.Language{},
 		models.Rarity{},
 		models.Item{},

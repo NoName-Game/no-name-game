@@ -5,8 +5,8 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
-// NewGalaxyChunk - Generate new portion of
-func NewGalaxyChunk(deviation int) bool {
+// NewGalaxyChunk - Generate new portion of galaxy
+func NewGalaxyChunk(deviation int) models.Star {
 	size := 10.0
 	sphere := galaxies.Sphere{
 		Size:      size,
@@ -14,8 +14,9 @@ func NewGalaxyChunk(deviation int) bool {
 		Deviation: float64(deviation),
 	}
 
+	var newStar models.Star
 	for _, star := range sphere.Generate() {
-		newStar := models.Star{
+		newStar = models.Star{
 			Name:        star.Name,
 			X:           star.Position[0],
 			Y:           star.Position[1],
@@ -27,5 +28,6 @@ func NewGalaxyChunk(deviation int) bool {
 		newStar.Create()
 	}
 
-	return true
+	// Return last star
+	return newStar
 }
