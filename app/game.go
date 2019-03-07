@@ -17,6 +17,7 @@ var (
 		"back":             controllers.Back,           // back.go
 		"clears":           controllers.Clears,         // clears.go
 		"start":            controllers.StartTutorial,  // tutorial.go
+		"time":             controllers.TestTimedQuest,
 	}
 
 	breakerRoutes = []string{

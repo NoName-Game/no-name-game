@@ -9,6 +9,7 @@ import (
 type Player struct {
 	gorm.Model
 	Username    string
+	ChatID      int64
 	State       []PlayerState
 	Language    Language
 	LanguageID  uint
@@ -53,6 +54,14 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 func FindPlayerByUsername(username string) Player {
 	var player Player
 	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
+
+	return player
+}
+
+// FindPlayerByID - find player by ID
+func FindPlayerByID(id uint) Player {
+	var player Player
+	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&player)
 
 	return player
 }

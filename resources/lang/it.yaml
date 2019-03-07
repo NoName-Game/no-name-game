@@ -3,3 +3,4 @@
 sample_text: "Testo di prova"
 text_with_placeholders: "Ciao, %s"
 complete: "Fatto!"
+timed-quest: "Timed Quest Terminata!"

@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"time"
 
+	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 //====================================
@@ -16,6 +18,55 @@ import (
 //			TEST / EXAMPLES
 //====================================
 //====================================
+
+// TestTimedQuest - ...
+func TestTimedQuest(update tgbotapi.Update, player models.Player) {
+	message := update.Message
+	routeName := "timed-quest"
+	state := helpers.StartAndCreatePlayerState(routeName, player)
+
+	go commands.Cron(1 * time.Minute) //Check every minute
+
+	//====================================
+	// Validator
+	//====================================
+	validationFlag := false
+	validationMessage := "Wrong input, please repeat or exit."
+	switch state.Stage {
+	case 0:
+		if message.Text == "ok" {
+			state.Stage = 1
+			state.Update()
+			validationFlag = false
+		}
+	case 1:
+		if time.Now().Before(state.FinishAt) {
+			validationFlag = false
+		}
+	}
+
+	if false == validationFlag {
+		if state.Stage != 0 {
+			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			services.SendMessage(validatorMsg)
+		}
+	}
+
+	switch state.Stage {
+	case 0:
+		state.Stage = 1
+		state.FinishAt = time.Now().Add((time.Minute*time.Duration(10) + time.Second*time.Duration(15)))
+		state.Update()
+		log.Println(state.FinishAt)
+		msg := services.NewMessage(message.Chat.ID, state.FinishAt.String())
+		services.SendMessage(msg)
+	case 1:
+		if validationFlag {
+			helpers.FinishAndCompleteState(state, player)
+		}
+	}
+
+}
 
 // TestMultiStage - Only for testing multi-stage
 func TestMultiStage(update tgbotapi.Update, player models.Player) {

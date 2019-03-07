@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/jinzhu/gorm"
 )
@@ -11,6 +13,8 @@ type PlayerState struct {
 	PlayerID  uint
 	Function  string
 	Stage     int
+	FinishAt  time.Time
+	ToNotify  bool
 	Payload   string
 	Completed bool `gorm:"default: false"`
 }
