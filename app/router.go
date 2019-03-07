@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
+	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -14,7 +15,7 @@ func routing(update tgbotapi.Update) {
 		if player := helpers.CheckUser(update.Message); player.ID >= 1 {
 			route := parseMessage(update.Message)
 
-			if helpers.InArray(route, breakerRoutes) != true {
+			if !helpers.InArray(route, breakerRoutes) {
 				routeCache := helpers.GetRedisState(player)
 				if routeCache != "" {
 					route = routeCache
@@ -23,7 +24,10 @@ func routing(update tgbotapi.Update) {
 
 			// Check if command exist.
 			if _, ok := routes[route]; ok {
-				Call(routes, route, update, player)
+				_, err := Call(routes, route, update, player)
+				if err != nil {
+					services.ErrorHandler("Error in call command", err)
+				}
 			}
 		}
 	}
@@ -49,7 +53,7 @@ func Call(m map[string]interface{}, name string, params ...interface{}) (result 
 // Parse message text, if command it's like telegram format the message will be parsed and return simple text without "/" char
 func parseMessage(message *tgbotapi.Message) (parsed string) {
 	parsed = message.Text
-	if message.IsCommand() == true {
+	if message.IsCommand() {
 		parsed = message.Command()
 	}
 

@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/jinzhu/gorm/dialects/postgres" // Autload postgress
+	_ "github.com/joho/godotenv/autoload"        // Autload .env
 )
 
 var (

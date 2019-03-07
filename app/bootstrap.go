@@ -33,6 +33,7 @@ func bootstrap() {
 
 func migrations() {
 	services.Database.AutoMigrate(
+		models.Star{},
 		models.Player{},
 		models.PlayerState{},
 		models.Language{},

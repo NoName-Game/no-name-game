@@ -49,7 +49,11 @@ func SeederItems() {
 
 	var items []map[string]string
 
-	json.Unmarshal(byteValue, &items)
+	err = json.Unmarshal(byteValue, &items)
+	if err != nil {
+		services.ErrorHandler("Error unmarshal items seeder", err)
+	}
+
 	for _, item := range items {
 		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"])}
 		services.Database.Where(Item{Name: item["name"]}).FirstOrCreate(&newItem)

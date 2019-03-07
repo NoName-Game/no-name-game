@@ -6,7 +6,7 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
 var (
@@ -53,7 +53,7 @@ func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
 			ChatID:           chatID,
 			ReplyToMessageID: 0,
 		},
-		Text: text,
+		Text:                  text,
 		DisableWebPagePreview: false,
 	}
 }
