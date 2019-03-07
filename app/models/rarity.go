@@ -39,7 +39,11 @@ func SeederRarities() {
 
 	var rarities []map[string]string
 
-	json.Unmarshal(byteValue, &rarities)
+	err = json.Unmarshal(byteValue, &rarities)
+	if err != nil {
+		services.ErrorHandler("Error unmarshal rarities seeder", err)
+	}
+
 	for _, rarity := range rarities {
 		newRarity := Rarity{Name: rarity["name"], Slug: rarity["slug"]}
 		services.Database.Where(Rarity{Name: rarity["name"]}).FirstOrCreate(&newRarity)
