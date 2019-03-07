@@ -20,8 +20,7 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 		player.Create()
 
 		// 2- New galaxy chunk and return player star
-		var playerStar models.Star
-		playerStar = NewGalaxyChunk(int(player.ID))
+		playerStar := NewGalaxyChunk(int(player.ID))
 
 		// 3 - Add first star to player
 		player.AddStar(playerStar)
