@@ -45,26 +45,16 @@ $ go run main.go
 
 ## Coding style
 
-NoName use [gometalinter](https://github.com/alecthomas/gometalinter), this linter it's configured in pipelines and run by default at every pull request.
+NoName use [golangci-lint](https://github.com/golangci/golangci-lint), this linter it's configured in pipelines and run by default at every pull request.
 If you use VSCode like IDE i advice you to add this configuration in your settings.
 
 ```
-  "go.lintTool": "gometalinter",
-  "go.lintOnSave": "file",
+  "go.lintTool": "golangci-lint",
+  "go.lintOnSave": "workspace",
   "go.lintFlags": [
-    "--vendor",
-    "--tests",
-    "--cyclo-over=50",
-    "--disable-all",
-    "--enable=vet",
-    "--enable=goimports",
-    "--enable=vetshadow",
     "--enable=golint",
-    "--enable=ineffassign",
-    "--enable=goconst",
-    "--enable=dupl",
-    "--enable=gocyclo"
-  ]
+    "--enable=maligned",
+  ],
 ```
 
 ## Deployment
