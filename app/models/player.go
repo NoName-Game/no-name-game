@@ -9,7 +9,9 @@ import (
 type Player struct {
 	gorm.Model
 	Username    string
-	State       []PlayerState
+	States      []PlayerState
+	Stars       []PlayerStar
+	Positions   []PlayerPosition
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
@@ -40,7 +42,7 @@ func (p *Player) Delete() *Player {
 //GetStateByFunction -
 func (p *Player) GetStateByFunction(function string) PlayerState {
 	var playerState PlayerState
-	for _, state := range p.State {
+	for _, state := range p.States {
 		if state.Function == function {
 			return state
 		}
@@ -55,4 +57,18 @@ func FindPlayerByUsername(username string) Player {
 	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
 
 	return player
+}
+
+// AddStar - Associate star to player
+func (p *Player) AddStar(star Star) *Player {
+	services.Database.Model(&p).Association("Stars").Append(PlayerStar{Star: star})
+
+	return p
+}
+
+// AddPosition
+func (p *Player) AddPosition(position PlayerPosition) *Player {
+	services.Database.Model(&p).Association("Positions").Append(position)
+
+	return p
 }

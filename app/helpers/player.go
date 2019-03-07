@@ -16,11 +16,21 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 			Inventory: models.Inventory{Items: ""},
 		}
 
-		// Create new player
+		// 1 - Create new player
 		player.Create()
 
-		// New galaxy chunk
-		NewGalaxyChunk(int(player.ID))
+		// 2- New galaxy chunk and return player star
+		playerStar := NewGalaxyChunk(int(player.ID))
+
+		// 3 - Add first star to player
+		player.AddStar(playerStar)
+
+		// 4 - Register first player position
+		player.AddPosition(models.PlayerPosition{
+			X: playerStar.X,
+			Y: playerStar.Y,
+			Z: playerStar.Z,
+		})
 	}
 
 	return
