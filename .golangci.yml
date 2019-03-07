@@ -57,5 +57,4 @@ linters-settings:
 linters:
   enable:
     - golint
-    - goconst
     - maligned

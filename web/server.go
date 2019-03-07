@@ -50,10 +50,18 @@ func Run() {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(response)
+		_, err = w.Write(response)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		services.ErrorHandler("Error start ListenAndServe", err)
+	}
 }
 
 func enableCors(w *http.ResponseWriter) {

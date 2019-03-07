@@ -46,7 +46,7 @@ func TestMultiStage(update tgbotapi.Update, player models.Player) {
 		}
 	}
 
-	if true == validationFlag {
+	if validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
 			services.SendMessage(validatorMsg)
@@ -150,7 +150,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 		}
 	}
 
-	if false == validationFlag {
+	if !validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
 			services.SendMessage(validatorMsg)
@@ -182,7 +182,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 
 	case 1:
 		// If is valid input
-		if true == validationFlag {
+		if validationFlag {
 			//R
 			payload.Red, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
@@ -205,7 +205,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 		services.SendMessage(msg)
 	case 2:
 		// If is valid input
-		if true == validationFlag {
+		if validationFlag {
 			//G
 			payload.Green, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
@@ -228,7 +228,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 		services.SendMessage(msg)
 	case 3:
 		// If is valid input
-		if true == validationFlag {
+		if validationFlag {
 			//B
 			payload.Blue, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)

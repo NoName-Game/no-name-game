@@ -27,7 +27,7 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 			player.Update()
 		}
 	}
-	if false == validationFlag {
+	if !validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
 			services.SendMessage(validatorMsg)
@@ -49,7 +49,7 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 		state.Update()
 		services.SendMessage(msg)
 	case 1:
-		if true == validationFlag {
+		if validationFlag {
 			//========================
 			// IMPORTANT!
 			//====================================

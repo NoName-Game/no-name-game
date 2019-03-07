@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/go-redis/redis"
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/joho/godotenv/autoload" // Autoload .env
 )
 
 var (
