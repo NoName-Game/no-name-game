@@ -26,6 +26,8 @@ func CheckFinishTime() {
 			player := models.FindPlayerByID(state.PlayerID)
 			text, _ := services.GetTranslation(state.Function, player.Language.Slug)
 			services.SendMessage(services.NewMessage(player.ChatID, text))
+			state.ToNotify = false
+			state.Update()
 		}
 	}
 

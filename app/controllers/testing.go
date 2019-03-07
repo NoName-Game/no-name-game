@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -24,8 +23,6 @@ func TestTimedQuest(update tgbotapi.Update, player models.Player) {
 	message := update.Message
 	routeName := "timed-quest"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
-
-	go commands.Cron(1 * time.Minute) //Check every minute
 
 	//====================================
 	// Validator

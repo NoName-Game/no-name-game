@@ -10,12 +10,12 @@ import (
 // PlayerState -
 type PlayerState struct {
 	gorm.Model
-	PlayerID  uint
-	Function  string
-	Stage     int
 	FinishAt  time.Time
-	ToNotify  bool
+	Function  string
 	Payload   string
+	PlayerID  uint
+	Stage     int
+	ToNotify  bool
 	Completed bool `gorm:"default: false"`
 }
 
