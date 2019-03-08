@@ -12,10 +12,11 @@ import (
 // Item - Item struct
 type Item struct {
 	gorm.Model
-	Name     string `json:"name"`
-	Rarity   Rarity
-	RarityID uint
-	// TODO: Add more information about item
+	Name           string `json:"name"`
+	Rarity         Rarity
+	RarityID       uint
+	Category       ItemCategory
+	ItemCategoryID uint
 }
 
 // Items - Items struct

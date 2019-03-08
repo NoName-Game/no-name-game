@@ -1,9 +1,11 @@
 package helpers
 
 import (
+	"encoding/json"
 	"log"
 
 	"bitbucket.org/no-name-game/no-name/app/commands/namer"
+	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
 // TrainItemNames - Only for developer, this function generate a model for markov chain
@@ -14,7 +16,24 @@ func TrainItemNames() {
 
 // GenerateNewItems
 func GenerateNewItems() {
-	name := namer.GenerateName("resources/items/model.json")
+	var items models.Items
+	type jsonStruct []map[string]string
+	for _, category := range models.GetAllItemCategories() {
+		for _, rarity := range models.GetAllRarities() {
+			for i := 0; i < 5; i++ {
+				name := namer.GenerateName("resources/items/model.json")
+				newItem := jsonStruct{
+					"name":     name,
+					"rarity":   rarity.Slug,
+					"category": category,
+				}
+				//TODO: fix me
+				// items = append(items, newItem)
+			}
+		}
 
-	log.Panicln(name)
+	}
+
+	jsonObj, _ := json.Marshal(items)
+	log.Panicln(string(jsonObj))
 }

@@ -16,6 +16,16 @@ type ItemCategory struct {
 	Name string
 }
 
+type ItemCategories []ItemCategory
+
+// GetAllItemCategories - Get all categories
+func GetAllItemCategories() ItemCategories {
+	var categories ItemCategories
+	services.Database.Find(&categories)
+
+	return categories
+}
+
 // SeederItemCategory - Seeder item category
 func SeederItemCategory() {
 	jsonFile, err := os.Open("resources/seeders/item_categories.json")
