@@ -70,9 +70,3 @@ func UnmarshalPayload(payload string, funcInterface interface{}) {
 		}
 	}
 }
-
-// GetAllPlayerState - Get all rows from db
-func GetAllPlayerState() (playerState []models.PlayerState) {
-	services.Database.Find(&playerState)
-	return
-}

@@ -14,6 +14,7 @@ type PlayerState struct {
 	Function  string
 	Payload   string
 	PlayerID  uint
+	Player    Player
 	Stage     int
 	ToNotify  bool
 	Completed bool `gorm:"default: false"`
@@ -38,4 +39,10 @@ func (s *PlayerState) Delete() *PlayerState {
 	services.Database.Delete(&s)
 
 	return s
+}
+
+// GetAllPlayerState - Get all rows from db
+func GetAllPlayerState() (playerState []PlayerState) {
+	services.Database.Preload("Player").Find(&playerState)
+	return
 }
