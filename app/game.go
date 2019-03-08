@@ -33,6 +33,10 @@ func init() {
 
 // Run - The Game!
 func Run() {
+
+	helpers.GenerateNewItems()
+	panic("After generate")
+
 	updates := services.GetUpdates()
 	for update := range updates {
 		if update.Message != nil {

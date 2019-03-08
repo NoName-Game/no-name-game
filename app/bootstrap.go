@@ -40,6 +40,7 @@ func migrations() {
 		models.PlayerPosition{},
 		models.Language{},
 		models.Rarity{},
+		models.ItemCategory{},
 		models.Item{},
 		models.Inventory{},
 	)
@@ -48,5 +49,6 @@ func migrations() {
 func seeders() {
 	models.SeederLanguage()
 	models.SeederRarities()
+	models.SeederItemCategory()
 	models.SeederItems()
 }
