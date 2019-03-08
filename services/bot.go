@@ -4,9 +4,6 @@ import (
 	"errors"
 	"log"
 	"os"
-	"time"
-
-	"bitbucket.org/no-name-game/no-name/app/commands"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
@@ -33,11 +30,6 @@ func BotUp() {
 	if err != nil {
 		ErrorHandler("tgbotapi.NewBotAPI(telegramAPIKey) return Error!", err)
 	}
-
-	//*************
-	// Cron Daemon
-	//*************
-	go commands.Cron(os.Getenv("CRON_MINUTES") * time.Minute)
 
 	log.Println("************************************************")
 	log.Println("Bot connected: " + botAPI.Self.UserName)

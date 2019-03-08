@@ -1,6 +1,11 @@
 package app
 
 import (
+	"os"
+	"strconv"
+	"time"
+
+	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
@@ -29,6 +34,9 @@ func bootstrap() {
 	// Bot
 	//*************
 	services.BotUp()
+
+	minutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
+	go commands.Cron(time.Duration(minutes) * time.Minute)
 }
 
 func migrations() {
