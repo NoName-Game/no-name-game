@@ -43,6 +43,6 @@ func (s *PlayerState) Delete() *PlayerState {
 
 // GetAllPlayerState - Get all rows from db
 func GetAllPlayerState() (playerState []PlayerState) {
-	services.Database.Preload("Player").Select("finish_at, tonotify, deleted_at").Where("completed = ?", false).Find(&playerState) //Seleziono solo ciò che mi serve
+	services.Database.Preload("Player").Select("finish_at, to_notify, deleted_at").Where("completed = ?", false).Find(&playerState) //Seleziono solo ciò che mi serve
 	return
 }
