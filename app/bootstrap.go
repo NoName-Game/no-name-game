@@ -33,7 +33,7 @@ func bootstrap() {
 	//*************
 	// Commands
 	//*************
-	// generate.GenerateItemsCommand()
+	// generate.ItemsCommand()
 }
 
 func migrations() {

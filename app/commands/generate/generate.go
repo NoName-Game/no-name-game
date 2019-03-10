@@ -10,8 +10,8 @@ import (
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
-// GenerateItemsCommand - this command generate a new list of items for seeder.
-func GenerateItemsCommand() {
+// ItemsCommand - this command generate a new list of items for seeder.
+func ItemsCommand() {
 
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/items/", "names.txt")
