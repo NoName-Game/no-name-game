@@ -26,6 +26,14 @@ func GetAllItemCategories() ItemCategories {
 	return categories
 }
 
+// GetCategoryBySlug - Get category by Slug
+func GetCategoryBySlug(slug string) ItemCategory {
+	var category ItemCategory
+	services.Database.Where("slug = ?", slug).First(&category)
+
+	return category
+}
+
 // SeederItemCategory - Seeder item category
 func SeederItemCategory() {
 	jsonFile, err := os.Open("resources/seeders/item_categories.json")

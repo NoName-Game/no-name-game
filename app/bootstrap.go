@@ -29,6 +29,11 @@ func bootstrap() {
 	// Bot
 	//*************
 	services.BotUp()
+
+	//*************
+	// Commands
+	//*************
+	// generate.GenerateItemsCommand()
 }
 
 func migrations() {

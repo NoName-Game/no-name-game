@@ -15,7 +15,7 @@ type Item struct {
 	Name           string `json:"name"`
 	Rarity         Rarity
 	RarityID       uint
-	Category       ItemCategory
+	ItemCategory   ItemCategory
 	ItemCategoryID uint
 }
 
@@ -56,7 +56,8 @@ func SeederItems() {
 	}
 
 	for _, item := range items {
-		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"])}
+		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"]), ItemCategory: GetCategoryBySlug(item["category"])}
+
 		services.Database.Where(Item{Name: item["name"]}).FirstOrCreate(&newItem)
 	}
 }
