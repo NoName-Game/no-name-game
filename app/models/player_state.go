@@ -41,8 +41,9 @@ func (s *PlayerState) Delete() *PlayerState {
 	return s
 }
 
-// GetAllPlayerState - Get all rows from db
-func GetAllPlayerState() (playerState []PlayerState) {
-	services.Database.Preload("Player").Select("finish_at, to_notify, deleted_at").Where("completed = ?", false).Find(&playerState) //Seleziono solo ciò che mi serve
+// GetAllStateToNotify - Get all rows from db to notify
+func GetAllStateToNotify() (playerState []PlayerState) {
+	services.Database.Where("completed = ?", false).Where("to_notify = ?", true).Where("finish_at < ?", time.Now()).Find(&playerState)
+
 	return
 }

@@ -19,13 +19,15 @@ func Cron(minute time.Duration) {
 
 // CheckFinishTime - Check the ending and handle the functions.
 func CheckFinishTime() {
-	for _, state := range models.GetAllPlayerState() {
-		if time.Now().Before(state.FinishAt) && state.DeletedAt == nil && state.ToNotify {
-			player := state.Player
-			text, _ := services.GetTranslation(state.Function, player.Language.Slug)
-			services.SendMessage(services.NewMessage(player.ChatID, text))
-			state.ToNotify = false
-			state.Update()
-		}
+	for _, state := range models.GetAllStateToNotify() {
+		player := models.FindPlayerByID(state.PlayerID)
+		text, _ := services.GetTranslation(state.Function, player.Language.Slug)
+
+		// Send notification
+		services.SendMessage(services.NewMessage(player.ChatID, text))
+
+		// Update status
+		state.ToNotify = false
+		state.Update()
 	}
 }

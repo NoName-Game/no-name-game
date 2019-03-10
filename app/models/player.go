@@ -43,11 +43,7 @@ func (p *Player) Delete() *Player {
 //GetStateByFunction -
 func (p *Player) GetStateByFunction(function string) PlayerState {
 	var playerState PlayerState
-	for _, state := range p.States {
-		if state.Function == function {
-			return state
-		}
-	}
+	services.Database.Where("function = ?", function).First(&playerState)
 
 	return playerState
 }
@@ -55,7 +51,7 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 // FindPlayerByUsername - find player by username
 func FindPlayerByUsername(username string) Player {
 	var player Player
-	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
+	services.Database.Where("username = ?", username).First(&player)
 
 	return player
 }
@@ -63,7 +59,7 @@ func FindPlayerByUsername(username string) Player {
 // FindPlayerByID - find player by ID
 func FindPlayerByID(id uint) Player {
 	var player Player
-	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&player)
+	services.Database.Where("id = ?", id).First(&player)
 
 	return player
 }
