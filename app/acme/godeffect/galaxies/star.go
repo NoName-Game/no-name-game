@@ -3,12 +3,10 @@ package galaxies
 import (
 	"fmt"
 	"math"
-	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/commands/godeffect/helpers/starnamer"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/no-name/app/acme/namer"
+
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/mb-14/gomarkov"
 )
 
 //Star -
@@ -38,22 +36,7 @@ func (s *Star) Swirl(axis mgl64.Vec3, amount float64) {
 
 // GenerateName -
 func (s *Star) GenerateName() {
-	chain, err := starnamer.StarNameModel()
-	if err != nil {
-		services.ErrorHandler("Error load star name models", err)
-	}
-
-	order := chain.Order
-	tokens := make([]string, 0)
-	for i := 0; i < order; i++ {
-		tokens = append(tokens, gomarkov.StartToken)
-	}
-	for tokens[len(tokens)-1] != gomarkov.EndToken {
-		next, _ := chain.Generate(tokens[(len(tokens) - order):])
-		tokens = append(tokens, next)
-	}
-
-	s.Name = strings.Join(tokens[order:len(tokens)-1], "")
+	s.Name = namer.GenerateName("resources/stars/model.json")
 }
 
 //ConvertTemperature -

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/no-name-game/no-name/app/commands/godeffect"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
@@ -30,11 +29,6 @@ func init() {
 func Run() {
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Pong")
-	})
-
-	http.HandleFunc("/omg", func(w http.ResponseWriter, r *http.Request) {
-		godeffect.OMG()
-		fmt.Fprintf(w, "Created")
 	})
 
 	http.HandleFunc("/galaxy", func(w http.ResponseWriter, r *http.Request) {
