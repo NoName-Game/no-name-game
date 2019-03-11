@@ -37,6 +37,11 @@ func bootstrap() {
 
 	minutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
 	go commands.Cron(time.Duration(minutes) * time.Minute)
+
+	//*************
+	// Commands
+	//*************
+	// generate.ItemsCommand()
 }
 
 func migrations() {
@@ -48,6 +53,7 @@ func migrations() {
 		models.PlayerPosition{},
 		models.Language{},
 		models.Rarity{},
+		models.ItemCategory{},
 		models.Item{},
 		models.Inventory{},
 	)
@@ -56,5 +62,6 @@ func migrations() {
 func seeders() {
 	models.SeederLanguage()
 	models.SeederRarities()
+	models.SeederItemCategory()
 	models.SeederItems()
 }
