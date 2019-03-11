@@ -12,10 +12,11 @@ import (
 // Item - Item struct
 type Item struct {
 	gorm.Model
-	Name     string `json:"name"`
-	Rarity   Rarity
-	RarityID uint
-	// TODO: Add more information about item
+	Name           string `json:"name"`
+	Rarity         Rarity
+	RarityID       uint
+	ItemCategory   ItemCategory
+	ItemCategoryID uint
 }
 
 // Items - Items struct
@@ -55,7 +56,8 @@ func SeederItems() {
 	}
 
 	for _, item := range items {
-		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"])}
+		newItem := Item{Name: item["name"], Rarity: GetRarityBySlug(item["rarity"]), ItemCategory: GetCategoryBySlug(item["category"])}
+
 		services.Database.Where(Item{Name: item["name"]}).FirstOrCreate(&newItem)
 	}
 }
