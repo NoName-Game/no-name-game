@@ -3,7 +3,7 @@ package galaxies
 import (
 	"math"
 
-	"bitbucket.org/no-name-game/no-name/app/commands/godeffect/helpers"
+	"bitbucket.org/no-name-game/no-name/app/acme/godeffect/helpers"
 	"github.com/go-gl/mathgl/mgl64"
 )
 
