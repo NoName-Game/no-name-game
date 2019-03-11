@@ -38,6 +38,13 @@ func GetItemByID(id uint) Item {
 	return item
 }
 
+func GetRandomItemByCategory(categoryID uint) Item {
+	var item Item
+	services.Database.Set("gorm:auto_preload", true).Where("item_category_id = ?", categoryID).Order(gorm.Expr("random()")).First(&item)
+
+	return item
+}
+
 // SeederItems - Seeder items
 func SeederItems() {
 	jsonFile, err := os.Open("resources/seeders/items.json")
