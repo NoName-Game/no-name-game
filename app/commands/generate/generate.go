@@ -5,14 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 
-	"bitbucket.org/no-name-game/no-name/app/commands/namer"
+	"bitbucket.org/no-name-game/no-name/app/acme/namer"
+	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
-// ItemsCommand - this command generate a new list of items for seeder.
-func ItemsCommand() {
-
+// Items - this command generate a new list of items for seeder.
+func Items() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/items/", "names.txt")
 
@@ -44,5 +44,24 @@ func ItemsCommand() {
 		services.ErrorHandler("Error DEL player state in redis", err)
 	}
 
+	log.Println("************************************************")
 	log.Println("End items generator")
+	log.Println("************************************************")
+}
+
+// Stars - this command generate a new galaxy.
+// (it's used only for testing falaxy structure)
+func Stars() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/stars/", "names.txt")
+
+	// Step 2 - Generate galaxy
+	nUsers := 10
+	for deviation := 1; deviation <= nUsers; deviation++ {
+		helpers.NewGalaxyChunk(deviation)
+	}
+
+	log.Println("************************************************")
+	log.Println("End star generator")
+	log.Println("************************************************")
 }

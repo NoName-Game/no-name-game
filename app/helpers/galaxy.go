@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/commands/godeffect/galaxies"
+	"bitbucket.org/no-name-game/no-name/app/acme/godeffect/galaxies"
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
