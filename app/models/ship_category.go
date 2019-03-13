@@ -26,7 +26,7 @@ func GetAllShipCategories() (categories ShipCategories) {
 }
 
 // GetShipCategoryBySlug - Get category by Slug
-func GetShipCategoryBySlug(slug string) (category ItemCategory) {
+func GetShipCategoryBySlug(slug string) (category ShipCategory) {
 	services.Database.Where("slug = ?", slug).First(&category)
 
 	return

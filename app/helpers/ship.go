@@ -5,12 +5,15 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
-// NewShip - Generate new ship
-func NewShip() (ship models.Ship) {
+// NewStartShip - Generate starter ship
+func NewStartShip() (ship models.Ship) {
+	rarity := models.GetRarityBySlug("VC")
+	category := models.GetShipCategoryBySlug("normal")
 	ship = models.Ship{
-		Name: namer.GenerateName("resources/stars/model.json"),
+		Name:         namer.GenerateName("resources/namer/ships/model.json"),
+		Rarity:       rarity,
+		ShipCategory: category,
 	}
-	//FIXME: todo
 
 	ship.Create()
 
