@@ -36,7 +36,7 @@ func (s *Star) Swirl(axis mgl64.Vec3, amount float64) {
 
 // GenerateName -
 func (s *Star) GenerateName() {
-	s.Name = namer.GenerateName("resources/stars/model.json")
+	s.Name = namer.GenerateName("resources/namer/stars/model.json")
 }
 
 //ConvertTemperature -

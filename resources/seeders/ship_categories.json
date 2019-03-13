@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Normal",
+    "slug": "normal"
+  },
+  {
+    "name": "Heavy",
+    "slug": "heavy"
+  },
+  {
+    "name": "Light",
+    "slug": "light"
+  }
+]
