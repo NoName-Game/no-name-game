@@ -25,7 +25,11 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 		// 3 - Add first star to player
 		player.AddStar(playerStar)
 
-		// 4 - Register first player position
+		// 4 - Add and create ship
+		ship := NewShip()
+		player.AddShip(ship)
+
+		// 5 - Register first player position
 		player.AddPosition(models.PlayerPosition{
 			X: playerStar.X,
 			Y: playerStar.Y,
