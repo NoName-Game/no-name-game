@@ -52,10 +52,13 @@ func migrations() {
 		models.PlayerState{},
 		models.PlayerStar{},
 		models.PlayerPosition{},
+		models.PlayerShip{},
 		models.Language{},
 		models.Rarity{},
 		models.ItemCategory{},
 		models.Item{},
+		models.ShipCategory{},
+		models.Ship{},
 		models.Inventory{},
 	)
 }
@@ -65,4 +68,5 @@ func seeders() {
 	models.SeederRarities()
 	models.SeederItemCategory()
 	models.SeederItems()
+	models.SeederShipCategory()
 }
