@@ -66,9 +66,9 @@ func Stars() {
 	log.Println("************************************************")
 }
 
-// Stars - this command generate a new ship.
+// Ship - this command generate a new ship.
 // (it's used only for testing ship creation)
-func Ship() {
+func Ships() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/namer/ships/", "names.txt")
 
@@ -77,5 +77,19 @@ func Ship() {
 
 	log.Println("************************************************")
 	log.Println("End Ship generator")
+	log.Println("************************************************")
+}
+
+// Weapon - this command generate a new ship.
+// (it's used only for testing ship creation)
+func Weapons() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/namer/weapons/", "names.txt")
+
+	// Step 2 - Generate ship
+	helpers.NewWeapon()
+
+	log.Println("************************************************")
+	log.Println("End Weapon generator")
 	log.Println("************************************************")
 }
