@@ -80,8 +80,8 @@ func Ships() {
 	log.Println("************************************************")
 }
 
-// Weapon - this command generate a new ship.
-// (it's used only for testing ship creation)
+// Weapon - this command generate a new weapon.
+// (it's used only for testing weapon creation)
 func Weapons() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/namer/weapons/", "names.txt")
@@ -91,5 +91,19 @@ func Weapons() {
 
 	log.Println("************************************************")
 	log.Println("End Weapon generator")
+	log.Println("************************************************")
+}
+
+// Armors - this command generate a new armor.
+// (it's used only for testing armor creation)
+func Armors() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/namer/armors/", "names.txt")
+
+	// Step 2 - Generate ship
+	helpers.NewArmor()
+
+	log.Println("************************************************")
+	log.Println("End Armor generator")
 	log.Println("************************************************")
 }

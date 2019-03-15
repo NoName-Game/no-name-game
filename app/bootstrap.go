@@ -36,6 +36,7 @@ func bootstrap() {
 	// generate.Items()
 	// generate.Stars()
 	// generate.Weapons()
+	// generate.Armors()
 }
 
 func migrations() {
@@ -54,6 +55,8 @@ func migrations() {
 		models.Ship{},
 		models.WeaponCategory{},
 		models.Weapon{},
+		models.ArmorCategory{},
+		models.Armor{},
 		models.Inventory{},
 	)
 }
@@ -65,4 +68,5 @@ func seeders() {
 	models.SeederItems()
 	models.SeederShipCategory()
 	models.SeederWeaponCategory()
+	models.SeederArmorCategory()
 }
