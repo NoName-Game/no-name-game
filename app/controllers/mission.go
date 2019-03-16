@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -105,7 +104,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			state.ToNotify = true
 			// Seleziono un tipo di materiale trovabile
 			state.FinishAt = commands.GetEndTime(0, 10, 0)
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("2006-01-02 15:04:05")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05")))
 			services.SendMessage(msg)
 			state.Update()
 		}
@@ -116,27 +115,28 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			state.Stage = 3
 			state.Update()
 			// Hai estratto {NOME ITEM} per una quantità pari a {QUANTITA'}, vuoi terminare l'estrazione?
-			text := "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
-			msg := services.NewMessage(player.ChatID, fmt.Sprintf(text, payload.Material.Name, payload.Quantity))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Continua"), tgbotapi.NewKeyboardButton("Esci")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("estrazione", player.Language.Slug, payload.Material.Name, payload.Quantity))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("exit", player.Language.Slug))))
 			services.SendMessage(msg)
 		}
 	case 3:
 		if validationFlag {
 			state.Stage = 2
 			// Setto un tempo e torno in fase 2
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("2006-01-02 15:04:05")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05")))
 			services.SendMessage(msg)
 			state.Update()
 		}
 	case 4:
-		helpers.FinishAndCompleteState(state, player)
-		// Aggiungere item all'inventario
-		player.Inventory.AddItem(payload.Material, payload.Quantity)
-		msg := services.NewMessage(player.ChatID, "Estrazione terminata!")
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		if validationFlag {
+			helpers.FinishAndCompleteState(state, player)
+			// Aggiungere item all'inventario
+			player.Inventory.AddItem(payload.Material, payload.Quantity)
+			player.Update()
+			msg := services.NewMessage(player.ChatID, "Estrazione terminata!")
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		}
 	}
-
 }
 
 func getCategoryID(eType, lang string) uint {
