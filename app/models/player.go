@@ -13,6 +13,7 @@ type Player struct {
 	States      []PlayerState
 	Stars       []PlayerStar
 	Positions   []PlayerPosition
+	Ships       []PlayerShip
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
@@ -74,6 +75,13 @@ func (p *Player) AddStar(star Star) *Player {
 // AddPosition
 func (p *Player) AddPosition(position PlayerPosition) *Player {
 	services.Database.Model(&p).Association("Positions").Append(position)
+
+	return p
+}
+
+// AddShip - Associate ship to player
+func (p *Player) AddShip(ship Ship) *Player {
+	services.Database.Model(&p).Association("Ships").Append(PlayerShip{Ship: ship})
 
 	return p
 }

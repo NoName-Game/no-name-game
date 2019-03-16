@@ -14,7 +14,7 @@ import (
 // Items - this command generate a new list of items for seeder.
 func Items() {
 	// Step 1 - Generate makov chain model
-	// namer.TrainName("resources/items/", "names.txt")
+	// namer.TrainName("resources/namer/items/", "names.txt")
 
 	// Step 2 - Generate seeder
 	type SeederItem map[string]string
@@ -26,7 +26,7 @@ func Items() {
 	for _, category := range models.GetAllItemCategories() {
 		for _, rarity := range models.GetAllRarities() {
 			for i := 1; i <= 5; i++ {
-				name := namer.GenerateName("resources/items/model.json")
+				name := namer.GenerateName("resources/namer/items/model.json")
 				item := SeederItem{
 					"name":     name,
 					"rarity":   rarity.Slug,
@@ -50,10 +50,10 @@ func Items() {
 }
 
 // Stars - this command generate a new galaxy.
-// (it's used only for testing falaxy structure)
+// (it's used only for testing galaxy structure)
 func Stars() {
 	// Step 1 - Generate makov chain model
-	// namer.TrainName("resources/stars/", "names.txt")
+	// namer.TrainName("resources/namer/stars/", "names.txt")
 
 	// Step 2 - Generate galaxy
 	nUsers := 10
@@ -63,5 +63,19 @@ func Stars() {
 
 	log.Println("************************************************")
 	log.Println("End star generator")
+	log.Println("************************************************")
+}
+
+// Stars - this command generate a new ship.
+// (it's used only for testing ship creation)
+func Ship() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/namer/ships/", "names.txt")
+
+	// Step 2 - Generate ship
+	helpers.NewStartShip()
+
+	log.Println("************************************************")
+	log.Println("End Ship generator")
 	log.Println("************************************************")
 }
