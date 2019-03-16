@@ -63,7 +63,7 @@ func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 // GetTranslation - Return text from key translated to locale.
 //
 // You can use printf's placeholders!
-// Available locales: it-IT, en-US
+// Available locales: it, en
 func GetTranslation(key, locale string, args ...interface{}) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
