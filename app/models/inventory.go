@@ -57,6 +57,16 @@ func (i *Inventory) ToString() string {
 	return result
 }
 
+// ToMap - return inventory for keyboard
+func (i *Inventory) ToMap() (results []string) {
+	mapInventory := unmarshalInventory(i.Items)
+	for key, value := range mapInventory {
+		results = append(results, strconv.Itoa(value)+"x "+GetResourceByID(key).Name)
+	}
+
+	return
+}
+
 // unmarshalInventory - Unmarshal player inventory
 func unmarshalInventory(inventory string) (items map[uint]int) {
 	if inventory != "" {

@@ -40,7 +40,7 @@ func (p *Player) Delete() *Player {
 	return p
 }
 
-//GetStateByFunction -
+// GetStateByFunction -
 func (p *Player) GetStateByFunction(function string) PlayerState {
 	var playerState PlayerState
 	for _, state := range p.States {
