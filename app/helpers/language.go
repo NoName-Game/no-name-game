@@ -7,7 +7,7 @@ import (
 // Trans - late shortCut
 func Trans(key, locale string, args ...interface{}) (message string) {
 	if len(args) <= 0 {
-		message, _ = services.GetTranslation(key, locale)
+		message, _ = services.GetTranslation(key, locale, nil)
 		return
 	}
 

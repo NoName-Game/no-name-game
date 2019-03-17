@@ -38,6 +38,14 @@ func GetResourceByID(id uint) Resource {
 	return resource
 }
 
+// GetRandomResourceByCategory
+func GetRandomResourceByCategory(categoryID uint) Resource {
+	var resource Resource
+	services.Database.Set("gorm:auto_preload", true).Where("resource_category_id = ?", categoryID).Order(gorm.Expr("random()")).First(&resource)
+
+	return resource
+}
+
 // SeederResources - Seeder resources
 func SeederResources() {
 	jsonFile, err := os.Open("resources/seeders/resources.json")

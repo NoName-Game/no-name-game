@@ -54,7 +54,7 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 // FindPlayerByUsername - find player by username
 func FindPlayerByUsername(username string) Player {
 	var player Player
-	services.Database.Where("username = ?", username).First(&player)
+	services.Database.Preload("Language").Where("username = ?", username).First(&player)
 
 	return player
 }

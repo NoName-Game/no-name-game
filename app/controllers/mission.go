@@ -24,7 +24,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	type payloadStruct struct {
 		ExplorationType string
 		Times           int
-		Material        models.Item
+		Material        models.Resource
 		Quantity        int
 	}
 
@@ -95,7 +95,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	case 1:
 		if validationFlag {
 			// ... Recupero il materiale trovabile
-			payload.Material = models.GetRandomItemByCategory(getCategoryID(message.Text, player.Language.Slug))
+			payload.Material = models.GetRandomResourceByCategory(getCategoryID(message.Text, player.Language.Slug))
 
 			// Salvo un po' tutto
 			payloadUpdated, _ := json.Marshal(payload)
@@ -131,7 +131,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			helpers.FinishAndCompleteState(state, player)
 			// Aggiungere item all'inventario
-			player.Inventory.AddItem(payload.Material, payload.Quantity)
+			player.Inventory.AddResource(payload.Material, payload.Quantity)
 			player.Update()
 			msg := services.NewMessage(player.ChatID, "Estrazione terminata!")
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)

@@ -64,14 +64,14 @@ func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 //
 // You can use printf's placeholders!
 // Available locales: it-IT, en-US
-func GetTranslation(key, locale string, args ...interface{}) (string, error) {
+func GetTranslation(key, locale string, args []interface{}) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{
 			MessageID: key,
 		},
 	)
-
 	msg = fmt.Sprintf(msg, args...)
+
 	return msg, err
 }
