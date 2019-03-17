@@ -14,6 +14,13 @@ type Inventory struct {
 	Items string //map[Item.ID]quantity
 }
 
+// Create inventory
+func (i *Inventory) Create() *Inventory {
+	services.Database.Create(&i)
+
+	return i
+}
+
 // AddResource - Add resource
 func (i *Inventory) AddResource(item Resource, quantity int) *Inventory {
 	mapInventory := unmarshalInventory(i.Items)

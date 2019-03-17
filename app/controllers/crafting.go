@@ -52,9 +52,11 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 			addResourceFlag = true
 			validationFlag = true
 		} else if message.Text == "Craft" {
-			state.Stage = 3
-			state.Update()
-			validationFlag = true
+			if len(payload.Resources) > 0 {
+				state.Stage = 3
+				state.Update()
+				validationFlag = true
+			}
 		}
 	case 3:
 		if message.Text == "YES!" {
@@ -138,8 +140,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 
 	case 2:
 		//ONLY FOR DEBUG - Add one resource
-		player.Inventory.AddResource(models.GetResourceByID(42), 2)
-		player.Inventory.AddResource(models.GetResourceByID(46), 3)
+		// player.Inventory.AddResource(models.GetResourceByID(42), 2)
+		// player.Inventory.AddResource(models.GetResourceByID(46), 3)
 
 		playerResources := player.Inventory.ToMap()
 
@@ -186,11 +188,15 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 			}
 		}
 
+		// If PayloadResources is not empty show craft button
+		if len(payload.Resources) > 0 {
+			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Craft"),
+			))
+		}
+
 		// Clear and exit
 		keyboardRowResources = append(keyboardRowResources,
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("Craft"),
-			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),
 				tgbotapi.NewKeyboardButton("clears"),
@@ -252,6 +258,11 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 
 			// For message
 			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
+		}
+
+		// Remove resources from player inventory
+		for k, q := range payload.Resources {
+			player.Inventory.RemoveItem(models.GetResourceByID(k), q)
 		}
 
 		//====================================
