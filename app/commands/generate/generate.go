@@ -11,23 +11,23 @@ import (
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
-// Items - this command generate a new list of items for seeder.
-func Items() {
+// Resources - this command generate a new list of items for seeder.
+func Resources() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/namer/items/", "names.txt")
 
 	// Step 2 - Generate seeder
-	type SeederItem map[string]string
-	type SeederItems []SeederItem
+	type SeederResource map[string]string
+	type SeederResources []SeederResource
 
-	var items SeederItems
+	var items SeederResources
 
 	// type jsonStruct []map[string]string
-	for _, category := range models.GetAllItemCategories() {
+	for _, category := range models.GetAllResourceCategories() {
 		for _, rarity := range models.GetAllRarities() {
 			for i := 1; i <= 5; i++ {
 				name := namer.GenerateName("resources/namer/items/model.json")
-				item := SeederItem{
+				item := SeederResource{
 					"name":     name,
 					"rarity":   rarity.Slug,
 					"category": category.Slug,

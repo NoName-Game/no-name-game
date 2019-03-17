@@ -13,6 +13,7 @@ type Weapon struct {
 	RarityID         uint
 	WeaponCategory   WeaponCategory
 	WeaponCategoryID uint
+	PlayerID         uint // Has Many from user
 }
 
 // Weapons - Weapons struct
@@ -21,6 +22,21 @@ type Weapons []Weapon
 // Create Weapon
 func (w *Weapon) Create() *Weapon {
 	services.Database.Create(&w)
+
+	return w
+}
+
+// Update Weapon
+func (w *Weapon) Update() *Weapon {
+	services.Database.Save(&w)
+
+	return w
+}
+
+// AddPlayer
+func (w *Weapon) AddPlayer(player Player) *Weapon {
+	w.PlayerID = player.ID
+	services.Database.Save(&w)
 
 	return w
 }

@@ -2,6 +2,9 @@ package helpers
 
 import (
 	"reflect"
+	"strings"
+
+	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
 // InArray - check if val exist in array
@@ -17,6 +20,52 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 				return
 			}
 		}
+	}
+
+	return
+}
+
+// StringInSlice
+func KeyInMap(a uint, list map[uint]int) bool {
+	for k := range list {
+		if k == a {
+			return true
+		}
+	}
+	return false
+}
+
+// Slugger - convert text in slug
+func Slugger(text string) string {
+	//FIXME: replace me with reaplace all in Go 1.12
+	return strings.Replace(strings.ToLower(text), " ", "_", -1)
+}
+
+// GetAllCategories - return all categories of all types
+func GetAllCategories() (categories []string) {
+	armorCategories := models.GetAllArmorCategories()
+	for _, armor := range armorCategories {
+		categories = append(categories, armor.Name)
+	}
+
+	weaponCategories := models.GetAllWeaponCategories()
+	for _, weapon := range weaponCategories {
+		categories = append(categories, weapon.Name)
+	}
+
+	return
+}
+
+// GetAllCategories - return all categories of all types
+func GetAllSlugCategories() (categories []string) {
+	armorCategories := models.GetAllArmorCategories()
+	for _, armor := range armorCategories {
+		categories = append(categories, armor.Slug)
+	}
+
+	weaponCategories := models.GetAllWeaponCategories()
+	for _, weapon := range weaponCategories {
+		categories = append(categories, weapon.Slug)
 	}
 
 	return

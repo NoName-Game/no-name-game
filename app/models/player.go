@@ -13,6 +13,8 @@ type Player struct {
 	Stars       []PlayerStar
 	Positions   []PlayerPosition
 	Ships       []PlayerShip
+	Weapons     []Weapon
+	Armors      []Armor
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
@@ -40,7 +42,7 @@ func (p *Player) Delete() *Player {
 	return p
 }
 
-//GetStateByFunction -
+// GetStateByFunction -
 func (p *Player) GetStateByFunction(function string) PlayerState {
 	var playerState PlayerState
 	for _, state := range p.States {

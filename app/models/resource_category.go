@@ -9,34 +9,34 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// ItemCategory -
-type ItemCategory struct {
+// ResourceCategory -
+type ResourceCategory struct {
 	gorm.Model
 	Slug string
 	Name string
 }
 
-type ItemCategories []ItemCategory
+type ResourceCategories []ResourceCategory
 
-// GetAllItemCategories - Get all categories
-func GetAllItemCategories() ItemCategories {
-	var categories ItemCategories
+// GetAllResourceCategories - Get all categories
+func GetAllResourceCategories() ResourceCategories {
+	var categories ResourceCategories
 	services.Database.Find(&categories)
 
 	return categories
 }
 
 // GetCategoryBySlug - Get category by Slug
-func GetCategoryBySlug(slug string) ItemCategory {
-	var category ItemCategory
+func GetCategoryBySlug(slug string) ResourceCategory {
+	var category ResourceCategory
 	services.Database.Where("slug = ?", slug).First(&category)
 
 	return category
 }
 
-// SeederItemCategory - Seeder item category
-func SeederItemCategory() {
-	jsonFile, err := os.Open("resources/seeders/item_categories.json")
+// SeederResourceCategory - Seeder Resource category
+func SeederResourceCategory() {
+	jsonFile, err := os.Open("resources/seeders/resource_categories.json")
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		services.ErrorHandler("Error opening a file", err)
@@ -52,7 +52,7 @@ func SeederItemCategory() {
 	}
 
 	for _, category := range categories {
-		newItemCategory := ItemCategory{Name: category["name"], Slug: category["slug"]}
-		services.Database.Where(ItemCategory{Slug: category["slug"]}).FirstOrCreate(&newItemCategory)
+		newResourceCategory := ResourceCategory{Name: category["name"], Slug: category["slug"]}
+		services.Database.Where(ResourceCategory{Slug: category["slug"]}).FirstOrCreate(&newResourceCategory)
 	}
 }

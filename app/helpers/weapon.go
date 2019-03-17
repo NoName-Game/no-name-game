@@ -19,3 +19,18 @@ func NewWeapon() (weapon models.Weapon) {
 
 	return
 }
+
+// NewCraftedWeapon - Generate starter ship
+func NewCraftedWeapon(c string) (weapon models.Weapon) {
+	rarity := models.GetRarityBySlug("VC")
+	category := models.GetWeaponCategoryBySlug(c)
+	weapon = models.Weapon{
+		Name:           namer.GenerateName("resources/namer/weapons/model.json"),
+		Rarity:         rarity,
+		WeaponCategory: category,
+	}
+
+	weapon.Create()
+
+	return
+}

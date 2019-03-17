@@ -19,7 +19,7 @@ type Rarity struct {
 // Rarities - Rarity slice
 type Rarities []Rarity
 
-// GetAllItemCategories - Get all rarities
+// GetAllCategories - Get all rarities
 func GetAllRarities() Rarities {
 	var rarities Rarities
 	services.Database.Find(&rarities)
