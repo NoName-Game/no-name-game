@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Knife",
+    "slug": "knife"
+  },
+  {
+    "name": "Auto Rifle",
+    "slug": "auto_rifle"
+  },
+  {
+    "name": "Sniper Rifle",
+    "slug": "sniper_rifle"
+  },
+  {
+    "name": "Shotgun",
+    "slug": "shotgun"
+  }
+]

@@ -41,8 +41,10 @@ func bootstrap() {
 	//*************
 	// Commands
 	//*************
-	// generate.Items()
+	// generate.Resources()
 	// generate.Stars()
+	// generate.Weapons()
+	// generate.Armors()
 }
 
 func migrations() {
@@ -55,10 +57,14 @@ func migrations() {
 		models.PlayerShip{},
 		models.Language{},
 		models.Rarity{},
-		models.ItemCategory{},
-		models.Item{},
+		models.ResourceCategory{},
+		models.Resource{},
 		models.ShipCategory{},
 		models.Ship{},
+		models.WeaponCategory{},
+		models.Weapon{},
+		models.ArmorCategory{},
+		models.Armor{},
 		models.Inventory{},
 	)
 }
@@ -66,7 +72,9 @@ func migrations() {
 func seeders() {
 	models.SeederLanguage()
 	models.SeederRarities()
-	models.SeederItemCategory()
-	models.SeederItems()
+	models.SeederResourceCategory()
+	models.SeederResources()
 	models.SeederShipCategory()
+	models.SeederWeaponCategory()
+	models.SeederArmorCategory()
 }

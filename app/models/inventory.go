@@ -14,8 +14,15 @@ type Inventory struct {
 	Items string //map[Item.ID]quantity
 }
 
-// AddItem - Add an item
-func (i *Inventory) AddItem(item Item, quantity int) *Inventory {
+// Create inventory
+func (i *Inventory) Create() *Inventory {
+	services.Database.Create(&i)
+
+	return i
+}
+
+// AddResource - Add resource
+func (i *Inventory) AddResource(item Resource, quantity int) *Inventory {
 	mapInventory := unmarshalInventory(i.Items)
 	mapInventory[item.ID] += quantity
 
@@ -25,8 +32,8 @@ func (i *Inventory) AddItem(item Item, quantity int) *Inventory {
 	return i
 }
 
-// RemoveItem - Remove an item
-func (i *Inventory) RemoveItem(item Item, quantity int) *Inventory {
+// RemoveResource - Remove one resource
+func (i *Inventory) RemoveItem(item Resource, quantity int) *Inventory {
 	mapInventory := unmarshalInventory(i.Items)
 	if _, ok := mapInventory[item.ID]; ok {
 		mapInventory[item.ID] += -quantity // Decrement quantity
@@ -51,10 +58,27 @@ func (i *Inventory) ToString() string {
 	var result string
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		result += strconv.Itoa(value) + "x " + GetItemByID(key).Name + "\n"
+		result += strconv.Itoa(value) + "x " + GetResourceByID(key).Name + "\n"
 	}
 
 	return result
+}
+
+// ToMap - return inventory unmarshal
+func (i *Inventory) ToMap() (items map[uint]int) {
+	items = unmarshalInventory(i.Items)
+
+	return
+}
+
+// ToKeyboardAddCraft - return inventory for keyboard
+func (i *Inventory) ToKeyboardAddCraft() (results []string) {
+	mapInventory := unmarshalInventory(i.Items)
+	for key, value := range mapInventory {
+		results = append(results, "Add "+GetResourceByID(key).Name+" ("+strconv.Itoa(value)+")")
+	}
+
+	return
 }
 
 // unmarshalInventory - Unmarshal player inventory
