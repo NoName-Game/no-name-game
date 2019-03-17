@@ -16,15 +16,16 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	//====================================
 	// Init Func!
 	//====================================
-	type payloadCrafting struct {
+	type craftingPayload struct {
 		Item      string
 		Category  string
-		Resources map[string]int
+		Resources map[uint]int
 	}
+
 	message := update.Message
 	routeName := "crafting"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
-	var payload payloadCrafting
+	var payload craftingPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
 	var addResourceFlag bool
 
@@ -50,8 +51,14 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		if strings.Contains(message.Text, "Add") {
 			addResourceFlag = true
 			validationFlag = true
-		} else if message.Text == "Craft!" {
+		} else if message.Text == "Craft" {
 			state.Stage = 3
+			state.Update()
+			validationFlag = true
+		}
+	case 3:
+		if message.Text == "YES!" {
+			state.Stage = 4
 			state.Update()
 			validationFlag = true
 		}
@@ -73,7 +80,7 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		payloadUpdated, _ := json.Marshal(payloadCrafting{})
+		payloadUpdated, _ := json.Marshal(craftingPayload{})
 		state.Payload = string(payloadUpdated)
 		state.Update()
 
@@ -130,22 +137,34 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		services.SendMessage(msg)
 
 	case 2:
+		//ONLY FOR DEBUG - Add one resource
+		player.Inventory.AddResource(models.GetResourceByID(42), 2)
+		player.Inventory.AddResource(models.GetResourceByID(46), 3)
+
+		playerResources := player.Inventory.ToMap()
+
 		// If is valid input
 		if validationFlag {
+			// Id Add new resource
 			if addResourceFlag {
 				if payload.Resources == nil {
-					payload.Resources = make(map[string]int)
+					payload.Resources = make(map[uint]int)
 				}
 
 				// Clear text from Add and other shit.
-				resource := strings.Split(
-					strings.Split(message.Text, "(")[0],
+				resourceName := strings.Split(
+					strings.Split(message.Text, " (")[0],
 					"Add ")[1]
 
-				if helpers.KeyInMap(resource, payload.Resources) {
-					payload.Resources[resource]++
+				resourceID := models.GetResourceByName(resourceName).ID
+				resourceMaxQuantity := playerResources[resourceID]
+
+				if helpers.KeyInMap(resourceID, payload.Resources) {
+					if payload.Resources[resourceID] < resourceMaxQuantity {
+						payload.Resources[resourceID]++
+					}
 				} else {
-					payload.Resources[resource] = 1
+					payload.Resources[resourceID] = 1
 				}
 			} else {
 				payload.Category = helpers.Slugger(message.Text)
@@ -155,28 +174,34 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 			state.Update()
 		}
 
-		//ONLY FOR DEBUG - Add one resource
-		debugItem := models.GetResourceByID(42)
-		player.Inventory.AddResource(debugItem, 2)
-
+		// Keyboard with resources
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
-		playerResources := player.Inventory.ToKeyboardAddCraft()
-		for _, resource := range playerResources {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(resource))
-			keyboardRowResources = append(keyboardRowResources, keyboardRow)
+		for r, q := range playerResources {
+			// If PayloadResouces < Inventory quantity ok :)
+			if payload.Resources[r] < q {
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+					"Add " + models.GetResourceByID(r).Name + " (" + (strconv.Itoa(q - payload.Resources[r])) + ")",
+				))
+				keyboardRowResources = append(keyboardRowResources, keyboardRow)
+			}
 		}
 
 		// Clear and exit
-		keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
-		))
+		keyboardRowResources = append(keyboardRowResources,
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Craft"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+				tgbotapi.NewKeyboardButton("clears"),
+			),
+		)
 
 		//Add recipe message
 		var recipe string
 		if len(payload.Resources) > 0 {
 			for k, v := range payload.Resources {
-				recipe += k + " x " + strconv.Itoa(v) + "\n"
+				recipe += models.GetResourceByID(k).Name + " x " + strconv.Itoa(v) + "\n"
 			}
 		}
 
@@ -187,35 +212,37 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		}
 		services.SendMessage(msg)
 
-		//FIXME: continue me :)
-	case 80:
-		// If is valid input
-		if validationFlag {
-			payload.Item = message.Text
-			payloadUpdated, _ := json.Marshal(payload)
-			state.Payload = string(payloadUpdated)
-			state.Update()
+	case 3:
+		//Add recipe message
+		var recipe string
+		if len(payload.Resources) > 0 {
+			for k, v := range payload.Resources {
+				recipe += models.GetResourceByID(k).Name + " x " + strconv.Itoa(v) + "\n"
+			}
 		}
 
-		msg := services.NewMessage(message.Chat.ID, "Finish?")
+		msg := services.NewMessage(message.Chat.ID, "Are you sure? You want use this recipe? \n\n "+recipe)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("YES!"),
-				tgbotapi.NewKeyboardButton("Wrong answare!"),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),
+				tgbotapi.NewKeyboardButton("clears"),
 			),
 		)
 		services.SendMessage(msg)
-	case 90:
+	case 4:
+		//Crafting
+		craftingResult := helpers.Crafting(state.Payload)
+
 		//====================================
 		// IMPORTANT!
 		//====================================
 		helpers.FinishAndCompleteState(state, player)
 		//====================================
 
-		msg := services.NewMessage(message.Chat.ID, "Completed! :)")
+		msg := services.NewMessage(message.Chat.ID, "Completed! This is your craft: \n\n"+craftingResult)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),

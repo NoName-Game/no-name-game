@@ -26,7 +26,7 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 }
 
 // StringInSlice
-func KeyInMap(a string, list map[string]int) bool {
+func KeyInMap(a uint, list map[uint]int) bool {
 	for k := range list {
 		if k == a {
 			return true
@@ -37,7 +37,8 @@ func KeyInMap(a string, list map[string]int) bool {
 
 // Slugger - convert text in slug
 func Slugger(text string) string {
-	return strings.ToLower(text)
+	//FIXME: replace me with reaplace all in Go 1.12
+	return strings.Replace(strings.ToLower(text), " ", "_", -1)
 }
 
 // GetAllCategories - return all categories of all types

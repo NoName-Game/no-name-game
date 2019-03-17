@@ -57,6 +57,13 @@ func (i *Inventory) ToString() string {
 	return result
 }
 
+// ToMap - return inventory unmarshal
+func (i *Inventory) ToMap() (items map[uint]int) {
+	items = unmarshalInventory(i.Items)
+
+	return
+}
+
 // ToKeyboardAddCraft - return inventory for keyboard
 func (i *Inventory) ToKeyboardAddCraft() (results []string) {
 	mapInventory := unmarshalInventory(i.Items)
