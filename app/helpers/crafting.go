@@ -4,8 +4,8 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
 
-// Crafting - this method generate items by craft
-func Crafting(maplist string) (craftingResult string) {
+// CraftArmor - this method generate armor for crafting controller
+func CraftArmor(maplist string) (armor models.Armor) {
 	type craftingPayload struct {
 		Item      string
 		Category  string
@@ -15,19 +15,23 @@ func Crafting(maplist string) (craftingResult string) {
 	var payload craftingPayload
 	UnmarshalPayload(maplist, &payload)
 
-	// var craftingResult string
-	switch payload.Item {
-	case "armors":
-		var armor models.Armor
-		armor = NewCraftedArmor(Slugger(payload.Category))
-		craftingResult = armor.Name
-	case "weapons":
-		var weapon models.Weapon
-		weapon = NewCraftedWeapon(Slugger(payload.Category))
-		craftingResult = weapon.Name
+	armor = NewCraftedArmor(Slugger(payload.Category))
+
+	return
+}
+
+// CraftWeapon - this method generate weapon for crafting controller
+func CraftWeapon(maplist string) (weapon models.Weapon) {
+	type craftingPayload struct {
+		Item      string
+		Category  string
+		Resources map[uint]int
 	}
 
-	//TODO: associate armor or weapon to player
+	var payload craftingPayload
+	UnmarshalPayload(maplist, &payload)
+
+	weapon = NewCraftedWeapon(Slugger(payload.Category))
 
 	return
 }

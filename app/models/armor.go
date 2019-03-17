@@ -13,14 +13,30 @@ type Armor struct {
 	RarityID        uint
 	ArmorCategory   ArmorCategory
 	ArmorCategoryID uint
+	PlayerID        uint
 }
 
 // Armors - Armors struct
 type Armors []Armor
 
 // Create Armor
-func (w *Armor) Create() *Armor {
-	services.Database.Create(&w)
+func (a *Armor) Create() *Armor {
+	services.Database.Create(&a)
 
-	return w
+	return a
+}
+
+// Update Armor
+func (a *Armor) Update() *Armor {
+	services.Database.Save(&a)
+
+	return a
+}
+
+// AddPlayer
+func (a *Armor) AddPlayer(player Player) *Armor {
+	a.PlayerID = player.ID
+	services.Database.Save(&a)
+
+	return a
 }

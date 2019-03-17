@@ -72,8 +72,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	}
 
 	// Logic flux
-	//		0		1		 	2
-	// -> What -> Category -> Resources
+	//		0		1		 	2			3
+	// -> What -> Category -> Resources -> craft
 
 	//====================================
 	// Stage
@@ -233,8 +233,26 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		)
 		services.SendMessage(msg)
 	case 4:
-		//Crafting
-		craftingResult := helpers.Crafting(state.Payload)
+		var craftingResult string
+
+		switch payload.Item {
+		case "armors":
+			crafted := helpers.CraftArmor(state.Payload)
+
+			// Associate craft result tu player
+			crafted.AddPlayer(player)
+
+			// For message
+			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
+		case "weapons":
+			crafted := helpers.CraftWeapon(state.Payload)
+
+			// Associate craft result tu player
+			crafted.AddPlayer(player)
+
+			// For message
+			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
+		}
 
 		//====================================
 		// IMPORTANT!

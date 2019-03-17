@@ -13,6 +13,8 @@ type Player struct {
 	Stars       []PlayerStar
 	Positions   []PlayerPosition
 	Ships       []PlayerShip
+	Weapons     []Weapon
+	Armors      []Armor
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
