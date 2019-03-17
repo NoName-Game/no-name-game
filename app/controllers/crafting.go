@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
@@ -15,14 +17,16 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	// Init Func!
 	//====================================
 	type payloadCrafting struct {
-		Item     string
-		Category string
+		Item      string
+		Category  string
+		Resources map[string]int
 	}
 	message := update.Message
 	routeName := "crafting"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload payloadCrafting
 	helpers.UnmarshalPayload(state.Payload, &payload)
+	var addResourceFlag bool
 
 	//====================================
 	// Validator
@@ -39,6 +43,15 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	case 1:
 		if helpers.InArray(message.Text, helpers.GetAllCategories()) {
 			state.Stage = 2
+			state.Update()
+			validationFlag = true
+		}
+	case 2:
+		if strings.Contains(message.Text, "Add") {
+			addResourceFlag = true
+			validationFlag = true
+		} else if message.Text == "Craft!" {
+			state.Stage = 3
 			state.Update()
 			validationFlag = true
 		}
@@ -119,7 +132,24 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	case 2:
 		// If is valid input
 		if validationFlag {
-			payload.Category = helpers.Slugger(message.Text)
+			if addResourceFlag {
+				if payload.Resources == nil {
+					payload.Resources = make(map[string]int)
+				}
+
+				// Clear text from Add and other shit.
+				resource := strings.Split(
+					strings.Split(message.Text, "(")[0],
+					"Add ")[1]
+
+				if helpers.KeyInMap(resource, payload.Resources) {
+					payload.Resources[resource]++
+				} else {
+					payload.Resources[resource] = 1
+				}
+			} else {
+				payload.Category = helpers.Slugger(message.Text)
+			}
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
 			state.Update()
@@ -130,7 +160,7 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		player.Inventory.AddResource(debugItem, 2)
 
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
-		playerResources := player.Inventory.ToMap()
+		playerResources := player.Inventory.ToKeyboardAddCraft()
 		for _, resource := range playerResources {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(resource))
 			keyboardRowResources = append(keyboardRowResources, keyboardRow)
@@ -142,7 +172,15 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 			tgbotapi.NewKeyboardButton("clears"),
 		))
 
-		msg := services.NewMessage(message.Chat.ID, "Choose which resources to use")
+		//Add recipe message
+		var recipe string
+		if len(payload.Resources) > 0 {
+			for k, v := range payload.Resources {
+				recipe += k + " x " + strconv.Itoa(v) + "\n"
+			}
+		}
+
+		msg := services.NewMessage(message.Chat.ID, "Choose which resources to use \n"+recipe)
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,

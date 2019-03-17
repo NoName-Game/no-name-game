@@ -57,11 +57,11 @@ func (i *Inventory) ToString() string {
 	return result
 }
 
-// ToMap - return inventory for keyboard
-func (i *Inventory) ToMap() (results []string) {
+// ToKeyboardAddCraft - return inventory for keyboard
+func (i *Inventory) ToKeyboardAddCraft() (results []string) {
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		results = append(results, strconv.Itoa(value)+"x "+GetResourceByID(key).Name)
+		results = append(results, "Add "+GetResourceByID(key).Name+" ("+strconv.Itoa(value)+")")
 	}
 
 	return

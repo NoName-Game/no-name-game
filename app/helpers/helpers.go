@@ -25,6 +25,16 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 	return
 }
 
+// StringInSlice
+func KeyInMap(a string, list map[string]int) bool {
+	for k := range list {
+		if k == a {
+			return true
+		}
+	}
+	return false
+}
+
 // Slugger - convert text in slug
 func Slugger(text string) string {
 	return strings.ToLower(text)
