@@ -3,3 +3,19 @@
 sample_text: "Testo di prova"
 text_with_placeholders: "Ciao, %s"
 complete: "Fatto!"
+validationMessage: "Input errato, riprova!"
+timed-quest: "Timed Quest Terminata!"
+continue: "Continua"
+exit: "Esci"
+#ESPLORAZIONE
+esplorazione: "Seleziona campo di ricerca!"
+sottosuolo: "Sottosuolo"
+terreno: "Terreno"
+atmosfera: "Atmosfera"
+estrazione: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
+estrazione_terminata: "Estrazione terminata!"
+#WAIT
+wait: "Sei in attesa fino alle %s"
+#ALERT FINE CRON
+missione_alert: "Esplorazione finita!"
+crafting_alert: "Crafting completato!"

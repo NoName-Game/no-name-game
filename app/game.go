@@ -17,7 +17,9 @@ var (
 		"back":             controllers.Back,           // back.go
 		"clears":           controllers.Clears,         // clears.go
 		"start":            controllers.StartTutorial,  // tutorial.go
-		"crafting":         controllers.Crafting,       // crafting.go
+		"time":             controllers.TestTimedQuest,
+		"missione":         controllers.StartMission,
+		"crafting":         controllers.Crafting, // crafting.go
 	}
 
 	breakerRoutes = []string{
