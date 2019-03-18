@@ -86,11 +86,20 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		state.Update()
 
 		msg := services.NewMessage(player.ChatID, helpers.Trans("esplorazione", player.Language.Slug))
-		keyboard := make([]tgbotapi.KeyboardButton, len(eTypes))
+		/*keyboard := make([]tgbotapi.KeyboardButton, len(eTypes))
 		for i, eType := range eTypes {
 			keyboard[i] = tgbotapi.NewKeyboardButton(eType)
 		}
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)*/
+		var keyboardRows [][]tgbotapi.KeyboardButton
+		for _, eType := range eTypes {
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(eType))
+			keyboardRows = append(keyboardRows, keyboardRow)
+		}
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard:       keyboardRows,
+			ResizeKeyboard: true,
+		}
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
@@ -104,7 +113,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			state.ToNotify = true
 			// Seleziono un tipo di materiale trovabile
 			state.FinishAt = commands.GetEndTime(0, 10, 0)
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
 			services.SendMessage(msg)
 			state.Update()
 		}
@@ -123,7 +132,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			state.Stage = 2
 			// Setto un tempo e torno in fase 2
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
 			services.SendMessage(msg)
 			state.Update()
 		}
@@ -133,7 +142,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			// Aggiungere item all'inventario
 			player.Inventory.AddResource(payload.Material, payload.Quantity)
 			player.Update()
-			msg := services.NewMessage(player.ChatID, "Estrazione terminata!")
+			msg := services.NewMessage(player.ChatID, helpers.Trans("estrazione_terminata", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		}
 	}

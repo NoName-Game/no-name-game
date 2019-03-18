@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
+
+	"bitbucket.org/no-name-game/no-name/app/commands"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Crafting
@@ -60,9 +63,18 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		}
 	case 3:
 		if message.Text == "YES!" {
+			state.FinishAt = commands.GetEndTime(0, 1, 10)
 			state.Stage = 4
+			state.ToNotify = true
 			state.Update()
+			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05"))
+			validationFlag = false
+		}
+	case 4:
+		if time.Now().After(state.FinishAt) {
 			validationFlag = true
+		} else {
+			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05"))
 		}
 	}
 
@@ -140,8 +152,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 
 	case 2:
 		//ONLY FOR DEBUG - Add one resource
-		// player.Inventory.AddResource(models.GetResourceByID(42), 2)
-		// player.Inventory.AddResource(models.GetResourceByID(46), 3)
+		//player.Inventory.AddResource(models.GetResourceByID(42), 2)
+		//player.Inventory.AddResource(models.GetResourceByID(46), 3)
 
 		playerResources := player.Inventory.ToMap()
 
@@ -239,44 +251,46 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		)
 		services.SendMessage(msg)
 	case 4:
-		var craftingResult string
+		if validationFlag {
+			var craftingResult string
 
-		switch payload.Item {
-		case "armors":
-			crafted := helpers.CraftArmor(state.Payload)
+			switch payload.Item {
+			case "armors":
+				crafted := helpers.CraftArmor(state.Payload)
 
-			// Associate craft result tu player
-			crafted.AddPlayer(player)
+				// Associate craft result tu player
+				crafted.AddPlayer(player)
 
-			// For message
-			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
-		case "weapons":
-			crafted := helpers.CraftWeapon(state.Payload)
+				// For message
+				craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
+			case "weapons":
+				crafted := helpers.CraftWeapon(state.Payload)
 
-			// Associate craft result tu player
-			crafted.AddPlayer(player)
+				// Associate craft result tu player
+				crafted.AddPlayer(player)
 
-			// For message
-			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
+				// For message
+				craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
+			}
+
+			// Remove resources from player inventory
+			for k, q := range payload.Resources {
+				player.Inventory.RemoveItem(models.GetResourceByID(k), q)
+			}
+
+			//====================================
+			// IMPORTANT!
+			//====================================
+			helpers.FinishAndCompleteState(state, player)
+			//====================================
+
+			msg := services.NewMessage(message.Chat.ID, "Completed! This is your craft: \n\n"+craftingResult)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton("back"),
+				),
+			)
+			services.SendMessage(msg)
 		}
-
-		// Remove resources from player inventory
-		for k, q := range payload.Resources {
-			player.Inventory.RemoveItem(models.GetResourceByID(k), q)
-		}
-
-		//====================================
-		// IMPORTANT!
-		//====================================
-		helpers.FinishAndCompleteState(state, player)
-		//====================================
-
-		msg := services.NewMessage(message.Chat.ID, "Completed! This is your craft: \n\n"+craftingResult)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-			),
-		)
-		services.SendMessage(msg)
 	}
 }
