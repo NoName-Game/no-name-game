@@ -2,20 +2,53 @@
 #You can use printf's placeholders!
 sample_text: "Testo di prova"
 text_with_placeholders: "Ciao, %s"
-complete: "Fatto!"
-validationMessage: "Input errato, riprova!"
 timed-quest: "Timed Quest Terminata!"
+
+# GENERAL
+complete: "Fatto!"
+validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
 continue: "Continua"
 exit: "Esci"
-#ESPLORAZIONE
-esplorazione: "Seleziona campo di ricerca!"
-sottosuolo: "Sottosuolo"
-terreno: "Terreno"
-atmosfera: "Atmosfera"
-estrazione: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
-estrazione_terminata: "Estrazione terminata!"
-#WAIT
 wait: "Sei in attesa fino alle %s"
-#ALERT FINE CRON
-missione_alert: "Esplorazione finita!"
-crafting_alert: "Crafting completato!"
+add: "Aggiungi"
+yep: "Si!"
+nope: "No!"
+confirm: "Confermo!"
+
+# ARMORS/WEAPONS
+armors: "Armature"
+helmet: "Elmo"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
+
+weapons: "Armi"
+knife: "Coltello"
+auto_rifle: "Fucile Automatico"
+sniper_rifle: "Fucile da cecchino"
+shotgun: "Fucile a pompa"
+
+# MISSION
+mission.exploration: "Seleziona campo di ricerca!"
+mission.underground: "Sottosuolo"
+mission.surface: "Superfice"
+mission.atmosphere: "Atmosfera"
+mission.extraction_recap: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
+mission.extraction_ended: "Decidi di rientrare dall'esplorazione con le tue nuove risorse!"
+mission.comeback: "Rientra dalla missione"
+mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcoli dovresti tornare intorno alle %s"
+mission.continue: "Continua ad esplorare"
+
+# CRAFTING
+crafting.craft: "Costruisci"
+crafting.what: "Cosa vuoi realizzare?"
+crafting.type: "Quale tipologia ti interessa realizzare?"
+crafting.add: "Aggiungi"
+crafting.choose_resources: "Quali risorse vuoi usare?"
+crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
+crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
+crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
+# CRON
+cron.mission_alert: "Esplorazione finita!"
+cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
