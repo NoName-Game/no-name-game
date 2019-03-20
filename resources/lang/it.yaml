@@ -49,11 +49,18 @@ crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguent
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
 
-#HUNTING
+# HUNTING
 hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
 hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
 hunting.enemy.card: "%s\nLife: %d\nCosa vuoi fare?"
+hunting.continue: "Vuoi continuare la caccia?"
+hunting.completed: "Caccia completata, torni alla base col bottino."
+
+# COMBAT SYSTEM
+combat.attack: "Attacca"
+combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"
 cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.hunting_alert: "Informazioni ritornate con successo!"

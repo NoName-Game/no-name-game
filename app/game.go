@@ -20,6 +20,7 @@ var (
 		"time":             controllers.TestTimedQuest,
 		"mission":          controllers.StartMission,
 		"crafting":         controllers.Crafting, // crafting.go
+		"hunting":          controllers.Hunting,  // hunting.go
 	}
 
 	breakerRoutes = []string{

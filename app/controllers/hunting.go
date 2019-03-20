@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"math/rand"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/commands"
@@ -38,8 +40,24 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
+		if message.Text == helpers.Trans("continue", player.Language.Slug) && payload.Mob.Life > 0 {
+			validationFlag = true
+		} else if payload.Mob.Life < 0 {
+			validationFlag = true
+			state.Stage = 4 //Drop
+			state.Update()
+		}
+	case 3:
+		if strings.Contains(message.Text, helpers.Trans("combat.attack", player.Language.Slug)) {
+			validationFlag = true
+		}
+	case 4:
 		if message.Text == helpers.Trans("continue", player.Language.Slug) {
 			validationFlag = true
+			state.Stage = 0
+		} else if message.Text == helpers.Trans("nope", player.Language.Slug) {
+			validationFlag = true
+			state.Stage = 5
 		}
 	}
 
@@ -90,15 +108,52 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		}
 	case 2:
 		if validationFlag {
-			//START BATTLE
-			// Scheme
-			// Name
-			// Life
-			// ExtraEffect (Optional)
-			// Cosa vuoi fare?
+			state.Stage = 3
+			state.Update()
 			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, payload.Mob.Name, payload.Mob.Life))
+			// TODO: Aggiungere pulsanti
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Attacca con Arma1")))
+			services.SendMessage(msg)
+		}
+	case 3:
+		if validationFlag {
+			// Calcolo danni e applicazione danni
+			// Danni player
+			playerDamage := rand.Int31n(13)
+			payload.Mob.Life -= playerDamage
+			mobDamage := int32((rand.Float32() * 13) * payload.Mob.DamageMultiplier)
 
+			payloadUpdated, _ := json.Marshal(payload)
+			state.Payload = string(payloadUpdated)
+			state.Stage = 2
+			state.Update()
+
+			msg := services.NewMessage(player.ChatID, helpers.Trans("combat.damage", player.Language.Slug, playerDamage, mobDamage))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
+			services.SendMessage(msg)
+		}
+	case 4:
+		if validationFlag {
+			// TODO: Add drop
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.continue", player.Language.Slug))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("nope", player.Language.Slug))))
+			services.SendMessage(msg)
+		}
+	case 5:
+		if validationFlag {
+			//====================================
+			// IMPORTANT!
+			//====================================
+			helpers.FinishAndCompleteState(state, player)
+			//====================================
+
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("hunting.complete", player.Language.Slug))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton("back"),
+				),
+			)
+			services.SendMessage(msg)
 		}
 	}
 }
