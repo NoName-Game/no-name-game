@@ -36,7 +36,7 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := "Wrong input, please repeat or exit."
+	validationMessage := helpers.Trans("validationMessage", player.Language.Slug)
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
