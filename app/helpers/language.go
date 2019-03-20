@@ -14,3 +14,13 @@ func Trans(key, locale string, args ...interface{}) (message string) {
 	message, _ = services.GetTranslation(key, locale, args)
 	return
 }
+
+// GetAllTranslatedSlugCategories - return weapon and armor slug category translated
+func GetAllTranslatedSlugCategoriesByLocale(locale string) (results []string) {
+	categories := GetAllSlugCategories()
+	for _, category := range categories {
+		results = append(results, Trans(category, locale))
+	}
+
+	return
+}

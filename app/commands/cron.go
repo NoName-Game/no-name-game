@@ -21,7 +21,7 @@ func Cron(minute time.Duration) {
 func CheckFinishTime() {
 	for _, state := range models.GetAllStateToNotify() {
 		player := models.FindPlayerByID(state.PlayerID)
-		text, _ := services.GetTranslation(state.Function+"_alert", player.Language.Slug, nil)
+		text, _ := services.GetTranslation("cron."+state.Function+"_alert", player.Language.Slug, nil)
 
 		// Send notification
 		msg := services.NewMessage(player.ChatID, text)

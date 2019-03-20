@@ -10,6 +10,24 @@ timed-quest: "Timed Quest Terminata!"
 continue: "Continua"
 exit: "Esci"
 wait: "Sei in attesa fino alle %s"
+add: "Aggiungi"
+yep: "Si!"
+nope: "No!"
+confirm: "Confermo!"
+
+# ARMORS/WEAPONS
+armors: "Armature"
+helmet: "Elmo"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
+
+weapons: "Armi"
+knife: "Coltello"
+auto_rifle: "Fucile Automatico"
+sniper_rifle: "Fucile da cecchino"
+shotgun: "Fucile a pompa"
+
 
 # MISSION
 exploration: "Seleziona campo di ricerca!"
@@ -20,6 +38,16 @@ extraction_recap: "Hai estratto %s per una quantità pari a %d, vuoi terminare l
 extraction_ended: "Estrazione terminata!"
 comeback_from_mission: "Rientra dalla missione"
 
+# CRAFTING
+crafting.craft: "Costruisci"
+crafting.what: "Cosa vuoi realizzare?"
+crafting.type: "Scegli un tipo?"
+crafting.add: "Aggiungi"
+crafting.choose_resources: "Quali risorse vuoi usare?"
+crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
+crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
+crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
 # CRON
-mission_alert: "Esplorazione finita!"
-crafting_alert: "Crafting completato!"
+cron.mission_alert: "Esplorazione finita!"
+cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
