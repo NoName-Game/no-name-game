@@ -78,13 +78,13 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		state.Payload = string(payloadUpdated)
 		state.Update()
 
-		services.SendMessage(services.NewMessage(player.ChatID, helpers.Trans("searching", player.Language.Slug, state.FinishAt.Format("15:04:05"))))
+		services.SendMessage(services.NewMessage(player.ChatID, helpers.Trans("hunting.searching", player.Language.Slug, state.FinishAt.Format("15:04:05"))))
 	case 1:
 		if validationFlag {
 			// Enemy found
 			state.Stage = 2
 			state.Update()
-			msg := services.NewMessage(player.ChatID, helpers.Trans("enemy_found", player.Language.Slug, payload.Mob.Name))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.found", player.Language.Slug, payload.Mob.Name))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
 			services.SendMessage(msg)
 		}
@@ -96,7 +96,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			// Life
 			// ExtraEffect (Optional)
 			// Cosa vuoi fare?
-			msg := services.NewMessage(player.ChatID, helpers.Trans("enemy_card", player.Language.Slug, payload.Mob.Name, payload.Mob.Life))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, payload.Mob.Name, payload.Mob.Life))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Attacca con Arma1")))
 
 		}
