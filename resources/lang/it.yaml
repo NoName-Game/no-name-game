@@ -9,11 +9,6 @@ complete: "Fatto!"
 validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
 continue: "Continua"
 exit: "Esci"
-#HUNTING
-searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
-enemy_found: "Hai incontrato un %s!! Aprire il fuoco?"
-#COMBAT
-enemy_card: "%s\nLife: %d\nCosa vuoi fare?"
 wait: "Sei in attesa fino alle %s"
 add: "Aggiungi"
 yep: "Si!"
@@ -53,6 +48,11 @@ crafting.choose_resources: "Quali risorse vuoi usare?"
 crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
+#HUNTING
+hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
+hunting.enemy.card: "%s\nLife: %d\nCosa vuoi fare?"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"
