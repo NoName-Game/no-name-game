@@ -14,6 +14,11 @@ terreno: "Terreno"
 atmosfera: "Atmosfera"
 estrazione: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
 estrazione_terminata: "Estrazione terminata!"
+#HUNTING
+searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+enemy_found: "Hai incontrato un %s!! Aprire il fuoco?"
+#COMBAT
+enemy_card: "%s\nLife: %d\nCosa vuoi fare?"
 #WAIT
 wait: "Sei in attesa fino alle %s"
 #ALERT FINE CRON
