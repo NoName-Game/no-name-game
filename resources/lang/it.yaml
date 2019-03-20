@@ -12,12 +12,12 @@ exit: "Esci"
 wait: "Sei in attesa fino alle %s"
 
 # MISSION
-esplorazione: "Seleziona campo di ricerca!"
+exploration: "Seleziona campo di ricerca!"
 underground: "Sottosuolo"
 surface: "Superfice"
 atmosphere: "Atmosfera"
 extraction_recap: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
-estrazione_ended: "Estrazione terminata!"
+extraction_ended: "Estrazione terminata!"
 comeback_from_mission: "Rientra dalla missione"
 
 # CRON

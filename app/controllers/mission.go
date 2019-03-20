@@ -44,7 +44,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	switch state.Stage {
 	case 1:
 		input := message.Text
-		if contains(eTypes, input) {
+		if helpers.StringInSlice(input, eTypes) {
 			payload.ExplorationType = input
 			validationFlag = true
 		}
@@ -57,11 +57,11 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		}
 	case 3:
 		input := message.Text
-		if input == "Continua" /*Da tradurre*/ {
+		if input == helpers.Trans("continue", player.Language.Slug) {
 			validationFlag = true
 			state.FinishAt = commands.GetEndTime(0, 10*(2*payload.Times), 0)
 			state.ToNotify = true
-		} else if input == "Rientra dalla missione" {
+		} else if input == helpers.Trans("comeback_from_mission", player.Language.Slug) {
 			state.Stage = 4
 			validationFlag = true
 		}
@@ -83,7 +83,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		state.Stage = 1
 		state.Update()
 
-		msg := services.NewMessage(player.ChatID, helpers.Trans("esplorazione", player.Language.Slug))
+		msg := services.NewMessage(player.ChatID, helpers.Trans("exploration", player.Language.Slug))
 
 		var keyboardRows [][]tgbotapi.KeyboardButton
 		for _, eType := range eTypes {
@@ -148,17 +148,8 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			// Add Items to player inventory
 			player.Inventory.AddResource(payload.Material, payload.Quantity)
 
-			msg := services.NewMessage(player.ChatID, helpers.Trans("estrazione_ended", player.Language.Slug))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("extraction_ended", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		}
 	}
-}
-
-func contains(a []string, v string) bool {
-	for _, e := range a {
-		if e == v {
-			return true
-		}
-	}
-	return false
 }

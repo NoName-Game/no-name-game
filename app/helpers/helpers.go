@@ -25,10 +25,20 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 	return
 }
 
-// StringInSlice
+// KeyInMap - Check if ID is in map
 func KeyInMap(a uint, list map[uint]int) bool {
 	for k := range list {
 		if k == a {
+			return true
+		}
+	}
+	return false
+}
+
+// StringInSlice - Check if strin is in slice
+func StringInSlice(v string, a []string) bool {
+	for _, e := range a {
+		if e == v {
 			return true
 		}
 	}
