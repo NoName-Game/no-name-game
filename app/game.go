@@ -18,7 +18,7 @@ var (
 		"clears":           controllers.Clears,         // clears.go
 		"start":            controllers.StartTutorial,  // tutorial.go
 		"time":             controllers.TestTimedQuest,
-		"missione":         controllers.StartMission,
+		"mission":          controllers.StartMission,
 		"crafting":         controllers.Crafting, // crafting.go
 	}
 

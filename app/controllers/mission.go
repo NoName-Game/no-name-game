@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"math/rand"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 // StartMission - start an exploration
 func StartMission(update tgbotapi.Update, player models.Player) {
 
-	routeName := "missione"
+	routeName := "mission"
 	message := update.Message
 
 	type payloadStruct struct {
@@ -33,9 +32,9 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	eTypes := make([]string, 3)
-	eTypes[0] = helpers.Trans("sottosuolo", player.Language.Slug)
-	eTypes[1] = helpers.Trans("terreno", player.Language.Slug)
-	eTypes[2] = helpers.Trans("atmosfera", player.Language.Slug)
+	eTypes[0] = helpers.Trans("mission.underground", player.Language.Slug)
+	eTypes[1] = helpers.Trans("mission.surface", player.Language.Slug)
+	eTypes[2] = helpers.Trans("mission.atmosphere", player.Language.Slug)
 
 	//====================================
 	// Validator
@@ -45,25 +44,24 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	switch state.Stage {
 	case 1:
 		input := message.Text
-		if contains(eTypes, input) {
+		if helpers.StringInSlice(input, eTypes) {
 			payload.ExplorationType = input
 			validationFlag = true
 		}
 	case 2:
 		if time.Now().After(state.FinishAt) && payload.Times < 10 {
-			log.Println("2")
 			payload.Times++
 			payload.Quantity = rand.Intn(3)*payload.Times + 1
 			validationFlag = true
-			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("2006-01-02 15:04:05"))
+			validationMessage = helpers.Trans("mission.wait", player.Language.Slug, state.FinishAt.Format("2006-01-02 15:04:05"))
 		}
 	case 3:
 		input := message.Text
-		if input == "Continua" /*Da tradurre*/ {
+		if input == helpers.Trans("mission.continue", player.Language.Slug) {
 			validationFlag = true
 			state.FinishAt = commands.GetEndTime(0, 10*(2*payload.Times), 0)
 			state.ToNotify = true
-		} else if input == "Esci" {
+		} else if input == helpers.Trans("mission.comeback", player.Language.Slug) {
 			state.Stage = 4
 			validationFlag = true
 		}
@@ -72,6 +70,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 	if !validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			validatorMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(validatorMsg)
 		}
 	}
@@ -85,12 +84,8 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		state.Stage = 1
 		state.Update()
 
-		msg := services.NewMessage(player.ChatID, helpers.Trans("esplorazione", player.Language.Slug))
-		/*keyboard := make([]tgbotapi.KeyboardButton, len(eTypes))
-		for i, eType := range eTypes {
-			keyboard[i] = tgbotapi.NewKeyboardButton(eType)
-		}
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)*/
+		msg := services.NewMessage(player.ChatID, helpers.Trans("mission.exploration", player.Language.Slug))
+
 		var keyboardRows [][]tgbotapi.KeyboardButton
 		for _, eType := range eTypes {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(eType))
@@ -103,19 +98,25 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			// ... Recupero il materiale trovabile
-			payload.Material = models.GetRandomResourceByCategory(getCategoryID(message.Text, player.Language.Slug))
+			// FIXME: replace me with new method
+			payload.Material = models.GetRandomResourceByCategory(helpers.GetMissionCategoryID(message.Text, player.Language.Slug))
 
-			// Salvo un po' tutto
+			// Updating state
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
 			state.Stage = 2
 			state.ToNotify = true
-			// Seleziono un tipo di materiale trovabile
+
+			// Set finishAt
 			state.FinishAt = commands.GetEndTime(0, 10, 0)
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
-			services.SendMessage(msg)
 			state.Update()
+
+			// Remove current redist stare
+			helpers.DelRedisState(player)
+
+			msg := services.NewMessage(player.ChatID, helpers.Trans("mission.wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			services.SendMessage(msg)
 		}
 	case 2:
 		if validationFlag {
@@ -123,48 +124,40 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			state.Payload = string(payloadUpdated)
 			state.Stage = 3
 			state.Update()
-			// Hai estratto {NOME ITEM} per una quantità pari a {QUANTITA'}, vuoi terminare l'estrazione?
-			msg := services.NewMessage(player.ChatID, helpers.Trans("estrazione", player.Language.Slug, payload.Material.Name, payload.Quantity))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("exit", player.Language.Slug))))
+
+			msg := services.NewMessage(player.ChatID, helpers.Trans("mission.extraction_recap", player.Language.Slug, payload.Material.Name, payload.Quantity))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("mission.continue", player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("mission.comeback", player.Language.Slug)),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	case 3:
 		if validationFlag {
 			state.Stage = 2
-			// Setto un tempo e torno in fase 2
-			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
+
+			// Remove current redist stare
+			helpers.DelRedisState(player)
+
+			// Continue
+			msg := services.NewMessage(player.ChatID, helpers.Trans("mission.wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
 			state.Update()
 		}
 	case 4:
 		if validationFlag {
+			// Exit
 			helpers.FinishAndCompleteState(state, player)
-			// Aggiungere item all'inventario
+
+			// Add Items to player inventory
 			player.Inventory.AddResource(payload.Material, payload.Quantity)
-			player.Update()
-			msg := services.NewMessage(player.ChatID, helpers.Trans("estrazione_terminata", player.Language.Slug))
+
+			msg := services.NewMessage(player.ChatID, helpers.Trans("mission.extraction_ended", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			services.SendMessage(msg)
 		}
 	}
-}
-
-func getCategoryID(eType, lang string) uint {
-	switch eType {
-	case helpers.Trans("sottosuolo", lang):
-		return 2
-	case helpers.Trans("terreno", lang):
-		return 1
-	case helpers.Trans("atmosfera", lang):
-		return 3
-	}
-	return 0
-}
-
-func contains(a []string, v string) bool {
-	for _, e := range a {
-		if e == v {
-			return true
-		}
-	}
-	return false
 }
