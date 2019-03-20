@@ -110,6 +110,9 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 			state.FinishAt = commands.GetEndTime(0, 10, 0)
 			state.Update()
 
+			// Remove current redist stare
+			helpers.DelRedisState(player)
+
 			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
@@ -134,6 +137,9 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			state.Stage = 2
 
+			// Remove current redist stare
+			helpers.DelRedisState(player)
+
 			// Continue
 			msg := services.NewMessage(player.ChatID, helpers.Trans("wait", player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -150,6 +156,7 @@ func StartMission(update tgbotapi.Update, player models.Player) {
 
 			msg := services.NewMessage(player.ChatID, helpers.Trans("extraction_ended", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			services.SendMessage(msg)
 		}
 	}
 }
