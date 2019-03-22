@@ -51,8 +51,10 @@ crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo �
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
 
 # INVENTORY
-inventory.intro: "Cosa del tuo inventario vorresti gestire?"
+inventory.intro: "Cosa vuoi gestire?"
 inventory.recap: "Recap inventario"
+inventory.summary: "Riassunto"
+inventory.equip: "Equipaggia"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

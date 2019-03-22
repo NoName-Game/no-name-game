@@ -33,15 +33,15 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
-			helpers.Trans("resources", player.Language.Slug),
-			helpers.Trans("armors", player.Language.Slug),
-			helpers.Trans("weapons", player.Language.Slug),
+			helpers.Trans("inventory.summary", player.Language.Slug),
+			helpers.Trans("inventory.equip", player.Language.Slug),
 		}) {
 			state.Stage = 1
 			state.Update()
 			validationFlag = true
 		}
 	case 1:
+		validationFlag = true
 		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale(player.Language.Slug)) {
 		// 	state.Stage = 2
 		// 	state.Update()
@@ -69,13 +69,10 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.intro", player.Language.Slug))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("resources", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("inventory.summary", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("armors", player.Language.Slug)),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("inventory.equip", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),
@@ -92,37 +89,29 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 			state.Update()
 		}
 
-		var keyboardRowCategories [][]tgbotapi.KeyboardButton
+		// var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Manager {
-		case helpers.Trans("resources", player.Language.Slug):
+		case helpers.Trans("inventory.summary", player.Language.Slug):
+			var recap string
+
+			// Summary Resources
 			playerResources := player.Inventory.ToMap()
 			for r, q := range playerResources {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(models.GetResourceByID(r).Name + " (" + (strconv.Itoa(q)) + ")"))
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+				recap += models.GetResourceByID(r).Name + " (" + (strconv.Itoa(q)) + ")\n"
 			}
-		case helpers.Trans("armors", player.Language.Slug):
-			for _, armor := range player.Armors {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(armor.Name))
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
-			}
-		case helpers.Trans("weapons", player.Language.Slug):
+
+			// Summary Weapons
 			for _, weapon := range player.Weapons {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(weapon.Name))
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+				recap += weapon.Name + "\n"
 			}
-		}
 
-		// Clear and exit
-		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
-		))
+			// Summary Armors
+			for _, armor := range player.Armors {
+				recap += armor.Name + "\n"
+			}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap", player.Language.Slug))
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			ResizeKeyboard: true,
-			Keyboard:       keyboardRowCategories,
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap", player.Language.Slug)+"\n\n"+recap)
+			services.SendMessage(msg)
 		}
-		services.SendMessage(msg)
 	}
 }
