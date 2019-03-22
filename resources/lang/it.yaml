@@ -14,6 +14,7 @@ add: "Aggiungi"
 yep: "Si!"
 nope: "No!"
 confirm: "Confermo!"
+resources: "Risorse"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -48,6 +49,10 @@ crafting.choose_resources: "Quali risorse vuoi usare?"
 crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
+# INVENTORY
+inventory.intro: "Cosa del tuo inventario vorresti gestire?"
+inventory.recap: "Recap inventario"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

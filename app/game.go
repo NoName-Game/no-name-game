@@ -19,11 +19,13 @@ var (
 		"start":            controllers.StartTutorial,  // tutorial.go
 		"time":             controllers.TestTimedQuest,
 		"mission":          controllers.StartMission,
-		"crafting":         controllers.Crafting, // crafting.go
+		"crafting":         controllers.Crafting,  // crafting.go
+		"inventory":        controllers.Inventory, // crafting.go
 	}
 
 	breakerRoutes = []string{
-		"back", "clears",
+		"back",   // back.go
+		"clears", // clears.go
 	}
 	//
 	// End routes
