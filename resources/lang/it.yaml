@@ -53,8 +53,9 @@ crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
 inventory.recap: "Recap inventario"
-inventory.summary: "Riassunto"
-inventory.equip: "Equipaggia"
+inventory.summary: "Riassunto inventario"
+inventory.equip: "Equipaggia Oggetto"
+inventory.destroy: "Distruggi Oggetto"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

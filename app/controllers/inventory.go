@@ -16,7 +16,7 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 	// Init Func!
 	//====================================
 	type inventoryPayload struct {
-		Manager string
+		//
 	}
 
 	message := update.Message
@@ -35,6 +35,7 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 		if helpers.InArray(message.Text, []string{
 			helpers.Trans("inventory.summary", player.Language.Slug),
 			helpers.Trans("inventory.equip", player.Language.Slug),
+			helpers.Trans("inventory.destroy", player.Language.Slug),
 		}) {
 			state.Stage = 1
 			state.Update()
@@ -59,6 +60,8 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 
 	//====================================
 	// Stage
+	// 1 - Inventory summary
+	// 2 -
 	//====================================
 	switch state.Stage {
 	case 0:
@@ -73,6 +76,7 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("inventory.equip", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("inventory.destroy", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),
@@ -82,36 +86,47 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 		services.SendMessage(msg)
 	case 1:
 		// If is valid input
-		if validationFlag {
-			payload.Manager = message.Text
-			payloadUpdated, _ := json.Marshal(payload)
-			state.Payload = string(payloadUpdated)
-			state.Update()
-		}
+		// if validationFlag {
+		// 	payload.Manager = message.Text
+		// 	payloadUpdated, _ := json.Marshal(payload)
+		// 	state.Payload = string(payloadUpdated)
+		// 	state.Update()
+		// }
 
-		// var keyboardRowCategories [][]tgbotapi.KeyboardButton
-		switch payload.Manager {
+		switch message.Text {
 		case helpers.Trans("inventory.summary", player.Language.Slug):
 			var recap string
 
 			// Summary Resources
+			recap += "\n" + helpers.Trans("resources", player.Language.Slug) + ":\n"
 			playerResources := player.Inventory.ToMap()
 			for r, q := range playerResources {
-				recap += models.GetResourceByID(r).Name + " (" + (strconv.Itoa(q)) + ")\n"
+				recap += "- " + models.GetResourceByID(r).Name + " (" + (strconv.Itoa(q)) + ")\n"
 			}
 
 			// Summary Weapons
+			recap += "\n" + helpers.Trans("weapons", player.Language.Slug) + ":\n"
 			for _, weapon := range player.Weapons {
-				recap += weapon.Name + "\n"
+				recap += "- " + weapon.Name + "\n"
 			}
 
 			// Summary Armors
+			recap += "\n" + helpers.Trans("armors", player.Language.Slug) + ":\n"
 			for _, armor := range player.Armors {
-				recap += armor.Name + "\n"
+				recap += "- " + armor.Name + "\n"
 			}
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap", player.Language.Slug)+"\n\n"+recap)
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap", player.Language.Slug)+recap)
 			services.SendMessage(msg)
+		case helpers.Trans("inventory.equip", player.Language.Slug):
+			inventoryEquip(update, player)
 		}
 	}
+}
+
+func inventoryEquip(update tgbotapi.Update, player models.Player) {
+	message := update.Message
+
+	msg := services.NewMessage(message.Chat.ID, "Bella")
+	services.SendMessage(msg)
 }
