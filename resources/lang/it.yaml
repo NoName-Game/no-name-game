@@ -59,6 +59,7 @@ inventory.equip: "Equipaggia Oggetto"
 inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
+inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
 

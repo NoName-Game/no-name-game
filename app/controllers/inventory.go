@@ -117,14 +117,14 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 	//====================================
 	// Extra data
 	//====================================
-	currentPlayerEquipment := "\n"
+	currentPlayerEquipment := helpers.Trans("inventory.equip.equipped", player.Language.Slug)
 
-	currentPlayerEquipment += "\nArmors:\n"
+	currentPlayerEquipment += "\n" + helpers.Trans("armors", player.Language.Slug) + ":\n"
 	for _, armor := range player.GetEquippedArmors() {
 		currentPlayerEquipment += "- " + armor.Name
 	}
 
-	currentPlayerEquipment += "\n\nWeapons:\n"
+	currentPlayerEquipment += "\n\n" + helpers.Trans("weapons", player.Language.Slug) + ":\n"
 	for _, weapon := range player.GetEquippedWeapons() {
 		currentPlayerEquipment += "- " + weapon.Name
 	}
