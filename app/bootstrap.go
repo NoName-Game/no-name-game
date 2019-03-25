@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
+	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
 func bootstrap() {
@@ -48,33 +49,37 @@ func bootstrap() {
 }
 
 func migrations() {
-	services.Database.AutoMigrate(
-		models.Star{},
-		models.Player{},
-		models.PlayerState{},
-		models.PlayerStar{},
-		models.PlayerPosition{},
-		models.PlayerShip{},
-		models.Language{},
-		models.Rarity{},
-		models.ResourceCategory{},
-		models.Resource{},
-		models.ShipCategory{},
-		models.Ship{},
-		models.WeaponCategory{},
-		models.Weapon{},
-		models.ArmorCategory{},
-		models.Armor{},
-		models.Inventory{},
-	)
+	if os.Getenv("DB_MIGRATE") == "true" {
+		services.Database.AutoMigrate(
+			models.Star{},
+			models.Player{},
+			models.PlayerState{},
+			models.PlayerStar{},
+			models.PlayerPosition{},
+			models.PlayerShip{},
+			models.Language{},
+			models.Rarity{},
+			models.ResourceCategory{},
+			models.Resource{},
+			models.ShipCategory{},
+			models.Ship{},
+			models.WeaponCategory{},
+			models.Weapon{},
+			models.ArmorCategory{},
+			models.Armor{},
+			models.Inventory{},
+		)
+	}
 }
 
 func seeders() {
-	models.SeederLanguage()
-	models.SeederRarities()
-	models.SeederResourceCategory()
-	models.SeederResources()
-	models.SeederShipCategory()
-	models.SeederWeaponCategory()
-	models.SeederArmorCategory()
+	if os.Getenv("DB_SEED") == "true" {
+		models.SeederLanguage()
+		models.SeederRarities()
+		models.SeederResourceCategory()
+		models.SeederResources()
+		models.SeederShipCategory()
+		models.SeederWeaponCategory()
+		models.SeederArmorCategory()
+	}
 }

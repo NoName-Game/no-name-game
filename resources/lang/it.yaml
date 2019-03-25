@@ -14,6 +14,9 @@ add: "Aggiungi"
 yep: "Si!"
 nope: "No!"
 confirm: "Confermo!"
+resources: "Risorse"
+equip: "Equipaggia"
+destroy: "Distruggi"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -48,6 +51,24 @@ crafting.choose_resources: "Quali risorse vuoi usare?"
 crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
+# INVENTORY
+inventory.intro: "Cosa vuoi gestire?"
+inventory.recap: "Recap inventario"
+inventory.summary: "Riassunto inventario"
+inventory.equip: "Equipaggia Oggetto"
+inventory.destroy: "Distruggi Oggetto"
+inventory.type: "Quale tipologia vorresti equipaggiare?"
+inventory.what: "Cosa vorresti equipaggiare?"
+
+inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
+inventory.equip.confirm: "Confermi di voler equipaggiare?"
+inventory.equip.completed: "Equipaggiamento confermato!"
+
+inventory.destroy.type: "Quale tipologia vorresti distruggere?"
+inventory.destroy.what: "Cosa vorresti distruggere?"
+inventory.destroy.confirm: "Confermi di voler distruggere?"
+inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

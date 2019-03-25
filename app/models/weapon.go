@@ -14,6 +14,7 @@ type Weapon struct {
 	WeaponCategory   WeaponCategory
 	WeaponCategoryID uint
 	PlayerID         uint // Has Many from user
+	Equipped         bool
 }
 
 // Weapons - Weapons struct
@@ -33,10 +34,33 @@ func (w *Weapon) Update() *Weapon {
 	return w
 }
 
+// Delete Weapon
+func (w *Weapon) Delete() *Weapon {
+	services.Database.Delete(&w)
+
+	return w
+}
+
 // AddPlayer
 func (w *Weapon) AddPlayer(player Player) *Weapon {
 	w.PlayerID = player.ID
 	services.Database.Save(&w)
 
 	return w
+}
+
+// GetWeaponByName - Get Weapon by name
+func GetWeaponByName(name string) Weapon {
+	var weapon Weapon
+	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&weapon)
+
+	return weapon
+}
+
+// GetWeaponByID - Get weapon by ID
+func GetWeaponByID(id uint) Weapon {
+	var weapon Weapon
+	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&weapon)
+
+	return weapon
 }

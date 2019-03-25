@@ -54,7 +54,11 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 // FindPlayerByUsername - find player by username
 func FindPlayerByUsername(username string) Player {
 	var player Player
-	services.Database.Preload("Language").Preload("Inventory").Where("username = ?", username).First(&player)
+	services.Database.Preload("Language").
+		Preload("Inventory").
+		Preload("Weapons").
+		Preload("Armors").
+		Where("username = ?", username).First(&player)
 
 	return player
 }
@@ -86,4 +90,18 @@ func (p *Player) AddShip(ship Ship) *Player {
 	services.Database.Model(&p).Association("Ships").Append(PlayerShip{Ship: ship})
 
 	return p
+}
+
+// GetEquippedArmors - get equipped player armors
+func (p *Player) GetEquippedArmors() (armors Armors) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&armors)
+
+	return
+}
+
+// GetEquippedWeapons - get equipped player weapons
+func (p *Player) GetEquippedWeapons() (weapons Weapons) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&weapons)
+
+	return
 }
