@@ -40,3 +40,11 @@ func (a *Armor) AddPlayer(player Player) *Armor {
 
 	return a
 }
+
+// GetArmorByName - Get Armor by name
+func GetArmorByName(name string) Armor {
+	var armor Armor
+	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&armor)
+
+	return armor
+}

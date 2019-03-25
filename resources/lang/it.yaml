@@ -15,6 +15,7 @@ yep: "Si!"
 nope: "No!"
 confirm: "Confermo!"
 resources: "Risorse"
+equip: "Equipaggia"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -56,6 +57,9 @@ inventory.recap: "Recap inventario"
 inventory.summary: "Riassunto inventario"
 inventory.equip: "Equipaggia Oggetto"
 inventory.destroy: "Distruggi Oggetto"
+inventory.type: "Quale tipologia vorresti equipaggiare?"
+inventory.what: "Cosa vorresti equipaggiare?"
+inventory.equip.confirm: "Confermi di voler equipaggiare?"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

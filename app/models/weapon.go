@@ -40,3 +40,11 @@ func (w *Weapon) AddPlayer(player Player) *Weapon {
 
 	return w
 }
+
+// GetWeaponByName - Get Weapon by name
+func GetWeaponByName(name string) Weapon {
+	var weapon Weapon
+	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&weapon)
+
+	return weapon
+}
