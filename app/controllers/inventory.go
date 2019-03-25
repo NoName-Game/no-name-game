@@ -72,7 +72,7 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "equip"
+	routeName := "inventory-equip"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload InventoryEquipPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
@@ -263,7 +263,7 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "destroy"
+	routeName := "inventory-destroy"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload InventoryDestroyPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
