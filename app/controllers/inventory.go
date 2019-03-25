@@ -100,8 +100,8 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 		}
 	case 2:
 		if message.Text == helpers.Trans("confirm", player.Language.Slug) {
-			// state.Stage = 4
-			// state.Update()
+			state.Stage = 3
+			state.Update()
 			validationFlag = true
 		}
 	}
@@ -115,6 +115,21 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 	}
 
 	//====================================
+	// Extra data
+	//====================================
+	currentPlayerEquipment := "\n"
+
+	currentPlayerEquipment += "\nArmors:\n"
+	for _, armor := range player.GetEquippedArmors() {
+		currentPlayerEquipment += "- " + armor.Name
+	}
+
+	currentPlayerEquipment += "\n\nWeapons:\n"
+	for _, weapon := range player.GetEquippedWeapons() {
+		currentPlayerEquipment += "- " + weapon.Name
+	}
+
+	//====================================
 	// Stage
 	//====================================
 	switch state.Stage {
@@ -123,7 +138,7 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 		state.Payload = string(payloadUpdated)
 		state.Update()
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.type", player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.type", player.Language.Slug)+currentPlayerEquipment)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("armors", player.Language.Slug)),
@@ -178,7 +193,6 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 		var equipmentName string
 		// If is valid input
 		if validationFlag {
-
 			// Clear text from Add and other shit.
 			equipmentName = strings.Split(message.Text, helpers.Trans("equip", player.Language.Slug)+" ")[1]
 
@@ -187,7 +201,7 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 			case helpers.Trans("armors", player.Language.Slug):
 				equipmentID = models.GetArmorByName(equipmentName).ID
 			case helpers.Trans("weapons", player.Language.Slug):
-				equipmentID = models.GetArmorByName(equipmentName).ID
+				equipmentID = models.GetWeaponByName(equipmentName).ID
 			}
 
 			payload.EquipID = equipmentID
@@ -196,7 +210,6 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 			state.Update()
 		}
 
-		//FIXME: continue me
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.confirm", player.Language.Slug)+"\n\n "+equipmentName)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -205,6 +218,34 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("back"),
 				tgbotapi.NewKeyboardButton("clears"),
+			),
+		)
+		services.SendMessage(msg)
+	case 3:
+		// If is valid input
+		if validationFlag {
+			switch payload.Type {
+			case helpers.Trans("armors", player.Language.Slug):
+				equipment := models.GetArmorByID(payload.EquipID)
+				equipment.Equipped = true
+				equipment.Update()
+			case helpers.Trans("weapons", player.Language.Slug):
+				equipment := models.GetWeaponByID(payload.EquipID)
+				equipment.Equipped = true
+				equipment.Update()
+			}
+		}
+
+		//====================================
+		// IMPORTANT!
+		//====================================
+		helpers.FinishAndCompleteState(state, player)
+		//====================================
+
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.completed", player.Language.Slug))
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
 			),
 		)
 		services.SendMessage(msg)

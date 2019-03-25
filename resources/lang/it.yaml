@@ -60,6 +60,7 @@ inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
+inventory.equip.completed: "Equipaggiamento confermato!"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

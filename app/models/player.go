@@ -91,3 +91,17 @@ func (p *Player) AddShip(ship Ship) *Player {
 
 	return p
 }
+
+// GetEquippedArmors - get equipped player armors
+func (p *Player) GetEquippedArmors() (armors Armors) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&armors)
+
+	return
+}
+
+// GetEquippedWeapons - get equipped player weapons
+func (p *Player) GetEquippedWeapons() (weapons Weapons) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&weapons)
+
+	return
+}
