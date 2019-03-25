@@ -16,6 +16,7 @@ nope: "No!"
 confirm: "Confermo!"
 resources: "Risorse"
 equip: "Equipaggia"
+destroy: "Distruggi"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -59,9 +60,15 @@ inventory.equip: "Equipaggia Oggetto"
 inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
+
 inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
+
+inventory.destroy.type: "Quale tipologia vorresti distruggere?"
+inventory.destroy.what: "Cosa vorresti distruggere?"
+inventory.destroy.confirm: "Confermi di voler distruggere?"
+inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

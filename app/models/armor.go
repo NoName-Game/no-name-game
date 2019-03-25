@@ -34,6 +34,13 @@ func (a *Armor) Update() *Armor {
 	return a
 }
 
+// Delete Armor
+func (a *Armor) Delete() *Armor {
+	services.Database.Delete(&a)
+
+	return a
+}
+
 // AddPlayer
 func (a *Armor) AddPlayer(player Player) *Armor {
 	a.PlayerID = player.ID

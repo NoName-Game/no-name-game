@@ -34,6 +34,13 @@ func (w *Weapon) Update() *Weapon {
 	return w
 }
 
+// Delete Weapon
+func (w *Weapon) Delete() *Weapon {
+	services.Database.Delete(&w)
+
+	return w
+}
+
 // AddPlayer
 func (w *Weapon) AddPlayer(player Player) *Weapon {
 	w.PlayerID = player.ID
