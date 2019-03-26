@@ -46,6 +46,7 @@ func bootstrap() {
 	// generate.Stars()
 	// generate.Weapons()
 	// generate.Armors()
+	// generate.Ships()
 }
 
 func migrations() {
