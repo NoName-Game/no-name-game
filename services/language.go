@@ -38,7 +38,7 @@ func LanguageUp() {
 // CreateLocalizerBundle reads language files and registers them in i18n bundle
 func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 	// Bundle stores a set of messages
-	bundle := &i18n.Bundle{DefaultLanguage: language.Italian}
+	bundle = &i18n.Bundle{DefaultLanguage: language.Italian}
 
 	// Enable bundle to understand yaml
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
@@ -65,15 +65,15 @@ func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 //
 // You can use printf's placeholders!
 // Available locales: it-IT, en-US
-func GetTranslation(key, locale string, args ...interface{}) (string, error) {
+func GetTranslation(key, locale string, args []interface{}) (string, error) {
 	localizer := i18n.NewLocalizer(bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{
 			MessageID: key,
 		},
 	)
-
 	msg = fmt.Sprintf(msg, args...)
+
 	return msg, err
 }
 

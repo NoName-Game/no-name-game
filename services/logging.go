@@ -32,7 +32,10 @@ func bootSentry() {
 		ErrorHandler("$SENTRY_DSN must be set", errors.New("sentryDSN Missing"))
 	}
 
-	raven.SetDSN(sentryDSN)
+	err := raven.SetDSN(sentryDSN)
+	if err != nil {
+		ErrorHandler("Error set Sentry DSN", err)
+	}
 }
 
 func bootLog() {

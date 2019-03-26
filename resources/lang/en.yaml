@@ -3,4 +3,5 @@
 sample_text: "Sample Text"
 text_with_placeholders: "Hello, %s"
 complete: "Done!"
+validationMessage: "Wrong input, please repeat or exit."
 miss_username: "Enter a username to play."

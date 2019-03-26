@@ -1,10 +1,16 @@
-hash: 261c50619fdbbe6ea507407b8ba6ad3c2218675c633edb784b5fbeeb2bf12b9a
-updated: 2019-02-14T00:50:18.790941+01:00
+hash: 71e049c4500a06c36ec07da763b64d594a44ef964d941a3c3525e892311c2241
+updated: 2019-03-08T12:20:32.523080104+01:00
 imports:
+- name: github.com/AvraamMavridis/randomcolor
+  version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
 - name: github.com/certifi/gocertifi
   version: abcd5707844888d7088866f25df3a7a2ac337dc4
 - name: github.com/getsentry/raven-go
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
+- name: github.com/go-gl/mathgl
+  version: cdf14b6b8f8a4a1bfb003dd5119205c5f711d85a
+  subpackages:
+  - mgl64
 - name: github.com/go-redis/redis
   version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
   subpackages:
@@ -27,12 +33,14 @@ imports:
   subpackages:
   - autoload
 - name: github.com/konsorten/go-windows-terminal-sequences
-  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
+  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/lib/pq
   version: 9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee
   subpackages:
   - hstore
   - oid
+- name: github.com/mb-14/gomarkov
+  version: 044dd0dcb5e7875ec824df72259c523d03aa4f49
 - name: github.com/nicksnyder/go-i18n
   version: 7a73c96f2026ad7c4b56c7a323fb1466374589a5
   subpackages:
@@ -40,22 +48,26 @@ imports:
   - v2/internal
   - v2/internal/plural
 - name: github.com/pkg/errors
-  version: ffb6e22f01932bf7ac35e0bad9be11f01d1c8685
+  version: 27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: golang.org/x/crypto
-  version: eb0de9b17e854e9b1ccd9963efafc79862359959
+  version: 8dd112bcdc25174059e45e07517d9fc663123347
   subpackages:
   - ssh/terminal
+- name: golang.org/x/image
+  version: 0694c2d4d067f97ebef574d63a763ee8ab559da7
+  subpackages:
+  - math/f64
 - name: golang.org/x/sys
-  version: 4ed8d59d0b35e1e29334a206d1b3f38b1e5dfb31
+  version: 584f3b12f43e1e55248c90e84804777009eed0a4
   subpackages:
   - unix
   - windows
 - name: golang.org/x/text
-  version: e6919f6577db79269a6443b9dc46d18f2238fb5d
+  version: 5d731a35f4867878fc89f7744f7b6debb3beded6
   subpackages:
   - internal/language
   - internal/language/compact
@@ -63,4 +75,8 @@ imports:
   - language
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+- name: k8s.io/apimachinery
+  version: 4519e5924e99cd805e0e5e1dc8e43170c3f94909
+  subpackages:
+  - pkg/util/rand
 testImports: []

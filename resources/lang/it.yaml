@@ -3,7 +3,77 @@
 sample_text: "Testo di prova"
 start_game: "Inizia a giocare!"
 text_with_placeholders: "Ciao, %s"
-complete: "Fatto!"
 tutorial_0: "[■■ 20%%]"
 tutorial_1: "[■■■■■■ 60%%]"
 tutorial_2: "[■■■■■■■■■■ 100%%]\nSistema ripristinato, IA operativa"
+timed-quest: "Timed Quest Terminata!"
+
+# GENERAL
+complete: "Fatto!"
+validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
+continue: "Continua"
+exit: "Esci"
+wait: "Sei in attesa fino alle %s"
+add: "Aggiungi"
+yep: "Si!"
+nope: "No!"
+confirm: "Confermo!"
+resources: "Risorse"
+equip: "Equipaggia"
+destroy: "Distruggi"
+
+# ARMORS/WEAPONS
+armors: "Armature"
+helmet: "Elmo"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
+
+weapons: "Armi"
+knife: "Coltello"
+auto_rifle: "Fucile Automatico"
+sniper_rifle: "Fucile da cecchino"
+shotgun: "Fucile a pompa"
+
+# MISSION
+mission.exploration: "Seleziona campo di ricerca!"
+mission.underground: "Sottosuolo"
+mission.surface: "Superfice"
+mission.atmosphere: "Atmosfera"
+mission.extraction_recap: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
+mission.extraction_ended: "Decidi di rientrare dall'esplorazione con le tue nuove risorse!"
+mission.comeback: "Rientra dalla missione"
+mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcoli dovresti tornare intorno alle %s"
+mission.continue: "Continua ad esplorare"
+
+# CRAFTING
+crafting.craft: "Costruisci"
+crafting.what: "Cosa vuoi realizzare?"
+crafting.type: "Quale tipologia ti interessa realizzare?"
+crafting.add: "Aggiungi"
+crafting.choose_resources: "Quali risorse vuoi usare?"
+crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
+crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
+crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+
+# INVENTORY
+inventory.intro: "Cosa vuoi gestire?"
+inventory.recap: "Recap inventario"
+inventory.summary: "Riassunto inventario"
+inventory.equip: "Equipaggia Oggetto"
+inventory.destroy: "Distruggi Oggetto"
+inventory.type: "Quale tipologia vorresti equipaggiare?"
+inventory.what: "Cosa vorresti equipaggiare?"
+
+inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
+inventory.equip.confirm: "Confermi di voler equipaggiare?"
+inventory.equip.completed: "Equipaggiamento confermato!"
+
+inventory.destroy.type: "Quale tipologia vorresti distruggere?"
+inventory.destroy.what: "Cosa vorresti distruggere?"
+inventory.destroy.confirm: "Confermi di voler distruggere?"
+inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
+
+# CRON
+cron.mission_alert: "Esplorazione finita!"
+cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"

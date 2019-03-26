@@ -19,6 +19,14 @@ type Rarity struct {
 // Rarities - Rarity slice
 type Rarities []Rarity
 
+// GetAllCategories - Get all rarities
+func GetAllRarities() Rarities {
+	var rarities Rarities
+	services.Database.Find(&rarities)
+
+	return rarities
+}
+
 // GetRarityBySlug - Get rarity by Slug
 func GetRarityBySlug(slug string) Rarity {
 	var rarity Rarity
@@ -39,7 +47,11 @@ func SeederRarities() {
 
 	var rarities []map[string]string
 
-	json.Unmarshal(byteValue, &rarities)
+	err = json.Unmarshal(byteValue, &rarities)
+	if err != nil {
+		services.ErrorHandler("Error unmarshal rarities seeder", err)
+	}
+
 	for _, rarity := range rarities {
 		newRarity := Rarity{Name: rarity["name"], Slug: rarity["slug"]}
 		services.Database.Where(Rarity{Name: rarity["name"]}).FirstOrCreate(&newRarity)

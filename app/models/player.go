@@ -9,7 +9,13 @@ import (
 type Player struct {
 	gorm.Model
 	Username    string
-	State       []PlayerState
+	ChatID      int64
+	States      []PlayerState
+	Stars       []PlayerStar
+	Positions   []PlayerPosition
+	Ships       []PlayerShip
+	Weapons     []Weapon
+	Armors      []Armor
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
@@ -37,14 +43,10 @@ func (p *Player) Delete() *Player {
 	return p
 }
 
-//GetStateByFunction -
+// GetStateByFunction -
 func (p *Player) GetStateByFunction(function string) PlayerState {
 	var playerState PlayerState
-	for _, state := range p.State {
-		if state.Function == function {
-			return state
-		}
-	}
+	services.Database.Where("function = ?", function).First(&playerState)
 
 	return playerState
 }
@@ -52,7 +54,54 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 // FindPlayerByUsername - find player by username
 func FindPlayerByUsername(username string) Player {
 	var player Player
-	services.Database.Set("gorm:auto_preload", true).Where("username = ?", username).First(&player)
+	services.Database.Preload("Language").
+		Preload("Inventory").
+		Preload("Weapons").
+		Preload("Armors").
+		Where("username = ?", username).First(&player)
 
 	return player
+}
+
+// FindPlayerByID - find player by ID
+func FindPlayerByID(id uint) Player {
+	var player Player
+	services.Database.Where("id = ?", id).First(&player)
+
+	return player
+}
+
+// AddStar - Associate star to player
+func (p *Player) AddStar(star Star) *Player {
+	services.Database.Model(&p).Association("Stars").Append(PlayerStar{Star: star})
+
+	return p
+}
+
+// AddPosition
+func (p *Player) AddPosition(position PlayerPosition) *Player {
+	services.Database.Model(&p).Association("Positions").Append(position)
+
+	return p
+}
+
+// AddShip - Associate ship to player
+func (p *Player) AddShip(ship Ship) *Player {
+	services.Database.Model(&p).Association("Ships").Append(PlayerShip{Ship: ship})
+
+	return p
+}
+
+// GetEquippedArmors - get equipped player armors
+func (p *Player) GetEquippedArmors() (armors Armors) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&armors)
+
+	return
+}
+
+// GetEquippedWeapons - get equipped player weapons
+func (p *Player) GetEquippedWeapons() (weapons Weapons) {
+	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&weapons)
+
+	return
 }

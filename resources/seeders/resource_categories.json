@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Solid",
+    "slug": "solid"
+  },
+  {
+    "name": "Liquid",
+    "slug": "liquid"
+  },
+  {
+    "name": "Gas",
+    "slug": "gas"
+  }
+]
