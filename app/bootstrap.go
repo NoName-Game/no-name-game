@@ -47,6 +47,7 @@ func bootstrap() {
 	// generate.Weapons()
 	// generate.Armors()
 	// generate.Ships()
+	// generate.Enemies()
 }
 
 func migrations() {
@@ -69,6 +70,7 @@ func migrations() {
 			models.ArmorCategory{},
 			models.Armor{},
 			models.Inventory{},
+			models.Enemy{},
 		)
 	}
 }

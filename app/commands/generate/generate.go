@@ -107,3 +107,17 @@ func Armors() {
 	log.Println("End Armor generator")
 	log.Println("************************************************")
 }
+
+// Enemies - this command generate a new enemy.
+// (it's used only for testing enemy creation)
+func Enemies() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/namer/enemies/", "names.txt")
+
+	// Step 2 - Generate ship
+	helpers.NewEnemy()
+
+	log.Println("************************************************")
+	log.Println("End enemy generator")
+	log.Println("************************************************")
+}
