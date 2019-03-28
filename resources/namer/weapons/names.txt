@@ -139,11 +139,11 @@ Bulldog
 Saiga-12
 RPK-74
 Tihar
-Hellbreath (Volt Driver)
+Hellbreath
 Railgun
 Helsing
 Kalash 2012
-VSV (VSK-94)
+VSV
 Booshka
 MarkzaM55 Argus
 Mulcher
@@ -157,7 +157,6 @@ M76 Revenant
 Fucile a impulso Geth
 M37 Falcon
 M55 Argus
-Fucile d�assalto dei Collettori
 M99 Saber
 Fucile particellare
 N7 Typhoon
@@ -417,7 +416,6 @@ Shock Hammer
 GL G20
 Mini-Gun
 Incinerator
-Annihilator (Kia)
 Swarmitron
 Genki Cannon
 Mounted .50 cal

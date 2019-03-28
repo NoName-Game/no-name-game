@@ -86,6 +86,9 @@ func Weapons() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/namer/weapons/", "names.txt")
 
+	// Step 1.5 - Generate makov chain model for knife
+	// namer.TrainName("resources/namer/weapons/knife/", "names.txt")
+
 	// Step 2 - Generate ship
 	helpers.NewWeapon()
 
