@@ -71,6 +71,7 @@ func migrations() {
 			models.Armor{},
 			models.Inventory{},
 			models.Enemy{},
+			models.PlayerStats{},
 		)
 	}
 }
