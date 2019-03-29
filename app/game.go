@@ -24,6 +24,7 @@ var (
 		"inventory-recap":   controllers.InventoryRecap,   // inventory.go - MAIN
 		"inventory-equip":   controllers.InventoryEquip,   // inventory.go - MAIN
 		"inventory-destroy": controllers.InventoryDestroy, // inventory.go - MAIN
+		"ability-tree":      controllers.AbilityTree,      // ability.go
 	}
 
 	breakerRoutes = []string{
