@@ -26,13 +26,13 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			validationFlag = true
 		} else if player.Stats.AbilityPoint == 0 {
 			state.Stage = 1
-			validationMessage = "Punti abilità non sufficienti"
+			validationMessage = helpers.Trans("ability.no_point_left", player.Language.Slug)
 		}
 	case 1:
-		if message.Text == "Torna all'albero" {
+		if message.Text == helpers.Trans("ability.back", player.Language.Slug) {
 			state.Stage = 0
 			player.Update()
-		} else if message.Text == "Esci" {
+		} else if message.Text == helpers.Trans("exit", player.Language.Slug) {
 			state.Stage = 2
 			validationFlag = true
 		}
@@ -49,20 +49,18 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		text := "Quale statistica vuoi incrementare?\n"
-		text += player.Stats.ToString()
-		text += "\nHai a disposizione %d punti abilità!"
+		text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString())
 		msg := services.NewMessage(player.ChatID, fmt.Sprintf(text, player.Stats.AbilityPoint))
 		msg.ReplyMarkup = helpers.StatsKeyboard()
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			text := "Hai incrementato con successo " + message.Text + " !"
+			text := helpers.Trans("ability.stats.completed", player.Language.Slug, message.Text)
 			player.Stats.Increment(message.Text)
 			player.Update()
 			msg := services.NewMessage(player.ChatID, text)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Torna all'albero"), tgbotapi.NewKeyboardButton("Esci")))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("ability.back", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("exit", player.Language.Slug))))
 			services.SendMessage(msg)
 		}
 	case 2:
@@ -72,6 +70,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			//====================================
 			helpers.FinishAndCompleteState(state, player)
 			//====================================
+			// TODO Richiamare il menu.
 			msg := services.NewMessage(player.ChatID, "Fine")
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)

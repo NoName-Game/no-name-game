@@ -70,6 +70,12 @@ inventory.destroy.what: "Cosa vorresti distruggere?"
 inventory.destroy.confirm: "Confermi di voler distruggere?"
 inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 
+# ABILITY TREE
+ability.no_point_left: "Punti abilità non sufficienti"
+ability.back: "Torna all'albero"
+ability.stats.type: "Quale statistica vuoi incrementare?\n%s\nHai a disposizione %d punti abilità!"
+ability.stats.completed: "Hai incrementato con successo %s!"
+
 # CRON
 cron.mission_alert: "Esplorazione finita!"
 cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
