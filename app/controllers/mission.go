@@ -16,8 +16,7 @@ import (
 
 // StartMission - start an exploration
 func StartMission(update tgbotapi.Update, player models.Player) {
-
-	routeName := "mission"
+	routeName := "route.mission"
 	message := update.Message
 
 	type payloadStruct struct {

@@ -4,6 +4,25 @@ sample_text: "Testo di prova"
 text_with_placeholders: "Ciao, %s"
 timed-quest: "Timed Quest Terminata!"
 
+# ROUTES
+route.start: "Start"
+route.mission: "Missione"
+route.crafting: "Crafting"
+route.inventory: "Inventario"
+route.inventory.recap: "Riepilogo Inventario"
+route.inventory.equip: "Equipaggia Oggetto"
+route.inventory.destroy: "Distruggi Oggetto"
+
+# ROUTES (BREAKER)
+route.breaker.back: "Fai altro"
+route.breaker.clears: "Lascia stare"
+
+# ROUTES (TESTING)
+route.testing.theAnswerIs: "the-answer-is"
+route.testing.multiState: "multi-state"
+route.testing.multiStage: "multi-stage"
+route.testing.time: "time"
+
 # GENERAL
 complete: "Fatto!"
 validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
@@ -55,13 +74,13 @@ crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
 inventory.recap: "Recap inventario"
-inventory.summary: "Riassunto inventario"
-inventory.equip: "Equipaggia Oggetto"
-inventory.destroy: "Distruggi Oggetto"
+# inventory.summary: "Riassunto inventario"
+# inventory.equip: "Equipaggia Oggetto"
+# inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
 
-inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
+inventory.equip.equipped: "\n\nIl tuo equipaggiamento attuale:\n"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
 

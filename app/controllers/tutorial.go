@@ -10,7 +10,7 @@ import (
 // StartTutorial - This is the first command called from telegram when bot started.
 func StartTutorial(update tgbotapi.Update, player models.Player) {
 	message := update.Message
-	routeName := "start"
+	routeName := "route.start"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	//====================================
