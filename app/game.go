@@ -18,18 +18,16 @@ var (
 		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
 		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
 		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
+
+		// "route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
+		// "route.testing.multiState":  controllers.TestMultiState, // testing.go
+		// "route.testing.multiStage":  controllers.TestMultiStage, // testing.go
+		// "route.testing.time":        controllers.TestTimedQuest, // testing.go
 	}
 
 	breakerRoutes = map[string]interface{}{
 		"route.breaker.back":   controllers.Back,   // back.go      - MAIN (breaker)
 		"route.breaker.clears": controllers.Clears, // clears.go    - MAIN (breaker)
-	}
-
-	testingRoutes = map[string]interface{}{
-		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
-		"route.testing.multiState":  controllers.TestMultiState, // testing.go
-		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
-		"route.testing.time":        controllers.TestTimedQuest, // testing.go
 	}
 	//
 	// End routes
