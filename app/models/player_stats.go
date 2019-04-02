@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/jinzhu/gorm"
 )
@@ -61,7 +60,7 @@ func (s *PlayerStats) ToString(slug string) (result string) {
 	val := reflect.ValueOf(s).Elem()
 	for i := 3; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
-		fieldName := helpers.Trans("ability."+strings.ToLower(val.Type().Field(i).Name), slug)
+		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), slug, nil)
 
 		result += fmt.Sprintf("<code>%-15v:%v</code>\n", fieldName, valueField.Interface())
 	}

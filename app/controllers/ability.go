@@ -21,7 +21,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	validationMessage := helpers.Trans("validationMessage", player.Language.Slug)
 	switch state.Stage {
 	case 0:
-		if helpers.InStatsArray(message.Text) && player.Stats.AbilityPoint > 0 {
+		if helpers.InStatsArray(message.Text, player.Language.Slug) && player.Stats.AbilityPoint > 0 {
 			state.Stage = 1
 			validationFlag = true
 		} else if player.Stats.AbilityPoint == 0 {
@@ -51,7 +51,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	case 0:
 		text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
 		msg := services.NewMessage(player.ChatID, fmt.Sprintf(text, player.Stats.AbilityPoint))
-		msg.ReplyMarkup = helpers.StatsKeyboard()
+		msg.ReplyMarkup = helpers.StatsKeyboard(player.Language.Slug)
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:

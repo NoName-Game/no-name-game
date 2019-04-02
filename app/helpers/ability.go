@@ -4,20 +4,22 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
+	"bitbucket.org/no-name-game/no-name/services"
+
 	"bitbucket.org/no-name-game/no-name/app/models"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // StatsKeyboard - Generate a keyboard with stats
-func StatsKeyboard() (keyboard tgbotapi.ReplyKeyboardMarkup, slug string) {
+func StatsKeyboard(slug string) (keyboard tgbotapi.ReplyKeyboardMarkup) {
 
 	var keyboardRows [][]tgbotapi.KeyboardButton
 
 	val := reflect.ValueOf(&models.PlayerStats{}).Elem()
 	for i := 3; i < val.NumField()-1; i++ {
-		keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("ability."+strings.ToLower(val.Type().Field(i).Name), slug)))
+		text, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), slug, nil)
+		keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text))
 		keyboardRows = append(keyboardRows, keyboardRow)
 	}
 
@@ -29,7 +31,7 @@ func StatsKeyboard() (keyboard tgbotapi.ReplyKeyboardMarkup, slug string) {
 func InStatsArray(s string, slug string) (ok bool) {
 	val := reflect.ValueOf(&models.PlayerStats{}).Elem()
 	for i := 3; i < val.NumField()-1; i++ {
-		fieldName := helpers.Trans("ability."+strings.ToLower(val.Type().Field(i).Name), slug)
+		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), slug, nil)
 		if strings.EqualFold(fieldName, s) {
 			return true
 		}
