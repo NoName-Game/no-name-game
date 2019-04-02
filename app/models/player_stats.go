@@ -3,7 +3,9 @@ package models
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
+	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/jinzhu/gorm"
 )
@@ -55,13 +57,13 @@ func (s *PlayerStats) Delete() *PlayerStats {
 	return s
 }
 
-func (s *PlayerStats) ToString() (result string) {
+func (s *PlayerStats) ToString(slug string) (result string) {
 	val := reflect.ValueOf(s).Elem()
 	for i := 3; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
-		typeField := val.Type().Field(i)
+		fieldName := helpers.Trans("ability."+strings.ToLower(val.Type().Field(i).Name), slug)
 
-		result += fmt.Sprintf("<code>%-15v:%v</code>\n", typeField.Name, valueField.Interface())
+		result += fmt.Sprintf("<code>%-15v:%v</code>\n", fieldName, valueField.Interface())
 	}
 	return
 }

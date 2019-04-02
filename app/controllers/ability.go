@@ -49,7 +49,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString())
+		text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
 		msg := services.NewMessage(player.ChatID, fmt.Sprintf(text, player.Stats.AbilityPoint))
 		msg.ReplyMarkup = helpers.StatsKeyboard()
 		msg.ParseMode = "HTML"
