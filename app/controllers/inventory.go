@@ -18,15 +18,15 @@ func Inventory(update tgbotapi.Update, player models.Player) {
 	msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.intro", player.Language.Slug))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("inventory.summary", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.recap", player.Language.Slug)),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("inventory.equip", player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("inventory.destroy", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.equip", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.destroy", player.Language.Slug)),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 		),
 	)
 	services.SendMessage(msg)
@@ -72,7 +72,7 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "inventory-equip"
+	routeName := "route.inventory.equip"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload InventoryEquipPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
@@ -147,8 +147,8 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -179,8 +179,8 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 		))
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.what", player.Language.Slug))
@@ -216,8 +216,8 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -245,7 +245,7 @@ func InventoryEquip(update tgbotapi.Update, player models.Player) {
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.completed", player.Language.Slug))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -263,7 +263,7 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "inventory-destroy"
+	routeName := "route.inventory.destroy"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload InventoryDestroyPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
@@ -323,8 +323,8 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -355,8 +355,8 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 		))
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.what", player.Language.Slug))
@@ -392,8 +392,8 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -419,7 +419,7 @@ func InventoryDestroy(update tgbotapi.Update, player models.Player) {
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.completed", player.Language.Slug))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
