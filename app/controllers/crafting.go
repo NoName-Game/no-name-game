@@ -26,7 +26,7 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "crafting"
+	routeName := "route.crafting"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload craftingPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
@@ -111,8 +111,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -143,8 +143,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("back"),
-			tgbotapi.NewKeyboardButton("clears"),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 		))
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.type", player.Language.Slug))
@@ -216,8 +216,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 		// Clear and exit
 		keyboardRowResources = append(keyboardRowResources,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 
@@ -251,8 +251,8 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", player.Language.Slug)),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("back"),
-				tgbotapi.NewKeyboardButton("clears"),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", player.Language.Slug)),
 			),
 		)
 		services.SendMessage(msg)
@@ -293,7 +293,7 @@ func Crafting(update tgbotapi.Update, player models.Player) {
 			msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.craft_completed", player.Language.Slug)+"\n\n"+craftingResult)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton("back"),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
 				),
 			)
 			services.SendMessage(msg)
