@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
@@ -58,7 +59,7 @@ func routing(update tgbotapi.Update) {
 // inRoutes - Check if message is translated command
 func inRoutes(messageRoute string, routeList map[string]interface{}, player models.Player) (isRoute bool, route string) {
 	for route := range routeList {
-		if helpers.Trans(route, player.Language.Slug) == messageRoute {
+		if strings.ToLower(helpers.Trans(route, player.Language.Slug)) == messageRoute {
 			return true, route
 		}
 	}
@@ -90,5 +91,5 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 		parsed = message.Command()
 	}
 
-	return
+	return strings.ToLower(parsed)
 }
