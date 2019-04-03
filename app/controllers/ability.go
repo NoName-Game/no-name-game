@@ -11,7 +11,7 @@ import (
 
 func AbilityTree(update tgbotapi.Update, player models.Player) {
 	message := update.Message
-	routeName := "ability-tree"
+	routeName := "route.abilityTree"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	//====================================
