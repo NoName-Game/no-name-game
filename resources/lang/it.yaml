@@ -12,7 +12,7 @@ route.inventory: "Inventario"
 route.inventory.recap: "Riepilogo Inventario"
 route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
-route.abilityTree: "Albero abilita"
+route.abilityTree: "Albero Abilità"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
