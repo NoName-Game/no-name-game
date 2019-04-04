@@ -9,14 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-/*Le caratteristiche del giocatore sono:
-FOR: Forza
-DES: Destrezza
-COS: Costituzione
-INT: Intelligenza
-SAG: Saggezza
-CAR: Carisma*/
-
+// PlayerStats - Player stats struct
 type PlayerStats struct {
 	gorm.Model
 	Experience   uint `gorm:"default:0"`
@@ -39,7 +32,8 @@ func (s *PlayerStats) Create() *PlayerStats {
 
 // Update Player State
 func (s *PlayerStats) Update() *PlayerStats {
-	if s.Experience >= 100 { //Controllo che l'esperienza posseduta sia abbastanza per aumentare di livello e assegno gli ability point
+	// Check if player has enough experience to level up and assign other ability points
+	if s.Experience >= 100 {
 		s.Experience -= 100
 		s.Level++
 		s.AbilityPoint++
@@ -56,19 +50,28 @@ func (s *PlayerStats) Delete() *PlayerStats {
 	return s
 }
 
-func (s *PlayerStats) ToString(slug string) (result string) {
+// ToString - Convert player stats to string
+func (s *PlayerStats) ToString(playerLanguageSlug string) (result string) {
 	val := reflect.ValueOf(s).Elem()
 	for i := 3; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
-		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), slug, nil)
+		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
 
 		result += fmt.Sprintf("<code>%-15v:%v</code>\n", fieldName, valueField.Interface())
 	}
 	return
 }
 
-func (s *PlayerStats) Increment(fieldName string) {
-	f := reflect.ValueOf(s).Elem().FieldByName(fieldName)
-	f.SetUint(uint64(f.Interface().(uint) + 1))
-	s.AbilityPoint--
+// Increment - Increment player stats by fieldName
+func (s *PlayerStats) Increment(statToIncrement string, playerLanguageSlug string) {
+	val := reflect.ValueOf(s).Elem()
+	for i := 3; i < val.NumField()-1; i++ {
+		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
+
+		if fieldName == statToIncrement {
+			f := reflect.ValueOf(s).Elem().FieldByName(val.Type().Field(i).Name)
+			f.SetUint(uint64(f.Interface().(uint) + 1))
+			s.AbilityPoint--
+		}
+	}
 }

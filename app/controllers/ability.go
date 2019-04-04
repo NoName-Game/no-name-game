@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -21,7 +19,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	validationMessage := helpers.Trans("validationMessage", player.Language.Slug)
 	switch state.Stage {
 	case 0:
-		if helpers.InStatsArray(message.Text, player.Language.Slug) && player.Stats.AbilityPoint > 0 {
+		if helpers.InStatsStruct(message.Text, player.Language.Slug) && player.Stats.AbilityPoint > 0 {
 			state.Stage = 1
 			validationFlag = true
 		} else if player.Stats.AbilityPoint == 0 {
@@ -49,18 +47,27 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
-		msg := services.NewMessage(player.ChatID, fmt.Sprintf(text, player.Stats.AbilityPoint))
+		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
+		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
+
+		msg := services.NewMessage(player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
 		msg.ReplyMarkup = helpers.StatsKeyboard(player.Language.Slug)
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			text := helpers.Trans("ability.stats.completed", player.Language.Slug, message.Text)
-			player.Stats.Increment(message.Text)
+			// Increment player stast
+			player.Stats.Increment(message.Text, player.Language.Slug)
 			player.Update()
+
+			text := helpers.Trans("ability.stats.completed", player.Language.Slug, message.Text)
 			msg := services.NewMessage(player.ChatID, text)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("ability.back", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("exit", player.Language.Slug))))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("ability.back", player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("exit", player.Language.Slug)),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	case 2:
@@ -70,7 +77,9 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			//====================================
 			helpers.FinishAndCompleteState(state, player)
 			//====================================
-			// TODO Richiamare il menu.
+
+			//TODO: Call main menu
+
 			msg := services.NewMessage(player.ChatID, helpers.Trans("complete", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
