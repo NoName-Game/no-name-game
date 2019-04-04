@@ -71,8 +71,12 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			helpers.FinishAndCompleteState(state, player)
 			//====================================
 			// TODO Richiamare il menu.
-			msg := services.NewMessage(player.ChatID, "Fine")
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			msg := services.NewMessage(player.ChatID, helpers.Trans("complete", player.Language.Slug))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	}

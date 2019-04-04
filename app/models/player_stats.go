@@ -19,15 +19,15 @@ CAR: Carisma*/
 
 type PlayerStats struct {
 	gorm.Model
-	Esperienza   uint `gorm:"default:0"`
-	Livello      uint `gorm:"default:1"`
-	Forza        uint `gorm:"default:1"`
-	Destrezza    uint `gorm:"default:1"`
-	Costituzione uint `gorm:"default:1"`
-	Intelligenza uint `gorm:"default:1"`
-	Saggezza     uint `gorm:"default:1"`
-	Carisma      uint `gorm:"default:1"`
-	AbilityPoint uint `gorm:"default:10"`
+	Experience   uint `gorm:"default:0"`
+	Level        uint `gorm:"default:1"`
+	Strength     uint `gorm:"default:1"`
+	Dexterity    uint `gorm:"default:1"`
+	Constitution uint `gorm:"default:1"`
+	Intelligence uint `gorm:"default:1"`
+	Wisdom       uint `gorm:"default:1"`
+	Charisma     uint `gorm:"default:1"`
+	AbilityPoint uint `gorm:"default:0"`
 }
 
 // Create Player State
@@ -39,9 +39,9 @@ func (s *PlayerStats) Create() *PlayerStats {
 
 // Update Player State
 func (s *PlayerStats) Update() *PlayerStats {
-	if s.Esperienza >= 100 { //Controllo che l'esperienza posseduta sia abbastanza per aumentare di livello e assegno gli ability point
-		s.Esperienza -= 100
-		s.Livello++
+	if s.Experience >= 100 { //Controllo che l'esperienza posseduta sia abbastanza per aumentare di livello e assegno gli ability point
+		s.Experience -= 100
+		s.Level++
 		s.AbilityPoint++
 	}
 	services.Database.Save(&s)
