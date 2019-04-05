@@ -12,6 +12,7 @@ route.inventory: "Inventario"
 route.inventory.recap: "Riepilogo Inventario"
 route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
+route.abilityTree: "Albero Abilità"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -88,6 +89,21 @@ inventory.destroy.type: "Quale tipologia vorresti distruggere?"
 inventory.destroy.what: "Cosa vorresti distruggere?"
 inventory.destroy.confirm: "Confermi di voler distruggere?"
 inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
+
+# ABILITY TREE
+ability.no_point_left: "Punti abilità non sufficienti"
+ability.back: "Torna all'albero"
+ability.stats.type: "Quale statistica vuoi incrementare?\n%s\n"
+ability.stats.total_point: "Hai a disposizione %d punti abilità!"
+ability.stats.completed: "Hai incrementato con successo %s!"
+ability.experience: "Esperienza"
+ability.level: "Livello"
+ability.strength: "Forza"
+ability.dexterity: "Destrezza"
+ability.constitution: "Costituzione"
+ability.intelligence: "Intelligenza"
+ability.wisdom: "Saggezza"
+ability.charisma: "Carisma"
 
 # CRON
 cron.mission_alert: "Esplorazione finita!"

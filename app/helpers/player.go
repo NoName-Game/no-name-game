@@ -14,11 +14,16 @@ func CheckUser(message *tgbotapi.Message) (player models.Player) {
 		newInventory := models.Inventory{Items: ""}
 		newInventory.Create()
 
+		// New Stats
+		newStats := models.PlayerStats{}
+		newStats.Create()
+
 		player = models.Player{
 			Username:  message.From.UserName,
 			ChatID:    message.Chat.ID,
 			Language:  models.GetLangBySlug("en"),
 			Inventory: newInventory,
+			Stats:     newStats,
 		}
 
 		// 1 - Create new player

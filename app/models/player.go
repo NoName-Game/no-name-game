@@ -16,6 +16,8 @@ type Player struct {
 	Ships       []PlayerShip
 	Weapons     []Weapon
 	Armors      []Armor
+	Stats       PlayerStats
+	StatsID     uint
 	Language    Language
 	LanguageID  uint
 	Inventory   Inventory
@@ -58,6 +60,7 @@ func FindPlayerByUsername(username string) Player {
 		Preload("Inventory").
 		Preload("Weapons").
 		Preload("Armors").
+		Preload("Stats").
 		Where("username = ?", username).First(&player)
 
 	return player
