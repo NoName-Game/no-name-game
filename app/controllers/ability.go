@@ -23,8 +23,8 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			state.Stage = 1
 			validationFlag = true
 		} else if player.Stats.AbilityPoint == 0 {
-			state.Stage = 1
-			validationMessage = helpers.Trans("ability.no_point_left", player.Language.Slug)
+			state.Stage = 2
+			validationFlag = true
 		}
 	case 1:
 		if message.Text == helpers.Trans("ability.back", player.Language.Slug) {
@@ -78,9 +78,14 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			helpers.FinishAndCompleteState(state, player)
 			//====================================
 
-			//TODO: Call main menu
-
-			msg := services.NewMessage(player.ChatID, helpers.Trans("complete", player.Language.Slug))
+			text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
+			if player.Stats.AbilityPoint == 0 {
+				text += "\n" + helpers.Trans("ability.no_point_left", player.Language.Slug)
+			} else {
+				text += helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
+			}
+			msg := services.NewMessage(player.ChatID, text)
+			msg.ParseMode = "HTML"
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
