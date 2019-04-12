@@ -21,7 +21,7 @@ import (
 // TestTimedQuest - ...
 func TestTimedQuest(update tgbotapi.Update, player models.Player) {
 	message := update.Message
-	routeName := "timed-quest"
+	routeName := "route.testing.time"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	//====================================
@@ -71,7 +71,7 @@ func TestMultiStage(update tgbotapi.Update, player models.Player) {
 	// Init Func!
 	//====================================
 	message := update.Message
-	routeName := "test-multi-stage"
+	routeName := "route.testing.multiStage"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	//====================================
@@ -158,7 +158,7 @@ func TestMultiState(update tgbotapi.Update, player models.Player) {
 	}
 
 	message := update.Message
-	routeName := "test-multi-state"
+	routeName := "route.testing.multiState"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 	var payload payloadStruct
 	helpers.UnmarshalPayload(state.Payload, &payload)

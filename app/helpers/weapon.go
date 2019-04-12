@@ -9,8 +9,17 @@ import (
 func NewWeapon() (weapon models.Weapon) {
 	rarity := models.GetRarityBySlug("VC")
 	category := models.GetWeaponCategoryBySlug("knife")
+
+	var name string
+	switch category.Slug {
+	case "knfie":
+		name = namer.GenerateName("resources/namer/weapons/knife/model.json")
+	default:
+		name = namer.GenerateName("resources/namer/weapons/model.json")
+	}
+
 	weapon = models.Weapon{
-		Name:           namer.GenerateName("resources/namer/weapons/model.json"),
+		Name:           name,
 		Rarity:         rarity,
 		WeaponCategory: category,
 	}
@@ -24,8 +33,17 @@ func NewWeapon() (weapon models.Weapon) {
 func NewCraftedWeapon(c string) (weapon models.Weapon) {
 	rarity := models.GetRarityBySlug("VC")
 	category := models.GetWeaponCategoryBySlug(c)
+
+	var name string
+	switch category.Slug {
+	case "knfie":
+		name = namer.GenerateName("resources/namer/weapons/knife/model.json")
+	default:
+		name = namer.GenerateName("resources/namer/weapons/model.json")
+	}
+
 	weapon = models.Weapon{
-		Name:           namer.GenerateName("resources/namer/weapons/model.json"),
+		Name:           name,
 		Rarity:         rarity,
 		WeaponCategory: category,
 	}

@@ -86,6 +86,9 @@ func Weapons() {
 	// Step 1 - Generate makov chain model
 	// namer.TrainName("resources/namer/weapons/", "names.txt")
 
+	// Step 1.5 - Generate makov chain model for knife
+	// namer.TrainName("resources/namer/weapons/knife/", "names.txt")
+
 	// Step 2 - Generate ship
 	helpers.NewWeapon()
 
@@ -105,5 +108,19 @@ func Armors() {
 
 	log.Println("************************************************")
 	log.Println("End Armor generator")
+	log.Println("************************************************")
+}
+
+// Enemies - this command generate a new enemy.
+// (it's used only for testing enemy creation)
+func Enemies() {
+	// Step 1 - Generate makov chain model
+	// namer.TrainName("resources/namer/enemies/", "names.txt")
+
+	// Step 2 - Generate ship
+	helpers.NewEnemy()
+
+	log.Println("************************************************")
+	log.Println("End enemy generator")
 	log.Println("************************************************")
 }

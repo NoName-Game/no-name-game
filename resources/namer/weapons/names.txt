@@ -1,894 +1,588 @@
-Acamar
-Achernar
-Achird
-Acrab
-Akrab
-Elakrab
-Graffias
-Acrux
-Acubens
-Adhafera
-Adhara
-Ain
-Aladfar
-Alamak
-Alathfar
-Alaraph
-Albaldah
-Albali
-Albireo
-Alchiba
-Alcor
-Alcyone
-Aldebaran
-Alderamin
-Aldhafera
-AlDhanab
-Aldhibah
-Aldib
-AlFawaris
-Alfecca
-Meridiana
-Alfirk
-Algedi
-AlGiedi
-Algenib
-Algieba
-Algol
-Algorab
-Alhajoth
-Alhena
-Alioth
-Alkaid
-AlKurud
-AlKalb
-AlRai
-Alkalurops
-AlKaphrah
-Alkes
-Alkurah
-Almach
-AlMinliar
-AlAsad
-AlNair
-Alnasl
-Alnilam
-Alnitak
-Alniyat
-Alphard
-Alphecca
-Alpheratz
-Alrai
-Alrakis
-Alrami
-Alrischa
-Alruccbah
-Alsafi
-Alsciaukat
-Alshain
-Alshat
-Altair
-Altais
-Altarf
-Alterf
-AlThalimain
-Aludra
-Alula
-Alwaid
-Alya
-Alzir
-Ancha
-Angetenar
-Ankaa
-Antares
-Arcturus
-Arich
-Arided
-Arkab
-Armus
-Arneb
-Arrakis
-Ascella
-Asellus
-Ashlesha
-Askella
-Aspidiske
-Asterion
-Asterope
-Atik
-Atlas
-Atria
-Auva
-Avior
-Azaleh
-Azelfafage
-Azha
-Azimech
-Azmidiske
-Baham
-Biham
-Baten
-Kaitos
-Becrux
-Beid
-Bellatrix
-Benetnasch
-Betelgeuse
-Botein
-Brachium
-Canopus
-Capella
-Caph
-Chaph
-Caphir
-Caput
-Medusae
-Castor
-Castula
-Cebalrai
-Celbalrai
-Ceginus
-Celaeno
-Chara
-Cheleb
-Chertan
-Chort
-Cor
-Caroli
-Hydrae
-Leonis
-Scorpii
-Serpentis
-Coxa
-Cujam
-Caiam
-Cursa
-Cynosura
-Dabih
-Decrux
-Deneb
-Denebola
-Dheneb
-Diadem
-Diphda
-Dnoces
-Dschubba
-Dubhe
-Duhr
-Edasich
-Electra
-Elmuthalleth
-Elnath
-Eltanin
-Enif
-Errai
-Etamin
-Fomalhaut
-FumalSamakah
-Furud
-Gacrux
-Garnet
-Gatria
-Gemma
-Gianfar
-Giedi
-GienahGurab
-Girtab
-Gomeisa
-Gorgonea
-Graffias
-Grafias
-Grassias
-Grumium
-Hadar
-Hadir
-Haedus
-Haldus
-Hamal
-Hassaleh
-Hydrus
-Heka
-Heze
-Hoedus
-Homam
-Hyadum
-Hydrobius
-Izar
-Jabbah
-Jih
-Kabdhilinan
-Kaffaljidhma
-Kajam
-Kastra
-Kaus
-Media
-Keid
-Kitalpha
-Kleeia
-Kochab
-Kornephoros
-Kraz
-Ksora
-Kullat
-Kuma
-Lanx
-Librae
-Superba
-Lesath
-Lucida
-Maasym
-Mahasim
-Maia
-Marfark
-Marfik
-Markab
-Matar
-Mebsuta
-Megrez
-Meissa
-Mekbuda
-Menchib
-Menkab
-Menkalinan
-Menkar
-Menkent
-Menkib
-Merak
-Merga
-Merope
-Mesarthim
-Miaplacidus
-Mimosa
-Minchir
-Minelava
-Minkar
-Mintaka
-Mira
-Mirach
-Miram
-Mirfak
-Mirzam
-Misam
-Mizar
-Mothallah
-Muliphein
-Muphrid
-Murzim
-Muscida
-Nair
-Naos
-Nash
-Nashira
-Navi
-Nekkar
-Nembus
-Neshmet
-Nihal
-Nunki
-Nusakan
-Okul
-Peacock
-Phact
-Phad
-Pherkad
-Pleione
-Polaris
-Pollux
-Porrima
-Praecipua
-Procyon
-Propus
-Proxi
-Pulcherrim
-Rana
-Ras
-Rasalas
-Rastaban
-Thaoum
-Regor
-Regulus
-Rigel
-Rigil
-Rijl
-Rotanev
-Ruchba
-Ruchbah
-Rukbat
-Sabik
-Sadachbia
-Sadalbari
-Sadalmelik
-Sadalsuud
-Sadatoni
-Sadira
-Sadr
-Sadlamulk
-Saiph
-Saiph
-Salm
-Sargas
-Sarin
-Sceptrum
-Scheat
-Scheddi
-Schedar
-Segin
-Seginus
-Sham
-Shaula
-Sheliak
-Sheratan
-Shurnarkabti
-Shashutu
-Sinistra
-Sirius
-Situla
-Skat
-Spica
-Sterope
-Sterope
-Sualocin
-Subra
-Suhail
-Suhel
-Sulafat
-Sol
-Syrma
-Tabit
-Talitha
-Tania
-Tarazet
-Tarazed
-Taygeta
-Tegmen
-Tegmine
-Terebellum
-Tejat
-Thabit
-Theemin
-Thuban
-Tien
-Toliman
-Torcularis
-Tseen
-Turais
-Tyl
-Unukalhai
-Unuk
-Vega
-Vindemiatrix
-Wasat
-Wei
-Wezen
-Wezn
-Yed
-Yildun
-Zaniah
-Zaurak
-Zavijava
-Zawiat
-Zedaron
-Zelphah
-Zibal
-Zosma
-Zuben
-Zubenelgenubi
-Zubeneschamali
-Ophiuchi
-Eridani
-Alkalurops
-Boötis
-Canopus
-Pavonis
-Fomalhaut
-Waiping
-Gruis
-Shalish
-Niushe
-Shaowei
-Alangue
-Alces
-Thalim
-Laoujin
-Giedi Prime
-Sikun
-Arrakis
-Richese
-Ix
-Caladan
-Salusa
-Anbus
-Dhanab
-Buzzell
-Chusuk
-Corrin
-Ecaz
-Gamont
-Gansireed
-Gangishree
-Gammu
-Ginaz
-Grumman
-Hagal
-Harmonthep
-Ipyr
-Junction
-Kaitain
-Kolhar
-Lampadas
-Lankiveil
-Lernaeus
-Muritan
-Naraj
-Palma
-Parmentier
-Poritrin
-Romo
-Rossak
-Synchrony
-Tleilax
-Tupile
-Wallach IX
-Zanovar
-Cygni
-Ursae
-Acamar
-Aldebaran
-Alfin-Bernard
-Alnitak
-Alpha Ataru
-Centauri
-Omicron
-Shiro
-Altair
-Amargosa
-Amleth
-Antares
-Antede
-Arakon
-Arcturus
-Argelius
-Argos
-Atalia
-Avenal
-Avery
-Azati
-Eridani
-Tauri
-Orionis
-Alnitak
-Rigil
-Kentaurus
-Toliman
-Aquilae
-Altair
-Amleth
-Scorpii
-Antede
-Antede
-Arakon
-Bootis
-Arcturus
-Argelius
-Argos
-Atalia
-Avenal
-Avery
-Azati
-B'hava'el
-Barradas
-Bellatrix
-Benthan
-Benzite
-Berengaria
-Bersallis
-Aquilae
-Aurigae
-Capricus
-Cassius
-Coupsic
-Geminorum
-Lankal
-Lyrae
-Magellan
-Mahoga
-Niobe
-Portolan
-Reilley
-Renner
-Simmons
-Stromgren
-Thoridar
-Betelgeuse
-Bilana
-Bilaren
-Bolarus
-Bopak
-Boraal
-Borratas
-Braslota
-Bre'el
-Breen
-Bringloid
-Browder
-Caldos
-Calindra
-Callinon
-Camor
-Canopus
-Capella
-Cardassia
-Carraya
-Carson
-Ceti
-Chess-Wilson
-Chin'toka
-Clarus
-Coltar
-Cordannas
-Coridan
-Corvan
-Dameron
-Delb
-Rana
-Deneb
-Denkir
-Detrian
-Devidia
-Devolin
-Devron
-Diomedian
-Dopa
-Dorala
-Draygo
-Dreon
-Echevarria
-El-Adrel
-Eminiar
-Endicor
-Indi
-Mynos
-Silar
-Errikang
-Falla
-Fima
-Hydra
-Trianguli
-Ganino
-Garth
-Gaspar
-Gavara
-Goralis
-Goren
-Grenna
-Groombridge
-Hanoli
-Hanon
-Hemakek
-Hayashi
-Hoek
-Iczerone
-Stimson
-Idran
-Ilecom
-Indri
-Ingraham
-Geminorum
-Irtok
-Itamish
-Izar
-J-25
-Japori
-Kabrel
-Kaelon
-Kazis
-Keloda
-Kelsin
-Kelvas
-Kendi
-Kolarus
-Koralis
-Kotanka
-Krios
-K'ushui
-L-370
-L-374
-Lalande
-Lapolis
-Ligon
-Loval
-Luyten
-Maranga
-Maxia
-Mericor
-Mintaka
-Mira
-Antlia
-Moab
-Modea
-Monac
-Murasaki
-Narendra
-Nel
-Nelvana
-Nequencia
-Norcadia
-Norpin
-Nyria
-Ohniaka
-Sagitta
-Ceti
-Orellius
-Orias
-Orion
-Ovion
-Pallas
-Paradas
-Pegos
-Pelosa
-Pendari
-Pentath
-Pernaia
-Phylos
-Portas
-Prema
-Procyon
-Questar
-Ramatis
-Regulus
-Rigel
-Romii
-Ross 154
-Rubicun
-Sahndara
-Sappora
-Sarona
-Sarpeid
-Secarus
-Shelia
-Sheliak
-Draconis
-Nesterowitz
-Sirius
-Sol
-Solais
-Solarion
-Soukara
-Stillwell
-Strnad
-Tambor Beta-6
-Talos
-Tanuga
-Tartaras
-Cygna
-Tavlihna
-Tehara
-Tellun
-Teplan
-Terlina
-Tessen
-Bowles
-Mees
-T'lli
-Topin
-Trialas
-Trivas
-Tsugh
-Kaidnn
-Tycho
-Tyra
-Tyrus
-Ufandi
-Unefra
-Unroth
-Vacca
-Vadris
-Valo
-Vandor
-Vega
-Vegan
-Verath
-Veridian
-Veytan
-Vico
-Vilmoran
-Vinri
-Vissia
-Volan
-Wolf
-Wyanti
-Xendi
-Kabu
-Orionis
-Orionis
-Alshain
-Menkalinam
-Pollux
-Sheliak
-Orionis
-Browder
-Carinae
-Aurigae
-Alhajoth
-Cygni
-Gemiorum
-Propus
-Bootis
-Canis
-Leonis
-Orionis
-Lyrae
-Alsafi
-Canis
-Helios
-Lyrae
-Alnitak
-Bajoran
-C-111
-Carinae
-Deneb
-Nyrian
-Lyrae
-Alnitak
-Cygni
-Alpha
-Anacreon
-Arcturus
-Askone
-Asperta
-Aurora
-Baronn
-Bonde
-Cil
-Cinna
-Comporellon
-Daribow
-Derowd
-Eos
-Erythro
-Euterpe
-Florina
-Fomalhaut
-Gaia
-Andromeda
-Getorin
-Glyptal
-Haven
-Helicon
-Hesperos
-Horleggor
-Ifni
-Iss
-Jennisek
-Kalgan
-Konom
-Korell
-Korell
-Libair
-Livia
-Locris
-Lyonesse
-Lystena
-Mandress
-Melpomenia
-Mnemon
-Mores
-Nephelos
-Lingane
-Rhodia
-Tyrann
-Neotrantor
-Nexon
-Nishaya
-Ophiuchus
-Orsha
-Pallas
-Radole
-Rhampora
-Rhea
-Rossem
-Salinn
-Santanni
-Sarip
-Sark
-Sayshell
-Sirius
-Siwenna
-Smitheus
-Smushyk
-Smyrno
-Solaria
-Synnax
-Tazenda
-Terel
-Terminus
-Trantor
-Vega
-Vincetori
-Voreg
-Wanda
-Wencory
-Whassalian
-Zoranel
-Ashyn
-Braize
-Nalthis
-Roshar
-Scadrial
-Sel
-Taldain
-Yolen
-Threnody
-Air
-Alizon
-Alphane
-Ameta
-Andermani
-Asgard
-Barnett
-Basilica
-Bassingford
-Beowulf
-Casimir
-Congo
-Dresden
-Durandel
-DuQuesne
-Elysia
-Endicott
-Enki
-Erewhon
-Flax
-Grayson
-Gregor
-Grendelsbane
-Gryphon
-Hades
-Halliman
-Hamilton
-Hancock
-Haven
-Hope
-Kemal
-Ki-Rin
-Kornati
-Kreskin
-Kuan Yin
-Lois
-Lovat
-Lynx
-MacGregor
-Manticore
-Marsh
-Masada
-Matapan
-Maya
-Medusa
-Melungeon
-Meyerdahl
-Mesa
-Mfecane
-Midgard
-Midsummer
-Monica
-Montana
-Ndebele
-Nagasaki
-Dijon
-Hamburg
-Geneva
-Octagon
-Parmley
-Phoenix
-Pontifex
-Potsdam
-Prague
-Refuge
-Rembrandt
-Shuttlesport
-Sidemore
-Sphinx
-Torch
-Toulon
-Zanzibar
-Zulu
+6P62
+80.002
+977 Bowing rifle
+90-1000 Assault Rifle
+9A-9
+Accuracy International Arctic Warfare
+PSG-90
+Accuracy International AWP
+Accuracy International AWM
+G22
+L115A1
+Accu-Tek AT32
+Accu-Tek AT380
+Accu-Tek BL9
+Accu-Tek HC380
+Accu-Tek XL9
+Adams Mk2
+Adams Mk3
+Adams Mk4
+ADI F89
+AP70
+AP85
+FAMAS 22
+T-26
+Ak 5D
+AK-47
+AK-74
+AK-9
+AK-97
+AKM
+AK-101
+AK-102
+Akaba
+Akdal MKA 1919
+Model 3530
+Springfield M1866
+Desert Eagle
+44 Magnum
+Five SeveN
+SOCOM
+M4A1
+FAMAS
+AUG-HBAR
+AUG-HBAR
+SCAR-H
+X-M8
+P90
+ACR 6.8
+G36
+MP5
+THOMPSON
+Barrett M82
+Dragunov
+PSG1
+Walther WA 2000
+Remington MSR
+Spas 12
+AA12
+Striker
+Mod.1887
+Doppietta
+Remington 870
+M60
+MG36
+Gatling
+RPG-7
+XM25
+Javelin
+LAW
+ARK-7
+XR-2
+HVK-30
+ICR-1
+Man-O-War
+Sheiva
+M8A7
+Kuda
+VMP
+Weevil
+Vesper
+Pharo
+Razorback
+Drakon
+Locus
+P-06
+SVG-100
+BRM
+Dingo
+Gorgon
+48 Dredge
+KRM-262
+205 Brecci
+Haymaker 12
+Argus
+HC-XD
+UAV
+Care Package
+Dart
+Guardian
+Lighting Strike
+Hellstorm
+Hardened Sentry
+Cerberus
+Rolling Thunder
+Talon
+Wraith
+H.A.T.R.
+R.A.P.S.
+Power Core
+G.I. Unit
+A280C
+CA-87
+DH-17
+DL-44
+DLT-19
+E-11
+EE-3
+RT-97C
+SE-14C
+T-21
+T-21B
+DL-18
+DLT-19X
+Relby-V10
+DT-12
+Lancer
+Hammerburst v.I
+Gnasher
+Longshot
+Boomshot
+Arco Torque
+Martello dell'Alba
+Pistola Snub
+Pistola Boltok
+Lolife
+Ashot
+Bigun
+Bulldog
+Saiga-12
+RPK-74
+Tihar
+Hellbreath
+Railgun
+Helsing
+Kalash 2012
+VSV
+Booshka
+MarkzaM55 Argus
+Mulcher
+Breechshot
+M8 Avenger
+M15 Vindicator
+M96 Mattok
+Phaeston
+Striker
+M76 Revenant
+Fucile a impulso Geth
+M37 Falcon
+M55 Argus
+M99 Saber
+Fucile particellare
+N7 Typhoon
+Fucile Harrier di Cerberus
+Lanciadischi Chakram
+N7 Valkyrie
+Fucile Adas
+M-3 Predator
+M5 Phalanx
+Pistola ARC
+M6 Carnifex
+Acolyte
+M358 Talon
+Scorpion
+M77 Paladin
+N7 Eagle
+Executioner
+M23 Katana
+M27 Scimitar
+M22 Eviscerator
+AT-12 Raider
+Carabina Reegar
+Lanciadardi Graal
+Fucile al plasma Geth
+Disciple
+M300 Claymore
+N7 Piranha
+M11 Wraith
+N7 Crusader
+Venom
+M-4 Shuriken
+M9 Tempest
+M12 Locust
+M-25 Hornet
+Mitragliatrice al plasma Geth
+Mitragliatrice dei Collettori
+N7 Hurricane
+Punisher del Branco Sanguinario
+M-92 Mantis
+M-97 Viper
+M-13 Raptor
+M-29 Incisor
+M-98 Widow
+Krysae
+Fucile di precisione dei Collettori
+Fucile ad arpioni Kickshock
+Javelin
+M-90 Indra
+Black widow
+N7 Valiant
+Lanciagranate M-100
+Lanciamissili ML-77
+M-622 Avalanche
+M-920 Cain
+Raggio particellare dei Collettori
+M-451 Firestorm
+M-490 Blackstorm
+Proiettore ad Arco
+Lanciamissili Cobra
+Blackstar
+Splitfire Geth
+MP5K
+UMP-45
+Sterling
+MP 40
+AC-556
+Mk18
+M1 Carbine
+SKS
+M16A4
+AKS-74U
+Galil SAR
+AKM
+L1A1 SLR
+M14 EBR
+FAL
+M249
+RPK
+M590
+TOZ
+M40A1
+Mosin
+Makarov
+M45A1
+M9
+M1911
+AMCAR
+CAR-4
+UAR
+JP36
+Galant
+M308
+AMR-16
+Tempest-21
+Union 5.56
+Commando 553
+Eagle Heavy
+Cavity 9mm
+Bootleg
+Clarion
+Valkyria
+Gecko 7.62
+Little Friend 7.62
+Falcon
+Gewehr 3
+Ksp 58
+RPK
+KSP
+Buzzsaw 42
+Brenner 21
+Reinfeld 880
+IZHMA 12G
+Mosconi 12G
+Breaker 12G
+M1014
+Raven
+Steakout 12G
+Predator 12G
+Joceline O/U 12G
+Platypus 70
+Rattlesnake
+Lebensauger .308
+Desertfox
+Contractor .308
+R93 Repeater 1874
+Grom
+Nagant
+Baby Deagle
+Bernetti 9
+Bronco .44
+Broomstick
+Chimano 88
+Chimano Compact
+Chimano Custom
+Crosskill
+Deagle
+Gruber Kurz
+Interceptor 45
+LEO
+Matever .357
+Parabellum
+Signature .40
+STRYK 18c
+White Streak
+Castigo .44
+Crosskill Guard
+M13 9mm
+Shotguns: Goliath 12G
+Judge
+Brothers Grimm 12G
+SMGs: Blaster 9mm
+Chicago Typewriter
+CMP Cobra
+Compact-5
+CR 805B
+Heather
+Jackal
+Jacket's Piece
+Kobus 90
+Krinkov
+Kross Vertex
+Mark 10
+Micro Uzi
+Para
+Patchett L2A1
+Ratonka
+Uzi
+M4A1
+Sabertooth
+Shadow Gun
+Death Hammer
+SIG 552
+Ectopod
+Firewave
+Jericho
+Oblivion Hammer
+Pain Hammer
+Sawn Off Shotgun
+Shotgun
+SPAS-12
+The Persuader
+Thunderbuss
+Vlad
+Annihilator 7
+AWP
+Dark Vanquisher
+Deliverator
+Fusion Lance
+G3 SG/1
+MSR
+Nefarious Needler
+Ordinator Rifle
+Particle Lance
+Snap Shot
+Sniper Rifle
+Vanquisher
+Cannon
+Enigma Cannon
+Force Cannon
+Force Cannon Plus
+Painzerfaust
+Ultima Cannon
+Arctic Rifle
+Gun o War
+Magma Rifle
+Splatter Gun
+Blotter
+Demolisher
+Mortar Exporter
+The Final Word
+Wrecker
+9mm Pistol
+Colt Python .357 Magnum
+MP5
+Hivehand
+Desert Eagle Mark XIX
+Slingshot
+SMEG
+Hunting Rifle
+WMD
+Protec Grappler G3
+UPM61
+CS27 Misfortune
+Bavarium Splitter
+USV 45 Sokol
+CS Predator
+CS110 Archangel
+CS Wraith 225R
+CS9 PDW-K
+Prizrak U4
+Automat U12
+U-24 Zabijak
+U-96 Kladivo
+Stun Gun
+KA-1 Kobra
+45 Shepherd
+Laser Pistol
+TEK Z-10
+D4TH Blossom
+Cyber Blaster
+Auto Laser
+Grave Digger
+AS3 Ultimax
+S3X Hammer
+Shark-O-Matic
+Bling Shotgun
+K-8 Krukov
+AR-55
+Viper Laser Rifle
+TOGO-13
+Annihilator
+McManus 2015
+SA-3 Airstrike
+Sonic Boom
+Nanoforge
+Shock Hammer
+GL G20
+Mini-Gun
+Incinerator
+Swarmitron
+Genki Cannon
+Mounted .50 cal
+Minigun/Rockets
+Laser Beam
+Glock 21
+Beretta 84F Cheetah
+Beretta 92FS
+Colt Anaconda
+GDHC .50
+Kobra Pistol
+Intratec TEC-9
+IMI Uzi
+H&K MP5K
+USAS-12 Shotgun
+Savage/Stevens 311A
+Benelli M3
+Model 727
+Heckler & Koch XM8
+M249-E2 SAW
+Barrett XM109
+GE M134 Minigun
+Browning M2
+RPG-7
+FN 40GL/Mk 13 Mod 0
+Ingram MAC-10
+Accuracy International AW
+Franchi SPAS-12
+FN FAL
+H&K G36C
+.45 Fletcher
+Cumia Magnum
+DEK-RD Railpistol
+The Captain
+Flintlock
+9MM Tactical
+Renegade Pistol
+Red Shirt Special
+Tombstone Special
+Z9 Handcannon
+Spec Ops SMG
+SWAT SMG
+Gangland
+Rubber Band Gun
+BG-40
+Hillbilly
+Magna 10mm
+Nailgun
+Cyborg Pistol
+Xenoblaster
+ouchstone 40-Cal
+Deacon 12-Gauge
+Blunderbuss
+Kardak Lasershot
+Deadwood Doc
+Hillbilly
+TAK-10 Streetsweeper
+Big Game
+Ion Blaster
+Full Choke Silenced
+Thumpgun
+Reynolds .50 HMG
+Inflato-Ray
+The Polarizer
+Shokolov AR
+Mercenary LMG
+EM Railgun
+Guardsman AR
+Impulse Rifle
+Soakmaster
+Dominator
+Disintegrator
+Kaiju-X
+Bounce Rifle
+Crimson Cowboy
+J7 Launcher
+El Fugitivo
+Potato Gun
+TF2
+Tyrant
+Singularity Gun
+Loud Locust
+Outhouse Avenger
+McManus 2020
+GI Sniper
+Lever-Action
+Block Gun
+Flintlock
+Abduct-O-Matic
+'Merica
+Minigun Arm
+Oppressor Minigun
+Minethrower Arm
+Oppressor Minelayer
+Dubs Gun
+Industrial
+Pop Star
+Christmastime
+TF2 Flamethrower
+TF2 Rainblower
+The Eviscerator
+The Brute
+The Flamin' Brute
+GL G20 Multibomber
+XEU Plasma Pistol
+XEU Light Plasma Rifle
+XEU Laser Rifle
+Absolvor Bolt Pistol
+Assault Bolte
+Astartes Webber
+Auto Bolt Rifle
+Bolter
+Bolt Carbine
+Bolt Rifle
+Bolt Pistol
+Boltstorm Gauntlet
+Combi-Flamer
+Combi-Plasma Gun
+Combi-Meltagun
+Combi-Grav
+Flamer
+Flame Gauntlet
+Grapnel Launcher
+Grav-gun
+Grav-pistol
+Grenade Harness
+Hand Flamer
+Heavy Bolt Pistol s
+Inferno Pistol
+Meltagun
+Plasma Exterminator
+Plasma Gun
+Plasma Incinerator
+Assault Plasma Incinerator
+Heavy Plasma Incinerator
+Plasma Pistol
+Plasma Exterminator
+Reductor Pistol
+Storm Bolter
+Vengeance
+Five Seven
+USP .45
+MP412
+Desert Eagle
+.44 Magnum
+P99
+G18
+Skorpion
+MP9
+FMG9
+M4A1
+M16A4
+SCAR-L
+ACR 6.8
+FAD
+G36C
+CM901
+MK14
+Type 95
+M60E4
+PKP Pecheneg
+MK46	Level 34
+L86 LSW	Level 41
+MG36
+MSR
+Dragunov
+RSASS
+L118A
+AS50
+Barrett .50cal

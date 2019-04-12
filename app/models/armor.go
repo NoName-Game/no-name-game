@@ -14,6 +14,7 @@ type Armor struct {
 	ArmorCategory   ArmorCategory
 	ArmorCategoryID uint
 	PlayerID        uint
+	Equipped        bool
 }
 
 // Armors - Armors struct
@@ -33,10 +34,33 @@ func (a *Armor) Update() *Armor {
 	return a
 }
 
+// Delete Armor
+func (a *Armor) Delete() *Armor {
+	services.Database.Delete(&a)
+
+	return a
+}
+
 // AddPlayer
 func (a *Armor) AddPlayer(player Player) *Armor {
 	a.PlayerID = player.ID
 	services.Database.Save(&a)
 
 	return a
+}
+
+// GetArmorByName - Get Armor by name
+func GetArmorByName(name string) Armor {
+	var armor Armor
+	services.Database.Set("gorm:auto_preload", true).Where("name = ?", name).First(&armor)
+
+	return armor
+}
+
+// GetArmorByID - Get armor by ID
+func GetArmorByID(id uint) Armor {
+	var armor Armor
+	services.Database.Set("gorm:auto_preload", true).Where("id = ?", id).First(&armor)
+
+	return armor
 }
