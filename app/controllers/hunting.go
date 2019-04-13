@@ -20,12 +20,13 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	type payloadHunting struct {
-		Mob   models.Enemy
+		MobID uint
 		Score int //Number of enemy defeated
 	}
 
 	var payload payloadHunting
 	helpers.UnmarshalPayload(state.Payload, &payload)
+	mob := models.GetEnemyByID(payload.MobID)
 
 	//====================================
 	// Validator
@@ -40,9 +41,9 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
-		if message.Text == helpers.Trans("continue", player.Language.Slug) && payload.Mob.Life > 0 {
+		if message.Text == helpers.Trans("continue", player.Language.Slug) && mob.Life > 0 {
 			validationFlag = true
-		} else if payload.Mob.Life < 0 {
+		} else if mob.Life == 0 {
 			validationFlag = true
 			state.Stage = 4 //Drop
 			state.Update()
@@ -81,16 +82,11 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 	switch state.Stage {
 	case 0:
 		// Set timer
-		state.FinishAt = commands.GetEndTime(0, 5, 0)
+		state.FinishAt = commands.GetEndTime(0, int(5*(payload.Score/3)), 0)
 		state.ToNotify = true
 		state.Stage = 1
-
-		//FIXME: Pick a random enemy from database
-		payload.Mob = models.Enemy{
-			Name:             "Spider",
-			Life:             1000,
-			DamageMultiplier: 1.0,
-		}
+		mob = helpers.NewEnemy()
+		payload.MobID = mob.ID
 		payload.Score = 1
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
@@ -102,7 +98,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			// Enemy found
 			state.Stage = 2
 			state.Update()
-			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.found", player.Language.Slug, payload.Mob.Name))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.found", player.Language.Slug, mob.Name))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
 			services.SendMessage(msg)
 		}
@@ -110,9 +106,8 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			state.Stage = 3
 			state.Update()
-			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, payload.Mob.Name, payload.Mob.Life))
-			// TODO: Aggiungere pulsanti
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Attacca con Arma1")))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, mob.Name, mob.Life))
+			msg.ReplyMarkup = helpers.GenerateWeaponKeyboard(player)
 			services.SendMessage(msg)
 		}
 	case 3:
@@ -120,8 +115,8 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			// Calcolo danni e applicazione danni
 			// Danni player
 			playerDamage := rand.Int31n(13)
-			payload.Mob.Life -= playerDamage
-			mobDamage := int32((rand.Float32() * 13) * payload.Mob.DamageMultiplier)
+			mob.Life -= uint(playerDamage)
+			mobDamage := int32((rand.Float32() * 13))
 
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
