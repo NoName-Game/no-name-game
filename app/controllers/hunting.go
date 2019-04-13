@@ -49,7 +49,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			state.Update()
 		}
 	case 3:
-		if strings.Contains(message.Text, helpers.Trans("combat.attack", player.Language.Slug)) {
+		if strings.Contains(message.Text, helpers.Trans("combat.attack_with", player.Language.Slug)) {
 			validationFlag = true
 		}
 	case 4:
@@ -112,10 +112,24 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		}
 	case 3:
 		if validationFlag {
-			// Calcolo danni e applicazione danni
-			// Danni player
-			playerDamage := rand.Int31n(13)
-			mob.Life -= uint(playerDamage)
+			// Calculating damage
+
+			weaponName := strings.SplitN(message.Text, " ", 3)[2]
+
+			weapon := models.GetWeaponByName(weaponName)
+
+			var playerDamage uint
+
+			switch weapon.WeaponCategory.Slug {
+			case "knife":
+				// Knife damage
+				playerDamage = 10
+			default:
+				playerDamage = uint(weapon.RawDamage + ((player.Stats.Intelligence + player.Stats.Dexterity) / 2))
+
+			}
+
+			mob.Life -= playerDamage
 			mobDamage := int32((rand.Float32() * 13))
 
 			payloadUpdated, _ := json.Marshal(payload)

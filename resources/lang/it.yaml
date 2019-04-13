@@ -60,6 +60,7 @@ hunting.completed: "Caccia completata, torni alla base col bottino."
 
 # COMBAT SYSTEM
 combat.attack: "Attacca"
+combat.attack_with: "Attacca con "
 combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 
 # MISSION
