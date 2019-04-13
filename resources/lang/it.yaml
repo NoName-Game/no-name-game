@@ -51,6 +51,17 @@ auto_rifle: "Fucile Automatico"
 sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
 
+# HUNTING
+hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
+hunting.enemy.card: "%s\nLife: %d\nCosa vuoi fare?"
+hunting.continue: "Vuoi continuare la caccia?"
+hunting.completed: "Caccia completata, torni alla base col bottino."
+
+# COMBAT SYSTEM
+combat.attack: "Attacca"
+combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
+
 # MISSION
 mission.exploration: "Seleziona campo di ricerca!"
 mission.underground: "Sottosuolo"
