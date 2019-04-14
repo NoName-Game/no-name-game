@@ -7,52 +7,53 @@ import (
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/models"
-	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if player := helpers.CheckUser(update.Message); player.ID >= 1 {
-			callingRoute := parseMessage(update.Message)
+		helpers.CheckUser(update.Message)
 
-			// ******************************************
-			// Check if callingRoute it's breaker routes
-			// ******************************************
-			isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes, player)
-			if isBreakerRoute {
-				_, err := Call(breakerRoutes, route, update, player)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
+		// if player := helpers.CheckUser(update.Message); player.ID >= 1 {
+		// 	callingRoute := parseMessage(update.Message)
 
-			// ******************************************
-			// Check if player have route in cache
-			// ******************************************
-			isCachedRoute := helpers.GetRedisState(player)
-			if isCachedRoute != "" {
-				_, err := Call(routes, isCachedRoute, update, player)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
+		// 	// ******************************************
+		// 	// Check if callingRoute it's breaker routes
+		// 	// ******************************************
+		// 	isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes, player)
+		// 	if isBreakerRoute {
+		// 		_, err := Call(breakerRoutes, route, update, player)
+		// 		if err != nil {
+		// 			services.ErrorHandler("Error in call command", err)
+		// 		}
+		// 		return
+		// 	}
 
-			// ******************************************
-			// Check if it's normal route
-			// ******************************************
-			isRoute, route := inRoutes(callingRoute, routes, player)
-			if isRoute {
-				_, err := Call(routes, route, update, player)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-		}
+		// 	// ******************************************
+		// 	// Check if player have route in cache
+		// 	// ******************************************
+		// 	isCachedRoute := helpers.GetRedisState(player)
+		// 	if isCachedRoute != "" {
+		// 		_, err := Call(routes, isCachedRoute, update, player)
+		// 		if err != nil {
+		// 			services.ErrorHandler("Error in call command", err)
+		// 		}
+		// 		return
+		// 	}
+
+		// 	// ******************************************
+		// 	// Check if it's normal route
+		// 	// ******************************************
+		// 	isRoute, route := inRoutes(callingRoute, routes, player)
+		// 	if isRoute {
+		// 		_, err := Call(routes, route, update, player)
+		// 		if err != nil {
+		// 			services.ErrorHandler("Error in call command", err)
+		// 		}
+		// 		return
+		// 	}
+		// }
 	}
 }
 

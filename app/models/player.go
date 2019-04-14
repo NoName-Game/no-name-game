@@ -53,32 +53,12 @@ func (p *Player) GetStateByFunction(function string) PlayerState {
 	return playerState
 }
 
-// FindPlayerByUsername - find player by username
-func FindPlayerByUsername(username string) Player {
-	var player Player
-	services.Database.Preload("Language").
-		Preload("Inventory").
-		Preload("Weapons").
-		Preload("Armors").
-		Preload("Stats").
-		Where("username = ?", username).First(&player)
-
-	return player
-}
-
 // FindPlayerByID - find player by ID
 func FindPlayerByID(id uint) Player {
 	var player Player
 	services.Database.Where("id = ?", id).First(&player)
 
 	return player
-}
-
-// AddStar - Associate star to player
-func (p *Player) AddStar(star Star) *Player {
-	services.Database.Model(&p).Association("Stars").Append(PlayerStar{Star: star})
-
-	return p
 }
 
 // AddPosition
