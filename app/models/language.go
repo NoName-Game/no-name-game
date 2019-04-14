@@ -35,12 +35,3 @@ func GetLangBySlug(lang string) Language {
 
 	return language
 }
-
-// SeederLanguage - SeederLanguage
-func SeederLanguage() {
-	for slug, lang := range services.Langs {
-		newLanguage := Language{Value: lang, Slug: slug}
-		services.Database.Where(Language{Slug: slug}).FirstOrCreate(&newLanguage)
-	}
-
-}
