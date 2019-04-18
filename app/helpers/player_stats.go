@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	"log"
-
 	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
@@ -20,11 +18,7 @@ func DecrementLife(lifePoint uint, player models.Player) {
 	player.Stats.Update()
 	if player.Stats.LifePoint == 0 {
 		// Player Die
-		log.Println(player.States)
-		for _, state := range player.States {
-			log.Println(state.Function)
-			FinishAndCompleteState(state, player)
-		}
+		DeleteRedisAndDbState(player)
 		msg := services.NewMessage(player.ChatID, Trans("playerDie", player.Language.Slug))
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)

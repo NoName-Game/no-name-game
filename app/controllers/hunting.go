@@ -134,7 +134,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 
 			mob.Life -= playerDamage
 			mob.Update()
-			mobDamage := uint(rand.Int31n(17)+1) - (player.Stats.Strength * uint(rand.Int31n(6)+1))
+			mobDamage := uint(rand.Int31n(17) + 1)
 			helpers.DecrementLife(mobDamage, player)
 
 			state.Stage = 2
