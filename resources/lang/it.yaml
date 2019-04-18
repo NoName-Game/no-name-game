@@ -13,6 +13,7 @@ route.inventory.recap: "Riepilogo Inventario"
 route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
 route.abilityTree: "Albero Abilità"
+route.hunting: "Caccia"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -37,6 +38,7 @@ confirm: "Confermo!"
 resources: "Risorse"
 equip: "Equipaggia"
 destroy: "Distruggi"
+playerDie: "<b>Sei morto...</b>"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -118,6 +120,6 @@ ability.wisdom: "Saggezza"
 ability.charisma: "Carisma"
 
 # CRON
-cron.mission_alert: "Esplorazione finita!"
-cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
-cron.hunting_alert: "Informazioni ritornate con successo!"
+cron.route.mission_alert: "Esplorazione finita!"
+cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.hunting_alert: "Informazioni ritornate con successo!"

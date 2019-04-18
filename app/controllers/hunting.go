@@ -16,7 +16,7 @@ import (
 func Hunting(update tgbotapi.Update, player models.Player) {
 
 	message := update.Message
-	routeName := "hunting"
+	routeName := "route.hunting"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
 
 	type payloadHunting struct {
@@ -45,6 +45,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			validationFlag = true
 		} else if mob.Life == 0 {
 			validationFlag = true
+			mob.Delete()    // Delete the enemy from table
 			state.Stage = 4 //Drop
 			state.Update()
 		}
@@ -107,7 +108,10 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			state.Stage = 3
 			state.Update()
 			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, mob.Name, mob.Life))
-			msg.ReplyMarkup = helpers.GenerateWeaponKeyboard(player)
+			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+				ResizeKeyboard: true,
+				Keyboard:       helpers.GenerateWeaponKeyboard(player),
+			}
 			services.SendMessage(msg)
 		}
 	case 3:
@@ -123,17 +127,16 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			switch weapon.WeaponCategory.Slug {
 			case "knife":
 				// Knife damage
-				playerDamage = 10
+				playerDamage = uint(rand.Int31n(6)+1) + (weapon.RawDamage + ((player.Stats.Strength + player.Stats.Dexterity) / 2))
 			default:
-				playerDamage = uint(weapon.RawDamage + ((player.Stats.Intelligence + player.Stats.Dexterity) / 2))
-
+				playerDamage = uint(rand.Int31n(6)+1) + (weapon.RawDamage + ((player.Stats.Intelligence + player.Stats.Dexterity) / 2))
 			}
 
 			mob.Life -= playerDamage
-			mobDamage := int32((rand.Float32() * 13))
+			mob.Update()
+			mobDamage := uint(rand.Int31n(17)+1) - (player.Stats.Strength * uint(rand.Int31n(6)+1))
+			helpers.DecrementLife(mobDamage, player)
 
-			payloadUpdated, _ := json.Marshal(payload)
-			state.Payload = string(payloadUpdated)
 			state.Stage = 2
 			state.Update()
 

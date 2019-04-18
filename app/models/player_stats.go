@@ -12,6 +12,7 @@ import (
 // PlayerStats - Player stats struct
 type PlayerStats struct {
 	gorm.Model
+	LifePoint    uint `gorm:"default:100"`
 	Experience   uint `gorm:"default:0"`
 	Level        uint `gorm:"default:1"`
 	Strength     uint `gorm:"default:1"`
@@ -36,6 +37,7 @@ func (s *PlayerStats) Update() *PlayerStats {
 	if s.Experience >= 100 {
 		s.Experience -= 100
 		s.Level++
+		s.LifePoint += 10
 		s.AbilityPoint++
 	}
 	services.Database.Save(&s)
@@ -53,7 +55,7 @@ func (s *PlayerStats) Delete() *PlayerStats {
 // ToString - Convert player stats to string
 func (s *PlayerStats) ToString(playerLanguageSlug string) (result string) {
 	val := reflect.ValueOf(s).Elem()
-	for i := 3; i < val.NumField()-1; i++ {
+	for i := 4; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
 		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
 
