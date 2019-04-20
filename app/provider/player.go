@@ -2,6 +2,7 @@ package provider
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -35,4 +36,20 @@ func CreatePlayer(request nnsdk.Player) (nnsdk.Player, error) {
 	}
 
 	return player, nil
+}
+
+func GetPlayerStates(player nnsdk.Player) (nnsdk.PlayerStates, error) {
+	var playerStates nnsdk.PlayerStates
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/states", nil).Get()
+	if err != nil {
+		return playerStates, err
+	}
+
+	err = json.Unmarshal(resp.Data, &playerStates)
+	if err != nil {
+		return playerStates, err
+	}
+
+	return playerStates, nil
 }

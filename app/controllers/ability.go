@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func AbilityTree(update tgbotapi.Update, player models.Player) {
+func AbilityTree(update tgbotapi.Update, player nnsdk.Player) {
 	message := update.Message
 	routeName := "route.abilityTree"
 	state := helpers.StartAndCreatePlayerState(routeName, player)
@@ -29,7 +29,7 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	case 1:
 		if message.Text == helpers.Trans("ability.back", player.Language.Slug) {
 			state.Stage = 0
-			player.Update()
+			// player.Update() //TODO:
 		} else if message.Text == helpers.Trans("exit", player.Language.Slug) {
 			state.Stage = 2
 			validationFlag = true
@@ -47,18 +47,20 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
-		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
+		//TODO::
+		// messageSummaryPlayerStats := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
+		// messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
 
-		msg := services.NewMessage(player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
-		msg.ReplyMarkup = helpers.StatsKeyboard(player.Language.Slug)
-		msg.ParseMode = "HTML"
-		services.SendMessage(msg)
+		// msg := services.NewMessage(player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
+		// msg.ReplyMarkup = helpers.StatsKeyboard(player.Language.Slug)
+		// msg.ParseMode = "HTML"
+		// services.SendMessage(msg)
 	case 1:
 		if validationFlag {
 			// Increment player stast
-			player.Stats.Increment(message.Text, player.Language.Slug)
-			player.Update()
+			//TODO::
+			// player.Stats.Increment(message.Text, player.Language.Slug)
+			// player.Update()
 
 			text := helpers.Trans("ability.stats.completed", player.Language.Slug, message.Text)
 			msg := services.NewMessage(player.ChatID, text)
@@ -75,23 +77,25 @@ func AbilityTree(update tgbotapi.Update, player models.Player) {
 			//====================================
 			// IMPORTANT!
 			//====================================
-			helpers.FinishAndCompleteState(state, player)
+			// TODO::
+			// helpers.FinishAndCompleteState(state, player)
 			//====================================
 
-			text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
-			if player.Stats.AbilityPoint == 0 {
-				text += "\n" + helpers.Trans("ability.no_point_left", player.Language.Slug)
-			} else {
-				text += helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
-			}
-			msg := services.NewMessage(player.ChatID, text)
-			msg.ParseMode = "HTML"
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
-				),
-			)
-			services.SendMessage(msg)
+			//TODO::
+			// text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
+			// if player.Stats.AbilityPoint == 0 {
+			// 	text += "\n" + helpers.Trans("ability.no_point_left", player.Language.Slug)
+			// } else {
+			// 	text += helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
+			// }
+			// msg := services.NewMessage(player.ChatID, text)
+			// msg.ParseMode = "HTML"
+			// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			// 	tgbotapi.NewKeyboardButtonRow(
+			// 		tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+			// 	),
+			// )
+			// services.SendMessage(msg)
 		}
 	}
 

@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/no-name/app/provider"
+
 	"bitbucket.org/no-name-game/no-name/app/models"
 
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
 // GetRedisState - set function state in Redis
-func GetRedisState(player models.Player) string {
+func GetRedisState(player nnsdk.Player) string {
 	var route string
 	route, _ = services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
 
@@ -18,7 +21,7 @@ func GetRedisState(player models.Player) string {
 }
 
 // SetRedisState - set function state in Redis
-func SetRedisState(player models.Player, function string) {
+func SetRedisState(player nnsdk.Player, function string) {
 	err := services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), function, 0).Err()
 	if err != nil {
 		services.ErrorHandler("Error SET player state in redis", err)
@@ -34,12 +37,16 @@ func DelRedisState(player models.Player) {
 }
 
 // StartAndCreatePlayerState - create and set redis state
-func StartAndCreatePlayerState(route string, player models.Player) (state models.PlayerState) {
-	state = player.GetStateByFunction(route)
-	if state.ID < 1 {
-		state.Function = route
-		state.PlayerID = player.ID
-		state.Create()
+func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState) {
+	playerState = GetPlayerStateByFunction(player, route)
+
+	if playerState.ID < 1 {
+		newPlayerState := nnsdk.PlayerState{
+			Function: route,
+			PlayerID: player.ID,
+		}
+
+		playerState, _ = provider.CreatePlayerState(newPlayerState)
 	}
 
 	SetRedisState(player, route)
@@ -54,11 +61,12 @@ func FinishAndCompleteState(state models.PlayerState, player models.Player) {
 }
 
 // DeleteRedisAndDbState - delete redis and db state
-func DeleteRedisAndDbState(player models.Player) {
-	rediState := GetRedisState(player)
-	state := player.GetStateByFunction(rediState)
-	state.Delete()
-	DelRedisState(player)
+func DeleteRedisAndDbState(player nnsdk.Player) {
+	// rediState := GetRedisState(player)
+	panic("INMPLEMENTO - IN DELETE REDIS AND DB STATE")
+	// state := player.GetStateByFunction(rediState)
+	// state.Delete()
+	// DelRedisState(player)
 }
 
 // UnmarshalPayload - Unmarshal payload state

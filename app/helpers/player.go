@@ -24,28 +24,22 @@ func CheckUser(message *tgbotapi.Message) (player nnsdk.Player) {
 		}
 
 		// 1 - Create new player
-		player, _ := provider.CreatePlayer(newPlayer)
+		player, _ = provider.CreatePlayer(newPlayer)
+	}
 
-		panic(player)
+	return
+}
 
-		//TODO: Continue here, move al login in WS like new registrer command
+func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState) {
+	playerStates, err := provider.GetPlayerStates(player)
+	if err != nil {
+		panic(err)
+	}
 
-		// 2- New galaxy chunk and return player star
-		// playerStar := NewGalaxyChunk(int(player.ID))
-
-		// // 3 - Add first star to player
-		// player.AddStar(playerStar)
-
-		// // 4 - Add and create ship
-		// ship := NewStartShip()
-		// player.AddShip(ship)
-
-		// // 5 - Register first player position
-		// player.AddPosition(models.PlayerPosition{
-		// 	X: playerStar.X,
-		// 	Y: playerStar.Y,
-		// 	Z: playerStar.Z,
-		// })
+	for i, state := range playerStates {
+		if state.Function == function {
+			playerState = playerStates[i]
+		}
 	}
 
 	return

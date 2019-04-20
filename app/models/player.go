@@ -61,20 +61,6 @@ func FindPlayerByID(id uint) Player {
 	return player
 }
 
-// AddPosition
-func (p *Player) AddPosition(position PlayerPosition) *Player {
-	services.Database.Model(&p).Association("Positions").Append(position)
-
-	return p
-}
-
-// AddShip - Associate ship to player
-func (p *Player) AddShip(ship Ship) *Player {
-	services.Database.Model(&p).Association("Ships").Append(PlayerShip{Ship: ship})
-
-	return p
-}
-
 // GetEquippedArmors - get equipped player armors
 func (p *Player) GetEquippedArmors() (armors Armors) {
 	services.Database.Where("player_id = ? AND equipped = ?", p.ID, true).First(&armors)
