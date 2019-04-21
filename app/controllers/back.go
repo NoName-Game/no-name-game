@@ -1,14 +1,14 @@
 package controllers
 
 import (
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Back delete only redis state, but not delete state stored in DB.
-func Back(update tgbotapi.Update, player models.Player) {
+func Back(update tgbotapi.Update, player nnsdk.Player) {
 	helpers.DelRedisState(player)
 
 	message := update.Message

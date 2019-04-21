@@ -8,6 +8,21 @@ import (
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
+func GetPlayerByID(id uint) (nnsdk.Player, error) {
+	var player nnsdk.Player
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10), nil).Get()
+	if err != nil {
+		return player, err
+	}
+
+	err = json.Unmarshal(resp.Data, &player)
+	if err != nil {
+		return player, err
+	}
+
+	return player, nil
+}
+
 func FindPlayerByUsername(username string) (nnsdk.Player, error) {
 	var player nnsdk.Player
 	resp, err := services.NnSDK.MakeRequest("search/player?username="+username, nil).Get()

@@ -3,7 +3,7 @@ package commands
 import (
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
@@ -19,18 +19,23 @@ func Cron(minute time.Duration) {
 
 // CheckFinishTime - Check the ending and handle the functions.
 func CheckFinishTime() {
-	for _, state := range models.GetAllStateToNotify() {
-		player := models.FindPlayerByID(state.PlayerID)
+	states, _ := provider.GetPlayerStateToNotify()
+
+	for _, state := range states {
+		player, _ := provider.GetPlayerByID(state.PlayerID)
 		text, _ := services.GetTranslation("cron."+state.Function+"_alert", player.Language.Slug, nil)
 
 		// Send notification
 		msg := services.NewMessage(player.ChatID, text)
-		// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
 		services.SendMessage(msg)
 
 		// Update status
-		state.ToNotify = false
-		state.Update()
+		// Stupid poninter stupid json pff
+		f := new(bool)
+		*f = false
+
+		state.ToNotify = f
+		state, _ = provider.UpdatePlayerState(state)
 	}
 }
 

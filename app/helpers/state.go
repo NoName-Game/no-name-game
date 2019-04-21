@@ -7,8 +7,6 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 
-	"bitbucket.org/no-name-game/no-name/app/models"
-
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
@@ -29,7 +27,7 @@ func SetRedisState(player nnsdk.Player, function string) {
 }
 
 // DelRedisState - del function state in Redis
-func DelRedisState(player models.Player) {
+func DelRedisState(player nnsdk.Player) {
 	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
 	if err != nil {
 		services.ErrorHandler("Error DEL player state in redis", err)
@@ -54,19 +52,31 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 }
 
 // FinishAndCompleteState - finish and set completed in playerstate
-func FinishAndCompleteState(state models.PlayerState, player models.Player) {
-	state.Completed = true
-	state.Update().Delete()
+func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
+	// Stupid poninter stupid json pff
+	t := new(bool)
+	*t = true
+
+	state.Completed = t
+	state, _ = provider.UpdatePlayerState(state) // Update
+	state, _ = provider.DeletePlayerState(state) // Delete
+
 	DelRedisState(player)
 }
 
 // DeleteRedisAndDbState - delete redis and db state
 func DeleteRedisAndDbState(player nnsdk.Player) {
-	// rediState := GetRedisState(player)
-	panic("INMPLEMENTO - IN DELETE REDIS AND DB STATE")
-	// state := player.GetStateByFunction(rediState)
-	// state.Delete()
-	// DelRedisState(player)
+	rediState := GetRedisState(player)
+
+	if rediState != "" {
+		playerState := GetPlayerStateByFunction(player, rediState)
+		_, err := provider.DeletePlayerState(playerState) // Delete
+		if err != nil {
+			services.ErrorHandler("Error delete player state", err)
+		}
+	}
+
+	DelRedisState(player)
 }
 
 // UnmarshalPayload - Unmarshal payload state

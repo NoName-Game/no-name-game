@@ -22,7 +22,7 @@ route.breaker.clears: "Lascia stare"
 route.testing.theAnswerIs: "the-answer-is"
 route.testing.multiState: "multi-state"
 route.testing.multiStage: "multi-stage"
-route.testing.time: "time"
+route.testing.time: "test-time"
 
 # GENERAL
 complete: "Fatto!"
@@ -106,5 +106,6 @@ ability.wisdom: "Saggezza"
 ability.charisma: "Carisma"
 
 # CRON
+cron.route.testing.time_alert: "End Test time"
 cron.mission_alert: "Esplorazione finita!"
 cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"

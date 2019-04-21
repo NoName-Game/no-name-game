@@ -20,10 +20,10 @@ var (
 		// "route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
 		// "route.abilityTree":       controllers.AbilityTree,      // ability.go
 
-		// "route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
-		// "route.testing.multiState":  controllers.TestMultiState, // testing.go
-		"route.testing.multiStage": controllers.TestMultiStage, // testing.go
-		// "route.testing.time":        controllers.TestTimedQuest, // testing.go
+		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
+		"route.testing.multiState":  controllers.TestMultiState, // testing.go
+		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
+		"route.testing.time":        controllers.TestTimedQuest, // testing.go
 	}
 
 	breakerRoutes = map[string]interface{}{
