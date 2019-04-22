@@ -9,7 +9,6 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/provider"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -43,12 +42,16 @@ func InventoryRecap(update tgbotapi.Update, player nnsdk.Player) {
 	var recap string
 
 	// Summary Resources
-	recap += "\n" + helpers.Trans("resources", player.Language.Slug) + ":\n"
-	playerResources := helpers.InventoryToMap(player.Inventory)
-	for r, q := range playerResources {
+	playerInventory, err := provider.GetPlayerInventory(player)
+	if err != nil {
+		services.ErrorHandler("Can't get player inventory", err)
+	}
 
-		resource, err := provider.GetResouceByID(r)
-		if err != nil {
+	recap += "\n" + helpers.Trans("resources", player.Language.Slug) + ":\n"
+	playerResources := helpers.InventoryToMap(playerInventory)
+	for r, q := range playerResources {
+		resource, errResouce := provider.GetResouceByID(r)
+		if errResouce != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
 
@@ -56,14 +59,23 @@ func InventoryRecap(update tgbotapi.Update, player nnsdk.Player) {
 	}
 
 	// Summary Weapons
+	playerWeapons, errWeapons := provider.GetPlayerWeapons(player, "false")
+	if errWeapons != nil {
+		services.ErrorHandler("Can't get player weapons", err)
+	}
 	recap += "\n" + helpers.Trans("weapons", player.Language.Slug) + ":\n"
-	for _, weapon := range player.Weapons {
+	for _, weapon := range playerWeapons {
 		recap += "- " + weapon.Name + "\n"
 	}
 
 	// Summary Armors
+	playerArmors, errArmors := provider.GetPlayerArmors(player, "false")
+	if errArmors != nil {
+		services.ErrorHandler("Can't get player armors", err)
+	}
+
 	recap += "\n" + helpers.Trans("armors", player.Language.Slug) + ":\n"
-	for _, armor := range player.Armors {
+	for _, armor := range playerArmors {
 		recap += "- " + armor.Name + "\n"
 	}
 
@@ -129,17 +141,27 @@ func InventoryEquip(update tgbotapi.Update, player nnsdk.Player) {
 	//====================================
 	currentPlayerEquipment := helpers.Trans("inventory.equip.equipped", player.Language.Slug)
 
+	//////////////////////////////////
 	currentPlayerEquipment += "\n" + helpers.Trans("armors", player.Language.Slug) + ":\n"
+	eqippedArmors, err := provider.GetPlayerArmors(player, "true")
+	if err != nil {
+		services.ErrorHandler("Cant get equpped player armors", err)
+	}
 
-	//TODO: TO FIX
-	// for _, armor := range player.GetEquippedArmors() {
-	// 	currentPlayerEquipment += "- " + armor.Name
-	// }
+	for _, armor := range eqippedArmors {
+		currentPlayerEquipment += "- " + armor.Name
+	}
+	//////////////////////////////////
+	currentPlayerEquipment += "\n\n" + helpers.Trans("weapons", player.Language.Slug) + ":\n"
+	eqippedWeapons, err := provider.GetPlayerWeapons(player, "true")
+	if err != nil {
+		services.ErrorHandler("Cant get equpped player weapons", err)
+	}
 
-	// currentPlayerEquipment += "\n\n" + helpers.Trans("weapons", player.Language.Slug) + ":\n"
-	// for _, weapon := range player.GetEquippedWeapons() {
-	// 	currentPlayerEquipment += "- " + weapon.Name
-	// }
+	for _, weapon := range eqippedWeapons {
+		currentPlayerEquipment += "- " + weapon.Name
+	}
+	//////////////////////////////////
 
 	//====================================
 	// Stage
@@ -176,14 +198,24 @@ func InventoryEquip(update tgbotapi.Update, player nnsdk.Player) {
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
 		case helpers.Trans("armors", player.Language.Slug):
+			armors, err := provider.GetPlayerArmors(player, "false")
+			if err != nil {
+				services.ErrorHandler("Cant get player armors", err)
+			}
+
 			// Each player armors
-			for _, armor := range player.Armors {
+			for _, armor := range armors {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip", player.Language.Slug) + " " + armor.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons", player.Language.Slug):
+			weapons, err := provider.GetPlayerWeapons(player, "false")
+			if err != nil {
+				services.ErrorHandler("Cant get player weapons", err)
+			}
+
 			// Each player weapons
-			for _, weapon := range player.Weapons {
+			for _, weapon := range weapons {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip", player.Language.Slug) + " " + weapon.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
@@ -211,9 +243,21 @@ func InventoryEquip(update tgbotapi.Update, player nnsdk.Player) {
 			var equipmentID uint
 			switch payload.Type {
 			case helpers.Trans("armors", player.Language.Slug):
-				equipmentID = models.GetArmorByName(equipmentName).ID
+				var armor nnsdk.Armor
+				armor, err := provider.FindArmorByName(equipmentName)
+				if err != nil {
+					services.ErrorHandler("Cant find equip armor name", err)
+				}
+
+				equipmentID = armor.ID
 			case helpers.Trans("weapons", player.Language.Slug):
-				equipmentID = models.GetWeaponByName(equipmentName).ID
+				var weapon nnsdk.Weapon
+				weapon, err := provider.FindWeaponByName(equipmentName)
+				if err != nil {
+					services.ErrorHandler("Cant find equip weapon name", err)
+				}
+
+				equipmentID = weapon.ID
 			}
 
 			payload.EquipID = equipmentID
@@ -238,13 +282,29 @@ func InventoryEquip(update tgbotapi.Update, player nnsdk.Player) {
 		if validationFlag {
 			switch payload.Type {
 			case helpers.Trans("armors", player.Language.Slug):
-				equipment := models.GetArmorByID(payload.EquipID)
+				equipment, err := provider.GetArmorByID(payload.EquipID)
+				if err != nil {
+					services.ErrorHandler("Cant find armor by ID", err)
+				}
+
 				equipment.Equipped = true
-				equipment.Update()
+
+				_, err = provider.UpdateArmor(equipment)
+				if err != nil {
+					services.ErrorHandler("Cant update armor", err)
+				}
 			case helpers.Trans("weapons", player.Language.Slug):
-				equipment := models.GetWeaponByID(payload.EquipID)
+				equipment, err := provider.GetWeaponByID(payload.EquipID)
+				if err != nil {
+					services.ErrorHandler("Cant find weapon by ID", err)
+				}
+
 				equipment.Equipped = true
-				equipment.Update()
+
+				_, err = provider.UpdateWeapon(equipment)
+				if err != nil {
+					services.ErrorHandler("Cant update weapon", err)
+				}
 			}
 		}
 
@@ -352,14 +412,24 @@ func InventoryDestroy(update tgbotapi.Update, player nnsdk.Player) {
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
 		case helpers.Trans("armors", player.Language.Slug):
+			armors, err := provider.GetPlayerArmors(player, "false")
+			if err != nil {
+				services.ErrorHandler("Cant get player armors", err)
+			}
+
 			// Each player armors
-			for _, armor := range player.Armors {
+			for _, armor := range armors {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy", player.Language.Slug) + " " + armor.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons", player.Language.Slug):
+			weapons, err := provider.GetPlayerWeapons(player, "false")
+			if err != nil {
+				services.ErrorHandler("Cant get player weapons", err)
+			}
+
 			// Each player weapons
-			for _, weapon := range player.Weapons {
+			for _, weapon := range weapons {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy", player.Language.Slug) + " " + weapon.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
@@ -387,9 +457,21 @@ func InventoryDestroy(update tgbotapi.Update, player nnsdk.Player) {
 			var equipmentID uint
 			switch payload.Type {
 			case helpers.Trans("armors", player.Language.Slug):
-				equipmentID = models.GetArmorByName(equipmentName).ID
+				var armor nnsdk.Armor
+				armor, err := provider.FindArmorByName(equipmentName)
+				if err != nil {
+					services.ErrorHandler("Cant find equip armor name", err)
+				}
+
+				equipmentID = armor.ID
 			case helpers.Trans("weapons", player.Language.Slug):
-				equipmentID = models.GetWeaponByName(equipmentName).ID
+				var weapon nnsdk.Weapon
+				weapon, err := provider.FindWeaponByName(equipmentName)
+				if err != nil {
+					services.ErrorHandler("Cant find equip weapon name", err)
+				}
+
+				equipmentID = weapon.ID
 			}
 
 			payload.EquipID = equipmentID
@@ -414,11 +496,25 @@ func InventoryDestroy(update tgbotapi.Update, player nnsdk.Player) {
 		if validationFlag {
 			switch payload.Type {
 			case helpers.Trans("armors", player.Language.Slug):
-				equipment := models.GetArmorByID(payload.EquipID)
-				equipment.Delete()
+				equipment, err := provider.GetArmorByID(payload.EquipID)
+				if err != nil {
+					services.ErrorHandler("Cant find weapon by ID", err)
+				}
+
+				_, err = provider.DeleteArmor(equipment)
+				if err != nil {
+					services.ErrorHandler("Cant delete armor", err)
+				}
 			case helpers.Trans("weapons", player.Language.Slug):
-				equipment := models.GetWeaponByID(payload.EquipID)
-				equipment.Delete()
+				equipment, err := provider.GetWeaponByID(payload.EquipID)
+				if err != nil {
+					services.ErrorHandler("Cant find weapon by ID", err)
+				}
+
+				_, err = provider.DeleteWeapon(equipment)
+				if err != nil {
+					services.ErrorHandler("Cant delete weapon", err)
+				}
 			}
 		}
 

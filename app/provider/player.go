@@ -68,3 +68,51 @@ func GetPlayerStates(player nnsdk.Player) (nnsdk.PlayerStates, error) {
 
 	return playerStates, nil
 }
+
+func GetPlayerArmors(player nnsdk.Player, equipped string) (nnsdk.Armors, error) {
+	var armors nnsdk.Armors
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/armors?equipped="+equipped, nil).Get()
+	if err != nil {
+		return armors, err
+	}
+
+	err = json.Unmarshal(resp.Data, &armors)
+	if err != nil {
+		return armors, err
+	}
+
+	return armors, nil
+}
+
+func GetPlayerWeapons(player nnsdk.Player, equipped string) (nnsdk.Weapons, error) {
+	var weapons nnsdk.Weapons
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/weapons?equipped="+equipped, nil).Get()
+	if err != nil {
+		return weapons, err
+	}
+
+	err = json.Unmarshal(resp.Data, &weapons)
+	if err != nil {
+		return weapons, err
+	}
+
+	return weapons, nil
+}
+
+func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
+	var inventory nnsdk.Inventory
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory", nil).Get()
+	if err != nil {
+		return inventory, err
+	}
+
+	err = json.Unmarshal(resp.Data, &inventory)
+	if err != nil {
+		return inventory, err
+	}
+
+	return inventory, nil
+}
