@@ -50,7 +50,7 @@ func InventoryRecap(update tgbotapi.Update, player nnsdk.Player) {
 	recap += "\n" + helpers.Trans("resources", player.Language.Slug) + ":\n"
 	playerResources := helpers.InventoryToMap(playerInventory)
 	for r, q := range playerResources {
-		resource, errResouce := provider.GetResouceByID(r)
+		resource, errResouce := provider.GetResourceByID(r)
 		if errResouce != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}

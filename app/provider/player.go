@@ -116,3 +116,35 @@ func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
 
 	return inventory, nil
 }
+
+func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
+	var inventory nnsdk.Inventory
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/add", request).Post()
+	if err != nil {
+		return inventory, err
+	}
+
+	err = json.Unmarshal(resp.Data, &inventory)
+	if err != nil {
+		return inventory, err
+	}
+
+	return inventory, nil
+}
+
+func RemoveResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
+	var inventory nnsdk.Inventory
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/remove", request).Post()
+	if err != nil {
+		return inventory, err
+	}
+
+	err = json.Unmarshal(resp.Data, &inventory)
+	if err != nil {
+		return inventory, err
+	}
+
+	return inventory, nil
+}

@@ -28,7 +28,7 @@ func InventoryToString(i nnsdk.Inventory) string {
 	var result string
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		resource, err := provider.GetResouceByID(key)
+		resource, err := provider.GetResourceByID(key)
 		if err != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
@@ -50,7 +50,7 @@ func InventoryToMap(i nnsdk.Inventory) (items map[uint]int) {
 func InventoryToKeyboardAddCraft(i nnsdk.Inventory) (results []string) {
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		resource, err := provider.GetResouceByID(key)
+		resource, err := provider.GetResourceByID(key)
 		if err != nil {
 			services.ErrorHandler("Error in ToKeyBoardAddCraft", err)
 		}

@@ -67,3 +67,18 @@ func DeleteArmor(request nnsdk.Armor) (nnsdk.Armor, error) {
 
 	return armor, nil
 }
+
+func CraftArmor(request nnsdk.ArmorCraft) (nnsdk.Armor, error) {
+	var armor nnsdk.Armor
+	resp, err := services.NnSDK.MakeRequest("armors/craft", request).Post()
+	if err != nil {
+		return armor, err
+	}
+
+	err = json.Unmarshal(resp.Data, &armor)
+	if err != nil {
+		return armor, err
+	}
+
+	return armor, nil
+}

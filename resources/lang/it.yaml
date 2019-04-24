@@ -107,5 +107,5 @@ ability.charisma: "Carisma"
 
 # CRON
 cron.route.testing.time_alert: "End Test time"
-cron.mission_alert: "Esplorazione finita!"
-cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.mission_alert: "Esplorazione finita!"
+cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"

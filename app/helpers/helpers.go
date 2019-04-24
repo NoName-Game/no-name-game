@@ -4,7 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/services"
 )
 
 // InArray - check if val exist in array
@@ -53,12 +54,20 @@ func Slugger(text string) string {
 
 // GetAllCategories - return all categories of all types
 func GetAllCategories() (categories []string) {
-	armorCategories := models.GetAllArmorCategories()
+	armorCategories, err := provider.GetAllArmorCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, armor := range armorCategories {
 		categories = append(categories, armor.Name)
 	}
 
-	weaponCategories := models.GetAllWeaponCategories()
+	weaponCategories, err := provider.GetAllWeaponCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, weapon := range weaponCategories {
 		categories = append(categories, weapon.Name)
 	}
@@ -68,12 +77,20 @@ func GetAllCategories() (categories []string) {
 
 // GetAllCategories - return all categories of all types
 func GetAllSlugCategories() (categories []string) {
-	armorCategories := models.GetAllArmorCategories()
+	armorCategories, err := provider.GetAllArmorCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, armor := range armorCategories {
 		categories = append(categories, armor.Slug)
 	}
 
-	weaponCategories := models.GetAllWeaponCategories()
+	weaponCategories, err := provider.GetAllWeaponCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, weapon := range weaponCategories {
 		categories = append(categories, weapon.Slug)
 	}
