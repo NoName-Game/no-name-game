@@ -69,6 +69,22 @@ func GetPlayerStates(player nnsdk.Player) (nnsdk.PlayerStates, error) {
 	return playerStates, nil
 }
 
+func GetPlayerStats(player nnsdk.Player) (nnsdk.PlayerStats, error) {
+	var playerStats nnsdk.PlayerStats
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/stats", nil).Get()
+	if err != nil {
+		return playerStats, err
+	}
+
+	err = json.Unmarshal(resp.Data, &playerStats)
+	if err != nil {
+		return playerStats, err
+	}
+
+	return playerStats, nil
+}
+
 func GetPlayerArmors(player nnsdk.Player, equipped string) (nnsdk.Armors, error) {
 	var armors nnsdk.Armors
 
