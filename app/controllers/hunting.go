@@ -41,9 +41,9 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 			validationMessage = helpers.Trans("wait", player.Language.Slug, state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
-		if message.Text == helpers.Trans("continue", player.Language.Slug) && mob.Life > 0 {
+		if message.Text == helpers.Trans("continue", player.Language.Slug) && mob.LifePoint > 0 {
 			validationFlag = true
-		} else if mob.Life == 0 {
+		} else if mob.LifePoint == 0 {
 			validationFlag = true
 			mob.Delete()    // Delete the enemy from table
 			state.Stage = 4 //Drop
@@ -107,7 +107,7 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			state.Stage = 3
 			state.Update()
-			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, mob.Name, mob.Life))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.enemy.card", player.Language.Slug, mob.Name, mob.LifePoint, player.Stats.LifePoint))
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				ResizeKeyboard: true,
 				Keyboard:       helpers.GenerateWeaponKeyboard(player),
@@ -132,23 +132,32 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 				playerDamage = uint(rand.Int31n(6)+1) + (weapon.RawDamage + ((player.Stats.Intelligence + player.Stats.Dexterity) / 2))
 			}
 
-			mob.Life -= playerDamage
+			mob.LifePoint -= playerDamage
 			mob.Update()
-			mobDamage := uint(rand.Int31n(17) + 1)
-			helpers.DecrementLife(mobDamage, player)
+			var text string
+			if mob.LifePoint == 0 {
+				text = helpers.Trans("combat.last_hit", player.Language.Slug)
+			} else {
+				mobDamage := uint(rand.Int31n(17) + 1)
+				helpers.DecrementLife(mobDamage, player)
+				text = helpers.Trans("combat.damage", player.Language.Slug, playerDamage, mobDamage)
+			}
 
 			state.Stage = 2
 			state.Update()
 
-			msg := services.NewMessage(player.ChatID, helpers.Trans("combat.damage", player.Language.Slug, playerDamage, mobDamage))
+			msg := services.NewMessage(player.ChatID, text)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
 			services.SendMessage(msg)
 		}
 	case 4:
 		if validationFlag {
-			// TODO: Add drop
+			player.Stats.Experience++
+			player.Update()
+			msg1 := services.NewMessage(player.ChatID, helpers.Trans("hunting.experience_earned", player.Language.Slug, 1))
 			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.continue", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("nope", player.Language.Slug))))
+			services.SendMessage(msg1)
 			services.SendMessage(msg)
 		}
 	case 5:

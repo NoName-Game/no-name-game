@@ -13,7 +13,7 @@ func NewEnemy() (enemy models.Enemy) {
 		Name: namer.GenerateName("resources/namer/enemies/model.json"),
 	}
 
-	enemy.Life = uint(rand.Int31n(15) + 100)
+	enemy.LifePoint = uint(rand.Int31n(15) + 100)
 	enemy.Create()
 
 	return
