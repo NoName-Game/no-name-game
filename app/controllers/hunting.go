@@ -154,10 +154,10 @@ func Hunting(update tgbotapi.Update, player models.Player) {
 		if validationFlag {
 			player.Stats.Experience++
 			player.Update()
-			msg1 := services.NewMessage(player.ChatID, helpers.Trans("hunting.experience_earned", player.Language.Slug, 1))
-			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.continue", player.Language.Slug))
+			msg := services.NewMessage(player.ChatID, helpers.Trans("hunting.experience_earned", player.Language.Slug, 1))
+			services.SendMessage(msg)
+			msg = services.NewMessage(player.ChatID, helpers.Trans("hunting.continue", player.Language.Slug))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("nope", player.Language.Slug))))
-			services.SendMessage(msg1)
 			services.SendMessage(msg)
 		}
 	case 5:
