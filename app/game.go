@@ -12,7 +12,7 @@ var (
 	//
 	routes = map[string]interface{}{
 		// "route.start":             controllers.StartTutorial,    // tutorial.go  - MAIN
-		// "route.mission":           controllers.StartMission,     // mission.go   - MAIN
+		"route.mission":           controllers.StartMission,     // mission.go   - MAIN
 		"route.crafting":          controllers.Crafting,         // crafting.go  - MAIN
 		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
 		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
