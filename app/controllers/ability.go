@@ -54,8 +54,7 @@ func AbilityTree(update tgbotapi.Update, player nnsdk.Player) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		//TODO: FIX ME PANIC
-		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", player.Language.Slug, helpers.PlayerStatsToString(playerStats, player.Language.Slug))
+		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", player.Language.Slug, helpers.PlayerStatsToString(&playerStats, player.Language.Slug))
 		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", player.Language.Slug, playerStats.AbilityPoint)
 
 		msg := services.NewMessage(player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
@@ -65,9 +64,14 @@ func AbilityTree(update tgbotapi.Update, player nnsdk.Player) {
 	case 1:
 		if validationFlag {
 			// Increment player stats
-			//TODO::
 			// player.Stats.Increment(message.Text, player.Language.Slug)
-			// player.Update()
+
+			helpers.PlayerStatsIncrement(&playerStats, message.Text, player.Language.Slug)
+
+			playerStats, err = provider.UpdatePlayerStats(playerStats)
+			if err != nil {
+				services.ErrorHandler("Cant update player stats", err)
+			}
 
 			text := helpers.Trans("ability.stats.completed", player.Language.Slug, message.Text)
 			msg := services.NewMessage(player.ChatID, text)
@@ -80,30 +84,29 @@ func AbilityTree(update tgbotapi.Update, player nnsdk.Player) {
 			services.SendMessage(msg)
 		}
 	case 2:
-		// if validationFlag {
-		//====================================
-		// IMPORTANT!
-		//====================================
-		// TODO::
-		// helpers.FinishAndCompleteState(state, player)
-		//====================================
+		if validationFlag {
+			// ====================================
+			// IMPORTANT!
+			// ====================================
+			helpers.FinishAndCompleteState(state, player)
+			// ====================================
 
-		//TODO::
-		// text := helpers.Trans("ability.stats.type", player.Language.Slug, player.Stats.ToString(player.Language.Slug))
-		// if player.Stats.AbilityPoint == 0 {
-		// 	text += "\n" + helpers.Trans("ability.no_point_left", player.Language.Slug)
-		// } else {
-		// 	text += helpers.Trans("ability.stats.total_point", player.Language.Slug, player.Stats.AbilityPoint)
-		// }
-		// msg := services.NewMessage(player.ChatID, text)
-		// msg.ParseMode = "HTML"
-		// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-		// 	tgbotapi.NewKeyboardButtonRow(
-		// 		tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
-		// 	),
-		// )
-		// services.SendMessage(msg)
-		// }
+			text := helpers.Trans("ability.stats.type", player.Language.Slug, helpers.PlayerStatsToString(&playerStats, player.Language.Slug))
+			if playerStats.AbilityPoint == 0 {
+				text += "\n" + helpers.Trans("ability.no_point_left", player.Language.Slug)
+			} else {
+				text += helpers.Trans("ability.stats.total_point", player.Language.Slug, playerStats.AbilityPoint)
+			}
+
+			msg := services.NewMessage(player.ChatID, text)
+			msg.ParseMode = "HTML"
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", player.Language.Slug)),
+				),
+			)
+			services.SendMessage(msg)
+		}
 	}
 
 }
