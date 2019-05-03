@@ -53,6 +53,22 @@ func CreatePlayer(request nnsdk.Player) (nnsdk.Player, error) {
 	return player, nil
 }
 
+func UpdatePlayer(request nnsdk.Player) (nnsdk.Player, error) {
+	var player nnsdk.Player
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(request.ID), 10), request).Patch()
+	if err != nil {
+		return player, err
+	}
+
+	err = json.Unmarshal(resp.Data, &player)
+	if err != nil {
+		return player, err
+	}
+
+	return player, nil
+}
+
 func GetPlayerStates(player nnsdk.Player) (nnsdk.PlayerStates, error) {
 	var playerStates nnsdk.PlayerStates
 
