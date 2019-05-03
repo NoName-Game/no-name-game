@@ -24,8 +24,6 @@ func bootstrap() {
 	//*************
 	// NoName WS
 	//*************
-	// services.DatabaseUp()
-
 	services.NnSDKUp()
 
 	services.RedisUp()
