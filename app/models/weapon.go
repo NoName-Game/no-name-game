@@ -11,6 +11,7 @@ type Weapon struct {
 	Name             string `json:"name"`
 	Rarity           Rarity
 	RarityID         uint
+	RawDamage        uint `gorm:"default:10"`
 	WeaponCategory   WeaponCategory
 	WeaponCategoryID uint
 	PlayerID         uint // Has Many from user

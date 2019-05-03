@@ -12,7 +12,7 @@ func NewWeapon() (weapon models.Weapon) {
 
 	var name string
 	switch category.Slug {
-	case "knfie":
+	case "knife":
 		name = namer.GenerateName("resources/namer/weapons/knife/model.json")
 	default:
 		name = namer.GenerateName("resources/namer/weapons/model.json")
@@ -36,7 +36,7 @@ func NewCraftedWeapon(c string) (weapon models.Weapon) {
 
 	var name string
 	switch category.Slug {
-	case "knfie":
+	case "knife":
 		name = namer.GenerateName("resources/namer/weapons/knife/model.json")
 	default:
 		name = namer.GenerateName("resources/namer/weapons/model.json")

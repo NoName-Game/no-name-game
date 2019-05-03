@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"math/rand"
+
 	"bitbucket.org/no-name-game/no-name/app/acme/namer"
 	"bitbucket.org/no-name-game/no-name/app/models"
 )
@@ -9,9 +11,9 @@ import (
 func NewEnemy() (enemy models.Enemy) {
 	enemy = models.Enemy{
 		Name: namer.GenerateName("resources/namer/enemies/model.json"),
-		Life: 100,
 	}
 
+	enemy.LifePoint = uint(rand.Int31n(15) + 100)
 	enemy.Create()
 
 	return

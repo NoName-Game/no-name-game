@@ -8,8 +8,8 @@ import (
 // Enemy - Enemy struct
 type Enemy struct {
 	gorm.Model
-	Name string `json:"name"`
-	Life uint
+	Name      string `json:"name"`
+	LifePoint uint
 }
 
 // Enemies - Enemies struct
