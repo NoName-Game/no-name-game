@@ -13,6 +13,7 @@ route.inventory.recap: "Riepilogo Inventario"
 route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
 route.abilityTree: "Albero Abilità"
+route.hunting: "Caccia"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -37,6 +38,7 @@ confirm: "Confermo!"
 resources: "Risorse"
 equip: "Equipaggia"
 destroy: "Distruggi"
+playerDie: "<b>Sei morto...</b>"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -50,6 +52,20 @@ knife: "Coltello"
 auto_rifle: "Fucile Automatico"
 sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
+
+# HUNTING
+hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
+hunting.enemy.card: "%s\nVita Nemico: %d\n\n\nLa tua vita: %d\n\nCosa vuoi fare?"
+hunting.last_hit: "Hai inflitto il colpo di grazia al mob!"
+hunting.experience_earned: "Hai ottenuto %d punti exp!"
+hunting.continue: "Vuoi continuare la caccia?"
+hunting.completed: "Caccia completata, torni alla base col bottino."
+
+# COMBAT SYSTEM
+combat.attack: "Attacca"
+combat.attack_with: "Attacca con "
+combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 
 # MISSION
 mission.exploration: "Seleziona campo di ricerca!"
@@ -109,3 +125,4 @@ ability.charisma: "Carisma"
 cron.route.testing.time_alert: "End Test time"
 cron.route.mission_alert: "Esplorazione finita!"
 cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.hunting_alert: "Informazioni ritornate con successo!"
