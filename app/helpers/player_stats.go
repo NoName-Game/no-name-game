@@ -5,8 +5,9 @@ import (
 	"reflect"
 	"strings"
 
+	"bitbucket.org/no-name-game/no-name/app/provider"
+
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/models"
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
@@ -37,21 +38,21 @@ func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string
 }
 
 // DecrementLife - Handle the life points
-func DecrementLife(lifePoint uint, player models.Player) {
-	//FIXME:
+func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	// MaxLife = 100 + Level * 10
 
-	if player.Stats.LifePoint-lifePoint > 100+player.Stats.Level*10 { // Overflow problem
-		player.Stats.LifePoint = 0
+	if stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
+		stats.LifePoint = 0
 	} else {
-		player.Stats.LifePoint -= lifePoint
+		stats.LifePoint -= lifePoint
 	}
-	player.Stats.Update()
-	if player.Stats.LifePoint == 0 {
-		// Player Die
-		DeleteRedisAndDbState(player)
-		msg := services.NewMessage(player.ChatID, Trans("playerDie", player.Language.Slug))
-		msg.ParseMode = "HTML"
-		services.SendMessage(msg)
+
+	var err error
+	stats, err = provider.UpdatePlayerStats(stats)
+	if err != nil {
+		services.ErrorHandler("Cant update player stats", err)
 	}
+	// player.Stats.Update()
+
+	return stats
 }
