@@ -58,7 +58,7 @@ func StartTutorial(update tgbotapi.Update, player nnsdk.Player) {
 
 		keyboard := make([]tgbotapi.KeyboardButton, len(languages))
 		for i, lang := range languages {
-			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Value)
+			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
 		}
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
