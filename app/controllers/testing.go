@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -21,10 +20,10 @@ import (
 //====================================
 
 // TestTimedQuest - ...
-func TestTimedQuest(update tgbotapi.Update, player nnsdk.Player) {
+func TestTimedQuest(update tgbotapi.Update) {
 	message := update.Message
 	routeName := "route.testing.time"
-	state := helpers.StartAndCreatePlayerState(routeName, player)
+	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
 	//====================================
 	// Validator
@@ -67,20 +66,20 @@ func TestTimedQuest(update tgbotapi.Update, player nnsdk.Player) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			helpers.FinishAndCompleteState(state, player)
+			helpers.FinishAndCompleteState(state, helpers.Player)
 		}
 	}
 
 }
 
 // TestMultiStage - Only for testing multi-stage
-func TestMultiStage(update tgbotapi.Update, player nnsdk.Player) {
+func TestMultiStage(update tgbotapi.Update) {
 	//====================================
 	// Init Func!
 	//====================================
 	message := update.Message
 	routeName := "route.testing.multiStage"
-	state := helpers.StartAndCreatePlayerState(routeName, player)
+	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
 	//====================================
 	// Validator
@@ -141,7 +140,7 @@ func TestMultiStage(update tgbotapi.Update, player nnsdk.Player) {
 		//====================================
 		// IMPORTANT!
 		//====================================
-		helpers.FinishAndCompleteState(state, player)
+		helpers.FinishAndCompleteState(state, helpers.Player)
 		//====================================
 
 		msg := services.NewMessage(message.Chat.ID, "Completed! :)")
@@ -155,7 +154,7 @@ func TestMultiStage(update tgbotapi.Update, player nnsdk.Player) {
 }
 
 // TestMultiState - Only for testing multi-state
-func TestMultiState(update tgbotapi.Update, player nnsdk.Player) {
+func TestMultiState(update tgbotapi.Update) {
 	//====================================
 	// Init Func!
 	//====================================
@@ -167,7 +166,7 @@ func TestMultiState(update tgbotapi.Update, player nnsdk.Player) {
 
 	message := update.Message
 	routeName := "route.testing.multiState"
-	state := helpers.StartAndCreatePlayerState(routeName, player)
+	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 	var payload payloadStruct
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
@@ -308,7 +307,7 @@ func TestMultiState(update tgbotapi.Update, player nnsdk.Player) {
 		//====================================
 		// IMPORTANT!
 		//====================================
-		helpers.FinishAndCompleteState(state, player)
+		helpers.FinishAndCompleteState(state, helpers.Player)
 		//====================================
 
 		msg := services.NewMessage(message.Chat.ID, "Completed :)")
@@ -322,6 +321,6 @@ func TestMultiState(update tgbotapi.Update, player nnsdk.Player) {
 }
 
 // TheAnswerIs - TheAnswerIs
-func TheAnswerIs(update tgbotapi.Update, player nnsdk.Player) {
+func TheAnswerIs(update tgbotapi.Update) {
 	log.Println(42)
 }

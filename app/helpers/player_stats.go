@@ -14,7 +14,7 @@ import (
 // PlayerStatsToString - Convert player stats to string
 func PlayerStatsToString(playerStats *nnsdk.PlayerStats, playerLanguageSlug string) (result string) {
 	val := reflect.ValueOf(playerStats).Elem()
-	for i := 4; i < val.NumField()-1; i++ {
+	for i := 8; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
 		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
 
@@ -26,7 +26,7 @@ func PlayerStatsToString(playerStats *nnsdk.PlayerStats, playerLanguageSlug stri
 // Increment - Increment player stats by fieldName
 func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string, playerLanguageSlug string) {
 	val := reflect.ValueOf(playerStats).Elem()
-	for i := 3; i < val.NumField()-1; i++ {
+	for i := 8; i < val.NumField()-1; i++ {
 		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
 
 		if fieldName == statToIncrement {

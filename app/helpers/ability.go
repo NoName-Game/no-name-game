@@ -17,7 +17,7 @@ func StatsKeyboard(slug string) (keyboard tgbotapi.ReplyKeyboardMarkup) {
 	var keyboardRows [][]tgbotapi.KeyboardButton
 
 	val := reflect.ValueOf(&nnsdk.PlayerStats{}).Elem()
-	for i := 4; i < val.NumField()-1; i++ {
+	for i := 8; i < val.NumField()-1; i++ {
 		text, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), slug, nil)
 		keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text))
 		keyboardRows = append(keyboardRows, keyboardRow)
@@ -31,7 +31,7 @@ func StatsKeyboard(slug string) (keyboard tgbotapi.ReplyKeyboardMarkup) {
 // InStatsStruct - Check if string exists in PlayerStats struct
 func InStatsStruct(s string, languageSlug string) (ok bool) {
 	val := reflect.ValueOf(&nnsdk.PlayerStats{}).Elem()
-	for i := 4; i < val.NumField()-1; i++ {
+	for i := 8; i < val.NumField()-1; i++ {
 		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), languageSlug, nil)
 		if strings.EqualFold(fieldName, s) {
 			return true

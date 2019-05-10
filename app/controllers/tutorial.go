@@ -9,10 +9,10 @@ import (
 )
 
 // StartTutorial - This is the first command called from telegram when bot started.
-func StartTutorial(update tgbotapi.Update, player nnsdk.Player) {
+func StartTutorial(update tgbotapi.Update) {
 	message := update.Message
 	routeName := "route.start"
-	state := helpers.StartAndCreatePlayerState(routeName, player)
+	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
 	//====================================
 	// Validator
@@ -21,20 +21,22 @@ func StartTutorial(update tgbotapi.Update, player nnsdk.Player) {
 	validationMessage := "Wrong input, please repeat or exit."
 	switch state.Stage {
 	case 1:
-		lang, err := provider.FindLanguageBy(message.Text, "value")
+		lang, err := provider.FindLanguageBy(message.Text, "name")
 		if err != nil {
 			services.ErrorHandler("Cant find language", err)
 		}
 
 		if lang.ID >= 1 {
 			validationFlag = true
-			player.LanguageID = lang.ID
 		}
 
-		player, err = provider.UpdatePlayer(player)
-		if err != nil {
-			services.ErrorHandler("Cant update player", err)
+		{
+			_, err := provider.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
+			if err != nil {
+				services.ErrorHandler("Cant update player", err)
+			}
 		}
+
 	}
 
 	if !validationFlag {
@@ -70,10 +72,10 @@ func StartTutorial(update tgbotapi.Update, player nnsdk.Player) {
 			//========================
 			// IMPORTANT!
 			//====================================
-			helpers.FinishAndCompleteState(state, player)
+			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			textToSend, _ := services.GetTranslation("complete", player.Language.Slug, nil)
+			textToSend, _ := services.GetTranslation("complete", helpers.Player.Language.Slug, nil)
 			msg := services.NewMessage(message.Chat.ID, textToSend)
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)

@@ -7,11 +7,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// CheckUser - Check if user exist in DB, if not exist create!
-func CheckUser(message *tgbotapi.Message) (player nnsdk.Player) {
-	player, _ = provider.FindPlayerByUsername(message.From.UserName)
+// HandleUser - Check if user exist in DB, if not exist create!
+func HandleUser(message *tgbotapi.Message) bool {
+	Player, _ = provider.FindPlayerByUsername(message.From.UserName)
 
-	if player.ID < 1 {
+	if Player.ID < 1 {
 		language, _ := provider.FindLanguageBySlug("en")
 
 		newPlayer := nnsdk.Player{
@@ -19,16 +19,18 @@ func CheckUser(message *tgbotapi.Message) (player nnsdk.Player) {
 			ChatID:   message.Chat.ID,
 			Language: language,
 			Inventory: nnsdk.Inventory{
-				Items: "",
+				Items: "{}",
 			},
-			Stats: nnsdk.PlayerStats{},
+			Stats: nnsdk.PlayerStats{
+				AbilityPoint: 1,
+			},
 		}
 
 		// 1 - Create new player
-		player, _ = provider.CreatePlayer(newPlayer)
+		Player, _ = provider.CreatePlayer(newPlayer)
 	}
 
-	return
+	return true
 }
 
 func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState) {

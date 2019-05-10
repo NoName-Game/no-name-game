@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -15,17 +13,15 @@ import (
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		// helpers.CheckUser(update.Message)
-
-		if player := helpers.CheckUser(update.Message); player.ID >= 1 {
+		if ok := helpers.HandleUser(update.Message); true == ok {
 			callingRoute := parseMessage(update.Message)
 
 			// ******************************************
 			// Check if callingRoute it's breaker routes
 			// ******************************************
-			isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes, player)
+			isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes)
 			if isBreakerRoute {
-				_, err := Call(breakerRoutes, route, update, player)
+				_, err := Call(breakerRoutes, route, update)
 				if err != nil {
 					services.ErrorHandler("Error in call command", err)
 				}
@@ -35,9 +31,9 @@ func routing(update tgbotapi.Update) {
 			// ******************************************
 			// Check if player have route in cache
 			// ******************************************
-			isCachedRoute := helpers.GetRedisState(player)
+			isCachedRoute := helpers.GetRedisState(helpers.Player)
 			if isCachedRoute != "" {
-				_, err := Call(routes, isCachedRoute, update, player)
+				_, err := Call(routes, isCachedRoute, update)
 				if err != nil {
 					services.ErrorHandler("Error in call command", err)
 				}
@@ -47,9 +43,9 @@ func routing(update tgbotapi.Update) {
 			// ******************************************
 			// Check if it's normal route
 			// ******************************************
-			isRoute, route := inRoutes(callingRoute, routes, player)
+			isRoute, route := inRoutes(callingRoute, routes)
 			if isRoute {
-				_, err := Call(routes, route, update, player)
+				_, err := Call(routes, route, update)
 				if err != nil {
 					services.ErrorHandler("Error in call command", err)
 				}
@@ -60,9 +56,9 @@ func routing(update tgbotapi.Update) {
 }
 
 // inRoutes - Check if message is translated command
-func inRoutes(messageRoute string, routeList map[string]interface{}, player nnsdk.Player) (isRoute bool, route string) {
+func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
 	for route := range routeList {
-		if strings.ToLower(helpers.Trans(route, player.Language.Slug)) == messageRoute {
+		if strings.ToLower(helpers.Trans(route, helpers.Player.Language.Slug)) == messageRoute {
 			return true, route
 		}
 	}

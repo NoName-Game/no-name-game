@@ -4,8 +4,18 @@ import (
 	"reflect"
 	"strings"
 
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
+)
+
+var (
+	//===================================
+	// Public
+
+	Player nnsdk.Player
+
+	//=====================================
 )
 
 // InArray - check if val exist in array
