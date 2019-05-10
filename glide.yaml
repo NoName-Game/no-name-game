@@ -1,0 +1,22 @@
+package: bitbucket.org/no-name-game/no-name
+import:
+- package: github.com/go-telegram-bot-api/telegram-bot-api
+  version: v5.0.0-rc1
+- package: github.com/joho/godotenv
+  version: v1.3.0
+- package: github.com/jinzhu/gorm
+  version: v1.9.2
+- package: github.com/getsentry/raven-go
+  version: v0.2.0
+- package: github.com/sirupsen/logrus
+  version: v1.3.0
+- package: github.com/nicksnyder/go-i18n
+  version: master
+- package: github.com/go-redis/redis
+  version: v6.15.1
+- package: github.com/go-gl/mathgl
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/util/rand
+- package: github.com/AvraamMavridis/randomcolor
+- package: github.com/mb-14/gomarkov

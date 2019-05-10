@@ -1,0 +1,258 @@
+Chain Mail
+Splint Mail
+Guardian
+Champion
+Warden
+Angelic Guardian
+Silk Shroud
+Ancient Armor
+Gothic Plate
+Ghost Armor
+Demonhide Armor
+Godly Plate of the Whale
+Arkaine's Valor
+Mystery Chest Armor
+Cloth Tunic
+Brigandine Coat
+Hide Tunic
+Hearth of Iron
+Splint Cuirass
+The Rainbow Cloak
+Torn Flesh of Souls
+Wisdom's Wrap
+The Gladiator's Bane
+Sparking Mail
+Scavenger Carapace
+Naj's Light Plate
+Demonspike Coat
+Chestplate of Ominous Power
+Tunic of Holy Torment
+Chainmail Tunic of Dark Nightmares
+Silver Cuirass of Conquered
+Haunted Ebon Greatplate
+Relentless Ivory Chestpiece
+Whistling Armor of Broken Families
+Solitude's Batteplate of Lost Voices
+Shepherd of Twilight's End
+Chestpiece of Ancient Whispers
+Tunic of Immortal Protection
+Scaled Chestguard of Imminent Wars
+Demon Vest of Smoldering Memories
+Pride's Mail Batteplate
+Timeworn Demon Breastplate
+Tyrannical Tunic of Mysteries
+Ghostly Tunic of the Bear
+Deflector of the Lost
+Oath of Sunfire
+Raider chest
+Metal chest
+Combat armor
+security armor
+Robot chest
+Trapper chest
+ Disciples metal chest
+Disciples strapped chest
+Operators belted chest
+Operators chest
+Operators heavy chest
+Destroyer's chest
+Vanquish
+MJOLNIR Armor
+N7 Armor
+HEV suit
+Agrias' Plate
+T-51b Power Armor
+Meta Knight's Cape
+Nightmare Possessed Plate
+Mood Armor
+Actium War Rig
+Armamentarium
+Crest of Alpha Lupi
+Hallowfire Heart
+Heart of Inmost Light
+ACD/0 Feedback Fence
+Gwisin Vest
+Lucky Raspberry
+Ophidia Spathe
+Raiden Flux
+The Dragon's Shadow
+The Sixth Coyote
+Chromatic Fire
+Phoenix Protocol
+Sanguine Alchemy
+Starfire Protocol
+Vesper of Radius
+Wings of Sacred Dawn
+Claws of Ahamkara
+Aeon Soul
+Contraverse Hold
+Ankaa Seeker IV Armor
+Battle Armor
+Powered Battle Armor
+Mandalorian Armor
+Verpine Zal Alloy Mesh
+Calo Nord's Battle Armor
+Heavy Battle Armor
+Durasteel Heavy Armor
+Mandalorian Battle Armor
+Mandalorian Heavy Armor
+Mandalorian Assault Armor
+Cassus Fett's Battle Armor
+Jurgan Kalta's Power Suit
+Baragwin Shadow Armor
+Bonadan Alloy Heavy Suit
+Darth Bandon's Fiber Armor
+Echani Fiber Armor
+Echani Light Armor
+Genoharadan Mesh Armor
+Heavy Combat Suit
+Light Exoskeleton
+Massassi Ceremonial Armor
+Reinforced Fiber Armor
+Republic Mod Armor
+Zabrak Battle Armor
+Zabrak Combat Suit
+Bronzium Light Battle Armor
+Cinnagar War Suit
+Davik's War Suit
+Environmental Bastion Armor
+Exar Kun's Light Battle Armor
+Heavy Exoskeleton
+Krath Heavy Armor
+Jamoh Hogra's Battle Armor
+Krath Holy Battle Suit
+Light Battle Armor
+Military Suit
+Powered Light Battle Armor
+Verpine Fiber Mesh
+Calo Nord's Battle Armor
+Cassus Fett's Armor
+Durasteel Heavy Armor
+Jurgan Kalta's Power Suit
+Heavy Battle Armor
+Mandalorian Assault Armor
+Mandalorian Battle Armor
+Mandalorian Heavy Armor
+Powered Battle Armor
+Verpine Zal Alloy Mesh
+Sand People Clothing
+Bastila Shan's Armor
+Carth Onasi's Armor
+Darth Malak's Armor
+Mission Vao's Armor
+Calo Nord's Armor
+Canderous Ordo's Armor
+Jolee Bindo's Armor
+Juhani's Armor
+Revan's Armor
+Trask Ulgo's Armor Set
+Kreia's Armor Set
+Darth Nihilus's Armor Set
+Darth Sion's Armor Set
+Visas Marr's Armor Set
+Mandalore the Preserver's Armor Set
+Mira's Armor Set
+Atton Rand's Armor Set
+Vrook Lamar's Armor Set
+Atris' Armor Set
+The Last Handmaiden's Armor Set
+Naresh's Armor Set
+Saul Karath Armor Set
+Restored Triumvirate Armor Set
+Diburnium Reinforced Body Armor Mk XI
+Exo-Plating Armor Mk XI
+Klingon Intelligence Stealth Utility Armor Mk XI
+Neutronium-Laced Combat Armor
+Physical Augmentation Utility Armor Mk XI
+Augmentation Armor Mk XI
+Polyalloy Weave Armor Mk X
+Stealth Operational Armor Mk XIII
+Kevlar Armor
+Spider Suit
+Wraith Suit
+Serpent Suit
+Serpent Armor
+Predator Armor
+Warden Armor
+Icarus Armor
+E.X.O. Suit
+W.A.R. Suit
+R.A.G.E. Suit
+R.A.G.E. Armor
+Nanoscale Vest
+Utility Vest
+Hellweave
+Plated Vest
+Hazmat Vest
+Stasis Vest
+SPARK Armor
+Reinforced Frame
+Agent
+Assassin
+Battlemaster
+Berserker
+Colossus
+Duelist
+Explorer
+Gladiator
+Guardian
+Hydra
+Liberator
+Mantis
+Mercenary
+Onyx
+Phantom
+Phoeni
+Predator
+Predator X
+Rage
+Scorpion
+Silverback
+Survivor
+Thermal
+Titan
+Ursa
+Warlord
+Blood Dragon Armor
+Cerberus Assault Armor
+Collector Armor
+Inferno Armor
+Kestrel Armor
+N7 Armor
+Terminus Assault Armor
+Hazard Suit
+Heavy Combat Armor
+Powered Armor
+WormSkin Armor
+Armante Suit
+Leather Jacket
+Armante Dress
+Heritage
+Nightshade
+Moonsilver
+Second Skin
+Ares Victory
+Rapid Transit
+Armor Clothing
+Armor Jacket
+Armor Vest
+Chameleon Suit
+Full Body Armor
+Space Explorer Jumpsuit
+Mark VI
+CQB
+EVA
+EOD
+Hayabusa
+Katana
+Recon
+Scout
+ODST
+Mark Armor
+Rogue Armor
+Elite Armor
+Assault Armor
+Flight Armor
+Heroic Armor
+Ascetic Armor
+Commando Armor

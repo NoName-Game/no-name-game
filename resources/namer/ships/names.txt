@@ -1,0 +1,962 @@
+Light Fighter
+Heavy Fighter
+Lightning
+Wing
+Corvette
+Viper
+Dart
+Raven
+Ironwing
+PSS Sparrow
+Valkyrie
+Scythe
+Rapier
+Arrow
+PSS Miran
+Hammerhead
+Morningstar
+Starbridge
+Age Eagle
+Broadsword
+Javelin
+Wanderer
+Hawk
+PSS EL-K
+Warrior
+Charger
+Therion
+Wraith
+Cerberos
+Myrmidon
+Destroyer Vega
+Phantom
+Baron
+Crusader
+Duke
+Sleipnir
+Eidolon
+Thane
+Arbiter
+Mjollnir
+Revenant
+RadiantX
+Ritari
+Vindicator
+Star Lancer
+Nightflyer
+USS Voyager
+USS Thunderchild
+USS Adelphi, NCC-26849
+USS Andromeda
+USS Agamennon
+Aldara
+Vetar
+Prakesh
+Trager
+Kraxon
+Reklar
+IRW Belak
+IRW Decius
+IRW Devoras
+IRW Haakona
+IRW Khazara
+IRW Makar
+IRW T'Met
+IRW Terix
+USS Adelphi, NCC-26849
+USS Ambassador, NX-10521
+USS Gander
+USS Ganges (NCC-72454)
+USS Mekong (NCC-72617)
+USS Orinoco (NCC-72905)
+USS Rio Grande (NCC-72452)
+USS Rubicon (NCC-72936)
+USS Volga (NCC-73196)
+USS Yukon (NCC-74602)
+USS Enterprise, NCC-1701-C
+USS Excalibur, NCC-26517
+USS Exeter, NCC-26531
+USS Gandhi, NCC-26632
+USS Horatio, NCC-10532
+USS Tolstoy, NCC-26510
+USS Valdemar, NCC-26198
+USS Yamaguchi, NCC-26510
+USS Zhukov, NCC-26136
+USS Akagi
+USS Tolstoy
+USS Yeager
+IKS BortaS
+IKS Drovna
+IKS Maht-H'a
+IKS Qu'Vat
+IKS Toh'Kaht
+IKS Vor'nak
+IKV LaDwI'va
+IRW Belak
+IRW Decius
+IRW Devoras
+IRW D'ridthau
+IRW Haakona
+IRW Khazara
+IRW Makar
+IRW T'Met
+IRW Terix
+Acclamator I
+Acclamator II
+Imperious
+Arc Hammer
+Caccia da ricognizione TIE/rc
+Cannoniera Skipray GAT-12
+Devastator
+Disintegratore Stellare
+Gravshock Bi-Onda
+Dominion
+Eclipse
+Eclipse II
+Super Star Destroyer di classe Eclipse
+Eidolon
+Emancipator
+Super Star Destroyer di classe Executor
+Fregata di classe Lancer
+Fregata DP20
+Incrociatore leggero di classe Guardian
+Incrociatore medio di classe Strike
+Harrow
+Hydra
+Eye of Palpatine
+Incrociatore Immobilizer 418
+Super Star Destroyer di classe Imperial
+Incrociatore da ricognizione di classe Tartan
+Incrociatore modulare da taskforce
+Inquisitor
+Incrociatore dell'Alleanza
+Fregata dell'Alleanza (SSV Normandy SR-2)
+Incrociatore di Cerberus
+Incrociatore geth
+Corazzata geth
+Incrociatore turian
+Incrociatore quarian
+Alarei
+AML Demeter
+Araldo
+Arcturian Jade
+Azedes
+Borealis
+Cybaen
+Cyniad
+Defrahnz
+Destiny Ascension
+Elbrus
+Excelsior
+Fusion
+Galduu
+Ghrigult
+Gloria di Khar'shan
+Grande Mar
+Helash
+Honorata
+Ibn Battuta
+Idenna
+Iktomi
+Indomitable
+Kalanhai
+Kara
+Konesh
+Kupe
+Kwunu
+Leviatano di Dis
+Moreh
+MSV Adams
+MSV Atlanta
+MSV Anixara
+MSV Broken Arrow
+MSV Collins
+MSV Cornucopia
+MSV Corsica
+MSV Estevanico
+MSV Fedele
+MSV Hugo Gernsback
+MSV Icarus
+MSV Kent
+MSV Kirkwall
+MSV Majesty
+MSV Monarch
+MSV Ontario
+MSV Rosalie
+MSV Sevrum
+MSV Stanislaw
+MSV Strontium Mule
+MSV Wallace
+MSV Worthington
+Nalotir
+Neema
+Nefrane
+Ostral
+Penumbra Apex
+PFS Havincaw
+Purgatory
+Qwib-Qwib
+Resolute
+Rayya
+Selani
+Shellen
+Sovereign
+SSV Aconcagua
+SSV Agincourt
+SSV Ain Jalut
+SSV Benjamin Davis
+SSV Budapest
+SSV Cairo
+SSV Cape Town
+SSV Einstein
+SSV Elbrus
+SSV Emden
+SSV Everest
+SSV Fuji
+SSV Hastings
+SSV Hawking
+SSV Hyderabad
+SSV Leipzig
+SSV Logan
+SSV London
+SSV Orizaba
+SSV Warsaw
+SSV Trafalgar
+Ter Alan
+Tesleya
+Tonbay
+Tunerron
+Typhoon
+Ulnay
+Undaunted
+Usela
+Verrikan
+Viridian Zenith
+Yaska
+Galactica
+Pegasus
+Valkyrie
+Columbia
+Atlantia
+Prometheus
+Hades
+Titan
+Mercury
+Triton
+Solaria
+Osiris
+Acheron
+Athena
+Demeter
+Colonial One
+Cloud 9
+Viper
+Raptor
+Blackbird
+Stealthstar
+Lakon Diamondback Scout (DBS)
+Lakon Diamondback Explorer (DBX)
+Viper MK3
+Python
+Asp Explorer
+Cobra MK 3
+Sidewinder
+Vulture
+Atlantide
+Aurora
+Orione
+Jumper
+Destiny
+Adaris
+Weir
+Avenger
+O'Neill
+Daniel Jackson
+Vanir
+Al'kesh
+Ha'tak
+Apophis
+Anubis
+Nave madre Ori
+Caccia Ori
+X-301
+F-302
+F-302 Fighter
+X-302
+Prometeo
+X-303
+X-304
+Daedalus
+Odyssey
+Korolev
+Apollo
+Phoenix
+Hammond
+Sun Tzu
+Dardo
+Dardo Wraith
+Incrociatore
+incrociatore Wraith
+Ricognitore
+Adowa
+USCSS Corazon Oscuro
+Erebus
+Torrens
+USCSS Nostromo
+Seegson
+Sevastopol
+Anesidora
+Disco volante Dalek
+TEC Fighter
+Advent Fighter
+Vasari Fighter
+TEC Bomber
+Vasari Bomber
+Shriken Corvette
+Stilat Corvette
+Acolyte Corvette
+Vespa Corvette
+Tosurak Corvette
+Sulsurak Corvette
+Arcova Scout Frigate
+Seeker Vessel
+Jikara Navigator
+Cobalt Light Frigate
+Disciple Vessel
+Ravastra Skirmisher
+Garda Flak Frigate
+Protev Colony Frigate
+Stock Saturn V
+Blue Ship
+Dropship
+Red Ship
+Scuttler
+Kushan Mothership
+Advanced Swarmer
+Ambassador Corvette
+Bentusi Exchange
+Cargo Barge
+Destroyer (Kushan)
+Defense Fighter
+Ghost Ship
+Headshot Asteroid
+Heavy Corvette (Kushan)
+Swarmer
+Standard Corvette
+Khar-Toba
+Scaffold
+Kestrel Cruiser
+Engi Cruiser
+Federation Cruiser
+Zoltan Cruiser
+The Mantis Cruiser
+Slug Cruiser
+Rock Cruiser
+Stealth Cruiser
+Lanius Cruiser
+Crystal Cruiser
+Isis gallente
+Incursus
+ISS caldari
+Heron
+ISS amarr
+Crucifier
+ISS minmatar
+Burst
+ISS gallente
+Algos
+Corax
+Coercer
+Thrasher
+Thorax
+Caracal
+Maller
+Scythe
+Myrmidon
+Blackbird
+Harbinger
+Hurricane
+Megathron
+Rokh
+Abaddon
+Tempest
+Rorqual
+Anshar
+Charon
+Thanatos
+Chimera
+Archon
+Nidhoggur
+Moros
+Phoenix
+Revelation
+Naglfar
+Apostle
+Minokawa
+Ninazu
+Lif
+Nyx
+Wyvern
+AeonHel
+Erebus
+Leviathan
+Avatar
+Ragnarok
+Shuttle
+Incursus
+Corax
+Omen
+Hurricane
+Brutix Navy Issue
+Raven Navy Issue
+Imperial Navy Slicer
+Republic Fleet Firetail
+Ishtar
+Hawk
+Paladin
+Sleipnir
+serpentis
+Vigilant
+Gila
+blood raiders
+Bhaalgorn
+angel
+Dramiel
+Proteus
+Tengu
+Legion
+Loki
+Iteron Mark V
+Badger
+Mammoth
+Crane
+Viator
+Mastodon
+Impel
+Charon
+Fenrir
+Obelisk
+Providence
+Anshar
+Ark
+Rhea
+Nomad
+Impairor
+Ibis
+Velator
+Reaper
+Executioner
+Inquisitor
+Tormentor
+Crucifier
+Punisher
+Condor
+Bantam
+Kestrel
+Atron
+Navitas
+Tristan
+Maulus
+Incursus
+Imicus 	Slasher
+Breacher
+Vigil
+Rifter
+Probe
+Vengeance
+Harpy
+Ishkur
+Enyo
+Wolf
+Jaguar
+Covert Ops
+Anathema
+Purifier
+Manticora
+Buzzard
+Nemesis
+Helios 	Cheetah
+Hound
+Malediction Crow
+Raptor
+Taranis
+Ares
+Claw
+Stiletto
+Coercer
+Dragoon
+Cormorant
+Corax
+Catalyst
+Algos
+Thrasher
+Talwar
+Command Destroyers
+Pontifex
+Stork
+Magus
+Bifrost
+Hecate 	Svipul
+Arbitrator
+Augoror
+Maller
+Blackbird
+Osprey
+Moa
+Celestis
+Exequrorax
+Vexor
+Bellicose
+Stabber
+Rupture
+Zealot
+Sacrilege
+Eagle
+Cerberus
+Ishtar
+Deimos
+Vagabond
+Onyx
+Phobos
+Broadsword
+Guardian
+Basilisk
+Oneiros
+Scimitar
+Pilgrim
+Falcon
+Rook
+Lachesis
+Huginn
+Rapier
+Prophecy
+Harbinger
+Oracle
+Ferox
+Drake
+Naga
+Brutix
+Myrmidon
+Talos
+Cyclone
+Hurricane
+Tornado
+Damnation
+Absolution
+Vulture
+Nighthawk
+Astarte
+Eos
+Sleipnir
+Scorpion
+Raven
+Rokh
+Dominix
+Hyperion
+Typhoon
+Redeemer
+Widow
+Paladin
+Kronos
+Vargur
+Nidhoggur
+Nyx
+Dreadnoughts
+Revelation
+Phoenix
+Naglfar
+Minokawa
+Ninazu
+Providence
+Charon
+Obelisk
+Fenrir
+Rhea
+Anshar
+Badger
+Tayra
+Nereus
+Kryos
+Epithal
+Miasmos
+Iteron Mark V
+Hoarder
+Wreathe
+Bustard
+Mastodon
+Amarr Shuttle
+Caldari Shuttle
+Gallente Shuttle
+Minmatar Shuttle
+Prospect
+Endurance
+Covetor
+Hulk
+Mackinaw
+Skiff
+Noctis
+Rorqual
+Dramiel
+Cruor
+Worm
+Garmur
+Succubus
+Daredevil
+Astero
+Cynabal
+Ashimmu
+Orthrus
+Phantasm
+Stratios
+Bhaalgorn
+Rattlesnake
+Barghest
+Nightmare
+Vindicator
+Nestor
+Chemosh
+Vehement
+Vendetta
+Loggerhead
+Molok
+Komodo
+Vanquisher
+Ada-1's Lone Wolf
+Aerial Shroud
+Affinity's Gift
+Azul Blade
+Bird of Peace
+Buckthorn Approach
+Cautious Optimism
+Celestial Tour
+Cold Snap
+Classical Nova
+Cosmo Jumper
+Crux Unraveled
+Dream Streak
+Flight of Fancy
+Galaxy Kayak
+Forgotten Vortex
+Glad Tidings
+Granite Burrow
+Grim Foxx
+Home Away
+In With the New
+Infected Seeker
+Inky Daydream
+Momentum Occasion
+Murmuration
+Ruby Slice
+Stained Shrapnel
+Stronger Than Now
+Technical Meltdown
+The First Domino
+The People's Pride
+The Platinum Starling
+Three to Eight
+Turbo Hammer
+Uncrowned Progenitor
+Unsecured
+OUTCRY
+Whetted Resolution
+Xenon Direct
+�drerir
+Jadewyrm XLIV
+Currus Gloriae XLII
+Rotaro 33
+Trirang Tox
+Shade at the Gates
+Stark Baffler
+Zavala's Authority
+The Ruinous Flame
+Lost Legend
+Shadow Trespass
+Ampulance LXXX
+Vor Pyl VIII
+Dusk Harrier
+Kolla Mauler IX
+Pitfall Souter E5D
+Burningbrite Tyger
+Hook Snarler
+Lang Syne Revenant
+A Thousand Wings
+Thunderwing
+Estival Excursion
+Ermine TAC-717
+Pallas Galliot
+Stellar Pavements
+Temperance Moon
+Impolite Company
+Upward Spiral
+Beautiful Gravities
+Where Stars Collide
+Bicameral Promise
+Last Sunset
+Quantum Cartographer
+In Medias Res
+Drift Apart
+The Tall Tale
+Unfinal Shapes
+Death to Kells
+Aeviternal XXII
+Astera Blade
+Tickled Catastrophe
+Jewel of Saturn
+The Great Beyond
+Queen of Hearts
+Distant Pulsar
+Iron Pendragon
+Leonine Carrack
+Bonegrip
+Sails of Osiris
+Saint-14's Gray Pigeon
+Kabr's Glass Aegis
+Asher Mir's
+Ikora's Resolve
+The Sundaresh Experiment 13-R
+Armcoat
+Sailing Shield
+Rubente Dextra
+Nebula Bloom
+Edge of the Worlds
+Andromeda Gleaming
+Star Scion
+Galactic Hum
+Dragonquin
+Arrowhawk
+Runereed
+Wanderlonging
+Infinite Visage
+Mainsail Royal
+Bassanio
+Spun Sidhe
+Neverfall
+Hardtop Regent
+Amethystine
+Fantail Regent
+Nothing Gold
+BreakPoint
+City Apex
+Echo Zero
+Vector Zero
+Shadowed Dawn
+Eriana's Vengeance
+Talon Blue
+Cardinal One
+Helios Strain
+Starling Bolt
+Leopard Zero
+Minerva Zero
+Zenith SV
+Leonid MV
+Space-Age Lancelot
+Eos Rapture
+Spectral Gain
+The Bandwagon
+High Line
+Verona Mesh
+Amplitude/PT
+Cartesian/KO
+Takanome Wings
+Absolute/MN
+Captain Nemo
+Nautilus
+Alexandria
+Dead Fall
+Sojourner
+Nautilus Zero
+Odyssey Zero
+Ego and Squid
+Ordinate/VD
+Alessa
+Imprint
+Symmetry Flightc
+Tidal Dawn
+Rose and Bone
+Wanderwing
+Nanophoenix
+Needle and Thread
+Once and Future
+Order Theory
+Timeless Tereshkova
+80 Proofreader
+AFv1 Octavian
+AFv2 Octavian
+AFv3 Octavian
+AX19 Slipper Misfit
+AX19 Spindle Demon
+Act on Instinct
+Agonarch Karve
+Akula 4V0 (Iteration 1)
+Alemyr's Lament
+Always Shoot the Messenger
+Arcadia Class Jumpship
+Aries Ascendant
+Armor of Vows
+Aspect of Glass
+Atalanta's Hunt
+Aurora Lance
+Gods
+Belisarius Defiant
+Belly of the Beast (Jumpship)
+CX20 Slipper Misfit
+CX20 Spindle Demon
+Callous Indifference
+Ceres Galliot
+Chasing Infinity
+Coldsnap BKR
+Comitatus
+Count the Stars
+Crypt Hammer
+Delinquent Sunrise
+Devils' Due BKR
+Downward Spiral
+Draught of Nectar
+Dream Eater
+EX21 Slipper Misfit
+EX21 Spindle Demon
+Eon Trespass
+Eternity to Eternity
+Ether Eater
+Extinction Event
+Fatal Vision
+Flexible Moral Compass
+Glass Minuet
+Gliding Hermitage
+Gloriole Jump
+Hebridean Thoughtcrime
+High and Flighty
+Hildian Seeker
+Invincible Ship the Third
+JS/T Bicameral Friendship
+JS/T Key Facts Elided
+JS/T Let's Employ Force
+Karuna, Falling
+Kestrel Class AX
+Kestrel Class AX0
+Kestrel Class CX
+Kestrel Class CX0
+Kestrel Class EX
+Kestrel Class EX0
+Ketch Me If You Can
+Kingslayer BKR
+Kondratyuk's Escape
+LRv1 Javelin
+LRv2 Javelin
+LRv3 Javelin
+Last Battle
+Laughing Behind Your Back
+Light in the Abyss
+Little Light (Ship)
+Lost Legacy
+Made of Shakespeare
+Malice Delta
+Manus Celer Dei
+Mind Bleacher
+NS22 Cloud Errant
+NS22 High Water
+NS44 Cloud Errant
+NS44 High Water
+NS66 Cloud Errant
+NS66 High Water
+Nanophoenix
+Needle and Thread
+Never Liked Thermodynamics
+No Apologies
+Newsbreaker
+No End Theory
+Obsidian Sonnet
+Omit the Legend
+Once and Future
+Outrageous Fortune
+Permission to Stomp
+Phaeton Class v1
+Phaeton Class v1.1
+Phaeton Class v2
+Phaeton Class v2.1
+Phaeton Class v3
+Phaeton Class v3.1
+Plus Stealth Origami
+Quite Content Damsel
+Regulus Class 22a
+Regulus Class 44b
+Regulus Class 55
+Regulus Class 66c
+Regulus Class 77
+Regulus Class 99
+Ripship Pardoner
+Rope to Heaven
+Scorpio Miracle
+Seraphim Toaster
+Shark Whisperer
+Sidereal Rumba
+Silent Verdict
+Sleek Antistate
+Smokehouse Six
+Someday Tether
+Space-Age Mariner
+Steel Atreus
+Strategic Joy Reserves
+Sun Current
+THANATOS 2/Upgun
+Teatime with Marduk
+The Climbc
+The Dirigible Incorrigible
+The Fangs of Nyx
+The Fermi Solution
+The Pahanin Imprint
+The Road Unraveled
+The Shark Wrestler
+Tiger Tiger
+Timeless Tereshkova
+Tropos Gardener
+Vacuum Diagram
+Valkyrie-O5X
+Vienna Singer
+Vintage Russian Soul
+Void Philosopher
+Waning Star
+Wolf Hunter BKR
+Zephyr Rig
+Moonrakers
+Orion III
+SSTO-TAV-37B
+Churchill
+Explorer
+Intrepid
+Roger
+X-71s
+Alexei Leonov
+Anastasia
+Bebop
+Bilkis
+Excelsior
+Hermes
+The MAV
+Hunter IV
+Rocke
+F-302 Mongoose
+Icarus
+Icarus I
+Icarus II
+Mars I
+Mars II
+Messiah
+Odyssey
+Orbit Jet
+Rocinante
+Ryvius
+SA-43 Hammerhead Mk
+Scorpio E-X-1
+Serenity
+USSC Discovery One
+USS Cygnu
+Valley Forge
+Zero-X
+SA-23E Aurora
+A-23J Thunderbolt
+Raider Fighter
+ARC-170 starfighter
+V-19 Torrent starfighter
+V-wing starfighter
+Naboo starfighter
