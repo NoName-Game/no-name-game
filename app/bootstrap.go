@@ -1,10 +1,6 @@
 package app
 
 import (
-	"os"
-	"strconv"
-	"time"
-
 	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
@@ -25,7 +21,6 @@ func bootstrap() {
 	// NoName WS
 	//*************
 	services.NnSDKUp()
-
 	services.RedisUp()
 
 	//*************
@@ -33,6 +28,8 @@ func bootstrap() {
 	//*************
 	services.BotUp()
 
-	minutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
-	go commands.Cron(time.Duration(minutes) * time.Minute)
+	//*************
+	// Cron
+	//*************
+	go commands.Cron()
 }

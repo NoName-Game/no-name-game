@@ -1,17 +1,24 @@
 package commands
 
 import (
+	"os"
+	"strconv"
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
+	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
 // Cron - Call every minute the function
-func Cron(minute time.Duration) {
+func Cron() {
+	envCronMinutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
+	sleepTime := time.Duration(envCronMinutes) * time.Minute
+
 	for {
 		//Sleep for minute
-		time.Sleep(minute)
+		time.Sleep(sleepTime)
+
 		//After sleep call function.
 		CheckFinishTime()
 	}
