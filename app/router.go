@@ -58,7 +58,7 @@ func routing(update tgbotapi.Update) {
 // inRoutes - Check if message is translated command
 func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
 	for route := range routeList {
-		if strings.ToLower(helpers.Trans(route, helpers.Player.Language.Slug)) == messageRoute {
+		if strings.ToLower(helpers.Trans(route)) == messageRoute {
 			return true, route
 		}
 	}

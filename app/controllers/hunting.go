@@ -47,16 +47,16 @@ func Hunting(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 1:
 		if state.FinishAt.Before(time.Now()) {
 			validationFlag = true
 		} else {
-			validationMessage = helpers.Trans("wait", helpers.Player.Language.Slug, state.FinishAt.Format("15:04:05"))
+			validationMessage = helpers.Trans("wait", state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
-		if message.Text == helpers.Trans("continue", helpers.Player.Language.Slug) && mob.LifePoint > 0 {
+		if message.Text == helpers.Trans("continue") && mob.LifePoint > 0 {
 			validationFlag = true
 		} else if mob.LifePoint == 0 {
 			validationFlag = true
@@ -71,14 +71,14 @@ func Hunting(update tgbotapi.Update) {
 			state, _ = provider.UpdatePlayerState(state)
 		}
 	case 3:
-		if strings.Contains(message.Text, helpers.Trans("combat.attack_with", helpers.Player.Language.Slug)) {
+		if strings.Contains(message.Text, helpers.Trans("combat.attack_with")) {
 			validationFlag = true
 		}
 	case 4:
-		if message.Text == helpers.Trans("continue", helpers.Player.Language.Slug) {
+		if message.Text == helpers.Trans("continue") {
 			validationFlag = true
 			state.Stage = 0
-		} else if message.Text == helpers.Trans("nope", helpers.Player.Language.Slug) {
+		} else if message.Text == helpers.Trans("nope") {
 			validationFlag = true
 			state.Stage = 5
 		}
@@ -119,21 +119,25 @@ func Hunting(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", helpers.Player.Language.Slug, state.FinishAt.Format("15:04:05"))))
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", state.FinishAt.Format("15:04:05"))))
 	case 1:
 		if validationFlag {
 			// Enemy found
 			state.Stage = 2
 			state, _ = provider.UpdatePlayerState(state)
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.found", helpers.Player.Language.Slug, mob.Name))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", helpers.Player.Language.Slug))))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.found", mob.Name))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	case 2:
 		if validationFlag {
 			state.Stage = 3
 			state, _ = provider.UpdatePlayerState(state)
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.card", helpers.Player.Language.Slug, mob.Name, mob.LifePoint, helpers.Player.Stats.LifePoint))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.card", mob.Name, mob.LifePoint, helpers.Player.Stats.LifePoint))
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				ResizeKeyboard: true,
 				Keyboard:       helpers.GenerateWeaponKeyboard(helpers.Player),
@@ -171,7 +175,7 @@ func Hunting(update tgbotapi.Update) {
 
 			var text string
 			if mob.LifePoint == 0 {
-				text = helpers.Trans("combat.last_hit", helpers.Player.Language.Slug)
+				text = helpers.Trans("combat.last_hit")
 			} else {
 				mobDamage := uint(rand.Int31n(17) + 1)
 
@@ -185,19 +189,23 @@ func Hunting(update tgbotapi.Update) {
 				if stats.LifePoint == 0 {
 					// Player Die
 					helpers.DeleteRedisAndDbState(helpers.Player)
-					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie", helpers.Player.Language.Slug))
+					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
 					msg.ParseMode = "HTML"
 					services.SendMessage(msg)
 				}
 
-				text = helpers.Trans("combat.damage", helpers.Player.Language.Slug, playerDamage, mobDamage)
+				text = helpers.Trans("combat.damage", playerDamage, mobDamage)
 			}
 
 			state.Stage = 2
 			state, _ = provider.UpdatePlayerState(state)
 
 			msg := services.NewMessage(helpers.Player.ChatID, text)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", helpers.Player.Language.Slug))))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	case 4:
@@ -208,10 +216,15 @@ func Hunting(update tgbotapi.Update) {
 				services.ErrorHandler("Cant update player", err)
 			}
 
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.experience_earned", helpers.Player.Language.Slug, 1))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.experience_earned", 1))
 			services.SendMessage(msg)
-			msg = services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.continue", helpers.Player.Language.Slug))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", helpers.Player.Language.Slug)), tgbotapi.NewKeyboardButton(helpers.Trans("nope", helpers.Player.Language.Slug))))
+			msg = services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.continue"))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
+					tgbotapi.NewKeyboardButton(helpers.Trans("nope")),
+				),
+			)
 			services.SendMessage(msg)
 		}
 	case 5:
@@ -222,7 +235,7 @@ func Hunting(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("hunting.complete", helpers.Player.Language.Slug))
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("hunting.complete"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton("back"),

@@ -12,11 +12,11 @@ import (
 )
 
 // PlayerStatsToString - Convert player stats to string
-func PlayerStatsToString(playerStats *nnsdk.PlayerStats, playerLanguageSlug string) (result string) {
+func PlayerStatsToString(playerStats *nnsdk.PlayerStats) (result string) {
 	val := reflect.ValueOf(playerStats).Elem()
 	for i := 8; i < val.NumField()-1; i++ {
 		valueField := val.Field(i)
-		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
+		fieldName := Trans("ability." + strings.ToLower(val.Type().Field(i).Name))
 
 		result += fmt.Sprintf("<code>%-15v:%v</code>\n", fieldName, valueField.Interface())
 	}
@@ -24,10 +24,10 @@ func PlayerStatsToString(playerStats *nnsdk.PlayerStats, playerLanguageSlug stri
 }
 
 // Increment - Increment player stats by fieldName
-func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string, playerLanguageSlug string) {
+func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string) {
 	val := reflect.ValueOf(playerStats).Elem()
 	for i := 8; i < val.NumField()-1; i++ {
-		fieldName, _ := services.GetTranslation("ability."+strings.ToLower(val.Type().Field(i).Name), playerLanguageSlug, nil)
+		fieldName := Trans("ability." + strings.ToLower(val.Type().Field(i).Name))
 
 		if fieldName == statToIncrement {
 			f := reflect.ValueOf(playerStats).Elem().FieldByName(val.Type().Field(i).Name)

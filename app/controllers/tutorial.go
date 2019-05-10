@@ -75,7 +75,7 @@ func StartTutorial(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			textToSend, _ := services.GetTranslation("complete", helpers.Player.Language.Slug, nil)
+			textToSend := helpers.Trans("complete")
 			msg := services.NewMessage(message.Chat.ID, textToSend)
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)

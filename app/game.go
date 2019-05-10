@@ -46,7 +46,7 @@ func Run() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username", "en"))
+				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username"))
 				services.SendMessage(msg)
 				continue
 			}

@@ -21,10 +21,10 @@ func AbilityTree(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 0:
-		if helpers.InStatsStruct(message.Text, helpers.Player.Language.Slug) && playerStats.AbilityPoint > 0 {
+		if helpers.InStatsStruct(message.Text) && playerStats.AbilityPoint > 0 {
 			state.Stage = 1
 			validationFlag = true
 		} else if playerStats.AbilityPoint == 0 {
@@ -32,10 +32,10 @@ func AbilityTree(update tgbotapi.Update) {
 			validationFlag = true
 		}
 	case 1:
-		if message.Text == helpers.Trans("ability.back", helpers.Player.Language.Slug) {
+		if message.Text == helpers.Trans("ability.back") {
 			state.Stage = 0
 			state, _ = provider.UpdatePlayerState(state)
-		} else if message.Text == helpers.Trans("exit", helpers.Player.Language.Slug) {
+		} else if message.Text == helpers.Trans("exit") {
 			state.Stage = 2
 			validationFlag = true
 		}
@@ -53,31 +53,29 @@ func AbilityTree(update tgbotapi.Update) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", helpers.Player.Language.Slug, helpers.PlayerStatsToString(&playerStats, helpers.Player.Language.Slug))
-		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", helpers.Player.Language.Slug, playerStats.AbilityPoint)
+		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&playerStats))
+		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", playerStats.AbilityPoint)
 
 		msg := services.NewMessage(helpers.Player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
-		msg.ReplyMarkup = helpers.StatsKeyboard(helpers.Player.Language.Slug)
+		msg.ReplyMarkup = helpers.StatsKeyboard()
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
 			// Increment player stats
-			// helpers.Player.Stats.Increment(message.Text, helpers.Player.Language.Slug)
-
-			helpers.PlayerStatsIncrement(&playerStats, message.Text, helpers.Player.Language.Slug)
+			helpers.PlayerStatsIncrement(&playerStats, message.Text)
 
 			playerStats, err = provider.UpdatePlayerStats(playerStats)
 			if err != nil {
 				services.ErrorHandler("Cant update player stats", err)
 			}
 
-			text := helpers.Trans("ability.stats.completed", helpers.Player.Language.Slug, message.Text)
+			text := helpers.Trans("ability.stats.completed", message.Text)
 			msg := services.NewMessage(helpers.Player.ChatID, text)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("ability.back", helpers.Player.Language.Slug)),
-					tgbotapi.NewKeyboardButton(helpers.Trans("exit", helpers.Player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("ability.back")),
+					tgbotapi.NewKeyboardButton(helpers.Trans("exit")),
 				),
 			)
 			services.SendMessage(msg)
@@ -90,18 +88,18 @@ func AbilityTree(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			// ====================================
 
-			text := helpers.Trans("ability.stats.type", helpers.Player.Language.Slug, helpers.PlayerStatsToString(&playerStats, helpers.Player.Language.Slug))
+			text := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&playerStats))
 			if playerStats.AbilityPoint == 0 {
-				text += "\n" + helpers.Trans("ability.no_point_left", helpers.Player.Language.Slug)
+				text += "\n" + helpers.Trans("ability.no_point_left")
 			} else {
-				text += helpers.Trans("ability.stats.total_point", helpers.Player.Language.Slug, playerStats.AbilityPoint)
+				text += helpers.Trans("ability.stats.total_point", playerStats.AbilityPoint)
 			}
 
 			msg := services.NewMessage(helpers.Player.ChatID, text)
 			msg.ParseMode = "HTML"
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 				),
 			)
 			services.SendMessage(msg)

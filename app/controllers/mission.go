@@ -30,9 +30,9 @@ func StartMission(update tgbotapi.Update) {
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	eTypes := make([]string, 3)
-	eTypes[0] = helpers.Trans("mission.underground", helpers.Player.Language.Slug)
-	eTypes[1] = helpers.Trans("mission.surface", helpers.Player.Language.Slug)
-	eTypes[2] = helpers.Trans("mission.atmosphere", helpers.Player.Language.Slug)
+	eTypes[0] = helpers.Trans("mission.underground")
+	eTypes[1] = helpers.Trans("mission.surface")
+	eTypes[2] = helpers.Trans("mission.atmosphere")
 
 	// Update status
 	// Stupid poninter stupid json pff
@@ -43,7 +43,7 @@ func StartMission(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 1:
 		input := message.Text
@@ -56,15 +56,15 @@ func StartMission(update tgbotapi.Update) {
 			payload.Times++
 			payload.Quantity = rand.Intn(3)*payload.Times + 1
 			validationFlag = true
-			validationMessage = helpers.Trans("mission.wait", helpers.Player.Language.Slug, state.FinishAt.Format("2006-01-02 15:04:05"))
+			validationMessage = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
 		}
 	case 3:
 		input := message.Text
-		if input == helpers.Trans("mission.continue", helpers.Player.Language.Slug) {
+		if input == helpers.Trans("mission.continue") {
 			validationFlag = true
 			state.FinishAt = commands.GetEndTime(0, 10*(2*payload.Times), 0)
 			state.ToNotify = t
-		} else if input == helpers.Trans("mission.comeback", helpers.Player.Language.Slug) {
+		} else if input == helpers.Trans("mission.comeback") {
 			state.Stage = 4
 			validationFlag = true
 		}
@@ -87,7 +87,7 @@ func StartMission(update tgbotapi.Update) {
 		state.Stage = 1
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration", helpers.Player.Language.Slug))
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration"))
 
 		var keyboardRows [][]tgbotapi.KeyboardButton
 		for _, eType := range eTypes {
@@ -122,7 +122,7 @@ func StartMission(update tgbotapi.Update) {
 			// Remove current redist stare
 			helpers.DelRedisState(helpers.Player)
 
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", helpers.Player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
 		}
@@ -133,11 +133,11 @@ func StartMission(update tgbotapi.Update) {
 			state.Stage = 3
 			state, _ = provider.UpdatePlayerState(state)
 
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", helpers.Player.Language.Slug, payload.Material.Name, payload.Quantity))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", payload.Material.Name, payload.Quantity))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("mission.continue", helpers.Player.Language.Slug)),
-					tgbotapi.NewKeyboardButton(helpers.Trans("mission.comeback", helpers.Player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("mission.continue")),
+					tgbotapi.NewKeyboardButton(helpers.Trans("mission.comeback")),
 				),
 			)
 			services.SendMessage(msg)
@@ -150,7 +150,7 @@ func StartMission(update tgbotapi.Update) {
 			helpers.DelRedisState(helpers.Player)
 
 			// Continue
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", helpers.Player.Language.Slug, string(state.FinishAt.Format("15:04:05"))))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
 			state, _ = provider.UpdatePlayerState(state)
@@ -169,7 +169,7 @@ func StartMission(update tgbotapi.Update) {
 				services.ErrorHandler("Cant add resource to player inventory", err)
 			}
 
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_ended", helpers.Player.Language.Slug))
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_ended"))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
 		}

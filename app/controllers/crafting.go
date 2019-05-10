@@ -37,28 +37,28 @@ func Crafting(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
-			helpers.Trans("armors", helpers.Player.Language.Slug),
-			helpers.Trans("weapons", helpers.Player.Language.Slug),
+			helpers.Trans("armors"),
+			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
-		if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale(helpers.Player.Language.Slug)) {
+		if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
 			state.Stage = 2
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
-		if strings.Contains(message.Text, helpers.Trans("crafting.add", helpers.Player.Language.Slug)) {
+		if strings.Contains(message.Text, helpers.Trans("crafting.add")) {
 			addResourceFlag = true
 			validationFlag = true
-		} else if message.Text == helpers.Trans("crafting.craft", helpers.Player.Language.Slug) {
+		} else if message.Text == helpers.Trans("crafting.craft") {
 			if len(payload.Resources) > 0 {
 				state.Stage = 3
 				state, _ = provider.UpdatePlayerState(state)
@@ -66,7 +66,7 @@ func Crafting(update tgbotapi.Update) {
 			}
 		}
 	case 3:
-		if message.Text == helpers.Trans("confirm", helpers.Player.Language.Slug) {
+		if message.Text == helpers.Trans("confirm") {
 			state.FinishAt = commands.GetEndTime(0, 1, 10)
 			state.Stage = 4
 
@@ -76,14 +76,14 @@ func Crafting(update tgbotapi.Update) {
 			state.ToNotify = t
 
 			state, _ = provider.UpdatePlayerState(state)
-			validationMessage = helpers.Trans("crafting.wait", helpers.Player.Language.Slug, state.FinishAt.Format("15:04:05"))
+			validationMessage = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
 			validationFlag = false
 		}
 	case 4:
 		if time.Now().After(state.FinishAt) {
 			validationFlag = true
 		} else {
-			validationMessage = helpers.Trans("crafting.wait", helpers.Player.Language.Slug, state.FinishAt.Format("15:04:05"))
+			validationMessage = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
 		}
 	}
 
@@ -108,17 +108,17 @@ func Crafting(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.what", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.what"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("armors", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("armors")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -133,35 +133,35 @@ func Crafting(update tgbotapi.Update) {
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Item {
-		case helpers.Trans("armors", helpers.Player.Language.Slug):
+		case helpers.Trans("armors"):
 			armorCategories, err := provider.GetAllArmorCategory()
 			if err != nil {
 				services.ErrorHandler("Cant get armor categories", err)
 			}
 
 			for _, category := range armorCategories {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(category.Slug, helpers.Player.Language.Slug)))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
-		case helpers.Trans("weapons", helpers.Player.Language.Slug):
+		case helpers.Trans("weapons"):
 			weaponCategories, err := provider.GetAllWeaponCategory()
 			if err != nil {
 				services.ErrorHandler("Cant get weapon categories", err)
 			}
 
 			for _, category := range weaponCategories {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(category.Slug, helpers.Player.Language.Slug)))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		))
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.type", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.type"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -199,7 +199,7 @@ func Crafting(update tgbotapi.Update) {
 				// Clear text from Add and other shit.
 				resourceName := strings.Split(
 					strings.Split(message.Text, " (")[0],
-					helpers.Trans("crafting.add", helpers.Player.Language.Slug)+" ")[1]
+					helpers.Trans("crafting.add")+" ")[1]
 
 				resource, err := provider.FindResourceByName(resourceName)
 				if err != nil {
@@ -235,7 +235,7 @@ func Crafting(update tgbotapi.Update) {
 				}
 
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					helpers.Trans("crafting.add", helpers.Player.Language.Slug) + " " + resource.Name + " (" + (strconv.Itoa(q - payload.Resources[r])) + ")",
+					helpers.Trans("crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(q - payload.Resources[r])) + ")",
 				))
 				keyboardRowResources = append(keyboardRowResources, keyboardRow)
 			}
@@ -245,7 +245,7 @@ func Crafting(update tgbotapi.Update) {
 		if len(payload.Resources) > 0 {
 			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans("crafting.craft", helpers.Player.Language.Slug),
+					helpers.Trans("crafting.craft"),
 				),
 			))
 		}
@@ -253,8 +253,8 @@ func Crafting(update tgbotapi.Update) {
 		// Clear and exit
 		keyboardRowResources = append(keyboardRowResources,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 
@@ -271,7 +271,7 @@ func Crafting(update tgbotapi.Update) {
 			}
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.choose_resources", helpers.Player.Language.Slug)+"\n"+recipe)
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.choose_resources")+"\n"+recipe)
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,
@@ -292,14 +292,14 @@ func Crafting(update tgbotapi.Update) {
 			}
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.confirm_choose_resources", helpers.Player.Language.Slug)+"\n\n "+recipe)
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.confirm_choose_resources")+"\n\n "+recipe)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -308,7 +308,7 @@ func Crafting(update tgbotapi.Update) {
 			var craftingResult string
 
 			switch payload.Item {
-			case helpers.Trans("armors", helpers.Player.Language.Slug):
+			case helpers.Trans("armors"):
 
 				var craftingRequest nnsdk.ArmorCraft
 				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
@@ -326,7 +326,7 @@ func Crafting(update tgbotapi.Update) {
 
 				// For message
 				craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
-			case helpers.Trans("weapons", helpers.Player.Language.Slug):
+			case helpers.Trans("weapons"):
 
 				var craftingRequest nnsdk.WeaponCraft
 				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
@@ -364,10 +364,10 @@ func Crafting(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.craft_completed", helpers.Player.Language.Slug)+"\n\n"+craftingResult)
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.craft_completed")+"\n\n"+craftingResult)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 				),
 			)
 			services.SendMessage(msg)

@@ -17,18 +17,18 @@ import (
 func Inventory(update tgbotapi.Update) {
 	message := update.Message
 
-	msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.intro", helpers.Player.Language.Slug))
+	msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.intro"))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.recap", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.recap")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.equip", helpers.Player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.destroy", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.equip")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.destroy")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		),
 	)
 
@@ -47,7 +47,7 @@ func InventoryRecap(update tgbotapi.Update) {
 		services.ErrorHandler("Can't get player inventory", err)
 	}
 
-	recap += "\n" + helpers.Trans("resources", helpers.Player.Language.Slug) + ":\n"
+	recap += "\n" + helpers.Trans("resources") + ":\n"
 	playerResources := helpers.InventoryToMap(playerInventory)
 	for r, q := range playerResources {
 		resource, errResouce := provider.GetResourceByID(r)
@@ -63,7 +63,7 @@ func InventoryRecap(update tgbotapi.Update) {
 	if errWeapons != nil {
 		services.ErrorHandler("Can't get player weapons", err)
 	}
-	recap += "\n" + helpers.Trans("weapons", helpers.Player.Language.Slug) + ":\n"
+	recap += "\n" + helpers.Trans("weapons") + ":\n"
 	for _, weapon := range playerWeapons {
 		recap += "- " + weapon.Name + "\n"
 	}
@@ -74,12 +74,12 @@ func InventoryRecap(update tgbotapi.Update) {
 		services.ErrorHandler("Can't get player armors", err)
 	}
 
-	recap += "\n" + helpers.Trans("armors", helpers.Player.Language.Slug) + ":\n"
+	recap += "\n" + helpers.Trans("armors") + ":\n"
 	for _, armor := range playerArmors {
 		recap += "- " + armor.Name + "\n"
 	}
 
-	msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap", helpers.Player.Language.Slug)+recap)
+	msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.recap")+recap)
 	services.SendMessage(msg)
 }
 
@@ -103,25 +103,25 @@ func InventoryEquip(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
-			helpers.Trans("armors", helpers.Player.Language.Slug),
-			helpers.Trans("weapons", helpers.Player.Language.Slug),
+			helpers.Trans("armors"),
+			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
-		if strings.Contains(message.Text, helpers.Trans("equip", helpers.Player.Language.Slug)) {
+		if strings.Contains(message.Text, helpers.Trans("equip")) {
 			state.Stage = 2
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
-		if message.Text == helpers.Trans("confirm", helpers.Player.Language.Slug) {
+		if message.Text == helpers.Trans("confirm") {
 			state.Stage = 3
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
@@ -139,10 +139,10 @@ func InventoryEquip(update tgbotapi.Update) {
 	//====================================
 	// Extra data
 	//====================================
-	currentPlayerEquipment := helpers.Trans("inventory.equip.equipped", helpers.Player.Language.Slug)
+	currentPlayerEquipment := helpers.Trans("inventory.equip.equipped")
 
 	//////////////////////////////////
-	currentPlayerEquipment += "\n" + helpers.Trans("armors", helpers.Player.Language.Slug) + ":\n"
+	currentPlayerEquipment += "\n" + helpers.Trans("armors") + ":\n"
 	eqippedArmors, err := provider.GetPlayerArmors(helpers.Player, "true")
 	if err != nil {
 		services.ErrorHandler("Cant get equpped player armors", err)
@@ -152,7 +152,7 @@ func InventoryEquip(update tgbotapi.Update) {
 		currentPlayerEquipment += "- " + armor.Name
 	}
 	//////////////////////////////////
-	currentPlayerEquipment += "\n\n" + helpers.Trans("weapons", helpers.Player.Language.Slug) + ":\n"
+	currentPlayerEquipment += "\n\n" + helpers.Trans("weapons") + ":\n"
 	eqippedWeapons, err := provider.GetPlayerWeapons(helpers.Player, "true")
 	if err != nil {
 		services.ErrorHandler("Cant get equpped player weapons", err)
@@ -172,17 +172,17 @@ func InventoryEquip(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.type", helpers.Player.Language.Slug)+currentPlayerEquipment)
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.type")+currentPlayerEquipment)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("armors", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("armors")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -197,7 +197,7 @@ func InventoryEquip(update tgbotapi.Update) {
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
-		case helpers.Trans("armors", helpers.Player.Language.Slug):
+		case helpers.Trans("armors"):
 			armors, err := provider.GetPlayerArmors(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player armors", err)
@@ -205,10 +205,10 @@ func InventoryEquip(update tgbotapi.Update) {
 
 			// Each player armors
 			for _, armor := range armors {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip", helpers.Player.Language.Slug) + " " + armor.Name))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + armor.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
-		case helpers.Trans("weapons", helpers.Player.Language.Slug):
+		case helpers.Trans("weapons"):
 			weapons, err := provider.GetPlayerWeapons(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player weapons", err)
@@ -216,18 +216,18 @@ func InventoryEquip(update tgbotapi.Update) {
 
 			// Each player weapons
 			for _, weapon := range weapons {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip", helpers.Player.Language.Slug) + " " + weapon.Name))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + weapon.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		))
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.what", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.what"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -238,11 +238,11 @@ func InventoryEquip(update tgbotapi.Update) {
 		// If is valid input
 		if validationFlag {
 			// Clear text from Add and other shit.
-			equipmentName = strings.Split(message.Text, helpers.Trans("equip", helpers.Player.Language.Slug)+" ")[1]
+			equipmentName = strings.Split(message.Text, helpers.Trans("equip")+" ")[1]
 
 			var equipmentID uint
 			switch payload.Type {
-			case helpers.Trans("armors", helpers.Player.Language.Slug):
+			case helpers.Trans("armors"):
 				var armor nnsdk.Armor
 				armor, err := provider.FindArmorByName(equipmentName)
 				if err != nil {
@@ -250,7 +250,7 @@ func InventoryEquip(update tgbotapi.Update) {
 				}
 
 				equipmentID = armor.ID
-			case helpers.Trans("weapons", helpers.Player.Language.Slug):
+			case helpers.Trans("weapons"):
 				var weapon nnsdk.Weapon
 				weapon, err := provider.FindWeaponByName(equipmentName)
 				if err != nil {
@@ -266,14 +266,14 @@ func InventoryEquip(update tgbotapi.Update) {
 			state, _ = provider.UpdatePlayerState(state)
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.confirm", helpers.Player.Language.Slug)+"\n\n "+equipmentName)
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.confirm")+"\n\n "+equipmentName)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -281,7 +281,7 @@ func InventoryEquip(update tgbotapi.Update) {
 		// If is valid input
 		if validationFlag {
 			switch payload.Type {
-			case helpers.Trans("armors", helpers.Player.Language.Slug):
+			case helpers.Trans("armors"):
 				equipment, err := provider.GetArmorByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find armor by ID", err)
@@ -296,7 +296,7 @@ func InventoryEquip(update tgbotapi.Update) {
 				if err != nil {
 					services.ErrorHandler("Cant update armor", err)
 				}
-			case helpers.Trans("weapons", helpers.Player.Language.Slug):
+			case helpers.Trans("weapons"):
 				equipment, err := provider.GetWeaponByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
@@ -320,10 +320,10 @@ func InventoryEquip(update tgbotapi.Update) {
 		helpers.FinishAndCompleteState(state, helpers.Player)
 		//====================================
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.completed", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.completed"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 			),
 		)
 		services.SendMessage(msg)
@@ -350,25 +350,25 @@ func InventoryDestroy(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage", helpers.Player.Language.Slug)
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
-			helpers.Trans("armors", helpers.Player.Language.Slug),
-			helpers.Trans("weapons", helpers.Player.Language.Slug),
+			helpers.Trans("armors"),
+			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
-		if strings.Contains(message.Text, helpers.Trans("destroy", helpers.Player.Language.Slug)) {
+		if strings.Contains(message.Text, helpers.Trans("destroy")) {
 			state.Stage = 2
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
-		if message.Text == helpers.Trans("confirm", helpers.Player.Language.Slug) {
+		if message.Text == helpers.Trans("confirm") {
 			state.Stage = 3
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
@@ -392,17 +392,17 @@ func InventoryDestroy(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.type", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.type"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("armors", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("armors")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("weapons", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -417,7 +417,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
-		case helpers.Trans("armors", helpers.Player.Language.Slug):
+		case helpers.Trans("armors"):
 			armors, err := provider.GetPlayerArmors(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player armors", err)
@@ -425,10 +425,10 @@ func InventoryDestroy(update tgbotapi.Update) {
 
 			// Each player armors
 			for _, armor := range armors {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy", helpers.Player.Language.Slug) + " " + armor.Name))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy") + " " + armor.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
-		case helpers.Trans("weapons", helpers.Player.Language.Slug):
+		case helpers.Trans("weapons"):
 			weapons, err := provider.GetPlayerWeapons(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player weapons", err)
@@ -436,18 +436,18 @@ func InventoryDestroy(update tgbotapi.Update) {
 
 			// Each player weapons
 			for _, weapon := range weapons {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy", helpers.Player.Language.Slug) + " " + weapon.Name))
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("destroy") + " " + weapon.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		))
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.what", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.what"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -458,11 +458,11 @@ func InventoryDestroy(update tgbotapi.Update) {
 		// If is valid input
 		if validationFlag {
 			// Clear text from Add and other shit.
-			equipmentName = strings.Split(message.Text, helpers.Trans("destroy", helpers.Player.Language.Slug)+" ")[1]
+			equipmentName = strings.Split(message.Text, helpers.Trans("destroy")+" ")[1]
 
 			var equipmentID uint
 			switch payload.Type {
-			case helpers.Trans("armors", helpers.Player.Language.Slug):
+			case helpers.Trans("armors"):
 				var armor nnsdk.Armor
 				armor, err := provider.FindArmorByName(equipmentName)
 				if err != nil {
@@ -470,7 +470,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 				}
 
 				equipmentID = armor.ID
-			case helpers.Trans("weapons", helpers.Player.Language.Slug):
+			case helpers.Trans("weapons"):
 				var weapon nnsdk.Weapon
 				weapon, err := provider.FindWeaponByName(equipmentName)
 				if err != nil {
@@ -486,14 +486,14 @@ func InventoryDestroy(update tgbotapi.Update) {
 			state, _ = provider.UpdatePlayerState(state)
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.confirm", helpers.Player.Language.Slug)+"\n\n "+equipmentName)
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.confirm")+"\n\n "+equipmentName)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("confirm", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
@@ -501,7 +501,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 		// If is valid input
 		if validationFlag {
 			switch payload.Type {
-			case helpers.Trans("armors", helpers.Player.Language.Slug):
+			case helpers.Trans("armors"):
 				equipment, err := provider.GetArmorByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
@@ -511,7 +511,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 				if err != nil {
 					services.ErrorHandler("Cant delete armor", err)
 				}
-			case helpers.Trans("weapons", helpers.Player.Language.Slug):
+			case helpers.Trans("weapons"):
 				equipment, err := provider.GetWeaponByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
@@ -530,10 +530,10 @@ func InventoryDestroy(update tgbotapi.Update) {
 		helpers.FinishAndCompleteState(state, helpers.Player)
 		//====================================
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.completed", helpers.Player.Language.Slug))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.completed"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back", helpers.Player.Language.Slug)),
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 			),
 		)
 		services.SendMessage(msg)
