@@ -13,7 +13,7 @@ import (
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if ok := helpers.HandleUser(update.Message); true == ok {
+		if helpers.HandleUser(update.Message) {
 			callingRoute := parseMessage(update.Message)
 
 			// ******************************************

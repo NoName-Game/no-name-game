@@ -2,7 +2,6 @@ package services
 
 import (
 	"log"
-	"os"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 )
@@ -26,9 +25,9 @@ func NnSDKUp() {
 	NnSDK.SetWSHost("http://localhost:8080")
 	NnSDK.SetAPIVersion("v1")
 
-	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-		// NnSDK.Debug = true
-	}
+	// if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+	// 	NnSDK.Debug = true
+	// }
 
 	log.Println("************************************************")
 	log.Println("NoName WS connection: OK!")
