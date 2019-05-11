@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/no-name/app/provider"
 
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
 // GetRedisState - set function state in Redis
-func GetRedisState(player models.Player) string {
+func GetRedisState(player nnsdk.Player) string {
 	var route string
 	route, _ = services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
 
@@ -18,7 +19,7 @@ func GetRedisState(player models.Player) string {
 }
 
 // SetRedisState - set function state in Redis
-func SetRedisState(player models.Player, function string) {
+func SetRedisState(player nnsdk.Player, function string) {
 	err := services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), function, 0).Err()
 	if err != nil {
 		services.ErrorHandler("Error SET player state in redis", err)
@@ -26,7 +27,7 @@ func SetRedisState(player models.Player, function string) {
 }
 
 // DelRedisState - del function state in Redis
-func DelRedisState(player models.Player) {
+func DelRedisState(player nnsdk.Player) {
 	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
 	if err != nil {
 		services.ErrorHandler("Error DEL player state in redis", err)
@@ -34,12 +35,16 @@ func DelRedisState(player models.Player) {
 }
 
 // StartAndCreatePlayerState - create and set redis state
-func StartAndCreatePlayerState(route string, player models.Player) (state models.PlayerState) {
-	state = player.GetStateByFunction(route)
-	if state.ID < 1 {
-		state.Function = route
-		state.PlayerID = player.ID
-		state.Create()
+func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState) {
+	playerState = GetPlayerStateByFunction(player, route)
+
+	if playerState.ID < 1 {
+		newPlayerState := nnsdk.PlayerState{
+			Function: route,
+			PlayerID: player.ID,
+		}
+
+		playerState, _ = provider.CreatePlayerState(newPlayerState)
 	}
 
 	SetRedisState(player, route)
@@ -47,17 +52,30 @@ func StartAndCreatePlayerState(route string, player models.Player) (state models
 }
 
 // FinishAndCompleteState - finish and set completed in playerstate
-func FinishAndCompleteState(state models.PlayerState, player models.Player) {
-	state.Completed = true
-	state.Update().Delete()
+func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
+	// Stupid poninter stupid json pff
+	t := new(bool)
+	*t = true
+
+	state.Completed = t
+	state, _ = provider.UpdatePlayerState(state) // Update
+	state, _ = provider.DeletePlayerState(state) // Delete
+
 	DelRedisState(player)
 }
 
 // DeleteRedisAndDbState - delete redis and db state
-func DeleteRedisAndDbState(player models.Player) {
+func DeleteRedisAndDbState(player nnsdk.Player) {
 	rediState := GetRedisState(player)
-	state := player.GetStateByFunction(rediState)
-	state.Delete()
+
+	if rediState != "" {
+		playerState := GetPlayerStateByFunction(player, rediState)
+		_, err := provider.DeletePlayerState(playerState) // Delete
+		if err != nil {
+			services.ErrorHandler("Error delete player state", err)
+		}
+	}
+
 	DelRedisState(player)
 }
 

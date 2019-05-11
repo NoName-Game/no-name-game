@@ -1,50 +1,48 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/no-name/app/provider"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// CheckUser - Check if user exist in DB, if not exist create!
-func CheckUser(message *tgbotapi.Message) (player models.Player) {
-	player = models.FindPlayerByUsername(message.From.UserName)
-	if player.ID < 1 {
-		// New Player Inventory
-		newInventory := models.Inventory{Items: ""}
-		newInventory.Create()
+// HandleUser - Check if user exist in DB, if not exist create!
+func HandleUser(message *tgbotapi.Message) bool {
+	Player, _ = provider.FindPlayerByUsername(message.From.UserName)
 
-		// New Stats
-		newStats := models.PlayerStats{}
-		newStats.Create()
+	if Player.ID < 1 {
+		language, _ := provider.FindLanguageBySlug("en")
 
-		player = models.Player{
-			Username:  message.From.UserName,
-			ChatID:    message.Chat.ID,
-			Language:  models.GetLangBySlug("en"),
-			Inventory: newInventory,
-			Stats:     newStats,
+		newPlayer := nnsdk.Player{
+			Username: message.From.UserName,
+			ChatID:   message.Chat.ID,
+			Language: language,
+			Inventory: nnsdk.Inventory{
+				Items: "{}",
+			},
+			Stats: nnsdk.PlayerStats{
+				AbilityPoint: 1,
+			},
 		}
 
 		// 1 - Create new player
-		player.Create()
+		Player, _ = provider.CreatePlayer(newPlayer)
+	}
 
-		// 2- New galaxy chunk and return player star
-		playerStar := NewGalaxyChunk(int(player.ID))
+	return true
+}
 
-		// 3 - Add first star to player
-		player.AddStar(playerStar)
+func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState) {
+	playerStates, err := provider.GetPlayerStates(player)
+	if err != nil {
+		panic(err)
+	}
 
-		// 4 - Add and create ship
-		ship := NewStartShip()
-		player.AddShip(ship)
-
-		// 5 - Register first player position
-		player.AddPosition(models.PlayerPosition{
-			X: playerStar.X,
-			Y: playerStar.Y,
-			Z: playerStar.Z,
-		})
+	for i, state := range playerStates {
+		if state.Function == function {
+			playerState = playerStates[i]
+		}
 	}
 
 	return

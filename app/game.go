@@ -18,13 +18,13 @@ var (
 		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
 		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
 		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
-		"route.abilityTree":       controllers.AbilityTree,      // ability.go
+		"route.abilityTree":       controllers.AbilityTree,      // ability.go - MAIN
 		"route.hunting":           controllers.Hunting,          // hunting.go
 
-		// "route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
-		// "route.testing.multiState":  controllers.TestMultiState, // testing.go
-		// "route.testing.multiStage":  controllers.TestMultiStage, // testing.go
-		// "route.testing.time":        controllers.TestTimedQuest, // testing.go
+		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
+		"route.testing.multiState":  controllers.TestMultiState, // testing.go
+		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
+		"route.testing.time":        controllers.TestTimedQuest, // testing.go
 	}
 
 	breakerRoutes = map[string]interface{}{
@@ -46,7 +46,7 @@ func Run() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username", "en"))
+				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username"))
 				services.SendMessage(msg)
 				continue
 			}
