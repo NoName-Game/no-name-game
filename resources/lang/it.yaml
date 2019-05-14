@@ -8,6 +8,27 @@ tutorial_1: "[■■■■■■ 60%%]"
 tutorial_2: "[■■■■■■■■■■ 100%%]\nSistema ripristinato, IA operativa"
 timed-quest: "Timed Quest Terminata!"
 
+# ROUTES
+route.start: "Start"
+route.mission: "Missione"
+route.crafting: "Crafting"
+route.inventory: "Inventario"
+route.inventory.recap: "Riepilogo Inventario"
+route.inventory.equip: "Equipaggia Oggetto"
+route.inventory.destroy: "Distruggi Oggetto"
+route.abilityTree: "Albero Abilità"
+route.hunting: "Caccia"
+
+# ROUTES (BREAKER)
+route.breaker.back: "Fai altro"
+route.breaker.clears: "Lascia stare"
+
+# ROUTES (TESTING)
+route.testing.theAnswerIs: "the-answer-is"
+route.testing.multiState: "multi-state"
+route.testing.multiStage: "multi-stage"
+route.testing.time: "test-time"
+
 # GENERAL
 complete: "Fatto!"
 validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
@@ -21,6 +42,7 @@ confirm: "Confermo!"
 resources: "Risorse"
 equip: "Equipaggia"
 destroy: "Distruggi"
+playerDie: "<b>Sei morto...</b>"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -34,6 +56,20 @@ knife: "Coltello"
 auto_rifle: "Fucile Automatico"
 sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
+
+# HUNTING
+hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
+hunting.enemy.card: "%s\nVita Nemico: %d\n\n\nLa tua vita: %d\n\nCosa vuoi fare?"
+hunting.last_hit: "Hai inflitto il colpo di grazia al mob!"
+hunting.experience_earned: "Hai ottenuto %d punti exp!"
+hunting.continue: "Vuoi continuare la caccia?"
+hunting.completed: "Caccia completata, torni alla base col bottino."
+
+# COMBAT SYSTEM
+combat.attack: "Attacca"
+combat.attack_with: "Attacca con "
+combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 
 # MISSION
 mission.exploration: "Seleziona campo di ricerca!"
@@ -59,13 +95,13 @@ crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
 inventory.recap: "Recap inventario"
-inventory.summary: "Riassunto inventario"
-inventory.equip: "Equipaggia Oggetto"
-inventory.destroy: "Distruggi Oggetto"
+# inventory.summary: "Riassunto inventario"
+# inventory.equip: "Equipaggia Oggetto"
+# inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
 
-inventory.equip.equipped: "\nIl tuo equipaggiamento attuale:\n"
+inventory.equip.equipped: "\n\nIl tuo equipaggiamento attuale:\n"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
 
@@ -74,6 +110,23 @@ inventory.destroy.what: "Cosa vorresti distruggere?"
 inventory.destroy.confirm: "Confermi di voler distruggere?"
 inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 
+# ABILITY TREE
+ability.no_point_left: "Punti abilità non sufficienti"
+ability.back: "Torna all'albero"
+ability.stats.type: "Quale statistica vuoi incrementare?\n%s\n"
+ability.stats.total_point: "Hai a disposizione %d punti abilità!"
+ability.stats.completed: "Hai incrementato con successo %s!"
+ability.experience: "Esperienza"
+ability.level: "Livello"
+ability.strength: "Forza"
+ability.dexterity: "Destrezza"
+ability.constitution: "Costituzione"
+ability.intelligence: "Intelligenza"
+ability.wisdom: "Saggezza"
+ability.charisma: "Carisma"
+
 # CRON
-cron.mission_alert: "Esplorazione finita!"
-cron.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.testing.time_alert: "End Test time"
+cron.route.mission_alert: "Esplorazione finita!"
+cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.hunting_alert: "Informazioni ritornate con successo!"

@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -18,10 +19,10 @@ func TimedMessages(texts []string, toChatID int64, seconds time.Duration) {
 }
 
 // StartTutorial - This is the first command called from telegram when bot started.
-func StartTutorial(update tgbotapi.Update, player models.Player) {
+func StartTutorial(update tgbotapi.Update) {
 	message := update.Message
-	routeName := "start"
-	state := helpers.StartAndCreatePlayerState(routeName, player)
+	routeName := "route.start"
+	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
 	//====================================
 	// Validator
@@ -30,17 +31,24 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 	validationMessage := "Wrong input, please repeat or exit."
 	switch state.Stage {
 	case 1:
-		if lang := models.GetLangByValue(message.Text); lang.Value != "" {
-			//Il languaggio esiste.
-			validationFlag = true
-			player.Language = lang
-			player.Update()
+		lang, err := provider.FindLanguageBy(message.Text, "name")
+		if err != nil {
+			services.ErrorHandler("Cant find language", err)
 		}
-	case 2:
-		if text, _ := services.GetTranslation("start_game", player.Language.Slug); text == message.Text {
+
+		if lang.ID >= 1 {
 			validationFlag = true
 		}
+
+		{
+			_, err := provider.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
+			if err != nil {
+				services.ErrorHandler("Cant update player", err)
+			}
+		}
+
 	}
+
 	if !validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
@@ -54,19 +62,30 @@ func StartTutorial(update tgbotapi.Update, player models.Player) {
 	switch state.Stage {
 	case 0:
 		msg := services.NewMessage(message.Chat.ID, "Select language")
-		keyboard := make([]tgbotapi.KeyboardButton, len(models.GetAllLangs()))
-		for i, lang := range models.GetAllLangs() {
-			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Value)
+
+		languages, err := provider.GetLanguages()
+		if err != nil {
+			services.ErrorHandler("Cant get languages", err)
 		}
+
+		keyboard := make([]tgbotapi.KeyboardButton, len(languages))
+		for i, lang := range languages {
+			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
+		}
+
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		state.Stage = 1
-		state.Update()
+		state, _ = provider.UpdatePlayerState(state)
 		services.SendMessage(msg)
 	case 1:
-		if true == validationFlag {
-			state.Stage = 2
-			state.Update()
-			textToSend, _ := services.GetTranslation("complete", player.Language.Slug)
+		if validationFlag {
+			//========================
+			// IMPORTANT!
+			//====================================
+			helpers.FinishAndCompleteState(state, helpers.Player)
+			//====================================
+
+			textToSend := helpers.Trans("complete")
 			msg := services.NewMessage(message.Chat.ID, textToSend)
 			text, _ := services.GetTranslation("start_game", player.Language.Slug)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text)))
