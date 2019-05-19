@@ -1,22 +1,15 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"log"
 	"time"
 
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
-
-// TimedMessages - Send multiple messages with a delay.
-func TimedMessages(texts []string, toChatID int64, seconds time.Duration) {
-	for _, text := range texts {
-		services.SendMessage(services.NewMessage(toChatID, text))
-		time.Sleep(seconds)
-	}
-}
 
 // StartTutorial - This is the first command called from telegram when bot started.
 func StartTutorial(update tgbotapi.Update) {
@@ -28,7 +21,7 @@ func StartTutorial(update tgbotapi.Update) {
 	// Validator
 	//====================================
 	validationFlag := false
-	validationMessage := "Wrong input, please repeat or exit."
+	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 1:
 		lang, err := provider.FindLanguageBy(message.Text, "name")
@@ -59,6 +52,9 @@ func StartTutorial(update tgbotapi.Update) {
 	//====================================
 	// Stage
 	//====================================
+	//====================================
+	// Language -> Messages -> Exploration -> Crafting -> Hunting
+	//====================================
 	switch state.Stage {
 	case 0:
 		msg := services.NewMessage(message.Chat.ID, "Select language")
@@ -79,25 +75,20 @@ func StartTutorial(update tgbotapi.Update) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			//========================
-			// IMPORTANT!
-			//====================================
 			helpers.FinishAndCompleteState(state, helpers.Player)
-			//====================================
-
-			textToSend := helpers.Trans("complete")
-			msg := services.NewMessage(message.Chat.ID, textToSend)
-			text, _ := services.GetTranslation("start_game", player.Language.Slug)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(text)))
-			services.SendMessage(msg)
+			// Messages
+			log.Println("Ehy, ....")
+			SendMultipleMessages(helpers.GenerateTextArray(routeName), 1*time.Second)
 		}
-	case 2:
-		//========================
-		// IMPORTANT!
-		//====================================
-		helpers.FinishAndCompleteState(state, player)
-		//====================================
-		TimedMessages(services.GenerateTextArray("tutorial", player.Language.Slug), message.Chat.ID, 1*time.Second)
 	}
 	//====================================
+}
+
+// sendMultipleMessages - Send multiple message every elapsedTime.
+func SendMultipleMessages(texts []string, elapsedTime time.Duration) {
+	log.Println(texts)
+	for _, text := range texts {
+		time.Sleep(elapsedTime)
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, text))
+	}
 }
