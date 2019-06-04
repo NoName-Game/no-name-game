@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
@@ -77,18 +76,22 @@ func StartTutorial(update tgbotapi.Update) {
 		if validationFlag {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			// Messages
-			log.Println("Ehy, ....")
-			SendMultipleMessages(helpers.GenerateTextArray(routeName), 1*time.Second)
+			SendMessages(helpers.GenerateTextArray(routeName), 2*time.Second)
 		}
 	}
 	//====================================
 }
 
-// sendMultipleMessages - Send multiple message every elapsedTime.
-func SendMultipleMessages(texts []string, elapsedTime time.Duration) {
-	log.Println(texts)
-	for _, text := range texts {
+// sendMessages - Send multiple message every elapsedTime.
+func SendMessages(texts []string, elapsedTime time.Duration) {
+	lastMessage := services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[0]))
+	var previousText string
+	for i := 1; i < 3; i++ {
 		time.Sleep(elapsedTime)
-		services.SendMessage(services.NewMessage(helpers.Player.ChatID, text))
+		/*previousText = */ services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
+	}
+	for i := 3; i < len(texts); i++ {
+		time.Sleep(elapsedTime)
+		previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
 	}
 }
