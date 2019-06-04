@@ -58,8 +58,19 @@ func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
 	}
 }
 
+// EditMessage - edit message
+func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessageTextConfig {
+	return tgbotapi.EditMessageTextConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ChatID:    chatID,
+			MessageID: messageID,
+		},
+		Text: text,
+	}
+}
+
 // SendMessage - send message
-func SendMessage(chattable tgbotapi.MessageConfig) tgbotapi.Message {
+func SendMessage(chattable tgbotapi.Chattable) tgbotapi.Message {
 	message, err := botAPI.Send(chattable)
 	if err != nil {
 		log.Println("Cant send message.")
