@@ -38,7 +38,28 @@ func StartTutorial(update tgbotapi.Update) {
 				services.ErrorHandler("Cant update player", err)
 			}
 		}
-
+	case 2:
+		if message.Text == helpers.Trans("route.start.openEye") {
+			validationFlag = true
+		}
+	case 3:
+		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		// Check if the player finished the previous function.
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
+			validationFlag = true
+		}
+	case 4:
+		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		// Check if the player finished the previous function.
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
+			validationFlag = true
+		}
+	case 5:
+		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		// Check if the player finished the previous function.
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
+			validationFlag = true
+		}
 	}
 
 	if !validationFlag {
@@ -74,24 +95,59 @@ func StartTutorial(update tgbotapi.Update) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			helpers.FinishAndCompleteState(state, helpers.Player)
 			// Messages
-			SendMessages(helpers.GenerateTextArray(routeName), 2*time.Second)
+			texts := helpers.GenerateTextArray(routeName)
+			lastMessage := services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[0]))
+			var previousText string
+			for i := 1; i < 3; i++ {
+				time.Sleep(2 * time.Second)
+				/*previousText = */ services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
+			}
+			for i := 3; i < 12; i++ {
+				time.Sleep(2 * time.Second)
+				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
+			}
+			lastMessage = services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[12]))
+			previousText = lastMessage.Text
+			for i := 13; i < len(texts); i++ {
+				time.Sleep(time.Second)
+				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
+			}
+			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.vexplosion"))
+			edit.ParseMode = "HTML"
+			services.SendMessage(edit)
+			msg := services.NewMessage(helpers.Player.ChatID, "...")
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
+			services.SendMessage(msg)
+			state.Stage = 2
+			state, _ = provider.UpdatePlayerState(state)
+		}
+	case 2:
+		if validationFlag {
+			//helpers.FinishAndCompleteState(state, helpers.Player)
+			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
+			state.Stage = 3
+			state, _ = provider.UpdatePlayerState(state)
+			StartMission(update)
+		}
+	case 3:
+		if validationFlag {
+			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
+			state.Stage = 4
+			state, _ = provider.UpdatePlayerState(state)
+			Crafting(update)
+		}
+	case 4:
+		if validationFlag {
+			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
+			state.Stage = 5
+			state, _ = provider.UpdatePlayerState(state)
+			Hunting(update)
+		}
+	case 5:
+		if validationFlag {
+			helpers.FinishAndCompleteState(state, helpers.Player)
 		}
 	}
 	//====================================
-}
-
-// sendMessages - Send multiple message every elapsedTime.
-func SendMessages(texts []string, elapsedTime time.Duration) {
-	lastMessage := services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[0]))
-	var previousText string
-	for i := 1; i < 3; i++ {
-		time.Sleep(elapsedTime)
-		/*previousText = */ services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
-	}
-	for i := 3; i < len(texts); i++ {
-		time.Sleep(elapsedTime)
-		previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
-	}
 }
