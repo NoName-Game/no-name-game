@@ -51,13 +51,19 @@ func StartTutorial(update tgbotapi.Update) {
 	case 4:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting") == (nnsdk.PlayerState{}) {
 			validationFlag = true
 		}
 	case 5:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip") == (nnsdk.PlayerState{}) {
+			validationFlag = true
+		}
+	case 6:
+		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		// Check if the player finished the previous function.
+		if helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting") == (nnsdk.PlayerState{}) {
 			validationFlag = true
 		}
 	}
@@ -97,11 +103,13 @@ func StartTutorial(update tgbotapi.Update) {
 		if validationFlag {
 			// Messages
 			texts := helpers.GenerateTextArray(routeName)
-			lastMessage := services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[0]))
+			msg := services.NewMessage(helpers.Player.ChatID, texts[0])
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			lastMessage := services.SendMessage(msg)
 			var previousText string
 			for i := 1; i < 3; i++ {
 				time.Sleep(2 * time.Second)
-				/*previousText = */ services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
+				services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
 			}
 			for i := 3; i < 12; i++ {
 				time.Sleep(2 * time.Second)
@@ -116,7 +124,7 @@ func StartTutorial(update tgbotapi.Update) {
 			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.vexplosion"))
 			edit.ParseMode = "HTML"
 			services.SendMessage(edit)
-			msg := services.NewMessage(helpers.Player.ChatID, "...")
+			msg = services.NewMessage(helpers.Player.ChatID, "...")
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
 			services.SendMessage(msg)
 			state.Stage = 2
@@ -124,7 +132,7 @@ func StartTutorial(update tgbotapi.Update) {
 		}
 	case 2:
 		if validationFlag {
-			//helpers.FinishAndCompleteState(state, helpers.Player)
+			// First Exploration
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
 			state.Stage = 3
 			state, _ = provider.UpdatePlayerState(state)
@@ -132,6 +140,7 @@ func StartTutorial(update tgbotapi.Update) {
 		}
 	case 3:
 		if validationFlag {
+			// First Crafting
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
 			state.Stage = 4
 			state, _ = provider.UpdatePlayerState(state)
@@ -139,12 +148,20 @@ func StartTutorial(update tgbotapi.Update) {
 		}
 	case 4:
 		if validationFlag {
-			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
+			// Equip weapon
+			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
 			state.Stage = 5
+			state, _ = provider.UpdatePlayerState(state)
+			InventoryEquip(update)
+		}
+	case 5:
+		if validationFlag {
+			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
+			state.Stage = 6
 			state, _ = provider.UpdatePlayerState(state)
 			Hunting(update)
 		}
-	case 5:
+	case 6:
 		if validationFlag {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 		}
