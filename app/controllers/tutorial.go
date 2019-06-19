@@ -121,7 +121,7 @@ func StartTutorial(update tgbotapi.Update) {
 				time.Sleep(time.Second)
 				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
 			}
-			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.vexplosion"))
+			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.explosion"))
 			edit.ParseMode = "HTML"
 			services.SendMessage(edit)
 			msg = services.NewMessage(helpers.Player.ChatID, "...")

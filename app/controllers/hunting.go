@@ -246,7 +246,7 @@ func Hunting(update tgbotapi.Update) {
 			msg := services.NewMessage(message.Chat.ID, helpers.Trans("hunting.complete"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton("back"),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 				),
 			)
 			services.SendMessage(msg)
