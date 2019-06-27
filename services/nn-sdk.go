@@ -23,10 +23,16 @@ func NnSDKUp() {
 	}
 
 	// Set Host and API version
-	NnSDK.SetWSHost(fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")))
-	NnSDK.SetAPIVersion(os.Getenv("WS_API_VERSION"))
+	NnSDK.SetWS(
+		nnsdk.WebService{
+			Host:       fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")),
+			APIVersion: os.Getenv("WS_API_VERSION"),
+		},
+	)
+
+	// Set Username and Password for WS-Authentication
 	NnSDK.SetAuth(
-		nnsdk.NoNameSDKAuthentication{
+		nnsdk.Authentication{
 			Username: os.Getenv("WS_USER"),
 			Password: os.Getenv("WS_PASSWORD"),
 		},
@@ -35,7 +41,7 @@ func NnSDKUp() {
 	// Autenticate to WS
 	_, err = NnSDK.Authenticate()
 	if err != nil {
-		log.Panicln("NNSDK - Authentication error", err)
+		ErrorHandler("NNSDK - Authentication error", err)
 	}
 
 	// if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
