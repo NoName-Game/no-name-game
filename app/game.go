@@ -11,15 +11,22 @@ var (
 	// Routes
 	//
 	routes = map[string]interface{}{
-		"route.start":             controllers.StartTutorial,    // tutorial.go  - MAIN
-		"route.mission":           controllers.StartMission,     // mission.go   - MAIN
-		"route.crafting":          controllers.Crafting,         // crafting.go  - MAIN
+		"route.start":       controllers.StartTutorial, // tutorial.go  - MAIN
+		"route.mission":     controllers.StartMission,  // mission.go   - MAIN
+		"route.crafting":    controllers.Crafting,      // crafting.go  - MAIN
+		"route.abilityTree": controllers.AbilityTree,   // ability.go - MAIN
+		"route.hunting":     controllers.Hunting,       // hunting.go
+
 		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
 		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
 		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
 		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
-		"route.abilityTree":       controllers.AbilityTree,      // ability.go - MAIN
-		"route.hunting":           controllers.Hunting,          // hunting.go
+
+		"route.ship":             controllers.Ship,            // ship.go
+		"route.ship.exploration": controllers.ShipExploration, // ship.go
+		"route.ship.warehouse":   controllers.ShipWarehouse,   // ship.go
+		"route.ship.repairs":     controllers.ShipRepairs,     // ship.go
+		"route.ship.better":      controllers.ShipBetter,      // ship.go
 
 		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
 		"route.testing.multiState":  controllers.TestMultiState, // testing.go
