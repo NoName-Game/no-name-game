@@ -46,6 +46,10 @@ resources: "Risorse"
 equip: "Equipaggia"
 destroy: "Distruggi"
 playerDie: "<b>Sei morto...</b>"
+name: "Nome"
+category: "Categoria"
+rarity: "Rarità"
+integrity: "Integrità"
 
 # ARMORS/WEAPONS
 armors: "Armature"
@@ -167,7 +171,7 @@ cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 
 # SHIP
-ship.report: "Rapporto stato nave"
+ship.report: "Rapporto Nave"
 
 # SHIP - Exploration
 ship.exploration.info: "Vuoi avviare una nuova esplorazione?"

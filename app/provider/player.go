@@ -133,6 +133,22 @@ func GetPlayerWeapons(player nnsdk.Player, equipped string) (nnsdk.Weapons, erro
 	return weapons, nil
 }
 
+func GetPlayerShips(player nnsdk.Player, equipped string) (nnsdk.Ships, error) {
+	var ships nnsdk.Ships
+
+	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/ships?equipped="+equipped, nil).Get()
+	if err != nil {
+		return ships, err
+	}
+
+	err = json.Unmarshal(resp.Data, &ships)
+	if err != nil {
+		return ships, err
+	}
+
+	return ships, nil
+}
+
 func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
 	var inventory nnsdk.Inventory
 

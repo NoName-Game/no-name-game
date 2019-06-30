@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
@@ -15,7 +16,24 @@ type ShipController struct{}
 func Ship(update tgbotapi.Update) {
 	message := update.Message
 
-	msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.report"))
+	//====================================
+	// Extra data
+	//====================================
+	currentShipRecap := "\n\n"
+	eqippedShips, err := provider.GetPlayerShips(helpers.Player, "true")
+	if err != nil {
+		services.ErrorHandler("Cant get equipped player ship", err)
+	}
+
+	for _, ship := range eqippedShips {
+		currentShipRecap += helpers.Trans("name") + ": " + ship.Name + "\n"
+		currentShipRecap += helpers.Trans("category") + ": " + ship.ShipCategory.Name + "\n"
+		currentShipRecap += helpers.Trans("rarity") + ": " + ship.Rarity.Name + "\n"
+		currentShipRecap += helpers.Trans("integrity") + ": " + strconv.FormatUint(uint64(ship.ShipStats.Integrity), 10) + "\n"
+	}
+	//////////////////////////////////
+
+	msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.report")+currentShipRecap)
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.ship.exploration")),
