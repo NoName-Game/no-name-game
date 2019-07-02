@@ -2,8 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
+	"time"
 
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+
+	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -230,16 +235,21 @@ func ShipRepairs(update tgbotapi.Update) {
 	//====================================
 	// Init Func!
 	//====================================
-	type craftingPayload struct {
-		Item      string
-		Category  string
-		Resources map[uint]int
+	type repairsPayload struct {
+		Ship              nnsdk.Ship
+		QuantityResources float64
+		RepairTime        float64
+		TypeResources     string
 	}
+
+	// Stupid poninter stupid json pff
+	t := new(bool)
+	*t = true
 
 	message := update.Message
 	routeName := "route.ship.repairs"
 	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
-	var payload craftingPayload
+	var payload repairsPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	//====================================
@@ -250,18 +260,20 @@ func ShipRepairs(update tgbotapi.Update) {
 	switch state.Stage {
 	case 0:
 		if helpers.InArray(message.Text, []string{
-			helpers.Trans("ship.exploration.start"),
+			helpers.Trans("ship.repairs.start"),
 		}) {
 			state.Stage = 1
 			state, _ = provider.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
-		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
-		// 	state.Stage = 2
-		// 	state, _ = provider.UpdatePlayerState(state)
-		// 	validationFlag = true
-		// }
+		if state.FinishAt.Before(time.Now()) {
+			state.Stage = 2
+			state, _ = provider.UpdatePlayerState(state)
+			validationFlag = true
+		} else {
+			validationMessage = helpers.Trans("wait", state.FinishAt.Format("15:04:05"))
+		}
 	}
 
 	if !validationFlag {
@@ -277,20 +289,76 @@ func ShipRepairs(update tgbotapi.Update) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		payloadUpdated, _ := json.Marshal(craftingPayload{})
+		//====================================
+		// Extra data
+		//====================================
+		currentShipRecap := "\n\n"
+		eqippedShips, err := provider.GetPlayerShips(helpers.Player, "true")
+		if err != nil {
+			services.ErrorHandler("Cant get equipped player ship", err)
+		}
+
+		currentShipRecap += helpers.Trans("integrity") + ": " + strconv.FormatUint(uint64(eqippedShips[0].ShipStats.Integrity), 10) + "\n"
+
+		repairInfo, err := provider.GetShipRepairInfo(eqippedShips[0])
+		if err != nil {
+			services.ErrorHandler("Cant get ship repair info", err)
+		}
+
+		currentShipRecap += fmt.Sprintf(helpers.Trans("ship.repairs.time")+": %v "+helpers.Trans("minutes")+"\n", repairInfo["RepairTime"])
+		currentShipRecap += fmt.Sprintf(helpers.Trans("ship.repairs.quantity_resources")+": %v (%v)\n", repairInfo["QuantityResources"], repairInfo["TypeResources"])
+
+		//////////////////////////////////
+
+		payloadUpdated, _ := json.Marshal(repairsPayload{
+			Ship:              eqippedShips[0],
+			QuantityResources: repairInfo["QuantityResources"].(float64),
+			RepairTime:        repairInfo["RepairTime"].(float64),
+			TypeResources:     repairInfo["TypeResources"].(string),
+		})
+
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.info"))
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.info")+currentShipRecap)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans("ship.repairs.start")),
+			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 			),
 		)
 		services.SendMessage(msg)
+
 	case 1:
 		if validationFlag {
+			// Set timer
+			state.FinishAt = commands.GetEndTime(0, int(payload.RepairTime), 0)
+			state.ToNotify = t
+			state.Stage = 1
+
+			payloadUpdated, _ := json.Marshal(payload)
+			state.Payload = string(payloadUpdated)
+			state, _ = provider.UpdatePlayerState(state)
+
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.reparing", state.FinishAt.Format("15:04:05")))
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				),
+			)
+			services.SendMessage(msg)
+		}
+	case 2:
+		if validationFlag {
+
+			// Repair ship
+			_, err := provider.PostShipRepair(payload.Ship)
+			if err != nil {
+				services.ErrorHandler("Cant repair ship", err)
+			}
 
 			//====================================
 			// IMPORTANT!
@@ -298,7 +366,7 @@ func ShipRepairs(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("todo_text"))
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.reparing.finish"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
