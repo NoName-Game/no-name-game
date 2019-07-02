@@ -123,7 +123,7 @@ func StartMission(update tgbotapi.Update) {
 			helpers.DelRedisState(helpers.Player)
 
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.Menu"))))
 			services.SendMessage(msg)
 		}
 	case 2:

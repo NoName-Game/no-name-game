@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"time"
-
 	"bitbucket.org/no-name-game/no-name/services"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
@@ -28,12 +26,12 @@ func Menu(update tgbotapi.Update) {
 	states, _ := provider.GetPlayerStates(helpers.Player)
 
 	for _, state := range states {
-		if state.FinishAt != (time.Time{}) {
+		if *state.ToNotify {
 			// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
 			stateText := helpers.Trans(state.Function) + helpers.Trans("menu.finishAt", state.FinishAt.Format("15:04:05"))
 			tasks += helpers.Trans("menu.onGoing", stateText) + "\n"
 		} else {
-			tasks += helpers.Trans("menu.onGoing", helpers.Trans(state.Function))
+			tasks += helpers.Trans("menu.onGoing", helpers.Trans(state.Function)) + "\n"
 		}
 		keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(state.Function)))
 		keyboardRows = append(keyboardRows, keyboardRow)
