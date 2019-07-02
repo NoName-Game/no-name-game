@@ -11,6 +11,12 @@ import (
 // Menu - create a menu with tasks to finish and other messages.
 func Menu(update tgbotapi.Update) {
 
+	var keyboardMenu = [][]tgbotapi.KeyboardButton{
+		{tgbotapi.NewKeyboardButton(helpers.Trans("route.mission")), tgbotapi.NewKeyboardButton(helpers.Trans("route.hunting"))},
+		{tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory"))},
+		{tgbotapi.NewKeyboardButton(helpers.Trans("route.crafting")), tgbotapi.NewKeyboardButton(helpers.Trans("route.abilityTree"))},
+	}
+
 	/* Computer di bordo di reloonfire
 	Task in corso:
 	Tutorial.
@@ -38,9 +44,19 @@ func Menu(update tgbotapi.Update) {
 	}
 
 	msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("menu", helpers.Player.Username, tasks))
-	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-		Keyboard: keyboardRows,
+	for _, state := range states {
+		if state.Function == "route.tutorial" {
+			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+				Keyboard: keyboardRows,
+			}
+			break
+		} else {
+			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+				Keyboard: keyboardMenu,
+			}
+		}
 	}
+	msg.ParseMode = "HTML"
 	services.SendMessage(msg)
 
 }

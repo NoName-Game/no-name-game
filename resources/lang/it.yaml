@@ -44,7 +44,7 @@ destroy: "Distruggi"
 playerDie: "<b>Sei morto...</b>"
 
 # MENU
-menu: "Computer di bordo di **%s**.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
+menu: "Computer di bordo di <b>%s</b>.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
 menu.onGoing: "In corso %s." 
 menu.finishAt: ": termina alle %s"
 
