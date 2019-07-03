@@ -57,6 +57,8 @@ func StartMission(update tgbotapi.Update) {
 			payload.Quantity = rand.Intn(3)*payload.Times + 1
 			validationFlag = true
 			validationMessage = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
+		} else {
+			validationMessage = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
 		}
 	case 3:
 		input := message.Text
@@ -123,7 +125,7 @@ func StartMission(update tgbotapi.Update) {
 			helpers.DelRedisState(helpers.Player)
 
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.Menu"))))
 			services.SendMessage(msg)
 		}
 	case 2:

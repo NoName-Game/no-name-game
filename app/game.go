@@ -16,6 +16,7 @@ var (
 		"route.crafting":    controllers.Crafting,      // crafting.go  - MAIN
 		"route.abilityTree": controllers.AbilityTree,   // ability.go - MAIN
 		"route.hunting":     controllers.Hunting,       // hunting.go
+		"route.menu":        controllers.Menu,          // menu.go
 
 		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
 		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN

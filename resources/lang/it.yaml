@@ -8,6 +8,7 @@ timed-quest: "Timed Quest Terminata!"
 
 # ROUTES
 route.start: "Start"
+route.backToTutorial: "Ritorna al tutorial."
 route.mission: "Missione"
 route.crafting: "Crafting"
 route.inventory: "Inventario"
@@ -21,6 +22,7 @@ route.ship.exploration: "Nuova Esplorazione"
 route.ship.warehouse: "Deposito"
 route.ship.repairs: "Ripara"
 route.ship.better: "Migliora"
+route.menu: "Computer di Bordo"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -51,6 +53,11 @@ name: "Nome"
 category: "Categoria"
 rarity: "Rarità"
 integrity: "Integrità"
+
+# MENU
+menu: "Computer di bordo di <b>%s</b>.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
+menu.onGoing: "In corso %s."
+menu.finishAt: ": termina alle %s"
 
 # ARMORS/WEAPONS
 armors: "Armature"
