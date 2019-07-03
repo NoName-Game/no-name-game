@@ -20,6 +20,7 @@ var (
 		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
 		"route.abilityTree":       controllers.AbilityTree,      // ability.go - MAIN
 		"route.hunting":           controllers.Hunting,          // hunting.go
+		"route.menu":              controllers.Menu,             // menu.go
 
 		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
 		"route.testing.multiState":  controllers.TestMultiState, // testing.go

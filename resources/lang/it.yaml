@@ -1,11 +1,13 @@
 #key: Text
 #You can use printf's placeholders!
 sample_text: "Testo di prova"
+start_game: "Inizia a giocare!"
 text_with_placeholders: "Ciao, %s"
 timed-quest: "Timed Quest Terminata!"
 
 # ROUTES
 route.start: "Start"
+route.backToTutorial: "Ritorna al tutorial."
 route.mission: "Missione"
 route.crafting: "Crafting"
 route.inventory: "Inventario"
@@ -14,6 +16,7 @@ route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
 route.abilityTree: "Albero Abilità"
 route.hunting: "Caccia"
+route.menu: "Computer di Bordo"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -40,6 +43,11 @@ equip: "Equipaggia"
 destroy: "Distruggi"
 playerDie: "<b>Sei morto...</b>"
 
+# MENU
+menu: "Computer di bordo di <b>%s</b>.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
+menu.onGoing: "In corso %s." 
+menu.finishAt: ": termina alle %s"
+
 # ARMORS/WEAPONS
 armors: "Armature"
 helmet: "Elmo"
@@ -54,6 +62,7 @@ sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
 
 # HUNTING
+hunting.error.noWeaponEquipped: "Devi equipaggiare un arma per andare a caccia!"
 hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
 hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
 hunting.enemy.card: "%s\nVita Nemico: %d\n\n\nLa tua vita: %d\n\nCosa vuoi fare?"
@@ -64,7 +73,7 @@ hunting.completed: "Caccia completata, torni alla base col bottino."
 
 # COMBAT SYSTEM
 combat.attack: "Attacca"
-combat.attack_with: "Attacca con "
+combat.attack_with: "Attacca con %s"
 combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 
 # MISSION
@@ -120,6 +129,37 @@ ability.constitution: "Costituzione"
 ability.intelligence: "Intelligenza"
 ability.wisdom: "Saggezza"
 ability.charisma: "Carisma"
+
+# TUTORIAL
+# Multiple Messages: keyword_number: "TEXT"
+route.start_0: "[■■          20%%]"
+route.start_1: "[■■■■■■      60%%]"
+route.start_2: "[■■■■■■■■■   90%%]"
+route.start_3: "| Sistema ripristinato, IA operativa |\n"
+route.start_4: "Pilota incosciente"
+route.start_5: "Controllo vitale:\tOn-Line\nStatus Pilota:\tstabile"
+route.start_6: "Controllo rotta:\tRadar:\tOn-Line"
+route.start_7: "Rotta di collisione con pianeta sconosciuto in 5 minuti"
+route.start_8: "Attivazione autopilota"
+route.start_9: "Controllo status nave:\nMotore:\tOffline\nScudi:\tOffline\nScanner:\tOnline\nSupp.Vitale:\tOnline"
+route.start_10: "Rilevate perdite dal serbatoio"
+route.start_11: "Scafo integro al 70%%"
+route.start_12: "ALERT. ALERT.\nIMPOSSIBILE MODIFICARE LA ROTTA DI COLLISIONE."
+route.start_13: "Impatto fra:\n"
+route.start_14: "5!"
+route.start_15: "4!"
+route.start_16: "3!"
+route.start_17: "2!"
+route.start_18: "1!"
+route.start_19: "..."
+#SO BIG #route.explosion: "<code>\t\t\t\t\t\t\t\t\t____/\t(\t\t(\t\t\t\t)\t\t\t)\t\\\\___\n\t\t\t\t\t\t\t\t/(\t(\t\t(\t\t)\t\t\t_\t\t\t\t))\t\t)\t\t\t)\\\n\t\t\t\t\t\t((\t\t\t\t\t(\t\t\t)(\t\t\t\t)\t\t)\t\t\t(\t\t\t)\t\t)\n\t\t\t\t((/\t\t(\t_(\t\t\t)\t\t\t(\t\t\t_)\t)\t(\t\t()\t)\t\t)\n\t\t\t(\t(\t\t(\t(_)\t\t\t((\t\t\t\t(\t\t\t)\t\t.((_\t)\t.\t\t)_\n\t\t(\t(\t\t)\t\t\t\t(\t\t\t\t\t\t(\t\t)\t\t\t\t)\t\t\t)\t.\t)\t(\t\t\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t)\t(\t\t_\t\t(\t_)\t).\t\t)\t.\t)\t)\t(\t)\n\t(\t(\t\t(\t\t\t)\t(\t\t)\t\t\t(\t\t))\t\t\t\t\t)\t_)(\t\t\t)\t\t)\t\t)\n(\t(\t\t(\\\\\t)\t(\t\t\t\t(_\t\t(\t)\t(\t)\t\t)\t\t\t)\t)\t\t))\t(\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t(_\t(\t)\t(\t_\t\t\t\t)\t\t)\t(\t\t)\t\t)\t\t\t)\n(\t(\t\t(\t(\t\t(\t\t)\t\t\t\t\t(_\t\t)\t\t)\t)\t\t_)\t\t\t)\t_(\t(\t)\n\t((\t\t(\t\t\t)(\t\t\t\t(\t\t\t\t\t_\t\t\t\t)\t\t\t_)\t_(_\t(\t\t(_\t)\n\t\t\t(_((__(_(__((\t(\t(\t|\t\t)\t)\t)\t)_))__))_)___)\n\t\t((__)\t\t\t\t\t\t\t\\\\\\||lll|l||///\t\t\t\t\t\t\t\t\t\\\\_))\n\t\t\t\t\t\t\t\t\t\t\t(\t\t\t/(/\t(\t\t)\t\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t(\t(\t(\t|\t|\t)\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t\t(\t\t\t/(|\t/\t(\t))\t)\t)\t))\t)\n\t\t\t\t\t\t\t\t(\t\t\t\t\t(\t((((_(|)_)))))\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t\t||\\(|(|)|/||\t\t\t\t\t)\n\t\t\t\t\t\t\t(\t\t\t\t\t\t\t\t|(||(||)||||\t\t\t\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t//|/l|||)|\\\\\\\\\t\t\t\t\t)\n\t\t\t\t\t\t\t(/\t/\t//\t\t/|//||||\\\\\t\\\\\\\\\t\\\\\t_)\n</code>"
+route.start.explosion: "<code>\t\t\t\t\t\t\t\t--_--\n\t\t\t\t\t(\t\t-_\t\t\t\t_).\n\t\t\t(\t~\t\t\t\t\t\t\t)\t\t\t)\n\t((\t)\t\t(\t\t\t\t)\t\t()\t\t)\n\t\t(.\t\t\t))\t(\t\t\t\t\t\t\t)\n\t\t\t\t``..\t\t\t\t\t..``\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t\t\t(=|\t|=)\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t(../(\t)\\.))\n</code>"
+route.start.openEye: "Apri gli occhi..."
+route.start.firstExploration: "Ti ritrovi su un pianeta sconosciuto, ma nonostante tu abbia perso conoscenza, degli insegnamenti rimbombano nella tua testa e ti dicono che devi recuperare risorse per evitare la morte.\nL'esplorazione é una delle maniere più veloci per trovare materiali da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
+route.start.firstCrafting: "Una volta che hai recuperato risorse, devi sicuramente creare qualcosa per evitare la morte in caso di avvicinamento di strani esseri.\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza e certe classi aprono molte strade."
+route.start.firstHunting: "Hai un'arma (e magari un'armatura)... Beh direi che è tempo di andare a caccia di insetti ripugnanti!\n La caccia è una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e soldi! Ovviamente se muori...beh muori."
+route.start.firstWeaponEquipped: "Certo, ma se non equipaggi quell'arma come fai ad usarla??"
+route.start.error.functionNotCompleted: "Devi prima terminare la precedente missione..."
 
 # CRON
 cron.route.testing.time_alert: "End Test time"

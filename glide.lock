@@ -1,5 +1,5 @@
 hash: 71e049c4500a06c36ec07da763b64d594a44ef964d941a3c3525e892311c2241
-updated: 2019-05-01T12:05:27.827942166+02:00
+updated: 2019-06-28T00:35:54.517565+02:00
 imports:
 - name: github.com/AvraamMavridis/randomcolor
   version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
@@ -9,8 +9,6 @@ imports:
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
 - name: github.com/go-gl/mathgl
   version: c4601bc793c7a480dab005cf969aab0d7a7fb07d
-  subpackages:
-  - mgl64
 - name: github.com/go-redis/redis
   version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
   subpackages:
@@ -24,26 +22,16 @@ imports:
   version: 5781187bc20cbb9910ba867eafe318479be119b6
 - name: github.com/jinzhu/gorm
   version: 472c70caa40267cb89fd8facb07fe6454b578626
-  subpackages:
-  - dialects/postgres
-- name: github.com/jinzhu/inflection
-  version: 04140366298a54a039076d798123ffa108fff46c
 - name: github.com/joho/godotenv
   version: 23d116af351c84513e1946b527c88823e476be13
   subpackages:
   - autoload
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
-- name: github.com/lib/pq
-  version: 51e2106eed1cea199c802d2a49e91e2491b02056
-  subpackages:
-  - hstore
-  - oid
-  - scram
 - name: github.com/mb-14/gomarkov
   version: 044dd0dcb5e7875ec824df72259c523d03aa4f49
 - name: github.com/nicksnyder/go-i18n
-  version: 7e1988a89e00f7a4fd5c0b0de8f0e15d546df5ec
+  version: 3f2fe621ac72b7d6700da69f1177dcc6d7689108
   subpackages:
   - v2/i18n
   - v2/internal
@@ -58,10 +46,6 @@ imports:
   version: a29dc8fdc73485234dbef99ebedb95d2eced08de
   subpackages:
   - ssh/terminal
-- name: golang.org/x/image
-  version: 6d32002ffd7577f23673706728e1c510698cecb1
-  subpackages:
-  - math/f64
 - name: golang.org/x/sys
   version: d89cdac9e8725f2aefce25fcbfef41134c9ad412
   subpackages:

@@ -49,6 +49,14 @@ func Hunting(update tgbotapi.Update) {
 	validationFlag := false
 	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
+	case 0:
+		// Check if the player have a weapon equipped.
+		if _, noWeapon := provider.GetPlayerWeapons(helpers.Player, "true"); noWeapon != nil {
+			validationMessage = helpers.Trans("hunting.error.noWeaponEquipped")
+			helpers.FinishAndCompleteState(state, helpers.Player)
+		} else {
+			validationFlag = true
+		}
 	case 1:
 		if state.FinishAt.Before(time.Now()) {
 			validationFlag = true
@@ -140,7 +148,7 @@ func Hunting(update tgbotapi.Update) {
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.card", mob.Name, mob.LifePoint, helpers.Player.Stats.LifePoint))
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				ResizeKeyboard: true,
-				Keyboard:       helpers.GenerateWeaponKeyboard(helpers.Player),
+				Keyboard:       helpers.GenerateWeaponKeyboard(),
 			}
 			services.SendMessage(msg)
 		}
@@ -238,7 +246,7 @@ func Hunting(update tgbotapi.Update) {
 			msg := services.NewMessage(message.Chat.ID, helpers.Trans("hunting.complete"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton("back"),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 				),
 			)
 			services.SendMessage(msg)
