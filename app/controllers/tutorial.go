@@ -71,6 +71,7 @@ func StartTutorial(update tgbotapi.Update) {
 	if !validationFlag {
 		if state.Stage != 0 {
 			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.menu"))))
 			services.SendMessage(validatorMsg)
 		}
 	}
@@ -104,7 +105,7 @@ func StartTutorial(update tgbotapi.Update) {
 			// Messages
 			texts := helpers.GenerateTextArray(routeName)
 			msg := services.NewMessage(helpers.Player.ChatID, texts[0])
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			//msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			lastMessage := services.SendMessage(msg)
 			var previousText string
 			for i := 1; i < 3; i++ {
@@ -121,7 +122,7 @@ func StartTutorial(update tgbotapi.Update) {
 				time.Sleep(time.Second)
 				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
 			}
-			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.vexplosion"))
+			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.explosion"))
 			edit.ParseMode = "HTML"
 			services.SendMessage(edit)
 			msg = services.NewMessage(helpers.Player.ChatID, "...")

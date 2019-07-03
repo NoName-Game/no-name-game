@@ -7,6 +7,7 @@ timed-quest: "Timed Quest Terminata!"
 
 # ROUTES
 route.start: "Start"
+route.backToTutorial: "Ritorna al tutorial."
 route.mission: "Missione"
 route.crafting: "Crafting"
 route.inventory: "Inventario"
@@ -15,6 +16,7 @@ route.inventory.equip: "Equipaggia Oggetto"
 route.inventory.destroy: "Distruggi Oggetto"
 route.abilityTree: "Albero Abilità"
 route.hunting: "Caccia"
+route.menu: "Computer di Bordo"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
@@ -40,6 +42,11 @@ resources: "Risorse"
 equip: "Equipaggia"
 destroy: "Distruggi"
 playerDie: "<b>Sei morto...</b>"
+
+# MENU
+menu: "Computer di bordo di <b>%s</b>.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
+menu.onGoing: "In corso %s." 
+menu.finishAt: ": termina alle %s"
 
 # ARMORS/WEAPONS
 armors: "Armature"
