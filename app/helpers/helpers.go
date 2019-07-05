@@ -4,7 +4,18 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/models"
+	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/services"
+)
+
+var (
+	//===================================
+	// Public
+
+	Player nnsdk.Player
+
+	//=====================================
 )
 
 // InArray - check if val exist in array
@@ -25,10 +36,20 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 	return
 }
 
-// StringInSlice
+// KeyInMap - Check if ID is in map
 func KeyInMap(a uint, list map[uint]int) bool {
 	for k := range list {
 		if k == a {
+			return true
+		}
+	}
+	return false
+}
+
+// StringInSlice - Check if strin is in slice
+func StringInSlice(v string, a []string) bool {
+	for _, e := range a {
+		if e == v {
 			return true
 		}
 	}
@@ -43,12 +64,20 @@ func Slugger(text string) string {
 
 // GetAllCategories - return all categories of all types
 func GetAllCategories() (categories []string) {
-	armorCategories := models.GetAllArmorCategories()
+	armorCategories, err := provider.GetAllArmorCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, armor := range armorCategories {
 		categories = append(categories, armor.Name)
 	}
 
-	weaponCategories := models.GetAllWeaponCategories()
+	weaponCategories, err := provider.GetAllWeaponCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, weapon := range weaponCategories {
 		categories = append(categories, weapon.Name)
 	}
@@ -58,12 +87,20 @@ func GetAllCategories() (categories []string) {
 
 // GetAllCategories - return all categories of all types
 func GetAllSlugCategories() (categories []string) {
-	armorCategories := models.GetAllArmorCategories()
+	armorCategories, err := provider.GetAllArmorCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, armor := range armorCategories {
 		categories = append(categories, armor.Slug)
 	}
 
-	weaponCategories := models.GetAllWeaponCategories()
+	weaponCategories, err := provider.GetAllWeaponCategory()
+	if err != nil {
+		services.ErrorHandler("Cant get armor categories", err)
+	}
+
 	for _, weapon := range weaponCategories {
 		categories = append(categories, weapon.Slug)
 	}

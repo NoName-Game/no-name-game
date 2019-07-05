@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -37,8 +38,8 @@ func LanguageUp() {
 // CreateLocalizerBundle reads language files and registers them in i18n bundle
 func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
 	// Bundle stores a set of messages
-	bundle = &i18n.Bundle{DefaultLanguage: language.Italian}
-
+	//bundle = &i18n.Bundle{DefaultLanguage: language.Italian}
+	bundle = i18n.NewBundle(language.Italian)
 	// Enable bundle to understand yaml
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
@@ -74,4 +75,20 @@ func GetTranslation(key, locale string, args []interface{}) (string, error) {
 	msg = fmt.Sprintf(msg, args...)
 
 	return msg, err
+}
+
+// GenerateTextArray - generate text's array from a common word in key.
+func GenerateTextArray(common string, lang string, args ...interface{}) []string {
+	var texts []string
+	var counter int
+	for {
+		keyText := common + "_" + strconv.Itoa(counter)
+		if text, _ := GetTranslation(keyText, lang, nil); text != "" {
+			texts = append(texts, text)
+			counter++
+		} else {
+			break
+		}
+	}
+	return texts
 }

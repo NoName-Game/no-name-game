@@ -1,19 +1,26 @@
 package commands
 
 import (
+	"os"
+	"strconv"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/models"
-	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/services"
+	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
 // Cron - Call every minute the function
-func Cron(minute time.Duration) {
+func Cron() {
+	envCronMinutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
+	sleepTime := time.Duration(envCronMinutes) * time.Minute
+
 	for {
 		//Sleep for minute
-		time.Sleep(minute)
+		time.Sleep(sleepTime)
+
 		//After sleep call function.
 		CheckFinishTime()
 	}
@@ -21,19 +28,26 @@ func Cron(minute time.Duration) {
 
 // CheckFinishTime - Check the ending and handle the functions.
 func CheckFinishTime() {
-	for _, state := range models.GetAllStateToNotify() {
-		player := models.FindPlayerByID(state.PlayerID)
-		text, _ := services.GetTranslation(state.Function+"_alert", player.Language.Slug, nil)
+	states, _ := provider.GetPlayerStateToNotify()
+
+	for _, state := range states {
+		player, _ := provider.GetPlayerByID(state.PlayerID)
+		text, _ := services.GetTranslation("cron."+state.Function+"_alert", player.Language.Slug, nil)
 
 		// Send notification
-
 		msg := services.NewMessage(player.ChatID, text)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("continue", player.Language.Slug))))
+		continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
+		// I need this continue button to recall the function.
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
 		services.SendMessage(msg)
 
 		// Update status
-		state.ToNotify = false
-		state.Update()
+		// Stupid poninter stupid json pff
+		f := new(bool)
+		*f = false
+
+		state.ToNotify = f
+		state, _ = provider.UpdatePlayerState(state)
 	}
 }
 

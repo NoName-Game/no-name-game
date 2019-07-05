@@ -11,19 +11,26 @@ var (
 	// Routes
 	//
 	routes = map[string]interface{}{
-		"the-answer-is":    controllers.TheAnswerIs,    // testing.go
-		"test-multi-state": controllers.TestMultiState, // testing.go
-		"test-multi-stage": controllers.TestMultiStage, // testing.go
-		"back":             controllers.Back,           // back.go
-		"clears":           controllers.Clears,         // clears.go
-		"start":            controllers.StartTutorial,  // tutorial.go
-		"time":             controllers.TestTimedQuest,
-		"missione":         controllers.StartMission,
-		"crafting":         controllers.Crafting, // crafting.go
+		"route.start":             controllers.StartTutorial,    // tutorial.go  - MAIN
+		"route.mission":           controllers.StartMission,     // mission.go   - MAIN
+		"route.crafting":          controllers.Crafting,         // crafting.go  - MAIN
+		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
+		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
+		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
+		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
+		"route.abilityTree":       controllers.AbilityTree,      // ability.go - MAIN
+		"route.hunting":           controllers.Hunting,          // hunting.go
+		"route.menu":              controllers.Menu,             // menu.go
+
+		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
+		"route.testing.multiState":  controllers.TestMultiState, // testing.go
+		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
+		"route.testing.time":        controllers.TestTimedQuest, // testing.go
 	}
 
-	breakerRoutes = []string{
-		"back", "clears",
+	breakerRoutes = map[string]interface{}{
+		"route.breaker.back":   controllers.Back,   // back.go      - MAIN (breaker)
+		"route.breaker.clears": controllers.Clears, // clears.go    - MAIN (breaker)
 	}
 	//
 	// End routes
@@ -40,7 +47,7 @@ func Run() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username", "en"))
+				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username"))
 				services.SendMessage(msg)
 				continue
 			}
