@@ -292,21 +292,26 @@ func ShipRepairs(update tgbotapi.Update) {
 		//====================================
 		// Extra data
 		//====================================
+		needRepair := true
 		currentShipRecap := "\n\n"
 		eqippedShips, err := provider.GetPlayerShips(helpers.Player, true)
 		if err != nil {
 			services.ErrorHandler("Cant get equipped player ship", err)
 		}
 
-		currentShipRecap += fmt.Sprintf("%s: %v\n", helpers.Trans("integrity"), eqippedShips[0].ShipStats.Integrity)
-
 		repairInfo, err := provider.GetShipRepairInfo(eqippedShips[0])
 		if err != nil {
 			services.ErrorHandler("Cant get ship repair info", err)
 		}
 
-		currentShipRecap += fmt.Sprintf("%s: %v %s\n", helpers.Trans("ship.repairs.time"), repairInfo["RepairTime"], helpers.Trans("minutes"))
-		currentShipRecap += fmt.Sprintf("%s: %v (%v)\n", helpers.Trans("ship.repairs.quantity_resources"), repairInfo["QuantityResources"], repairInfo["TypeResources"])
+		if repairInfo["QuantityResources"].(float64) <= 0 {
+			needRepair = false
+			currentShipRecap += helpers.Trans("ship.repairs.dont_need")
+		} else {
+			currentShipRecap += fmt.Sprintf("%s: %v\n", helpers.Trans("integrity"), eqippedShips[0].ShipStats.Integrity)
+			currentShipRecap += fmt.Sprintf("%s: %v %s\n", helpers.Trans("ship.repairs.time"), repairInfo["RepairTime"], helpers.Trans("minutes"))
+			currentShipRecap += fmt.Sprintf("%s: %v (%v)\n", helpers.Trans("ship.repairs.quantity_resources"), repairInfo["QuantityResources"], repairInfo["TypeResources"])
+		}
 
 		//////////////////////////////////
 
@@ -320,16 +325,23 @@ func ShipRepairs(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
+		var keyboardRow [][]tgbotapi.KeyboardButton
+		if needRepair {
+			newKeyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("ship.repairs.start")))
+			keyboardRow = append(keyboardRow, newKeyboardRow)
+		}
+
+		// Clear and exit
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+		))
+
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.info")+currentShipRecap)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("ship.repairs.start")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
-			),
-		)
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboardRow,
+		}
 		services.SendMessage(msg)
 
 	case 1:
@@ -363,7 +375,9 @@ func ShipRepairs(update tgbotapi.Update) {
 			state.Payload = string(payloadUpdated)
 			state, _ = provider.UpdatePlayerState(state)
 
-			msg := services.NewMessage(message.Chat.ID, recapResourceUsed+helpers.Trans("ship.repairs.reparing", state.FinishAt.Format("15:04:05")))
+			msg := services.NewMessage(message.Chat.ID,
+				fmt.Sprintf("%s \n %s", recapResourceUsed, helpers.Trans("ship.repairs.reparing", state.FinishAt.Format("15:04:05"))),
+			)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),

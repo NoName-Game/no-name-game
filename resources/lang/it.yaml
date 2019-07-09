@@ -194,9 +194,10 @@ ship.repairs.info: "Dettagli di riparazione!"
 ship.repairs.time: "Tempo necessario"
 ship.repairs.quantity_resources: "Risorse necessarie"
 ship.repairs.used_resources: "Risorse usate per la riparazione"
+ship.repairs.dont_need: "La tua nave non necessita di riparazioni."
 ship.repairs.start: "Avvia riparazione"
 ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle %s"
-ship.repairs.reparing.finish: "La tua nave è tornata al 100% della sua integrità."
+ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrità."
 
 # SHIP - Better
 ship.better.info: "Info better"
