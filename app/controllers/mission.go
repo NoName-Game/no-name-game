@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"math/rand"
 	"time"
 
@@ -103,10 +104,9 @@ func StartMission(update tgbotapi.Update) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			// FIXME: replace me with new method
-			// payload.Material = models.GetRandomResourceByCategory(helpers.GetMissionCategoryID(message.Text, player.Language.Slug))
-			material, err := provider.GetResourceByID(1)
+			material, err := provider.GetRandomResource(helpers.GetMissionCategoryID(message.Text))
 			if err != nil {
+				log.Println(err)
 				services.ErrorHandler("Cant add resource to player inventory", err)
 			}
 
