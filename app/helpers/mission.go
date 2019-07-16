@@ -1,12 +1,12 @@
 package helpers
 
-func GetMissionCategoryID(eType, lang string) uint {
+func GetMissionCategoryID(eType string) uint {
 	switch eType {
-	case Trans("underground", lang):
+	case Trans("mission.underground"):
 		return 2
-	case Trans("surface", lang):
+	case Trans("mission.surface"):
 		return 1
-	case Trans("atmosphere", lang):
+	case Trans("mission.atmosphere"):
 		return 3
 	}
 	return 0
