@@ -184,7 +184,8 @@ ship.report: "Rapporto Nave"
 
 # SHIP - Exploration
 ship.exploration.info: "Vuoi avviare una nuova esplorazione?"
-ship.exploration.start: "Avvia nuova esplorazione"
+ship.exploration.start: "Ricerca"
+ship.exploration.current_position: "La tua posizione attuale:"
 
 # SHIP - Warehouse
 ship.warehouse.info: "Info warehouse"

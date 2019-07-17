@@ -150,6 +150,22 @@ func GetPlayerShips(player nnsdk.Player, equipped bool) (nnsdk.Ships, error) {
 	return ships, nil
 }
 
+func GetPlayerLastPosition(player nnsdk.Player) (nnsdk.PlayerPosition, error) {
+	var position nnsdk.PlayerPosition
+
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/positions/last", player.ID), nil).Get()
+	if err != nil {
+		return position, err
+	}
+
+	err = json.Unmarshal(resp.Data, &position)
+	if err != nil {
+		return position, err
+	}
+
+	return position, nil
+}
+
 func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
 	var inventory nnsdk.Inventory
 

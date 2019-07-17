@@ -115,7 +115,19 @@ func ShipExploration(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.info"))
+		//====================================
+		// Extra data
+		//====================================
+		currentPlayerPositions := "\n\n"
+		position, err := provider.GetPlayerLastPosition(helpers.Player)
+		if err != nil {
+			services.ErrorHandler("Cant get player last position", err)
+		}
+
+		currentPlayerPositions += fmt.Sprintf("%s \nX: %v \nY: %v \nZ: %v \n", helpers.Trans("ship.exploration.current_position"), position.X, position.Y, position.Z)
+		//////////////////////////////////
+
+		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.info")+currentPlayerPositions)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("ship.exploration.start")),
