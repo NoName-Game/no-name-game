@@ -64,16 +64,14 @@ func ShipExploration(update tgbotapi.Update) {
 	//====================================
 	// Init Func!
 	//====================================
-	type craftingPayload struct {
-		Item      string
-		Category  string
-		Resources map[uint]int
+	type explorationPayload struct {
+		Ship nnsdk.Ship
 	}
 
 	message := update.Message
 	routeName := "route.ship.exploration"
 	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
-	var payload craftingPayload
+	var payload explorationPayload
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	//====================================
@@ -91,6 +89,7 @@ func ShipExploration(update tgbotapi.Update) {
 			validationFlag = true
 		}
 	case 1:
+		validationFlag = true
 		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
 		// 	state.Stage = 2
 		// 	state, _ = provider.UpdatePlayerState(state)
@@ -111,7 +110,7 @@ func ShipExploration(update tgbotapi.Update) {
 	//====================================
 	switch state.Stage {
 	case 0:
-		payloadUpdated, _ := json.Marshal(craftingPayload{})
+		payloadUpdated, _ := json.Marshal(explorationPayload{})
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 
@@ -139,6 +138,51 @@ func ShipExploration(update tgbotapi.Update) {
 		)
 		services.SendMessage(msg)
 	case 1:
+		if validationFlag {
+			//====================================
+			// Extra data
+			//====================================
+			eqippedShips, err := provider.GetPlayerShips(helpers.Player, true)
+			if err != nil {
+				services.ErrorHandler("Cant get equipped player ship", err)
+			}
+
+			msgNearestStars := "\n\n"
+			explorationInfos, err := provider.GetShipExplorationInfo(eqippedShips[0])
+			if err != nil {
+				services.ErrorHandler("Cant get player last position", err)
+			}
+
+			for _, explorationInfo := range explorationInfos {
+				star := explorationInfo.Star
+				msgNearestStars += fmt.Sprintf("%s \nX: %v \nY: %v \nZ: %v \n\n",
+					star.Name,
+					star.X,
+					star.Y,
+					star.Z,
+				)
+			}
+			//////////////////////////////////
+
+			payloadUpdated, _ := json.Marshal(explorationPayload{
+				Ship: eqippedShips[0],
+			})
+			state.Payload = string(payloadUpdated)
+			state, _ = provider.UpdatePlayerState(state)
+
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.research")+msgNearestStars)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("ship.exploration.start")),
+				),
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+				),
+			)
+			services.SendMessage(msg)
+		}
+	case 2:
 		if validationFlag {
 
 			//====================================

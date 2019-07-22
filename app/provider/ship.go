@@ -8,6 +8,13 @@ import (
 	"bitbucket.org/no-name-game/no-name/services"
 )
 
+type ResponseExplorationInfo struct {
+	Star     nnsdk.Star
+	Distance float64
+	Fuel     float64
+	Time     float64
+}
+
 func GetShipRepairInfo(ship nnsdk.Ship) (map[string]interface{}, error) {
 	var info map[string]interface{}
 
@@ -44,6 +51,23 @@ func EndShipRepair(ship nnsdk.Ship) (map[string]interface{}, error) {
 	var info map[string]interface{}
 
 	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/repairs/end", ship.ID), nil).Post()
+	if err != nil {
+		return info, err
+	}
+
+	err = json.Unmarshal(resp.Data, &info)
+	if err != nil {
+		return info, err
+	}
+
+	return info, nil
+}
+
+func GetShipExplorationInfo(ship nnsdk.Ship) ([]ResponseExplorationInfo, error) {
+	// var info []map[string]interface{}
+	var info []ResponseExplorationInfo
+
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/explorations/info", ship.ID), nil).Get()
 	if err != nil {
 		return info, err
 	}
