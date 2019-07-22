@@ -9,7 +9,6 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 
-	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -67,7 +66,7 @@ func Crafting(update tgbotapi.Update) {
 		}
 	case 3:
 		if message.Text == helpers.Trans("confirm") {
-			state.FinishAt = commands.GetEndTime(0, 1, 10)
+			state.FinishAt = helpers.GetEndTime(0, 1, 10)
 			state.Stage = 4
 
 			// Stupid poninter stupid json pff

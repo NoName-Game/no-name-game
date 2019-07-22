@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -65,7 +64,7 @@ func StartMission(update tgbotapi.Update) {
 		input := message.Text
 		if input == helpers.Trans("mission.continue") {
 			validationFlag = true
-			state.FinishAt = commands.GetEndTime(0, 10*(2*payload.Times), 0)
+			state.FinishAt = helpers.GetEndTime(0, 10*(2*payload.Times), 0)
 			state.ToNotify = t
 		} else if input == helpers.Trans("mission.comeback") {
 			state.Stage = 4
@@ -118,7 +117,7 @@ func StartMission(update tgbotapi.Update) {
 			state.ToNotify = t
 
 			// Set finishAt
-			state.FinishAt = commands.GetEndTime(0, 10, 0)
+			state.FinishAt = helpers.GetEndTime(0, 10, 0)
 			state, _ = provider.UpdatePlayerState(state)
 
 			// Remove current redist stare

@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 
-	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -65,8 +65,15 @@ func ShipExploration(update tgbotapi.Update) {
 	// Init Func!
 	//====================================
 	type explorationPayload struct {
-		Ship nnsdk.Ship
+		Ship               nnsdk.Ship
+		StarNearestMapName map[int]string
+		StarNearestMapInfo map[int]provider.ResponseExplorationInfo
+		StarIDChosen       int
 	}
+
+	// Stupid poninter stupid json pff
+	t := new(bool)
+	*t = true
 
 	message := update.Message
 	routeName := "route.ship.exploration"
@@ -89,12 +96,19 @@ func ShipExploration(update tgbotapi.Update) {
 			validationFlag = true
 		}
 	case 1:
-		validationFlag = true
-		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
-		// 	state.Stage = 2
-		// 	state, _ = provider.UpdatePlayerState(state)
-		// 	validationFlag = true
-		// }
+		if helpers.InArray(message.Text, payload.StarNearestMapName) {
+			state.Stage = 2
+			state, _ = provider.UpdatePlayerState(state)
+			validationFlag = true
+		}
+	case 2:
+		if time.Now().After(state.FinishAt) {
+			state.Stage = 3
+			state, _ = provider.UpdatePlayerState(state)
+			validationFlag = true
+		} else {
+			validationMessage = helpers.Trans("wait", state.FinishAt.Format("15:04:05"))
+		}
 	}
 
 	if !validationFlag {
@@ -153,37 +167,108 @@ func ShipExploration(update tgbotapi.Update) {
 				services.ErrorHandler("Cant get player last position", err)
 			}
 
+			// It's for match with keyboard in validator and needed for next step
+			var starNearestMapName = make(map[int]string)
+			var starNearestMapInfo = make(map[int]provider.ResponseExplorationInfo)
+
+			// Keyboard with resources
+			var keyboardRowStars [][]tgbotapi.KeyboardButton
+
 			for _, explorationInfo := range explorationInfos {
-				star := explorationInfo.Star
-				msgNearestStars += fmt.Sprintf("%s \nX: %v \nY: %v \nZ: %v \n\n",
-					star.Name,
-					star.X,
-					star.Y,
-					star.Z,
-				)
+				msgNearestStars += fmt.Sprintf("%s:%s\n", helpers.Trans("name"), explorationInfo.Star.Name)
+				msgNearestStars += fmt.Sprintf("%s:%v\n", helpers.Trans("ship.exploration.fuel_needed"), explorationInfo.Fuel)
+				msgNearestStars += fmt.Sprintf("%s:%v\n", helpers.Trans("ship.exploration.time_needed"), explorationInfo.Time)
+				msgNearestStars += fmt.Sprintf("X: %v \nY: %v \nZ: %v \n\n", explorationInfo.Star.X, explorationInfo.Star.Y, explorationInfo.Star.Z)
+
+				// Add for validation and next step
+				starNearestMapName[int(explorationInfo.Star.ID)] = explorationInfo.Star.Name
+				starNearestMapInfo[int(explorationInfo.Star.ID)] = explorationInfo
+
+				// Add for keyboard
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+					explorationInfo.Star.Name,
+				))
+				keyboardRowStars = append(keyboardRowStars, keyboardRow)
 			}
 			//////////////////////////////////
 
-			payloadUpdated, _ := json.Marshal(explorationPayload{
-				Ship: eqippedShips[0],
-			})
-			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
-
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.research")+msgNearestStars)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("ship.exploration.start")),
-				),
+			// Clear and exit
+			keyboardRowStars = append(keyboardRowStars,
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 				),
 			)
+
+			// Update state
+			payloadUpdated, _ := json.Marshal(explorationPayload{
+				Ship:               eqippedShips[0],
+				StarNearestMapName: starNearestMapName,
+				StarNearestMapInfo: starNearestMapInfo,
+			})
+			state.Payload = string(payloadUpdated)
+			state, _ = provider.UpdatePlayerState(state)
+
+			// Send message
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.research")+msgNearestStars)
+			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+				ResizeKeyboard: true,
+				Keyboard:       keyboardRowStars,
+			}
 			services.SendMessage(msg)
 		}
 	case 2:
 		if validationFlag {
+			// Filter chosen star id by message
+			var starIDchosen int
+			for key, name := range payload.StarNearestMapName {
+				if name == message.Text {
+					starIDchosen = key
+					break
+				}
+			}
+
+			// Not found
+			if starIDchosen <= 0 {
+				services.ErrorHandler("Cant get chose star destination", errors.New("Cant get chose star destination"))
+			}
+
+			// Set timer
+			state.FinishAt = helpers.GetEndTime(0, int(payload.StarNearestMapInfo[starIDchosen].Time), 0)
+			state.ToNotify = t
+			state.Stage = 2
+
+			payload.StarIDChosen = starIDchosen
+
+			payloadUpdated, _ := json.Marshal(payload)
+			state.Payload = string(payloadUpdated)
+			state, _ = provider.UpdatePlayerState(state)
+
+			msg := services.NewMessage(message.Chat.ID,
+				fmt.Sprintf("%s \n", helpers.Trans("ship.exploration.exploring", state.FinishAt.Format("15:04:05"))),
+			)
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				),
+			)
+			services.SendMessage(msg)
+		}
+	case 3:
+		if validationFlag {
+			// End exploration
+			var request provider.RequestExplorationEnd
+			request.Position = []float64{
+				payload.StarNearestMapInfo[payload.StarIDChosen].Star.X,
+				payload.StarNearestMapInfo[payload.StarIDChosen].Star.Y,
+				payload.StarNearestMapInfo[payload.StarIDChosen].Star.Z,
+			}
+			request.Tank = payload.StarNearestMapInfo[payload.StarIDChosen].Fuel
+
+			_, err := provider.EndShipExploration(payload.Ship, request)
+			if err != nil {
+				services.ErrorHandler("Cant end exploration", err)
+			}
 
 			//====================================
 			// IMPORTANT!
@@ -191,7 +276,7 @@ func ShipExploration(update tgbotapi.Update) {
 			helpers.FinishAndCompleteState(state, helpers.Player)
 			//====================================
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("todo_text"))
+			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.exploration.end"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
@@ -423,7 +508,7 @@ func ShipRepairs(update tgbotapi.Update) {
 			//////////////////////////////////
 
 			// Set timer
-			state.FinishAt = commands.GetEndTime(0, int(payload.RepairTime), 0)
+			state.FinishAt = helpers.GetEndTime(0, int(payload.RepairTime), 0)
 			state.ToNotify = t
 			state.Stage = 1
 

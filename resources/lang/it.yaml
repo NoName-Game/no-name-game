@@ -178,6 +178,7 @@ cron.route.mission_alert: "Esplorazione finita!"
 cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
+cron.route.ship.exploration_alert: "Nuovo pianeta raggiunto!"
 
 # SHIP
 ship.report: "Rapporto Nave"
@@ -185,8 +186,12 @@ ship.report: "Rapporto Nave"
 # SHIP - Exploration
 ship.exploration.info: "Vuoi avviare una nuova esplorazione?"
 ship.exploration.start: "Ricerca"
-ship.exploration.current_position: "La tua posizione attuale:"
+ship.exploration.current_position: "La tua posizione attuale"
 ship.exploration.research: "Sono stati rilevati queste entità nelle vicinanze:"
+ship.exploration.fuel_needed: "Carburante necessario"
+ship.exploration.time_needed: "Tempo necessario"
+ship.exploration.exploring: "Motori accesi, buon viaggio! Il tuo arrivo è previsto per le %s"
+ship.exploration.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli dell'esplorazione."
 
 # SHIP - Warehouse
 ship.warehouse.info: "Info warehouse"
