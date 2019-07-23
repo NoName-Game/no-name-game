@@ -44,11 +44,7 @@ func Ship(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.ship.exploration")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.ship.warehouse")),
-		),
-		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.ship.repairs")),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.ship.better")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
@@ -287,90 +283,6 @@ func ShipExploration(update tgbotapi.Update) {
 	}
 }
 
-// ShipWarehouse
-func ShipWarehouse(update tgbotapi.Update) {
-	//====================================
-	// Init Func!
-	//====================================
-	type craftingPayload struct {
-		Item      string
-		Category  string
-		Resources map[uint]int
-	}
-
-	message := update.Message
-	routeName := "route.ship.warehouse"
-	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
-	var payload craftingPayload
-	helpers.UnmarshalPayload(state.Payload, &payload)
-
-	//====================================
-	// Validator
-	//====================================
-	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage")
-	switch state.Stage {
-	case 0:
-		if helpers.InArray(message.Text, []string{
-			helpers.Trans("ship.exploration.start"),
-		}) {
-			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
-			validationFlag = true
-		}
-	case 1:
-		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
-		// 	state.Stage = 2
-		// 	state, _ = provider.UpdatePlayerState(state)
-		// 	validationFlag = true
-		// }
-	}
-
-	if !validationFlag {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			validatorMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			services.SendMessage(validatorMsg)
-		}
-	}
-
-	//====================================
-	// Stage
-	//====================================
-	switch state.Stage {
-	case 0:
-		payloadUpdated, _ := json.Marshal(craftingPayload{})
-		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
-
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.warehouse.info"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
-			),
-		)
-		services.SendMessage(msg)
-	case 1:
-		if validationFlag {
-
-			//====================================
-			// IMPORTANT!
-			//====================================
-			helpers.FinishAndCompleteState(state, helpers.Player)
-			//====================================
-
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("todo_text"))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
-				),
-			)
-			services.SendMessage(msg)
-		}
-	}
-}
-
 // ShipRepairs
 func ShipRepairs(update tgbotapi.Update) {
 	//====================================
@@ -541,90 +453,6 @@ func ShipRepairs(update tgbotapi.Update) {
 			//====================================
 
 			msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.repairs.reparing.finish"))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
-				),
-			)
-			services.SendMessage(msg)
-		}
-	}
-}
-
-// ShipBetter
-func ShipBetter(update tgbotapi.Update) {
-	//====================================
-	// Init Func!
-	//====================================
-	type craftingPayload struct {
-		Item      string
-		Category  string
-		Resources map[uint]int
-	}
-
-	message := update.Message
-	routeName := "route.ship.better"
-	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
-	var payload craftingPayload
-	helpers.UnmarshalPayload(state.Payload, &payload)
-
-	//====================================
-	// Validator
-	//====================================
-	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage")
-	switch state.Stage {
-	case 0:
-		if helpers.InArray(message.Text, []string{
-			helpers.Trans("ship.exploration.start"),
-		}) {
-			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
-			validationFlag = true
-		}
-	case 1:
-		// if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
-		// 	state.Stage = 2
-		// 	state, _ = provider.UpdatePlayerState(state)
-		// 	validationFlag = true
-		// }
-	}
-
-	if !validationFlag {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			validatorMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			services.SendMessage(validatorMsg)
-		}
-	}
-
-	//====================================
-	// Stage
-	//====================================
-	switch state.Stage {
-	case 0:
-		payloadUpdated, _ := json.Marshal(craftingPayload{})
-		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
-
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("ship.better.info"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
-			),
-		)
-		services.SendMessage(msg)
-	case 1:
-		if validationFlag {
-
-			//====================================
-			// IMPORTANT!
-			//====================================
-			helpers.FinishAndCompleteState(state, helpers.Player)
-			//====================================
-
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("todo_text"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
