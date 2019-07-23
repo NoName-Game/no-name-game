@@ -3,6 +3,7 @@ package helpers
 import (
 	"reflect"
 	"strings"
+	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/provider"
@@ -27,6 +28,14 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 		s := reflect.ValueOf(array)
 		for i := 0; i < s.Len(); i++ {
 			if reflect.DeepEqual(val, s.Index(i).Interface()) {
+				exists = true
+				return
+			}
+		}
+	case reflect.Map:
+		m := reflect.ValueOf(array)
+		for _, e := range m.MapKeys() {
+			if reflect.DeepEqual(val, m.MapIndex(e).Interface()) {
 				exists = true
 				return
 			}
@@ -105,5 +114,11 @@ func GetAllSlugCategories() (categories []string) {
 		categories = append(categories, weapon.Slug)
 	}
 
+	return
+}
+
+// GetEndTime - Add to Now() the value passed.
+func GetEndTime(hours, minutes, seconds int) (t time.Time) {
+	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
 	return
 }

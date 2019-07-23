@@ -9,7 +9,6 @@ import (
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/provider"
 
-	"bitbucket.org/no-name-game/no-name/app/commands"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -112,7 +111,7 @@ func Hunting(update tgbotapi.Update) {
 	switch state.Stage {
 	case 0:
 		// Set timer
-		state.FinishAt = commands.GetEndTime(0, int(5*(payload.Score/3)), 0)
+		state.FinishAt = helpers.GetEndTime(0, int(5*(payload.Score/3)), 0)
 		state.ToNotify = t
 		state.Stage = 1
 

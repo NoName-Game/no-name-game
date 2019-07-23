@@ -45,12 +45,16 @@ func bootLog() {
 		ErrorHandler("Error when opening file", err)
 	}
 
-	//DateFormatter
+	// DateFormatter
 	logrus.SetFormatter(&logrus.TextFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
 
+	// Set output file
 	logrus.SetOutput(file)
+
+	// Set log level
+	logrus.SetLevel(logrus.InfoLevel)
 }
 
 // ErrorHandler logs a new Error.
@@ -58,16 +62,18 @@ func bootLog() {
 // message is a custom text.
 func ErrorHandler(message string, err error) {
 	if err != nil {
-		//Report to Sentry
-		if sentryDebug := os.Getenv("SENTRY_DEBUG"); sentryDebug != "false" {
-			raven.CaptureErrorAndWait(err, nil) //Invio errore potenzialmente Panicoso (Crusca fatti da parte) a Sentry
+		if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+			log.Panicln(err)
 		}
 
-		//Report Log
-		if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-			logrus.WithFields(logrus.Fields{
-				"Message": message,
-			}).Panic(err)
+		// Report to Sentry
+		if sentryDebug := os.Getenv("SENTRY_DEBUG"); sentryDebug != "false" {
+			raven.CaptureErrorAndWait(err, nil)
 		}
+
+		// Report to Logfile
+		logrus.WithFields(logrus.Fields{
+			"Message": message,
+		}).Error(err)
 	}
 }

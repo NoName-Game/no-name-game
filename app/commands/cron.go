@@ -50,9 +50,3 @@ func CheckFinishTime() {
 		state, _ = provider.UpdatePlayerState(state)
 	}
 }
-
-// GetEndTime - Add to Now() the value passed.
-func GetEndTime(hours, minutes, seconds int) (t time.Time) {
-	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
-	return
-}

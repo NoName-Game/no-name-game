@@ -2,6 +2,7 @@ package provider
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
@@ -131,6 +132,38 @@ func GetPlayerWeapons(player nnsdk.Player, equipped string) (nnsdk.Weapons, erro
 	}
 
 	return weapons, nil
+}
+
+func GetPlayerShips(player nnsdk.Player, equipped bool) (nnsdk.Ships, error) {
+	var ships nnsdk.Ships
+
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/ships?equipped=%v", player.ID, equipped), nil).Get()
+	if err != nil {
+		return ships, err
+	}
+
+	err = json.Unmarshal(resp.Data, &ships)
+	if err != nil {
+		return ships, err
+	}
+
+	return ships, nil
+}
+
+func GetPlayerLastPosition(player nnsdk.Player) (nnsdk.PlayerPosition, error) {
+	var position nnsdk.PlayerPosition
+
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/positions/last", player.ID), nil).Get()
+	if err != nil {
+		return position, err
+	}
+
+	err = json.Unmarshal(resp.Data, &position)
+	if err != nil {
+		return position, err
+	}
+
+	return position, nil
 }
 
 func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
