@@ -25,9 +25,9 @@ var (
 
 		"route.ship":             controllers.Ship,            // ship.go
 		"route.ship.exploration": controllers.ShipExploration, // ship.go
-		"route.ship.warehouse":   controllers.ShipWarehouse,   // ship.go
-		"route.ship.repairs":     controllers.ShipRepairs,     // ship.go
-		"route.ship.better":      controllers.ShipBetter,      // ship.go
+		//"route.ship.warehouse":   controllers.ShipWarehouse,   // ship.go
+		"route.ship.repairs": controllers.ShipRepairs, // ship.go
+		//"route.ship.better":      controllers.ShipBetter,      // ship.go
 
 		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
 		"route.testing.multiState":  controllers.TestMultiState, // testing.go
