@@ -25,7 +25,7 @@ func GetMapByID(id uint) (nnsdk.Map, error) {
 
 func CreateMap() (nnsdk.Map, error) {
 	var Map nnsdk.Map
-	resp, err := services.NnSDK.MakeRequest("maps/", nil).Post()
+	resp, err := services.NnSDK.MakeRequest("maps", nil).Post()
 	if err != nil {
 		return Map, err
 	}
