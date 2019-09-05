@@ -28,6 +28,9 @@ route.menu: "Computer di Bordo"
 route.breaker.back: "Fai altro"
 route.breaker.clears: "Lascia stare"
 
+# ROUTES (CALLBACK)
+callback.map: "map"
+
 # ROUTES (TESTING)
 route.testing.theAnswerIs: "the-answer-is"
 route.testing.multiState: "multi-state"

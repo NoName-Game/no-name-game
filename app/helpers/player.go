@@ -8,15 +8,15 @@ import (
 )
 
 // HandleUser - Check if user exist in DB, if not exist create!
-func HandleUser(message *tgbotapi.Message) bool {
-	Player, _ = provider.FindPlayerByUsername(message.From.UserName)
+func HandleUser(user *tgbotapi.User) bool {
+	Player, _ = provider.FindPlayerByUsername(user.UserName)
 
 	if Player.ID < 1 {
 		language, _ := provider.FindLanguageBySlug("en")
 
 		newPlayer := nnsdk.Player{
-			Username: message.From.UserName,
-			ChatID:   message.Chat.ID,
+			Username: user.UserName,
+			ChatID:   int64(user.ID),
 			Language: language,
 			Inventory: nnsdk.Inventory{
 				Items: "{}",
