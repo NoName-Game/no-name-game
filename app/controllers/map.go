@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
@@ -21,6 +22,9 @@ func MapController(update tgbotapi.Update) {
 
 	m, err := provider.GetMapByID(helpers.Player.ID)
 	if err != nil {
+		services.ErrorHandler("Error while retriving map", err)
+	}
+	if m.ID < 1 {
 		// Create map
 		m, _ = provider.CreateMap()
 		msg := services.NewMessage(helpers.Player.ChatID, "<code>"+helpers.TextDisplay(m)+"</code>")
@@ -28,46 +32,53 @@ func MapController(update tgbotapi.Update) {
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	} else {
-		var cellMap [66][66]bool
-		actionCompleted := false
-		err = json.Unmarshal([]byte(m.Cell), &cellMap)
-		if err != nil {
-			services.ErrorHandler("Error during unmarshal", err)
-		}
-		switch callback.Data {
-		case "map_up":
-			if !cellMap[m.PlayerX-1][m.PlayerY] {
-				m.PlayerX--
-				actionCompleted = true
-			}
-		case "map_down":
-			if !cellMap[m.PlayerX+1][m.PlayerY] {
-				m.PlayerX++
-				actionCompleted = true
-			}
-		case "map_left":
-			if !cellMap[m.PlayerX][m.PlayerY-1] {
-				m.PlayerY--
-				actionCompleted = true
-			}
-		case "map_right":
-			if !cellMap[m.PlayerX][m.PlayerY+1] {
-				m.PlayerY++
-				actionCompleted = true
-			}
-		}
+		if time.Since(m.UpdatedAt).Seconds() > 1.0 {
 
-		_, err = provider.UpdateMap(m)
-		if err != nil {
-			services.ErrorHandler("Error while updating map", err)
-		}
+			var cellMap [66][66]bool
+			actionCompleted := false
+			err = json.Unmarshal([]byte(m.Cell), &cellMap)
+			if err != nil {
+				services.ErrorHandler("Error during unmarshal", err)
+			}
+			switch callback.Data {
+			case "map_up":
+				if !cellMap[m.PlayerX-1][m.PlayerY] {
+					m.PlayerX--
+					actionCompleted = true
+				}
+			case "map_down":
+				if !cellMap[m.PlayerX+1][m.PlayerY] {
+					m.PlayerX++
+					actionCompleted = true
+				}
+			case "map_left":
+				if !cellMap[m.PlayerX][m.PlayerY-1] {
+					m.PlayerY--
+					actionCompleted = true
+				}
+			case "map_right":
+				if !cellMap[m.PlayerX][m.PlayerY+1] {
+					m.PlayerY++
+					actionCompleted = true
+				}
+			}
 
-		if actionCompleted {
-			log.Println(helpers.Player.ChatID)
-			msg := services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, "<code>"+helpers.TextDisplay(m)+"</code>")
-			msg.ReplyMarkup = &mapKeyboard
-			msg.ParseMode = "HTML"
-			services.SendMessage(msg)
+			_, err = provider.UpdateMap(m)
+			if err != nil {
+				services.ErrorHandler("Error while updating map", err)
+			}
+
+			if actionCompleted {
+				log.Println(helpers.Player.ChatID)
+				msg := services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, "<code>"+helpers.TextDisplay(m)+"</code>")
+				msg.ReplyMarkup = &mapKeyboard
+				msg.ParseMode = "HTML"
+				services.SendMessage(msg)
+				services.AnswerCallbackQuery(services.NewAnswer(callback.ID, "", false))
+			}
+		} else {
+			answer := services.NewAnswer(callback.ID, "1 second delay", false)
+			services.AnswerCallbackQuery(answer)
 		}
 	}
 
