@@ -37,7 +37,7 @@ func BotUp() {
 }
 
 // GetUpdates - return new updates
-func GetUpdates() tgbotapi.UpdatesChannel {
+func GetUpdates() (tgbotapi.UpdatesChannel, error) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -77,4 +77,19 @@ func SendMessage(chattable tgbotapi.Chattable) tgbotapi.Message {
 	}
 
 	return message
+}
+
+func NewAnswer(callbackQueryID string, text string, alert bool) tgbotapi.CallbackConfig {
+	return tgbotapi.CallbackConfig{
+		CallbackQueryID: callbackQueryID,
+		Text:            text,
+		ShowAlert:       alert,
+	}
+}
+
+func AnswerCallbackQuery(config tgbotapi.CallbackConfig) {
+	_, err := botAPI.AnswerCallbackQuery(config)
+	if err != nil {
+		log.Println("Cant send answer.")
+	}
 }

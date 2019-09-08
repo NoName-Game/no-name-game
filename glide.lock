@@ -1,14 +1,14 @@
-hash: 71e049c4500a06c36ec07da763b64d594a44ef964d941a3c3525e892311c2241
-updated: 2019-06-28T00:35:54.517565+02:00
+hash: 6de34cf5c80e5c8e50e46906c31ed330ec243b448f84745284949a3557d246ed
+updated: 2019-09-08T22:27:13.145822938+02:00
 imports:
 - name: github.com/AvraamMavridis/randomcolor
   version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
 - name: github.com/certifi/gocertifi
-  version: 92f724a62f3ed0fda3d0bc76a5e63cec357c4e26
+  version: a5e0173ced670013bfb649c7e806bc9529c986ec
 - name: github.com/getsentry/raven-go
   version: f04e7487e9a6b9d9837d52743fb5f40576c56411
 - name: github.com/go-gl/mathgl
-  version: c4601bc793c7a480dab005cf969aab0d7a7fb07d
+  version: 592312d8590acb0686c14740dcf60e2f32d9c618
 - name: github.com/go-redis/redis
   version: 22be8a3eaf992c828cecb69dc07348313bf08d2e
   subpackages:
@@ -19,7 +19,7 @@ imports:
   - internal/proto
   - internal/util
 - name: github.com/go-telegram-bot-api/telegram-bot-api
-  version: 5781187bc20cbb9910ba867eafe318479be119b6
+  version: 87e7035a900c7cb1fd896e5f33b461c96c3ac31e
 - name: github.com/jinzhu/gorm
   version: 472c70caa40267cb89fd8facb07fe6454b578626
 - name: github.com/joho/godotenv
@@ -43,16 +43,16 @@ imports:
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: golang.org/x/crypto
-  version: a29dc8fdc73485234dbef99ebedb95d2eced08de
+  version: 71b5226ff73902d121cd9dbbdfdb67045a805845
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: d89cdac9e8725f2aefce25fcbfef41134c9ad412
+  version: d223b2b6db03988709bac9e66576ad6ec0d83695
   subpackages:
   - unix
   - windows
 - name: golang.org/x/text
-  version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
+  version: 3d0f7978add91030e5e8976ff65ccdd828286cba
   subpackages:
   - internal/language
   - internal/language/compact
@@ -61,7 +61,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: k8s.io/apimachinery
-  version: 5bae42371a56b2252d3a1c531087dce873ee446e
+  version: 461753078381c979582f217a28eb759ebee5295d
   subpackages:
   - pkg/util/rand
 testImports: []

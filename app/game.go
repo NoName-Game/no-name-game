@@ -51,7 +51,10 @@ func init() {
 
 // Run - The Game!
 func Run() {
-	updates := services.GetUpdates()
+	updates, err := services.GetUpdates()
+	if err != nil {
+		services.ErrorHandler("Update channel error", err)
+	}
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
