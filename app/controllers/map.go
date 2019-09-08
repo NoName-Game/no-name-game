@@ -20,10 +20,7 @@ var mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 func MapController(update tgbotapi.Update) {
 	callback := update.CallbackQuery
 
-	m, err := provider.GetMapByID(helpers.Player.ID)
-	if err != nil {
-		services.ErrorHandler("Error while retriving map", err)
-	}
+	m, _ := provider.GetMapByID(helpers.Player.ID)
 	if m.ID < 1 {
 		// Create map
 		m, _ = provider.CreateMap()
@@ -36,7 +33,7 @@ func MapController(update tgbotapi.Update) {
 
 			var cellMap [66][66]bool
 			actionCompleted := false
-			err = json.Unmarshal([]byte(m.Cell), &cellMap)
+			err := json.Unmarshal([]byte(m.Cell), &cellMap)
 			if err != nil {
 				services.ErrorHandler("Error during unmarshal", err)
 			}
