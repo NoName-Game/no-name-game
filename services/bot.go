@@ -73,7 +73,7 @@ func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessa
 func SendMessage(chattable tgbotapi.Chattable) tgbotapi.Message {
 	message, err := botAPI.Send(chattable)
 	if err != nil {
-		log.Println("Cant send message.")
+		ErrorHandler("Can't send message.", err)
 	}
 
 	return message

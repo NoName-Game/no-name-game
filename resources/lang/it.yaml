@@ -69,6 +69,8 @@ gauntlets: "Braccia"
 chest: "Petto"
 leg: "Gambe"
 
+head: "Testa"
+
 weapons: "Armi"
 knife: "Coltello"
 auto_rifle: "Fucile Automatico"
@@ -89,6 +91,7 @@ hunting.completed: "Caccia completata, torni alla base col bottino."
 combat.attack: "Attacca"
 combat.attack_with: "Attacca con %s"
 combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
+combat.card: "🐺 %s\n❤️ %d/%d\n\nStai mirando a: %s"
 
 # MISSION
 mission.exploration: "Seleziona campo di ricerca!"

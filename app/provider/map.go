@@ -23,9 +23,10 @@ func GetMapByID(id uint) (nnsdk.Map, error) {
 	return Map, nil
 }
 
-func CreateMap() (nnsdk.Map, error) {
+func CreateMap(playerID uint) (nnsdk.Map, error) {
 	var Map nnsdk.Map
-	resp, err := services.NnSDK.MakeRequest("maps", nil).Post()
+	Map.PlayerID = playerID
+	resp, err := services.NnSDK.MakeRequest("maps", Map).Post()
 	if err != nil {
 		return Map, err
 	}

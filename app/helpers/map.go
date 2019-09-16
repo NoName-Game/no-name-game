@@ -9,7 +9,7 @@ import (
 )
 
 func TextDisplay(m nnsdk.Map) string {
-	result := "+---------------------+\n"
+	result := "<code>+---------------------+\n"
 	var cellMap [66][66]bool
 	err := json.Unmarshal([]byte(m.Cell), &cellMap)
 	if err != nil {
@@ -41,6 +41,6 @@ func TextDisplay(m nnsdk.Map) string {
 		result += "|"
 		result += "\n"
 	}
-	result += "+---------------------+"
+	result += "+---------------------+</code>"
 	return result
 }

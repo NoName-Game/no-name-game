@@ -1,5 +1,5 @@
 hash: 6de34cf5c80e5c8e50e46906c31ed330ec243b448f84745284949a3557d246ed
-updated: 2019-09-08T22:27:13.145822938+02:00
+updated: 2019-09-09T21:24:07.6080913+02:00
 imports:
 - name: github.com/AvraamMavridis/randomcolor
   version: 208aff70bf2c91d73d903e3dd4d291d96d52addd
@@ -19,7 +19,7 @@ imports:
   - internal/proto
   - internal/util
 - name: github.com/go-telegram-bot-api/telegram-bot-api
-  version: 87e7035a900c7cb1fd896e5f33b461c96c3ac31e
+  version: ec221ba9ea458cd5386c35dd90af04b8a895f8eb
 - name: github.com/jinzhu/gorm
   version: 472c70caa40267cb89fd8facb07fe6454b578626
 - name: github.com/joho/godotenv
@@ -43,11 +43,11 @@ imports:
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: golang.org/x/crypto
-  version: 71b5226ff73902d121cd9dbbdfdb67045a805845
+  version: 094676da4a83be5288d281081bba63a173ce6772
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: d223b2b6db03988709bac9e66576ad6ec0d83695
+  version: f460065e899abee61eb86816fd1fd684ea5a0f26
   subpackages:
   - unix
   - windows
