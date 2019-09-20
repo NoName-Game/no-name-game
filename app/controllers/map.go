@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"math"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -163,8 +165,8 @@ func Fight(update tgbotapi.Update) {
 
 	switch callback.Data {
 	case "map_fight.start":
-		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Trans(bodyParts[payload.Selection])))
-		editMessage.ReplyMarkup = &mobKeyboard
+		// editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Trans(bodyParts[payload.Selection])))
+		// editMessage.ReplyMarkup = &mobKeyboard
 	case "map_fight.returnMap":
 		payload.InFight = false
 		payloadUpdated, _ := json.Marshal(payload)
@@ -191,8 +193,52 @@ func Fight(update tgbotapi.Update) {
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
+	case "map_fight.hit":
+		// alt(B)=1,7*[1000 - dist(B)]/1000
+		mobDistance := math.Sqrt(math.Pow(float64(m.EnemyX-m.PlayerX), 2) + math.Pow(float64(m.EnemyY-m.PlayerY), 2))
+		// 1000 corrisponde ad 1KM, la distanza in cui si vede circa lo 0% del corpo, con la formula calcoliamo quanta percentuale del corpo vedo
+		// per determinare la percentuale di riuscita di nel colpire una parte del corpo.
+		mobPercentage := ((1000 - mobDistance) / 1000) // What percentage I see of the body? Number between 0 -> 1
+		// RULE OF NINE: HEAD > 9%, BODY > 37%, ARMS > 18, LEGS > 36
+		// 1 : 90 = mobPercentage : x
+		var damageMultiplier float64
+		var precision float64
+		precision = (85.0 / 37.0) * mobPercentage // Base precision
+		switch payload.Selection {
+		case 0: // HEAD
+			precision *= 9.0
+			damageMultiplier = 3
+		case 1: // BODY
+			precision *= 37.0 // precision * body part weight
+			damageMultiplier = 1
+		case 2: // ARMS
+			precision *= 18.0
+			damageMultiplier = 0.9
+		case 3: // LEGS
+			precision *= 36.0
+			damageMultiplier = 0.9
+		}
+		if rand.Float64() < precision {
+			// Hitted
+			playerWeapons, err := provider.GetPlayerWeapons(helpers.Player, "true")
+			if err != nil {
+				services.ErrorHandler("Error while retriving weapons", err)
+			}
+			damageToMob := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + float64(playerWeapons[0].RawDamage))))
+			mob.LifePoint -= damageToMob
+			_, err = provider.UpdateEnemy(mob)
+			if err != nil {
+				services.ErrorHandler("Error while updating enemy", err)
+			}
+			damageToPlayer := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + 4)))
+			stats, _ := provider.GetPlayerStats(helpers.Player)
+			helpers.DecrementLife(damageToPlayer, stats)
+			editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, damageToPlayer))
+		}
+
 	}
 
+	// Standard Message
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
 		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Trans(bodyParts[payload.Selection])))
 		editMessage.ReplyMarkup = &mobKeyboard
