@@ -102,7 +102,7 @@ func MapController(update tgbotapi.Update) {
 				state.Payload = string(payloadUpdated)
 				state, _ = provider.UpdatePlayerState(state)
 				Fight(update)
-			case "map_fight.end":
+			case "map_finish.fight":
 				helpers.FinishAndCompleteState(state, helpers.Player)
 				services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("complete")))
 				return
@@ -226,14 +226,32 @@ func Fight(update tgbotapi.Update) {
 			}
 			damageToMob := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + float64(playerWeapons[0].RawDamage))))
 			mob.LifePoint -= damageToMob
+			if mob.LifePoint > mob.LifeMax || mob.LifePoint == 0 {
+				// Mob die
+				mob.LifePoint = 0
+				editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.mob_killed"))
+				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_finish.fight")))
+				editMessage.ReplyMarkup = &ok
+				// Add drop
+				playerStats, _ := provider.GetPlayerStats(helpers.Player)
+				playerStats.Experience++
+				provider.UpdatePlayerStats(playerStats)
+				payload.InFight = false
+				payloadUpdated, _ := json.Marshal(payload)
+				state.Payload = string(payloadUpdated)
+				state, _ = provider.UpdatePlayerState(state)
+			} else {
+				damageToPlayer := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + 4)))
+				stats, _ := provider.GetPlayerStats(helpers.Player)
+				helpers.DecrementLife(damageToPlayer, stats)
+				editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, damageToPlayer))
+				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
+				editMessage.ReplyMarkup = &ok
+			}
 			_, err = provider.UpdateEnemy(mob)
 			if err != nil {
 				services.ErrorHandler("Error while updating enemy", err)
 			}
-			damageToPlayer := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + 4)))
-			stats, _ := provider.GetPlayerStats(helpers.Player)
-			helpers.DecrementLife(damageToPlayer, stats)
-			editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, damageToPlayer))
 		}
 
 	}
