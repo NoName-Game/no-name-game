@@ -25,15 +25,14 @@ func TextDisplay(m nnsdk.Map) string {
 				} else {
 					if x == m.PlayerX && y == m.PlayerY {
 						result += "@"
-					} else if x == m.EnemyX && y == m.EnemyY {
+						continue
+					} else if checkForMob(m, x, y) {
 						result += "*"
 					} else {
 						result += " "
 					}
-
 				}
 			} else {
-				//log.Println("Out of Bound X: ", x, " Y: ", y)
 				result += "#"
 			}
 
@@ -43,4 +42,29 @@ func TextDisplay(m nnsdk.Map) string {
 	}
 	result += "+---------------------+</code>"
 	return result
+}
+
+func checkForMob(m nnsdk.Map, x, y int) bool {
+	for i := 0; i < len(m.Enemies); i++ {
+		if x == m.Enemies[i].MapPositionX && y == m.Enemies[i].MapPositionY {
+			return true
+		}
+	}
+	return false
+}
+
+func ChooseMob(m nnsdk.Map) int {
+	for x := m.PlayerX - 5; x < m.PlayerX+5; x++ {
+		for y := m.PlayerY - 10; y < m.PlayerY+11; y++ {
+			if (x >= 0 && x < 66) && (y >= 0 && y < 66) { // In bounds
+				for i := 0; i < len(m.Enemies); i++ {
+					if x == m.Enemies[i].MapPositionX && y == m.Enemies[i].MapPositionY {
+						return i
+					}
+				}
+
+			}
+		}
+	}
+	return -1
 }

@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"math"
 	"math/rand"
 	"strings"
 	"time"
-
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/app/provider"
@@ -33,6 +30,7 @@ func MapController(update tgbotapi.Update) {
 	type payloadStruct struct {
 		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight   bool
+		Kill      uint
 	}
 
 	routeName := "callback.map"
@@ -106,6 +104,8 @@ func MapController(update tgbotapi.Update) {
 				helpers.FinishAndCompleteState(state, helpers.Player)
 				services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("complete")))
 				return
+			case "map_no.action":
+				actionCompleted = true
 			}
 
 			_, err = provider.UpdateMap(m)
@@ -135,7 +135,7 @@ func MapController(update tgbotapi.Update) {
 
 var mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "map_fight.up")),
-	tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🗾", "map_fight.returnMap"), tgbotapi.NewInlineKeyboardButtonData("⚔", "map_fight.hit"), tgbotapi.NewInlineKeyboardButtonData("🔍", "map_fight.analize")),
+	tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🗾", "map_fight.returnMap"), tgbotapi.NewInlineKeyboardButtonData("⚔", "map_fight.hit")),
 	tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "map_fight.down")),
 )
 
@@ -147,6 +147,7 @@ func Fight(update tgbotapi.Update) {
 	type payloadStruct struct {
 		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight   bool
+		Kill      uint
 	}
 	bodyParts := [4]string{"head", "chest", "gauntlets", "leg"}
 
@@ -158,10 +159,7 @@ func Fight(update tgbotapi.Update) {
 	var editMessage tgbotapi.EditMessageTextConfig
 	m, _ := provider.GetMapByID(helpers.Player.ID)
 
-	mob, _ := provider.GetEnemyByID(helpers.Player.ID)
-	if mob.ID < 1 {
-		mob, _ = provider.Spawn(nnsdk.Enemy{})
-	}
+	mob := m.Enemies[helpers.ChooseMob(m)]
 
 	switch callback.Data {
 	case "map_fight.start":
@@ -194,59 +192,59 @@ func Fight(update tgbotapi.Update) {
 		state.Payload = string(payloadUpdated)
 		state, _ = provider.UpdatePlayerState(state)
 	case "map_fight.hit":
-		// alt(B)=1,7*[1000 - dist(B)]/1000
-		mobDistance := math.Sqrt(math.Pow(float64(m.EnemyX-m.PlayerX), 2) + math.Pow(float64(m.EnemyY-m.PlayerY), 2))
-		// 1000 corrisponde ad 1KM, la distanza in cui si vede circa lo 0% del corpo, con la formula calcoliamo quanta percentuale del corpo vedo
-		// per determinare la percentuale di riuscita di nel colpire una parte del corpo.
+		mobDistance, _ := provider.Distance(m, mob)
 		mobPercentage := ((1000 - mobDistance) / 1000) // What percentage I see of the body? Number between 0 -> 1
-		// RULE OF NINE: HEAD > 9%, BODY > 37%, ARMS > 18, LEGS > 36
-		// 1 : 90 = mobPercentage : x
-		var damageMultiplier float64
-		var precision float64
-		precision = (85.0 / 37.0) * mobPercentage // Base precision
-		switch payload.Selection {
-		case 0: // HEAD
-			precision *= 9.0
-			damageMultiplier = 3
-		case 1: // BODY
-			precision *= 37.0 // precision * body part weight
-			damageMultiplier = 1
-		case 2: // ARMS
-			precision *= 18.0
-			damageMultiplier = 0.9
-		case 3: // LEGS
-			precision *= 36.0
-			damageMultiplier = 0.9
-		}
+		//var damageMultiplier float64
+		precision, _ := provider.PlayerPrecision(helpers.Player.ID, payload.Selection)
+		precision *= (85.0 / 37.0) * mobPercentage // Base precision
+
 		if rand.Float64() < precision {
 			// Hitted
-			playerWeapons, err := provider.GetPlayerWeapons(helpers.Player, "true")
+			_, err := provider.GetPlayerWeapons(helpers.Player, "true")
 			if err != nil {
 				services.ErrorHandler("Error while retriving weapons", err)
 			}
-			damageToMob := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + float64(playerWeapons[0].RawDamage))))
+			playerDamage, _ := provider.PlayerDamage(helpers.Player.ID)
+			damageToMob := uint(playerDamage)
 			mob.LifePoint -= damageToMob
 			if mob.LifePoint > mob.LifeMax || mob.LifePoint == 0 {
 				// Mob die
+				payload.Kill++
 				mob.LifePoint = 0
+				_, err := provider.DeleteEnemy(mob.ID)
+				if err != nil {
+					services.ErrorHandler("Cant delete enemy.", err)
+				}
 				editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.mob_killed"))
-				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_finish.fight")))
+				var ok tgbotapi.InlineKeyboardMarkup
+				if payload.Kill == uint(len(m.Enemies)) {
+					ok = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_finish.fight")))
+				} else {
+					ok = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
+				}
 				editMessage.ReplyMarkup = &ok
 				// Add drop
-				playerStats, _ := provider.GetPlayerStats(helpers.Player)
-				playerStats.Experience++
-				provider.UpdatePlayerStats(playerStats)
+				stats, _ := provider.GetPlayerStats(helpers.Player)
+				helpers.IncrementExp(1, stats)
 				payload.InFight = false
 				payloadUpdated, _ := json.Marshal(payload)
 				state.Payload = string(payloadUpdated)
 				state, _ = provider.UpdatePlayerState(state)
 			} else {
-				damageToPlayer := uint(math.Round(damageMultiplier * 1.2 * ((rand.Float64() * 10) + 4)))
+				damageToPlayer, _ := provider.EnemyDamage(mob.ID)
 				stats, _ := provider.GetPlayerStats(helpers.Player)
-				helpers.DecrementLife(damageToPlayer, stats)
-				editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, damageToPlayer))
-				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
-				editMessage.ReplyMarkup = &ok
+				stats = helpers.DecrementLife(uint(damageToPlayer), stats)
+				if stats.LifePoint == 0 {
+					// Player Die
+					helpers.DeleteRedisAndDbState(helpers.Player)
+					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
+					msg.ParseMode = "HTML"
+					services.SendMessage(msg)
+				} else {
+					editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, uint(damageToPlayer)))
+					ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
+					editMessage.ReplyMarkup = &ok
+				}
 			}
 			_, err = provider.UpdateEnemy(mob)
 			if err != nil {

@@ -52,7 +52,15 @@ func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	if err != nil {
 		services.ErrorHandler("Cant update player stats", err)
 	}
-	// player.Stats.Update()
 
+	return stats
+}
+
+func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
+	stats.Experience++
+	_, err := provider.UpdatePlayerStats(stats)
+	if err != nil {
+		services.ErrorHandler("Can't update player stats.", err)
+	}
 	return stats
 }
