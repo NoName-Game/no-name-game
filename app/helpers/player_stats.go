@@ -40,11 +40,10 @@ func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string
 // DecrementLife - Handle the life points
 func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	// MaxLife = 100 + Level * 10
-
-	if stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
-		stats.LifePoint = 0
+	if *stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
+		*stats.LifePoint = 0
 	} else {
-		stats.LifePoint -= lifePoint
+		*stats.LifePoint -= lifePoint
 	}
 
 	var err error
