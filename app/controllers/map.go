@@ -275,7 +275,7 @@ func Fight(update tgbotapi.Update) {
 	// Standard Message
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
 		stats, _ := provider.GetPlayerStats(helpers.Player)
-		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Player.Username, &stats.LifePoint, (100+stats.Level*10), helpers.Trans(bodyParts[payload.Selection])))
+		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Player.Username, *stats.LifePoint, (100+stats.Level*10), helpers.Trans(bodyParts[payload.Selection])))
 		editMessage.ReplyMarkup = &mobKeyboard
 	}
 
