@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -32,7 +32,7 @@ func Hunting(update tgbotapi.Update) {
 
 	var mob nnsdk.Enemy
 	if payload.MobID > 0 {
-		mob, err = provider.GetEnemyByID(payload.MobID)
+		mob, err = providers.GetEnemyByID(payload.MobID)
 		if err != nil {
 			services.ErrorHandler("Cant find enemy", err)
 		}
@@ -50,7 +50,7 @@ func Hunting(update tgbotapi.Update) {
 	switch state.Stage {
 	case 0:
 		// Check if the player have a weapon equipped.
-		if _, noWeapon := provider.GetPlayerWeapons(helpers.Player, "true"); noWeapon != nil {
+		if _, noWeapon := providers.GetPlayerWeapons(helpers.Player, "true"); noWeapon != nil {
 			validationMessage = helpers.Trans("hunting.error.noWeaponEquipped")
 			helpers.FinishAndCompleteState(state, helpers.Player)
 		} else {
@@ -69,13 +69,13 @@ func Hunting(update tgbotapi.Update) {
 			validationFlag = true
 
 			// Delete the enemy from table
-			_, err = provider.DeleteEnemy(mob.ID)
+			_, err = providers.DeleteEnemy(mob.ID)
 			if err != nil {
 				services.ErrorHandler("Cant delete enemy", err)
 			}
 
 			state.Stage = 4 //Drop
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 	case 3:
 		if strings.Contains(message.Text, helpers.Trans("combat.attack_with")) {
@@ -115,7 +115,7 @@ func Hunting(update tgbotapi.Update) {
 		state.ToNotify = t
 		state.Stage = 1
 
-		mob, err = provider.Spawn(nnsdk.Enemy{})
+		mob, err = providers.Spawn(nnsdk.Enemy{})
 		if err != nil {
 			services.ErrorHandler("Cant spawn enemy", err)
 		}
@@ -124,14 +124,14 @@ func Hunting(update tgbotapi.Update) {
 		payload.Score = 1
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", state.FinishAt.Format("15:04:05"))))
 	case 1:
 		if validationFlag {
 			// Enemy found
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.found", mob.Name))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -143,7 +143,7 @@ func Hunting(update tgbotapi.Update) {
 	case 2:
 		if validationFlag {
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.card", mob.Name, mob.LifePoint, helpers.Player.Stats.LifePoint))
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				ResizeKeyboard: true,
@@ -158,7 +158,7 @@ func Hunting(update tgbotapi.Update) {
 			weaponName := strings.SplitN(message.Text, " ", 3)[2]
 
 			var weapon nnsdk.Weapon
-			weapon, err = provider.FindWeaponByName(weaponName)
+			weapon, err = providers.FindWeaponByName(weaponName)
 			if err != nil {
 				services.ErrorHandler("Cant find weapon", err)
 			}
@@ -175,7 +175,7 @@ func Hunting(update tgbotapi.Update) {
 
 			mob.LifePoint -= playerDamage
 
-			mob, err = provider.UpdateEnemy(mob)
+			mob, err = providers.UpdateEnemy(mob)
 			if err != nil {
 				services.ErrorHandler("Cant update enemy", err)
 			}
@@ -187,13 +187,13 @@ func Hunting(update tgbotapi.Update) {
 				mobDamage := uint(rand.Int31n(17) + 1)
 
 				var stats nnsdk.PlayerStats
-				stats, err = provider.GetPlayerStats(helpers.Player)
+				stats, err = providers.GetPlayerStats(helpers.Player)
 				if err != nil {
 					services.ErrorHandler("Cant get player stats", err)
 				}
 
 				stats = helpers.DecrementLife(mobDamage, stats)
-				if stats.LifePoint == 0 {
+				if *stats.LifePoint == 0 {
 					// Player Die
 					helpers.DeleteRedisAndDbState(helpers.Player)
 					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
@@ -205,7 +205,7 @@ func Hunting(update tgbotapi.Update) {
 			}
 
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 
 			msg := services.NewMessage(helpers.Player.ChatID, text)
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -218,7 +218,7 @@ func Hunting(update tgbotapi.Update) {
 	case 4:
 		if validationFlag {
 			helpers.Player.Stats.Experience++
-			_, err = provider.UpdatePlayer(helpers.Player)
+			_, err = providers.UpdatePlayer(helpers.Player)
 			if err != nil {
 				services.ErrorHandler("Cant update player", err)
 			}

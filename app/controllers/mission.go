@@ -8,7 +8,7 @@ import (
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -87,7 +87,7 @@ func StartMission(update tgbotapi.Update) {
 		payloadUpdated, _ := json.Marshal(payloadStruct{})
 		state.Payload = string(payloadUpdated)
 		state.Stage = 1
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration"))
 
@@ -103,7 +103,7 @@ func StartMission(update tgbotapi.Update) {
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
-			material, err := provider.GetRandomResource(helpers.GetMissionCategoryID(message.Text))
+			material, err := providers.GetRandomResource(helpers.GetMissionCategoryID(message.Text))
 			if err != nil {
 				log.Println(err)
 				services.ErrorHandler("Cant add resource to player inventory", err)
@@ -118,7 +118,7 @@ func StartMission(update tgbotapi.Update) {
 
 			// Set finishAt
 			state.FinishAt = helpers.GetEndTime(0, 10, 0)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 
 			// Remove current redist stare
 			helpers.DelRedisState(helpers.Player)
@@ -132,7 +132,7 @@ func StartMission(update tgbotapi.Update) {
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", payload.Material.Name, payload.Quantity))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -154,14 +154,14 @@ func StartMission(update tgbotapi.Update) {
 			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			services.SendMessage(msg)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 	case 4:
 		if validationFlag {
 			// Exit
 			helpers.FinishAndCompleteState(state, helpers.Player)
 
-			_, err := provider.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
+			_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
 				ItemID:   payload.Material.ID,
 				Quantity: payload.Quantity,
 			})

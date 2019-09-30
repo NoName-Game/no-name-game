@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -40,19 +40,26 @@ func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string
 // DecrementLife - Handle the life points
 func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	// MaxLife = 100 + Level * 10
-
-	if stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
-		stats.LifePoint = 0
+	if *stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
+		*stats.LifePoint = 0
 	} else {
-		stats.LifePoint -= lifePoint
+		*stats.LifePoint -= lifePoint
 	}
 
 	var err error
-	stats, err = provider.UpdatePlayerStats(stats)
+	stats, err = providers.UpdatePlayerStats(stats)
 	if err != nil {
 		services.ErrorHandler("Cant update player stats", err)
 	}
-	// player.Stats.Update()
 
+	return stats
+}
+
+func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
+	stats.Experience++
+	_, err := providers.UpdatePlayerStats(stats)
+	if err != nil {
+		services.ErrorHandler("Can't update player stats.", err)
+	}
 	return stats
 }

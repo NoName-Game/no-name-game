@@ -13,7 +13,7 @@ import (
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
 	if update.Message != nil {
-		if helpers.HandleUser(update.Message) {
+		if helpers.HandleUser(update.Message.From) {
 			callingRoute := parseMessage(update.Message)
 
 			// ******************************************
@@ -52,7 +52,22 @@ func routing(update tgbotapi.Update) {
 				return
 			}
 		}
+	} else if update.CallbackQuery != nil {
+		// It's a callback query
+		if helpers.HandleUser(update.CallbackQuery.From) {
+			callingRoute := parseCallback(update.CallbackQuery)
+			//log.Println(callingRoute)
+			isRoute, route := inRoutes(callingRoute, routes)
+			if isRoute {
+				_, err := Call(routes, route, update)
+				if err != nil {
+					services.ErrorHandler("Error in call command", err)
+				}
+				return
+			}
+		}
 	}
+
 }
 
 // inRoutes - Check if message is translated command
@@ -90,5 +105,11 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 		parsed = message.Command()
 	}
 
+	return strings.ToLower(parsed)
+}
+
+func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
+	parsed = callback.Data
+	parsed = strings.Split(parsed, "_")[0]
 	return strings.ToLower(parsed)
 }

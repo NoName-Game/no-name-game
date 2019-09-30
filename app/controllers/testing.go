@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 	"bitbucket.org/no-name-game/no-name/services"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -34,7 +34,7 @@ func TestTimedQuest(update tgbotapi.Update) {
 	case 0:
 		if message.Text == "ok" {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = false
 		}
 	case 1:
@@ -58,7 +58,7 @@ func TestTimedQuest(update tgbotapi.Update) {
 		state.Stage = 1
 		state.ToNotify = t
 		state.FinishAt = time.Now().Add((time.Minute*time.Duration(10) + time.Second*time.Duration(15)))
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		log.Println(state.FinishAt)
 
@@ -90,13 +90,13 @@ func TestMultiStage(update tgbotapi.Update) {
 	case 0:
 		if message.Text == "Go to stage 1" {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = false
 		}
 	case 1:
 		if message.Text == "YES!" {
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = false
 		}
 	}
@@ -180,27 +180,27 @@ func TestMultiState(update tgbotapi.Update) {
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
 		input, _ := strconv.Atoi(message.Text)
 		if input >= 1 && input <= 100 {
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 3:
 		if message.Text == "YES!" {
 			state.Stage = 4
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	}
@@ -219,7 +219,7 @@ func TestMultiState(update tgbotapi.Update) {
 	case 0:
 		payloadUpdated, _ := json.Marshal(payloadStruct{})
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		msg := services.NewMessage(message.Chat.ID, "State setted, How much of R?")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -242,7 +242,7 @@ func TestMultiState(update tgbotapi.Update) {
 			payload.Red, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of G?")
@@ -265,7 +265,7 @@ func TestMultiState(update tgbotapi.Update) {
 			payload.Green, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Stage 2 setted, How much of B?")
@@ -288,7 +288,7 @@ func TestMultiState(update tgbotapi.Update) {
 			payload.Blue, _ = strconv.Atoi(message.Text)
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		msg := services.NewMessage(message.Chat.ID, "Finish?")
@@ -323,4 +323,5 @@ func TestMultiState(update tgbotapi.Update) {
 // TheAnswerIs - TheAnswerIs
 func TheAnswerIs(update tgbotapi.Update) {
 	log.Println(42)
+	MapController(update)
 }

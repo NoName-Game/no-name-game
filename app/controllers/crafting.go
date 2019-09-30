@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 
 	"bitbucket.org/no-name-game/no-name/app/helpers"
 	"bitbucket.org/no-name-game/no-name/services"
@@ -44,13 +44,13 @@ func Crafting(update tgbotapi.Update) {
 			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
 		if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
@@ -60,7 +60,7 @@ func Crafting(update tgbotapi.Update) {
 		} else if message.Text == helpers.Trans("crafting.craft") {
 			if len(payload.Resources) > 0 {
 				state.Stage = 3
-				state, _ = provider.UpdatePlayerState(state)
+				state, _ = providers.UpdatePlayerState(state)
 				validationFlag = true
 			}
 		}
@@ -74,7 +74,7 @@ func Crafting(update tgbotapi.Update) {
 			*t = true
 			state.ToNotify = t
 
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationMessage = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
 			validationFlag = false
 		}
@@ -105,7 +105,7 @@ func Crafting(update tgbotapi.Update) {
 	case 0:
 		payloadUpdated, _ := json.Marshal(craftingPayload{})
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.what"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -127,13 +127,13 @@ func Crafting(update tgbotapi.Update) {
 			payload.Item = message.Text
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Item {
 		case helpers.Trans("armors"):
-			armorCategories, err := provider.GetAllArmorCategory()
+			armorCategories, err := providers.GetAllArmorCategory()
 			if err != nil {
 				services.ErrorHandler("Cant get armor categories", err)
 			}
@@ -143,7 +143,7 @@ func Crafting(update tgbotapi.Update) {
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons"):
-			weaponCategories, err := provider.GetAllWeaponCategory()
+			weaponCategories, err := providers.GetAllWeaponCategory()
 			if err != nil {
 				services.ErrorHandler("Cant get weapon categories", err)
 			}
@@ -171,7 +171,7 @@ func Crafting(update tgbotapi.Update) {
 
 		////////////////////////////////////
 		// ONLY FOR DEBUG - Add one resource
-		_, err := provider.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
+		_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
 			ItemID:   42,
 			Quantity: 2,
 		})
@@ -180,7 +180,7 @@ func Crafting(update tgbotapi.Update) {
 		}
 		////////////////////////////////////
 
-		inventory, err := provider.GetPlayerInventory(helpers.Player)
+		inventory, err := providers.GetPlayerInventory(helpers.Player)
 		if err != nil {
 			services.ErrorHandler("Cant get player inventory", err)
 		}
@@ -200,7 +200,7 @@ func Crafting(update tgbotapi.Update) {
 					strings.Split(message.Text, " (")[0],
 					helpers.Trans("crafting.add")+" ")[1]
 
-				resource, err := provider.FindResourceByName(resourceName)
+				resource, err := providers.FindResourceByName(resourceName)
 				if err != nil {
 					services.ErrorHandler("Cant find resource", err)
 				}
@@ -220,7 +220,7 @@ func Crafting(update tgbotapi.Update) {
 			}
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		// Keyboard with resources
@@ -228,7 +228,7 @@ func Crafting(update tgbotapi.Update) {
 		for r, q := range playerResources {
 			// If PayloadResouces < Inventory quantity ok :)
 			if payload.Resources[r] < q {
-				resource, err := provider.GetResourceByID(r)
+				resource, err := providers.GetResourceByID(r)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
 				}
@@ -261,7 +261,7 @@ func Crafting(update tgbotapi.Update) {
 		var recipe string
 		if len(payload.Resources) > 0 {
 			for k, v := range payload.Resources {
-				resource, err := provider.GetResourceByID(k)
+				resource, err := providers.GetResourceByID(k)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
 				}
@@ -282,7 +282,7 @@ func Crafting(update tgbotapi.Update) {
 		var recipe string
 		if len(payload.Resources) > 0 {
 			for k, v := range payload.Resources {
-				resource, err := provider.GetResourceByID(k)
+				resource, err := providers.GetResourceByID(k)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
 				}
@@ -311,14 +311,14 @@ func Crafting(update tgbotapi.Update) {
 
 				var craftingRequest nnsdk.ArmorCraft
 				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
-				crafted, err := provider.CraftArmor(craftingRequest)
+				crafted, err := providers.CraftArmor(craftingRequest)
 				if err != nil {
 					services.ErrorHandler("Cant create armor craft", err)
 				}
 
 				// Associate craft result tu player
 				crafted.PlayerID = helpers.Player.ID
-				crafted, err = provider.UpdateArmor(crafted)
+				crafted, err = providers.UpdateArmor(crafted)
 				if err != nil {
 					services.ErrorHandler("Cant associate armor craft", err)
 				}
@@ -329,14 +329,14 @@ func Crafting(update tgbotapi.Update) {
 
 				var craftingRequest nnsdk.WeaponCraft
 				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
-				crafted, err := provider.CraftWeapon(craftingRequest)
+				crafted, err := providers.CraftWeapon(craftingRequest)
 				if err != nil {
 					services.ErrorHandler("Cant create weapon craft", err)
 				}
 
 				// Associate craft result tu player
 				crafted.PlayerID = helpers.Player.ID
-				crafted, err = provider.UpdateWeapon(crafted)
+				crafted, err = providers.UpdateWeapon(crafted)
 				if err != nil {
 					services.ErrorHandler("Cant associate armor craft", err)
 				}
@@ -347,7 +347,7 @@ func Crafting(update tgbotapi.Update) {
 
 			// Remove resources from player inventory
 			for k, q := range payload.Resources {
-				_, err := provider.RemoveResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
+				_, err := providers.RemoveResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
 					ItemID:   k,
 					Quantity: q,
 				})

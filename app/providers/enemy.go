@@ -1,4 +1,4 @@
-package provider
+package providers
 
 import (
 	"encoding/json"
@@ -67,4 +67,18 @@ func Spawn(request nnsdk.Enemy) (nnsdk.Enemy, error) {
 	}
 
 	return enemy, nil
+}
+
+func EnemyDamage(id uint) (float64, error) {
+	var damage float64
+	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(id), 10)+"/damage", nil).Get()
+	if err != nil {
+		return 0, err
+	}
+
+	err = json.Unmarshal(resp.Data, &damage)
+	if err != nil {
+		return 0, err
+	}
+	return damage, nil
 }

@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 
 	"bitbucket.org/no-name-game/no-name/services"
 )
@@ -44,7 +44,7 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 			PlayerID: player.ID,
 		}
 
-		playerState, _ = provider.CreatePlayerState(newPlayerState)
+		playerState, _ = providers.CreatePlayerState(newPlayerState)
 	}
 
 	SetRedisState(player, route)
@@ -58,8 +58,8 @@ func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
 	*t = true
 
 	state.Completed = t
-	state, _ = provider.UpdatePlayerState(state) // Update
-	state, _ = provider.DeletePlayerState(state) // Delete
+	state, _ = providers.UpdatePlayerState(state) // Update
+	state, _ = providers.DeletePlayerState(state) // Delete
 
 	DelRedisState(player)
 }
@@ -70,7 +70,7 @@ func DeleteRedisAndDbState(player nnsdk.Player) {
 
 	if rediState != "" {
 		playerState := GetPlayerStateByFunction(player, rediState)
-		_, err := provider.DeletePlayerState(playerState) // Delete
+		_, err := providers.DeletePlayerState(playerState) // Delete
 		if err != nil {
 			services.ErrorHandler("Error delete player state", err)
 		}
