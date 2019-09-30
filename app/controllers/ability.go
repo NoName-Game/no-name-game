@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -12,7 +12,7 @@ func AbilityTree(update tgbotapi.Update) {
 	routeName := "route.abilityTree"
 	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
-	playerStats, err := provider.GetPlayerStats(helpers.Player)
+	playerStats, err := providers.GetPlayerStats(helpers.Player)
 	if err != nil {
 		services.ErrorHandler("Cant get player stats", err)
 	}
@@ -34,7 +34,7 @@ func AbilityTree(update tgbotapi.Update) {
 	case 1:
 		if message.Text == helpers.Trans("ability.back") {
 			state.Stage = 0
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		} else if message.Text == helpers.Trans("exit") {
 			state.Stage = 2
 			validationFlag = true
@@ -65,7 +65,7 @@ func AbilityTree(update tgbotapi.Update) {
 			// Increment player stats
 			helpers.PlayerStatsIncrement(&playerStats, message.Text)
 
-			playerStats, err = provider.UpdatePlayerStats(playerStats)
+			playerStats, err = providers.UpdatePlayerStats(playerStats)
 			if err != nil {
 				services.ErrorHandler("Cant update player stats", err)
 			}

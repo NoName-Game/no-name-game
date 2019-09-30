@@ -7,7 +7,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 	"bitbucket.org/no-name-game/no-name/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
@@ -28,10 +28,10 @@ func Cron() {
 
 // CheckFinishTime - Check the ending and handle the functions.
 func CheckFinishTime() {
-	states, _ := provider.GetPlayerStateToNotify()
+	states, _ := providers.GetPlayerStateToNotify()
 
 	for _, state := range states {
-		player, _ := provider.GetPlayerByID(state.PlayerID)
+		player, _ := providers.GetPlayerByID(state.PlayerID)
 		text, _ := services.GetTranslation("cron."+state.Function+"_alert", player.Language.Slug, nil)
 
 		// Send notification
@@ -47,6 +47,6 @@ func CheckFinishTime() {
 		*f = false
 
 		state.ToNotify = f
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 	}
 }

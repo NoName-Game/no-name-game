@@ -5,7 +5,7 @@ import (
 
 	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/no-name/app/providers"
 	"bitbucket.org/no-name-game/no-name/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -23,7 +23,7 @@ func StartTutorial(update tgbotapi.Update) {
 	validationMessage := helpers.Trans("validationMessage")
 	switch state.Stage {
 	case 1:
-		lang, err := provider.FindLanguageBy(message.Text, "name")
+		lang, err := providers.FindLanguageBy(message.Text, "name")
 		if err != nil {
 			services.ErrorHandler("Cant find language", err)
 		}
@@ -33,7 +33,7 @@ func StartTutorial(update tgbotapi.Update) {
 		}
 
 		{
-			_, err := provider.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
+			_, err := providers.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
 			if err != nil {
 				services.ErrorHandler("Cant update player", err)
 			}
@@ -86,7 +86,7 @@ func StartTutorial(update tgbotapi.Update) {
 	case 0:
 		msg := services.NewMessage(message.Chat.ID, "Select language")
 
-		languages, err := provider.GetLanguages()
+		languages, err := providers.GetLanguages()
 		if err != nil {
 			services.ErrorHandler("Cant get languages", err)
 		}
@@ -98,7 +98,7 @@ func StartTutorial(update tgbotapi.Update) {
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		state.Stage = 1
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 		services.SendMessage(msg)
 	case 1:
 		if validationFlag {
@@ -129,14 +129,14 @@ func StartTutorial(update tgbotapi.Update) {
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
 			services.SendMessage(msg)
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 	case 2:
 		if validationFlag {
 			// First Exploration
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			StartMission(update)
 		}
 	case 3:
@@ -144,7 +144,7 @@ func StartTutorial(update tgbotapi.Update) {
 			// First Crafting
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
 			state.Stage = 4
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			Crafting(update)
 		}
 	case 4:
@@ -152,14 +152,14 @@ func StartTutorial(update tgbotapi.Update) {
 			// Equip weapon
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
 			state.Stage = 5
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			InventoryEquip(update)
 		}
 	case 5:
 		if validationFlag {
 			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
 			state.Stage = 6
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			Hunting(update)
 		}
 	case 6:
