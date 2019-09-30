@@ -211,7 +211,7 @@ func Fight(update tgbotapi.Update) {
 				// Mob die
 				payload.Kill++
 				mob.LifePoint = 0
-				_, err := providers.DeleteEnemy(mob.ID)
+				_, err = providers.DeleteEnemy(mob.ID)
 				if err != nil {
 					services.ErrorHandler("Cant delete enemy.", err)
 				}
