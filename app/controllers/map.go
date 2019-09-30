@@ -246,10 +246,10 @@ func Fight(update tgbotapi.Update) {
 					ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
 					editMessage.ReplyMarkup = &ok
 				}
-			}
-			_, err = provider.UpdateEnemy(mob)
-			if err != nil {
-				services.ErrorHandler("Error while updating enemy", err)
+				_, err = provider.UpdateEnemy(mob)
+				if err != nil {
+					services.ErrorHandler("Error while updating enemy", err)
+				}
 			}
 		} else {
 			// Miss by player
