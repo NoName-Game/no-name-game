@@ -8,7 +8,8 @@ pipelines:
             - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/no-name
 
             # Manage dependencies
-            - cd /go/src/bitbucket.org/no-name-game/no-name
+            - go get -u github.com/golang/dep/cmd/dep
+            - cd ${GOPATH}/src/bitbucket.org/no-name-game/no-name
             - dep ensure
 
             # Update submodule NNSDK
