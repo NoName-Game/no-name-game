@@ -91,7 +91,7 @@ hunting.completed: "Caccia completata, torni alla base col bottino."
 combat.attack: "Attacca"
 combat.attack_with: "Attacca con %s"
 combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
-combat.card: "🐺 %s\n❤️ %d/%d\n\nStai mirando a: %s"
+combat.card: "🐺 %s\n❤️ %d/%d\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: %s"
 combat.mob_killed: "Hai ucciso il mostro!"
 
 # MISSION

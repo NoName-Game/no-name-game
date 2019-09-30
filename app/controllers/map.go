@@ -237,9 +237,10 @@ func Fight(update tgbotapi.Update) {
 				if stats.LifePoint == 0 {
 					// Player Die
 					helpers.DeleteRedisAndDbState(helpers.Player)
-					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
+					msg := services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("playerDie"))
 					msg.ParseMode = "HTML"
 					services.SendMessage(msg)
+					helpers.FinishAndCompleteState(state, helpers.Player)
 				} else {
 					editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.damage", damageToMob, uint(damageToPlayer)))
 					ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
