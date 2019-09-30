@@ -25,14 +25,15 @@ var (
 
 		"route.ship":             controllers.Ship,            // ship.go
 		"route.ship.exploration": controllers.ShipExploration, // ship.go
-		"route.ship.warehouse":   controllers.ShipWarehouse,   // ship.go
-		"route.ship.repairs":     controllers.ShipRepairs,     // ship.go
-		"route.ship.better":      controllers.ShipBetter,      // ship.go
+
+		"route.ship.repairs": controllers.ShipRepairs, // ship.go
 
 		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
 		"route.testing.multiState":  controllers.TestMultiState, // testing.go
 		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
 		"route.testing.time":        controllers.TestTimedQuest, // testing.go
+
+		"callback.map": controllers.MapController,
 	}
 
 	breakerRoutes = map[string]interface{}{
@@ -50,7 +51,10 @@ func init() {
 
 // Run - The Game!
 func Run() {
-	updates := services.GetUpdates()
+	updates, err := services.GetUpdates()
+	if err != nil {
+		services.ErrorHandler("Update channel error", err)
+	}
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.From.UserName == "" {
@@ -59,6 +63,8 @@ func Run() {
 				continue
 			}
 
+			routing(update)
+		} else if update.CallbackQuery != nil {
 			routing(update)
 		}
 	}

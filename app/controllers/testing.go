@@ -323,4 +323,5 @@ func TestMultiState(update tgbotapi.Update) {
 // TheAnswerIs - TheAnswerIs
 func TheAnswerIs(update tgbotapi.Update) {
 	log.Println(42)
+	MapController(update)
 }

@@ -193,7 +193,7 @@ func Hunting(update tgbotapi.Update) {
 				}
 
 				stats = helpers.DecrementLife(mobDamage, stats)
-				if stats.LifePoint == 0 {
+				if *stats.LifePoint == 0 {
 					// Player Die
 					helpers.DeleteRedisAndDbState(helpers.Player)
 					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
