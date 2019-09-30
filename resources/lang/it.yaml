@@ -93,6 +93,7 @@ combat.attack_with: "Attacca con %s"
 combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
 combat.card: "🐺 %s\n❤️ %d/%d\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: %s"
 combat.mob_killed: "Hai ucciso il mostro!"
+combat.miss: "Hai mancato il mostro, ma hai subito %d danni."
 
 # MISSION
 mission.exploration: "Seleziona campo di ricerca!"

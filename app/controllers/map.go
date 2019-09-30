@@ -251,13 +251,31 @@ func Fight(update tgbotapi.Update) {
 			if err != nil {
 				services.ErrorHandler("Error while updating enemy", err)
 			}
+		} else {
+			// Miss by player
+			damageToPlayer, _ := provider.EnemyDamage(mob.ID)
+			stats, _ := provider.GetPlayerStats(helpers.Player)
+			stats = helpers.DecrementLife(uint(damageToPlayer), stats)
+			if *stats.LifePoint == 0 {
+				// Player Die
+				helpers.DeleteRedisAndDbState(helpers.Player)
+				msg := services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("playerDie"))
+				msg.ParseMode = "HTML"
+				services.SendMessage(msg)
+				helpers.FinishAndCompleteState(state, helpers.Player)
+			} else {
+				editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.miss", damageToPlayer))
+				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
+				editMessage.ReplyMarkup = &ok
+			}
 		}
 
 	}
 
 	// Standard Message
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Trans(bodyParts[payload.Selection])))
+		stats, _ := provider.GetPlayerStats(helpers.Player)
+		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Player.Username, &stats.LifePoint, (100+stats.Level*10), helpers.Trans(bodyParts[payload.Selection])))
 		editMessage.ReplyMarkup = &mobKeyboard
 	}
 
