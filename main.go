@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/no-name-game/no-name/app"
+	"bitbucket.org/no-name-game/nn-telegram/app"
 )
 
 func main() {

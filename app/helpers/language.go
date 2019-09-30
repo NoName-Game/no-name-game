@@ -3,7 +3,7 @@ package helpers
 import (
 	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // Trans - late shortCut

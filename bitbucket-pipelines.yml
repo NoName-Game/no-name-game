@@ -5,11 +5,11 @@ pipelines:
     "**":
       - step:
           script:
-            - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/no-name
+            - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
 
             # Manage dependencies
             - go get -u github.com/golang/dep/cmd/dep
-            - cd ${GOPATH}/src/bitbucket.org/no-name-game/no-name
+            - cd ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
             - dep ensure
 
             # Update submodule NNSDK

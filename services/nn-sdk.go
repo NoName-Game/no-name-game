@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 type ResponseExplorationInfo struct {

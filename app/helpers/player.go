@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
