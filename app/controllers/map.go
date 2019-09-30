@@ -234,7 +234,7 @@ func Fight(update tgbotapi.Update) {
 				damageToPlayer, _ := provider.EnemyDamage(mob.ID)
 				stats, _ := provider.GetPlayerStats(helpers.Player)
 				stats = helpers.DecrementLife(uint(damageToPlayer), stats)
-				if stats.LifePoint == 0 {
+				if *stats.LifePoint == 0 {
 					// Player Die
 					helpers.DeleteRedisAndDbState(helpers.Player)
 					msg := services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("playerDie"))
