@@ -34,6 +34,8 @@ var (
 		"route.testing.time":        controllers.TestTimedQuest, // testing.go
 
 		"callback.map": controllers.MapController,
+
+		"route.testing.multiStageRevelution": new(controllers.TestingController),
 	}
 
 	breakerRoutes = map[string]interface{}{

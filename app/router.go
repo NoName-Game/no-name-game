@@ -19,24 +19,27 @@ func routing(update tgbotapi.Update) {
 			// ******************************************
 			// Check if callingRoute it's breaker routes
 			// ******************************************
-			isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes)
-			if isBreakerRoute {
-				_, err := Call(breakerRoutes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
+			// isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes)
+			// if isBreakerRoute {
+			// 	_, err := Call(breakerRoutes, route, update)
+			// 	if err != nil {
+			// 		services.ErrorHandler("Error in call command", err)
+			// 	}
+			// 	return
+			// }
 
 			// ******************************************
 			// Check if player have route in cache
 			// ******************************************
 			isCachedRoute := helpers.GetRedisState(helpers.Player)
 			if isCachedRoute != "" {
-				_, err := Call(routes, isCachedRoute, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
+
+				Invoke(routes[isCachedRoute], "Handle", update)
+
+				// _, err := Call(routes, isCachedRoute, update)
+				// if err != nil {
+				// 	services.ErrorHandler("Error in call command", err)
+				// }
 				return
 			}
 
@@ -45,10 +48,25 @@ func routing(update tgbotapi.Update) {
 			// ******************************************
 			isRoute, route := inRoutes(callingRoute, routes)
 			if isRoute {
-				_, err := Call(routes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
+
+				// log.Println(routes[route])
+
+				Invoke(routes[route], "Handle", update)
+
+				// _, err := CallTwo(prova, update)
+				// if err != nil {
+				// 	services.ErrorHandler("Error in call command", err)
+				// }
+
+				// prova.Handle()
+				// .Handle(update)
+
+				// log.Panicln("here END router")
+
+				// _, err := Call(routes, route, update)
+				// if err != nil {
+				// 	services.ErrorHandler("Error in call command", err)
+				// }
 				return
 			}
 		}
@@ -79,6 +97,16 @@ func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bo
 	}
 
 	return false, ""
+}
+
+// Invoke - Dinamicaly call method interface
+func Invoke(any interface{}, name string, args ...interface{}) {
+	inputs := make([]reflect.Value, len(args))
+	for i, _ := range args {
+		inputs[i] = reflect.ValueOf(args[i])
+	}
+
+	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
 
 // Call - Method to call another func and check needed parameters

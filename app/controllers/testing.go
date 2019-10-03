@@ -6,12 +6,113 @@ import (
 	"strconv"
 	"time"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
+
+type TestingController struct {
+	RouteName  string
+	Validation bool
+}
+
+func (t TestingController) Handle(update tgbotapi.Update) {
+	// Current Controller instance
+	t.RouteName = "route.testing.multiStageRevelution"
+
+	message := update.Message
+
+	// routeName := "route.testing.multiStage"
+	state := helpers.StartAndCreatePlayerState(t.RouteName, helpers.Player)
+
+	// Go to validator
+	t.Validation = t.Validator(message, state)
+
+	t.Stage(message, state)
+
+	// log.Panicln("FINE", t.Validation)
+}
+
+// Return false
+func (t TestingController) Validator(message *tgbotapi.Message, state nnsdk.PlayerState) bool {
+	//====================================
+	// Validator
+	//====================================
+	validatorStatus := true
+	validationMessage := "Wrong input, please repeat or exit."
+	switch state.Stage {
+	case 0:
+		if message.Text == "Go to stage 1" {
+			state.Stage = 1
+			state, _ = providers.UpdatePlayerState(state)
+			validatorStatus = false
+		}
+	case 1:
+		if message.Text == "YES!" {
+			state.Stage = 2
+			state, _ = providers.UpdatePlayerState(state)
+			validatorStatus = false
+		}
+	}
+
+	if validatorStatus {
+		if state.Stage != 0 {
+			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			services.SendMessage(validatorMsg)
+		}
+	}
+
+	return validatorStatus
+}
+
+func (t TestingController) Stage(message *tgbotapi.Message, state nnsdk.PlayerState) {
+	//====================================
+	// Stage
+	//====================================
+	switch state.Stage {
+	case 0:
+		msg := services.NewMessage(message.Chat.ID, "This is stage 0.")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Go to stage 1"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+				tgbotapi.NewKeyboardButton("clears"),
+			),
+		)
+		services.SendMessage(msg)
+	case 1:
+		msg := services.NewMessage(message.Chat.ID, "Finish?")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("YES!"),
+				tgbotapi.NewKeyboardButton("Wrong answare!"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
+		)
+		services.SendMessage(msg)
+	case 2:
+		//====================================
+		// IMPORTANT!
+		//====================================
+		helpers.FinishAndCompleteState(state, helpers.Player)
+		//====================================
+
+		msg := services.NewMessage(message.Chat.ID, "Completed! :)")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("back"),
+			),
+		)
+		services.SendMessage(msg)
+	}
+}
 
 //====================================
 //====================================
