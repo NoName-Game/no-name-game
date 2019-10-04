@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // unmarshalInventory - Unmarshal player inventory
@@ -28,7 +28,7 @@ func InventoryToString(i nnsdk.Inventory) string {
 	var result string
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		resource, err := provider.GetResourceByID(key)
+		resource, err := providers.GetResourceByID(key)
 		if err != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
@@ -50,7 +50,7 @@ func InventoryToMap(i nnsdk.Inventory) (items map[uint]int) {
 func InventoryToKeyboardAddCraft(i nnsdk.Inventory) (results []string) {
 	mapInventory := unmarshalInventory(i.Items)
 	for key, value := range mapInventory {
-		resource, err := provider.GetResourceByID(key)
+		resource, err := providers.GetResourceByID(key)
 		if err != nil {
 			services.ErrorHandler("Error in ToKeyBoardAddCraft", err)
 		}

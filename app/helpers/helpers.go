@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 var (
@@ -73,7 +73,7 @@ func Slugger(text string) string {
 
 // GetAllCategories - return all categories of all types
 func GetAllCategories() (categories []string) {
-	armorCategories, err := provider.GetAllArmorCategory()
+	armorCategories, err := providers.GetAllArmorCategory()
 	if err != nil {
 		services.ErrorHandler("Cant get armor categories", err)
 	}
@@ -82,7 +82,7 @@ func GetAllCategories() (categories []string) {
 		categories = append(categories, armor.Name)
 	}
 
-	weaponCategories, err := provider.GetAllWeaponCategory()
+	weaponCategories, err := providers.GetAllWeaponCategory()
 	if err != nil {
 		services.ErrorHandler("Cant get armor categories", err)
 	}
@@ -96,7 +96,7 @@ func GetAllCategories() (categories []string) {
 
 // GetAllCategories - return all categories of all types
 func GetAllSlugCategories() (categories []string) {
-	armorCategories, err := provider.GetAllArmorCategory()
+	armorCategories, err := providers.GetAllArmorCategory()
 	if err != nil {
 		services.ErrorHandler("Cant get armor categories", err)
 	}
@@ -105,7 +105,7 @@ func GetAllSlugCategories() (categories []string) {
 		categories = append(categories, armor.Slug)
 	}
 
-	weaponCategories, err := provider.GetAllWeaponCategory()
+	weaponCategories, err := providers.GetAllWeaponCategory()
 	if err != nil {
 		services.ErrorHandler("Cant get armor categories", err)
 	}

@@ -1,11 +1,11 @@
-package provider
+package providers
 
 import (
 	"encoding/json"
 	"strconv"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 func FindLanguageBySlug(slug string) (nnsdk.Language, error) {

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -39,14 +39,14 @@ func MapController(update tgbotapi.Update) {
 	var payload payloadStruct
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
-	m, _ := provider.GetMapByID(helpers.Player.ID)
+	m, _ := providers.GetMapByID(helpers.Player.ID)
 	if m.ID < 1 {
 		// Initialize payload
 		payloadUpdated, _ := json.Marshal(payloadStruct{})
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 		// Create map
-		m, _ = provider.CreateMap(helpers.Player.ID)
+		m, _ = providers.CreateMap(helpers.Player.ID)
 		msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(m))
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
@@ -98,7 +98,7 @@ func MapController(update tgbotapi.Update) {
 				payload.InFight = true
 				payloadUpdated, _ := json.Marshal(payload)
 				state.Payload = string(payloadUpdated)
-				state, _ = provider.UpdatePlayerState(state)
+				state, _ = providers.UpdatePlayerState(state)
 				Fight(update)
 			case "map_finish.fight":
 				helpers.FinishAndCompleteState(state, helpers.Player)
@@ -108,7 +108,7 @@ func MapController(update tgbotapi.Update) {
 				actionCompleted = true
 			}
 
-			_, err = provider.UpdateMap(m)
+			_, err = providers.UpdateMap(m)
 			if err != nil {
 				services.ErrorHandler("Error while updating map", err)
 			}
@@ -157,7 +157,7 @@ func Fight(update tgbotapi.Update) {
 	helpers.UnmarshalPayload(state.Payload, &payload)
 
 	var editMessage tgbotapi.EditMessageTextConfig
-	m, _ := provider.GetMapByID(helpers.Player.ID)
+	m, _ := providers.GetMapByID(helpers.Player.ID)
 
 	mob := m.Enemies[helpers.ChooseMob(m)]
 
@@ -169,7 +169,7 @@ func Fight(update tgbotapi.Update) {
 		payload.InFight = false
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.TextDisplay(m))
 		editMessage.ParseMode = "HTML"
 		editMessage.ReplyMarkup = &mapKeyboard
@@ -181,7 +181,7 @@ func Fight(update tgbotapi.Update) {
 		}
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 	case "map_fight.down":
 		if payload.Selection < 3 {
 			payload.Selection++
@@ -190,28 +190,28 @@ func Fight(update tgbotapi.Update) {
 		}
 		payloadUpdated, _ := json.Marshal(payload)
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 	case "map_fight.hit":
-		mobDistance, _ := provider.Distance(m, mob)
+		mobDistance, _ := providers.Distance(m, mob)
 		mobPercentage := ((1000 - mobDistance) / 1000) // What percentage I see of the body? Number between 0 -> 1
 		//var damageMultiplier float64
-		precision, _ := provider.PlayerPrecision(helpers.Player.ID, payload.Selection)
+		precision, _ := providers.PlayerPrecision(helpers.Player.ID, payload.Selection)
 		precision *= (85.0 / 37.0) * mobPercentage // Base precision
 
 		if rand.Float64() < precision {
 			// Hitted
-			_, err := provider.GetPlayerWeapons(helpers.Player, "true")
+			_, err := providers.GetPlayerWeapons(helpers.Player, "true")
 			if err != nil {
 				services.ErrorHandler("Error while retriving weapons", err)
 			}
-			playerDamage, _ := provider.PlayerDamage(helpers.Player.ID)
+			playerDamage, _ := providers.PlayerDamage(helpers.Player.ID)
 			damageToMob := uint(playerDamage)
 			mob.LifePoint -= damageToMob
 			if mob.LifePoint > mob.LifeMax || mob.LifePoint == 0 {
 				// Mob die
 				payload.Kill++
 				mob.LifePoint = 0
-				_, err := provider.DeleteEnemy(mob.ID)
+				_, err = providers.DeleteEnemy(mob.ID)
 				if err != nil {
 					services.ErrorHandler("Cant delete enemy.", err)
 				}
@@ -224,15 +224,15 @@ func Fight(update tgbotapi.Update) {
 				}
 				editMessage.ReplyMarkup = &ok
 				// Add drop
-				stats, _ := provider.GetPlayerStats(helpers.Player)
+				stats, _ := providers.GetPlayerStats(helpers.Player)
 				helpers.IncrementExp(1, stats)
 				payload.InFight = false
 				payloadUpdated, _ := json.Marshal(payload)
 				state.Payload = string(payloadUpdated)
-				state, _ = provider.UpdatePlayerState(state)
+				state, _ = providers.UpdatePlayerState(state)
 			} else {
-				damageToPlayer, _ := provider.EnemyDamage(mob.ID)
-				stats, _ := provider.GetPlayerStats(helpers.Player)
+				damageToPlayer, _ := providers.EnemyDamage(mob.ID)
+				stats, _ := providers.GetPlayerStats(helpers.Player)
 				stats = helpers.DecrementLife(uint(damageToPlayer), stats)
 				if *stats.LifePoint == 0 {
 					// Player Die
@@ -246,15 +246,15 @@ func Fight(update tgbotapi.Update) {
 					ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "map_no.action")))
 					editMessage.ReplyMarkup = &ok
 				}
-				_, err = provider.UpdateEnemy(mob)
+				_, err = providers.UpdateEnemy(mob)
 				if err != nil {
 					services.ErrorHandler("Error while updating enemy", err)
 				}
 			}
 		} else {
 			// Miss by player
-			damageToPlayer, _ := provider.EnemyDamage(mob.ID)
-			stats, _ := provider.GetPlayerStats(helpers.Player)
+			damageToPlayer, _ := providers.EnemyDamage(mob.ID)
+			stats, _ := providers.GetPlayerStats(helpers.Player)
 			stats = helpers.DecrementLife(uint(damageToPlayer), stats)
 			if *stats.LifePoint == 0 {
 				// Player Die
@@ -274,7 +274,7 @@ func Fight(update tgbotapi.Update) {
 
 	// Standard Message
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-		stats, _ := provider.GetPlayerStats(helpers.Player)
+		stats, _ := providers.GetPlayerStats(helpers.Player)
 		editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Player.Username, *stats.LifePoint, (100+stats.Level*10), helpers.Trans(bodyParts[payload.Selection])))
 		editMessage.ReplyMarkup = &mobKeyboard
 	}

@@ -3,9 +3,9 @@ package helpers
 import (
 	"encoding/json"
 
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 )
 
 func TextDisplay(m nnsdk.Map) string {

@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -29,7 +29,7 @@ func Menu(update tgbotapi.Update) {
 	var tasks string
 	var keyboardRows [][]tgbotapi.KeyboardButton
 
-	states, _ := provider.GetPlayerStates(helpers.Player)
+	states, _ := providers.GetPlayerStates(helpers.Player)
 
 	for _, state := range states {
 		if *state.ToNotify {

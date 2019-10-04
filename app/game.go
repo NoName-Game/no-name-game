@@ -1,9 +1,9 @@
 package app
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/controllers"
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 var (

@@ -1,14 +1,14 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/provider"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func GenerateWeaponKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 	// FIXME: remove this
-	weapons, err := provider.GetPlayerWeapons(Player, "true")
+	weapons, err := providers.GetPlayerWeapons(Player, "true")
 	if err != nil {
 		services.ErrorHandler("Cant get weapon equipped", err)
 	}

@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // PlayerStatsToString - Convert player stats to string
@@ -47,7 +47,7 @@ func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	}
 
 	var err error
-	stats, err = provider.UpdatePlayerStats(stats)
+	stats, err = providers.UpdatePlayerStats(stats)
 	if err != nil {
 		services.ErrorHandler("Cant update player stats", err)
 	}
@@ -57,7 +57,7 @@ func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 
 func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
 	stats.Experience++
-	_, err := provider.UpdatePlayerStats(stats)
+	_, err := providers.UpdatePlayerStats(stats)
 	if err != nil {
 		services.ErrorHandler("Can't update player stats.", err)
 	}

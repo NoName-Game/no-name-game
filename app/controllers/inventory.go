@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/provider"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -42,7 +42,7 @@ func InventoryRecap(update tgbotapi.Update) {
 	var recap string
 
 	// Summary Resources
-	playerInventory, err := provider.GetPlayerInventory(helpers.Player)
+	playerInventory, err := providers.GetPlayerInventory(helpers.Player)
 	if err != nil {
 		services.ErrorHandler("Can't get player inventory", err)
 	}
@@ -50,7 +50,7 @@ func InventoryRecap(update tgbotapi.Update) {
 	recap += "\n" + helpers.Trans("resources") + ":\n"
 	playerResources := helpers.InventoryToMap(playerInventory)
 	for r, q := range playerResources {
-		resource, errResouce := provider.GetResourceByID(r)
+		resource, errResouce := providers.GetResourceByID(r)
 		if errResouce != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
@@ -59,7 +59,7 @@ func InventoryRecap(update tgbotapi.Update) {
 	}
 
 	// Summary Weapons
-	playerWeapons, errWeapons := provider.GetPlayerWeapons(helpers.Player, "false")
+	playerWeapons, errWeapons := providers.GetPlayerWeapons(helpers.Player, "false")
 	if errWeapons != nil {
 		services.ErrorHandler("Can't get player weapons", err)
 	}
@@ -69,7 +69,7 @@ func InventoryRecap(update tgbotapi.Update) {
 	}
 
 	// Summary Armors
-	playerArmors, errArmors := provider.GetPlayerArmors(helpers.Player, "false")
+	playerArmors, errArmors := providers.GetPlayerArmors(helpers.Player, "false")
 	if errArmors != nil {
 		services.ErrorHandler("Can't get player armors", err)
 	}
@@ -111,19 +111,19 @@ func InventoryEquip(update tgbotapi.Update) {
 			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
 		if strings.Contains(message.Text, helpers.Trans("equip")) {
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
 		if message.Text == helpers.Trans("confirm") {
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	}
@@ -143,7 +143,7 @@ func InventoryEquip(update tgbotapi.Update) {
 
 	//////////////////////////////////
 	currentPlayerEquipment += "\n" + helpers.Trans("armors") + ":\n"
-	eqippedArmors, err := provider.GetPlayerArmors(helpers.Player, "true")
+	eqippedArmors, err := providers.GetPlayerArmors(helpers.Player, "true")
 	if err != nil {
 		services.ErrorHandler("Cant get equpped player armors", err)
 	}
@@ -153,7 +153,7 @@ func InventoryEquip(update tgbotapi.Update) {
 	}
 	//////////////////////////////////
 	currentPlayerEquipment += "\n\n" + helpers.Trans("weapons") + ":\n"
-	eqippedWeapons, err := provider.GetPlayerWeapons(helpers.Player, "true")
+	eqippedWeapons, err := providers.GetPlayerWeapons(helpers.Player, "true")
 	if err != nil {
 		services.ErrorHandler("Cant get equpped player weapons", err)
 	}
@@ -170,7 +170,7 @@ func InventoryEquip(update tgbotapi.Update) {
 	case 0:
 		payloadUpdated, _ := json.Marshal(InventoryEquipPayload{})
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.type")+currentPlayerEquipment)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -192,13 +192,13 @@ func InventoryEquip(update tgbotapi.Update) {
 			payload.Type = message.Text
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
 		case helpers.Trans("armors"):
-			armors, err := provider.GetPlayerArmors(helpers.Player, "false")
+			armors, err := providers.GetPlayerArmors(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player armors", err)
 			}
@@ -209,7 +209,7 @@ func InventoryEquip(update tgbotapi.Update) {
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons"):
-			weapons, err := provider.GetPlayerWeapons(helpers.Player, "false")
+			weapons, err := providers.GetPlayerWeapons(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player weapons", err)
 			}
@@ -244,7 +244,7 @@ func InventoryEquip(update tgbotapi.Update) {
 			switch payload.Type {
 			case helpers.Trans("armors"):
 				var armor nnsdk.Armor
-				armor, err := provider.FindArmorByName(equipmentName)
+				armor, err := providers.FindArmorByName(equipmentName)
 				if err != nil {
 					services.ErrorHandler("Cant find equip armor name", err)
 				}
@@ -252,7 +252,7 @@ func InventoryEquip(update tgbotapi.Update) {
 				equipmentID = armor.ID
 			case helpers.Trans("weapons"):
 				var weapon nnsdk.Weapon
-				weapon, err := provider.FindWeaponByName(equipmentName)
+				weapon, err := providers.FindWeaponByName(equipmentName)
 				if err != nil {
 					services.ErrorHandler("Cant find equip weapon name", err)
 				}
@@ -263,7 +263,7 @@ func InventoryEquip(update tgbotapi.Update) {
 			payload.EquipID = equipmentID
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.equip.confirm")+"\n\n "+equipmentName)
@@ -282,7 +282,7 @@ func InventoryEquip(update tgbotapi.Update) {
 		if validationFlag {
 			switch payload.Type {
 			case helpers.Trans("armors"):
-				equipment, err := provider.GetArmorByID(payload.EquipID)
+				equipment, err := providers.GetArmorByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find armor by ID", err)
 				}
@@ -292,12 +292,12 @@ func InventoryEquip(update tgbotapi.Update) {
 				*t = true
 				equipment.Equipped = t
 
-				_, err = provider.UpdateArmor(equipment)
+				_, err = providers.UpdateArmor(equipment)
 				if err != nil {
 					services.ErrorHandler("Cant update armor", err)
 				}
 			case helpers.Trans("weapons"):
-				equipment, err := provider.GetWeaponByID(payload.EquipID)
+				equipment, err := providers.GetWeaponByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
 				}
@@ -307,7 +307,7 @@ func InventoryEquip(update tgbotapi.Update) {
 				*t = true
 				equipment.Equipped = t
 
-				_, err = provider.UpdateWeapon(equipment)
+				_, err = providers.UpdateWeapon(equipment)
 				if err != nil {
 					services.ErrorHandler("Cant update weapon", err)
 				}
@@ -358,19 +358,19 @@ func InventoryDestroy(update tgbotapi.Update) {
 			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 1:
 		if strings.Contains(message.Text, helpers.Trans("destroy")) {
 			state.Stage = 2
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	case 2:
 		if message.Text == helpers.Trans("confirm") {
 			state.Stage = 3
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 			validationFlag = true
 		}
 	}
@@ -390,7 +390,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 	case 0:
 		payloadUpdated, _ := json.Marshal(InventoryDestroyPayload{})
 		state.Payload = string(payloadUpdated)
-		state, _ = provider.UpdatePlayerState(state)
+		state, _ = providers.UpdatePlayerState(state)
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.type"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -412,13 +412,13 @@ func InventoryDestroy(update tgbotapi.Update) {
 			payload.Type = message.Text
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch payload.Type {
 		case helpers.Trans("armors"):
-			armors, err := provider.GetPlayerArmors(helpers.Player, "false")
+			armors, err := providers.GetPlayerArmors(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player armors", err)
 			}
@@ -429,7 +429,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons"):
-			weapons, err := provider.GetPlayerWeapons(helpers.Player, "false")
+			weapons, err := providers.GetPlayerWeapons(helpers.Player, "false")
 			if err != nil {
 				services.ErrorHandler("Cant get player weapons", err)
 			}
@@ -464,7 +464,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 			switch payload.Type {
 			case helpers.Trans("armors"):
 				var armor nnsdk.Armor
-				armor, err := provider.FindArmorByName(equipmentName)
+				armor, err := providers.FindArmorByName(equipmentName)
 				if err != nil {
 					services.ErrorHandler("Cant find equip armor name", err)
 				}
@@ -472,7 +472,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 				equipmentID = armor.ID
 			case helpers.Trans("weapons"):
 				var weapon nnsdk.Weapon
-				weapon, err := provider.FindWeaponByName(equipmentName)
+				weapon, err := providers.FindWeaponByName(equipmentName)
 				if err != nil {
 					services.ErrorHandler("Cant find equip weapon name", err)
 				}
@@ -483,7 +483,7 @@ func InventoryDestroy(update tgbotapi.Update) {
 			payload.EquipID = equipmentID
 			payloadUpdated, _ := json.Marshal(payload)
 			state.Payload = string(payloadUpdated)
-			state, _ = provider.UpdatePlayerState(state)
+			state, _ = providers.UpdatePlayerState(state)
 		}
 
 		msg := services.NewMessage(message.Chat.ID, helpers.Trans("inventory.destroy.confirm")+"\n\n "+equipmentName)
@@ -502,22 +502,22 @@ func InventoryDestroy(update tgbotapi.Update) {
 		if validationFlag {
 			switch payload.Type {
 			case helpers.Trans("armors"):
-				equipment, err := provider.GetArmorByID(payload.EquipID)
+				equipment, err := providers.GetArmorByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
 				}
 
-				_, err = provider.DeleteArmor(equipment)
+				_, err = providers.DeleteArmor(equipment)
 				if err != nil {
 					services.ErrorHandler("Cant delete armor", err)
 				}
 			case helpers.Trans("weapons"):
-				equipment, err := provider.GetWeaponByID(payload.EquipID)
+				equipment, err := providers.GetWeaponByID(payload.EquipID)
 				if err != nil {
 					services.ErrorHandler("Cant find weapon by ID", err)
 				}
 
-				_, err = provider.DeleteWeapon(equipment)
+				_, err = providers.DeleteWeapon(equipment)
 				if err != nil {
 					services.ErrorHandler("Cant delete weapon", err)
 				}
