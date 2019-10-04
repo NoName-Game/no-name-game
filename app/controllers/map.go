@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/providers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -211,7 +211,7 @@ func Fight(update tgbotapi.Update) {
 				// Mob die
 				payload.Kill++
 				mob.LifePoint = 0
-				_, err := providers.DeleteEnemy(mob.ID)
+				_, err = providers.DeleteEnemy(mob.ID)
 				if err != nil {
 					services.ErrorHandler("Cant delete enemy.", err)
 				}

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/no-name/app/providers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 var (

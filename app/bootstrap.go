@@ -1,8 +1,8 @@
 package app
 
 import (
-	"bitbucket.org/no-name-game/no-name/app/commands"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/commands"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 

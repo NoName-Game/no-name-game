@@ -7,8 +7,8 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"bitbucket.org/no-name-game/no-name/app/providers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 

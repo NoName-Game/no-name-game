@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
