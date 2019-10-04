@@ -3,15 +3,13 @@ package controllers
 import (
 	"time"
 
-	"bitbucket.org/no-name-game/no-name/app/helpers"
-	"bitbucket.org/no-name-game/no-name/app/providers"
-	"bitbucket.org/no-name-game/no-name/services"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// TestTimedQuest - ...
 func PlayerDeath(update tgbotapi.Update) {
-	message := update.Message
 	routeName := "route.death"
 	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
@@ -29,7 +27,7 @@ func PlayerDeath(update tgbotapi.Update) {
 
 	if !validationFlag {
 		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
+			validatorMsg := services.NewMessage(helpers.Player.ChatID, validationMessage)
 			validatorMsg.ParseMode = "HTML"
 			services.SendMessage(validatorMsg)
 		}
