@@ -5,7 +5,9 @@ import (
 	"reflect"
 	"strings"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -16,6 +18,17 @@ func routing(update tgbotapi.Update) {
 		if helpers.HandleUser(update.Message.From) {
 			callingRoute := parseMessage(update.Message)
 
+			// ******************************************
+			// Check if player have PlayerDeath active
+			// ******************************************
+			states, _ := providers.GetPlayerStates(helpers.Player)
+			for _, state := range states {
+				if state.Function == "route.death" {
+					// Player Morto
+					controllers.PlayerDeath(update)
+					return
+				}
+			}
 			// ******************************************
 			// Check if callingRoute it's breaker routes
 			// ******************************************
