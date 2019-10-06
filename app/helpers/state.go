@@ -51,6 +51,24 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 	return
 }
 
+// CheckState - create and set redis state
+func CheckState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
+	playerState = GetPlayerStateByFunction(player, route)
+
+	if playerState.ID < 1 {
+		newPlayerState := nnsdk.PlayerState{
+			Function: route,
+			PlayerID: player.ID,
+		}
+
+		playerState, _ = providers.CreatePlayerState(newPlayerState)
+		isNewState = true
+	}
+
+	SetRedisState(player, route)
+	return
+}
+
 // FinishAndCompleteState - finish and set completed in playerstate
 func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
 	// Stupid poninter stupid json pff

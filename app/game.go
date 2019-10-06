@@ -10,7 +10,7 @@ var (
 	//===================================
 	// Routes
 	//
-	routes = map[string]interface{}{
+	Routes = map[string]interface{}{
 		"route.start":       controllers.StartTutorial, // tutorial.go  - MAIN
 		"route.mission":     controllers.StartMission,  // mission.go   - MAIN
 		"route.crafting":    controllers.Crafting,      // crafting.go  - MAIN
@@ -38,7 +38,7 @@ var (
 		"route.testing.multiStageRevelution": new(controllers.TestingController),
 	}
 
-	breakerRoutes = map[string]interface{}{
+	BreakerRoutes = map[string]interface{}{
 		"route.breaker.back":   controllers.Back,   // back.go      - MAIN (breaker)
 		"route.breaker.clears": controllers.Clears, // clears.go    - MAIN (breaker)
 	}

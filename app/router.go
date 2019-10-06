@@ -5,9 +5,10 @@ import (
 	"reflect"
 	"strings"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Routing - Check message type and call if exist the correct function
@@ -19,54 +20,30 @@ func routing(update tgbotapi.Update) {
 			// ******************************************
 			// Check if callingRoute it's breaker routes
 			// ******************************************
-			// isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes)
-			// if isBreakerRoute {
-			// 	_, err := Call(breakerRoutes, route, update)
-			// 	if err != nil {
-			// 		services.ErrorHandler("Error in call command", err)
-			// 	}
-			// 	return
-			// }
+			isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
+			if isBreakerRoute {
+				_, err := Call(BreakerRoutes, route, update)
+				if err != nil {
+					services.ErrorHandler("Error in call command", err)
+				}
+				return
+			}
 
 			// ******************************************
 			// Check if player have route in cache
 			// ******************************************
 			isCachedRoute := helpers.GetRedisState(helpers.Player)
 			if isCachedRoute != "" {
-
-				Invoke(routes[isCachedRoute], "Handle", update)
-
-				// _, err := Call(routes, isCachedRoute, update)
-				// if err != nil {
-				// 	services.ErrorHandler("Error in call command", err)
-				// }
+				Invoke(Routes[isCachedRoute], "Handle", update)
 				return
 			}
 
 			// ******************************************
 			// Check if it's normal route
 			// ******************************************
-			isRoute, route := inRoutes(callingRoute, routes)
+			isRoute, route := inRoutes(callingRoute, Routes)
 			if isRoute {
-
-				// log.Println(routes[route])
-
-				Invoke(routes[route], "Handle", update)
-
-				// _, err := CallTwo(prova, update)
-				// if err != nil {
-				// 	services.ErrorHandler("Error in call command", err)
-				// }
-
-				// prova.Handle()
-				// .Handle(update)
-
-				// log.Panicln("here END router")
-
-				// _, err := Call(routes, route, update)
-				// if err != nil {
-				// 	services.ErrorHandler("Error in call command", err)
-				// }
+				Invoke(Routes[route], "Handle", update)
 				return
 			}
 		}
@@ -75,9 +52,9 @@ func routing(update tgbotapi.Update) {
 		if helpers.HandleUser(update.CallbackQuery.From) {
 			callingRoute := parseCallback(update.CallbackQuery)
 			//log.Println(callingRoute)
-			isRoute, route := inRoutes(callingRoute, routes)
+			isRoute, route := inRoutes(callingRoute, Routes)
 			if isRoute {
-				_, err := Call(routes, route, update)
+				_, err := Call(Routes, route, update)
 				if err != nil {
 					services.ErrorHandler("Error in call command", err)
 				}

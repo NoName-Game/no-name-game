@@ -33,15 +33,11 @@ func HandleUser(user *tgbotapi.User) bool {
 	return true
 }
 
+// GetPlayerStateByFunction - Check if function exist in player states
 func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState) {
-	playerStates, err := providers.GetPlayerStates(player)
-	if err != nil {
-		panic(err)
-	}
-
-	for i, state := range playerStates {
+	for i, state := range player.States {
 		if state.Function == function {
-			playerState = playerStates[i]
+			playerState = player.States[i]
 		}
 	}
 
