@@ -57,17 +57,18 @@ func Run() {
 	if err != nil {
 		services.ErrorHandler("Update channel error", err)
 	}
-	for update := range updates {
-		if update.Message != nil {
-			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username"))
-				services.SendMessage(msg)
-				continue
-			}
 
-			routing(update)
-		} else if update.CallbackQuery != nil {
-			routing(update)
+	for update := range updates {
+		// ***************
+		// Handle users
+		// ***************
+		if !helpers.HandleUser(update) {
+			continue
 		}
+
+		// ***************
+		// Routing update
+		// ***************
+		routing(update)
 	}
 }

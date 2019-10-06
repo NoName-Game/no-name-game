@@ -5,80 +5,51 @@ import (
 	"reflect"
 	"strings"
 
-<<<<<<< HEAD
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-=======
-	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
->>>>>>> develop
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
+	// ************************
+	// Switch by message type
+	// ************************
+	var callingRoute string
 	if update.Message != nil {
-		if helpers.HandleUser(update.Message.From) {
-			callingRoute := parseMessage(update.Message)
-
-			// ******************************************
-			// Check if player have PlayerDeath active
-			// ******************************************
-			states, _ := providers.GetPlayerStates(helpers.Player)
-			for _, state := range states {
-				if state.Function == "route.death" {
-					// Player Morto
-					controllers.PlayerDeath(update)
-					return
-				}
-			}
-			// ******************************************
-			// Check if callingRoute it's breaker routes
-			// ******************************************
-			isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
-			if isBreakerRoute {
-				_, err := Call(BreakerRoutes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-
-			// ******************************************
-			// Check if player have route in cache
-			// ******************************************
-			isCachedRoute := helpers.GetRedisState(helpers.Player)
-			if isCachedRoute != "" {
-				Invoke(Routes[isCachedRoute], "Handle", update)
-				return
-			}
-
-			// ******************************************
-			// Check if it's normal route
-			// ******************************************
-			isRoute, route := inRoutes(callingRoute, Routes)
-			if isRoute {
-				Invoke(Routes[route], "Handle", update)
-				return
-			}
-		}
+		callingRoute = parseMessage(update.Message)
 	} else if update.CallbackQuery != nil {
-		// It's a callback query
-		if helpers.HandleUser(update.CallbackQuery.From) {
-			callingRoute := parseCallback(update.CallbackQuery)
-			//log.Println(callingRoute)
-			isRoute, route := inRoutes(callingRoute, Routes)
-			if isRoute {
-				_, err := Call(Routes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-		}
+		callingRoute = parseCallback(update.CallbackQuery)
 	}
 
+	// ******************************************
+	// Check if callingRoute it's breaker routes
+	// ******************************************
+	isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
+	if isBreakerRoute {
+		Invoke(BreakerRoutes[route], "Handle", update)
+		return
+	}
+
+	// ******************************************
+	// Check if player have route in cache
+	// ******************************************
+	isCachedRoute := helpers.GetRedisState(helpers.Player)
+	if isCachedRoute != "" {
+		Invoke(Routes[isCachedRoute], "Handle", update)
+		return
+	}
+
+	// ******************************************
+	// Check if it's normal route
+	// ******************************************
+	isRoute, route := inRoutes(callingRoute, Routes)
+	if isRoute {
+		Invoke(Routes[route], "Handle", update)
+		return
+	}
+
+	return
 }
 
 // inRoutes - Check if message is translated command
