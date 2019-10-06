@@ -81,11 +81,6 @@ shotgun: "Fucile a pompa"
 # HUNTING
 hunting.error.noWeaponEquipped: "Devi equipaggiare un arma per andare a caccia!"
 hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
-hunting.enemy.found: "Hai incontrato un %s!! Aprire il fuoco?"
-hunting.enemy.card: "%s\nVita Nemico: %d\n\n\nLa tua vita: %d\n\nCosa vuoi fare?"
-hunting.last_hit: "Hai inflitto il colpo di grazia al mob!"
-hunting.experience_earned: "Hai ottenuto %d punti exp!"
-hunting.continue: "Vuoi continuare la caccia?"
 hunting.completed: "Caccia completata, torni alla base col bottino."
 
 # COMBAT SYSTEM

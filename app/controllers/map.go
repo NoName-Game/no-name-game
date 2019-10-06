@@ -52,7 +52,7 @@ func MapController(update tgbotapi.Update) {
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	} else {
-		if *update.Message != (tgbotapi.Message{}) {
+		if *update.Message == (tgbotapi.Message{}) {
 			msg := services.NewEditMessage(helpers.Player.ChatID, update.Message.MessageID, helpers.TextDisplay(m))
 			if strings.Contains(helpers.TextDisplay(m), "*") {
 				msg.ReplyMarkup = &fightKeyboard
