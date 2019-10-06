@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
@@ -69,7 +68,7 @@ func HandleUser(update tgbotapi.Update) bool {
 	// Check if player is die
 	// ************************
 	if _, err := GetPlayerStateByFunction(Player, "route.death"); err == nil {
-		controllers.PlayerDeath(update)
+		// controllers.PlayerDeath(update) TODO: FIXME
 		return false
 	}
 

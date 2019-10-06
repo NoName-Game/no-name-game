@@ -151,7 +151,7 @@ func Fight(update tgbotapi.Update) {
 	}
 	bodyParts := [4]string{"head", "chest", "gauntlets", "leg"}
 
-	state := helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
+	state, _ := helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
 
 	var payload payloadStruct
 	helpers.UnmarshalPayload(state.Payload, &payload)

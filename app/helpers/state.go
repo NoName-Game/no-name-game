@@ -36,7 +36,7 @@ func DelRedisState(player nnsdk.Player) {
 
 // StartAndCreatePlayerState - create and set redis state
 func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState) {
-	playerState = GetPlayerStateByFunction(player, route)
+	playerState, _ = GetPlayerStateByFunction(player, route)
 
 	if playerState.ID < 1 {
 		newPlayerState := nnsdk.PlayerState{
@@ -53,7 +53,7 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 
 // CheckState - create and set redis state
 func CheckState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
-	playerState = GetPlayerStateByFunction(player, route)
+	playerState, _ = GetPlayerStateByFunction(player, route)
 
 	if playerState.ID < 1 {
 		newPlayerState := nnsdk.PlayerState{
@@ -87,7 +87,7 @@ func DeleteRedisAndDbState(player nnsdk.Player) {
 	rediState := GetRedisState(player)
 
 	if rediState != "" {
-		playerState := GetPlayerStateByFunction(player, rediState)
+		playerState, _ := GetPlayerStateByFunction(player, rediState)
 		_, err := providers.DeletePlayerState(playerState) // Delete
 		if err != nil {
 			services.ErrorHandler("Error delete player state", err)

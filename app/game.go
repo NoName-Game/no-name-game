@@ -11,29 +11,29 @@ var (
 	// Routes
 	//
 	Routes = map[string]interface{}{
-		"route.start":       controllers.StartTutorial, // tutorial.go  - MAIN
-		"route.mission":     controllers.StartMission,  // mission.go   - MAIN
-		"route.crafting":    controllers.Crafting,      // crafting.go  - MAIN
-		"route.abilityTree": controllers.AbilityTree,   // ability.go - MAIN
-		"route.hunting":     controllers.Hunting,       // hunting.go
-		"route.menu":        controllers.Menu,          // menu.go
+		"route.start": new(controllers.TutorialController), // tutorial.go  - MAIN
+		// "route.mission":     new(controllers.StartMission),  // mission.go   - MAIN
+		// "route.crafting":    new(controllers.Crafting),      // crafting.go  - MAIN
+		// "route.abilityTree": new(controllers.AbilityTree),   // ability.go - MAIN
+		// "route.hunting":     new(controllers.Hunting),       // hunting.go
+		// "route.menu":        new(controllers.Menu),          // menu.go
 
-		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
-		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
-		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
-		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
+		// "route.inventory":         new(controllers.Inventory),        // inventory.go - KEYBOARD
+		// "route.inventory.recap":   new(controllers.InventoryRecap),   // inventory.go - MAIN
+		// "route.inventory.equip":   new(controllers.InventoryEquip),   // inventory.go - MAIN
+		// "route.inventory.destroy": new(controllers.InventoryDestroy), // inventory.go - MAIN
 
-		"route.ship":             controllers.Ship,            // ship.go
-		"route.ship.exploration": controllers.ShipExploration, // ship.go
+		// "route.ship":             new(controllers.Ship),            // ship.go
+		// "route.ship.exploration": new(controllers.ShipExploration), // ship.go
 
-		"route.ship.repairs": controllers.ShipRepairs, // ship.go
+		// "route.ship.repairs": new(controllers.ShipRepairs), // ship.go
 
-		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
-		"route.testing.multiState":  controllers.TestMultiState, // testing.go
-		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
-		"route.testing.time":        controllers.TestTimedQuest, // testing.go
+		// "route.testing.theAnswerIs": new(controllers.TheAnswerIs),    // testing.go
+		// "route.testing.multiState":  new(controllers.TestMultiState), // testing.go
+		// "route.testing.multiStage":  new(controllers.TestMultiStage), // testing.go
+		// "route.testing.time":        new(controllers.TestTimedQuest), // testing.go
 
-		"callback.map": controllers.MapController,
+		// "callback.map": new(controllers.MapController),
 
 		"route.testing.multiStageRevelution": new(controllers.TestingController),
 	}

@@ -10,81 +10,106 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// StartTutorial - This is the first command called from telegram when bot started.
-func StartTutorial(update tgbotapi.Update) {
-	message := update.Message
-	routeName := "route.start"
-	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
+type TutorialController struct {
+	RouteName  string
+	Validation bool
+	Update     tgbotapi.Update
+	Message    *tgbotapi.Message
+}
 
-	//====================================
-	// Validator
-	//====================================
-	validationFlag := false
+//====================================
+// Handle
+//====================================
+func (c TutorialController) Handle(update tgbotapi.Update) {
+	// Current Controller instance
+	c.RouteName = "route.start"
+	c.Update = update
+	c.Message = update.Message
+
+	// Check current state for this routes
+	state, isNewState := helpers.CheckState(c.RouteName, helpers.Player)
+
+	// It's first message
+	if isNewState {
+		c.Stage(state)
+		return
+	}
+
+	// Go to validator
+	c.Validation, state = c.Validator(state)
+	if !c.Validation {
+		state, _ = providers.UpdatePlayerState(state)
+		c.Stage(state)
+	}
+	return
+}
+
+//====================================
+// Validator
+//====================================
+func (c TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	validationMessage := helpers.Trans("validationMessage")
+
 	switch state.Stage {
 	case 1:
-		lang, err := providers.FindLanguageBy(message.Text, "name")
+		lang, err := providers.FindLanguageBy(c.Message.Text, "name")
 		if err != nil {
 			services.ErrorHandler("Cant find language", err)
 		}
 
-		if lang.ID >= 1 {
-			validationFlag = true
+		_, err = providers.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
 		}
 
-		{
-			_, err := providers.UpdatePlayer(nnsdk.Player{ID: helpers.Player.ID, LanguageID: lang.ID})
-			if err != nil {
-				services.ErrorHandler("Cant update player", err)
-			}
-		}
+		return false, state
 	case 2:
-		if message.Text == helpers.Trans("route.start.openEye") {
-			validationFlag = true
+		if c.Message.Text == helpers.Trans("route.start.openEye") {
+			return false, state
 		}
 	case 3:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.mission") == (nnsdk.PlayerState{}) {
-			validationFlag = true
+		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); state == (nnsdk.PlayerState{}) {
+			return false, state
 		}
 	case 4:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting") == (nnsdk.PlayerState{}) {
-			validationFlag = true
+		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting"); state == (nnsdk.PlayerState{}) {
+			return false, state
 		}
 	case 5:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip") == (nnsdk.PlayerState{}) {
-			validationFlag = true
+		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip"); state == (nnsdk.PlayerState{}) {
+			return false, state
 		}
 	case 6:
 		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting") == (nnsdk.PlayerState{}) {
-			validationFlag = true
+		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting"); state == (nnsdk.PlayerState{}) {
+			return false, state
 		}
 	}
 
-	if !validationFlag {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.menu"))))
-			services.SendMessage(validatorMsg)
-		}
-	}
+	// Validator goes errors
+	validatorMsg := services.NewMessage(c.Message.Chat.ID, validationMessage)
+	services.SendMessage(validatorMsg)
 
-	//====================================
-	// Stage
-	//====================================
+	return true, state
+}
+
+//====================================
+// Stage
+//====================================
+func (c TutorialController) Stage(state nnsdk.PlayerState) {
 	//====================================
 	// Language -> Messages -> Exploration -> Crafting -> Hunting
 	//====================================
 	switch state.Stage {
 	case 0:
-		msg := services.NewMessage(message.Chat.ID, "Select language")
+		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
 
 		languages, err := providers.GetLanguages()
 		if err != nil {
@@ -101,71 +126,61 @@ func StartTutorial(update tgbotapi.Update) {
 		state, _ = providers.UpdatePlayerState(state)
 		services.SendMessage(msg)
 	case 1:
-		if validationFlag {
-			// Messages
-			texts := helpers.GenerateTextArray(routeName)
-			msg := services.NewMessage(helpers.Player.ChatID, texts[0])
-			//msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			lastMessage := services.SendMessage(msg)
-			var previousText string
-			for i := 1; i < 3; i++ {
-				time.Sleep(2 * time.Second)
-				services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
-			}
-			for i := 3; i < 12; i++ {
-				time.Sleep(2 * time.Second)
-				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
-			}
-			lastMessage = services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[12]))
-			previousText = lastMessage.Text
-			for i := 13; i < len(texts); i++ {
-				time.Sleep(time.Second)
-				previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
-			}
-			edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.explosion"))
-			edit.ParseMode = "HTML"
-			services.SendMessage(edit)
-			msg = services.NewMessage(helpers.Player.ChatID, "...")
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
-			services.SendMessage(msg)
-			state.Stage = 2
-			state, _ = providers.UpdatePlayerState(state)
+		// Messages
+		texts := helpers.GenerateTextArray(c.RouteName)
+		msg := services.NewMessage(helpers.Player.ChatID, texts[0])
+		//msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		lastMessage := services.SendMessage(msg)
+		var previousText string
+		for i := 1; i < 3; i++ {
+			time.Sleep(2 * time.Second)
+			services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
 		}
+		for i := 3; i < 12; i++ {
+			time.Sleep(2 * time.Second)
+			previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
+		}
+		lastMessage = services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[12]))
+		previousText = lastMessage.Text
+		for i := 13; i < len(texts); i++ {
+			time.Sleep(time.Second)
+			previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
+		}
+		edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.explosion"))
+		edit.ParseMode = "HTML"
+		services.SendMessage(edit)
+		msg = services.NewMessage(helpers.Player.ChatID, "...")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
+		services.SendMessage(msg)
+		state.Stage = 2
+		state, _ = providers.UpdatePlayerState(state)
+
 	case 2:
-		if validationFlag {
-			// First Exploration
-			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
-			state.Stage = 3
-			state, _ = providers.UpdatePlayerState(state)
-			StartMission(update)
-		}
+		// First Exploration
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
+		state.Stage = 3
+		state, _ = providers.UpdatePlayerState(state)
+		StartMission(c.Update)
+
 	case 3:
-		if validationFlag {
-			// First Crafting
-			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
-			state.Stage = 4
-			state, _ = providers.UpdatePlayerState(state)
-			Crafting(update)
-		}
+		// First Crafting
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
+		state.Stage = 4
+		state, _ = providers.UpdatePlayerState(state)
+		Crafting(c.Update)
 	case 4:
-		if validationFlag {
-			// Equip weapon
-			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
-			state.Stage = 5
-			state, _ = providers.UpdatePlayerState(state)
-			InventoryEquip(update)
-		}
+		// Equip weapon
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
+		state.Stage = 5
+		state, _ = providers.UpdatePlayerState(state)
+		InventoryEquip(c.Update)
 	case 5:
-		if validationFlag {
-			services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
-			state.Stage = 6
-			state, _ = providers.UpdatePlayerState(state)
-			Hunting(update)
-		}
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
+		state.Stage = 6
+		state, _ = providers.UpdatePlayerState(state)
+		Hunting(c.Update)
 	case 6:
-		if validationFlag {
-			helpers.FinishAndCompleteState(state, helpers.Player)
-		}
+		helpers.FinishAndCompleteState(state, helpers.Player)
+
 	}
-	//====================================
 }
