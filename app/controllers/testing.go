@@ -27,45 +27,42 @@ func (t TestingController) Handle(update tgbotapi.Update) {
 
 	// routeName := "route.testing.multiStage"
 	state := helpers.StartAndCreatePlayerState(t.RouteName, helpers.Player)
+	// tagliare in due parti
 
 	// Go to validator
-	t.Validation = t.Validator(message, state)
+	t.Validation, state = t.Validator(message, state)
 
-	t.Stage(message, state)
+	log.Panicln(t.Validation, state)
 
-	// log.Panicln("FINE", t.Validation)
+	if !t.Validation {
+		state, _ = providers.UpdatePlayerState(state)
+		t.Stage(message, state)
+	}
 }
 
 // Return false
-func (t TestingController) Validator(message *tgbotapi.Message, state nnsdk.PlayerState) bool {
+func (t TestingController) Validator(message *tgbotapi.Message, state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	//====================================
 	// Validator
 	//====================================
-	validatorStatus := true
-	validationMessage := "Wrong input, please repeat or exit."
 	switch state.Stage {
 	case 0:
 		if message.Text == "Go to stage 1" {
 			state.Stage = 1
-			state, _ = providers.UpdatePlayerState(state)
-			validatorStatus = false
+			return false, state
 		}
 	case 1:
 		if message.Text == "YES!" {
 			state.Stage = 2
-			state, _ = providers.UpdatePlayerState(state)
-			validatorStatus = false
+			return false, state
 		}
 	}
 
-	if validatorStatus {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			services.SendMessage(validatorMsg)
-		}
-	}
+	// Validator goes errors
+	validatorMsg := services.NewMessage(message.Chat.ID, "Wrong input, please repeat or exit.")
+	services.SendMessage(validatorMsg)
 
-	return validatorStatus
+	return true, state
 }
 
 func (t TestingController) Stage(message *tgbotapi.Message, state nnsdk.PlayerState) {
