@@ -71,7 +71,10 @@ func Hunting(update tgbotapi.Update) {
 		state.FinishAt = helpers.GetEndTime(0, 10, 0)
 		state.ToNotify = t
 		state.Stage = 1
-
+		_, err := providers.UpdatePlayerState(state)
+		if err != nil {
+			services.ErrorHandler("Cant update state", err)
+		}
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", state.FinishAt.Format("04:05"))))
 	case 1:
 		if validationFlag {
