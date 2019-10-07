@@ -17,7 +17,9 @@ import (
 type TestingController struct {
 	RouteName  string
 	Validation bool
+	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
+	Payload    struct{}
 }
 
 //====================================
@@ -29,7 +31,7 @@ func (t TestingController) Handle(update tgbotapi.Update) {
 	t.Message = update.Message
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(t.RouteName, helpers.Player)
+	state, isNewState := helpers.CheckState(t.RouteName, t.Payload, helpers.Player)
 
 	// It's first message
 	if isNewState {

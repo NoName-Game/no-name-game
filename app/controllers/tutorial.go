@@ -15,6 +15,7 @@ type TutorialController struct {
 	Validation bool
 	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
+	Payload    struct{}
 }
 
 //====================================
@@ -27,7 +28,7 @@ func (c TutorialController) Handle(update tgbotapi.Update) {
 	c.Message = update.Message
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(c.RouteName, helpers.Player)
+	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
 	// It's first message
 	if isNewState {
@@ -160,8 +161,9 @@ func (c TutorialController) Stage(state nnsdk.PlayerState) {
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
 		state.Stage = 3
 		state, _ = providers.UpdatePlayerState(state)
-		StartMission(c.Update)
 
+		// Call mission controller
+		new(MissionController).Handle(c.Update)
 	case 3:
 		// First Crafting
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))

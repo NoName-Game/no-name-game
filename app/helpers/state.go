@@ -52,13 +52,15 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 }
 
 // CheckState - create and set redis state
-func CheckState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
+func CheckState(route string, payload interface{}, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
 	playerState, _ = GetPlayerStateByFunction(player, route)
 
 	if playerState.ID < 1 {
+		jsonPayload, _ := json.Marshal(payload)
 		newPlayerState := nnsdk.PlayerState{
 			Function: route,
 			PlayerID: player.ID,
+			Payload:  string(jsonPayload),
 		}
 
 		playerState, _ = providers.CreatePlayerState(newPlayerState)
