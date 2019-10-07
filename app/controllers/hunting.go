@@ -1,12 +1,9 @@
 package controllers
 
 import (
-	"encoding/json"
-	"math/rand"
-	"strings"
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -20,25 +17,7 @@ func Hunting(update tgbotapi.Update) {
 	routeName := "route.hunting"
 	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
 
-	type payloadHunting struct {
-		MobID uint
-		Score int //Number of enemy defeated
-	}
-
-	var err error
-
-	var payload payloadHunting
-	helpers.UnmarshalPayload(state.Payload, &payload)
-
-	var mob nnsdk.Enemy
-	if payload.MobID > 0 {
-		mob, err = providers.GetEnemyByID(payload.MobID)
-		if err != nil {
-			services.ErrorHandler("Cant find enemy", err)
-		}
-	}
-
-	// Stupid poninter stupid json pff
+	// Stupid pointer stupid json pff
 	t := new(bool)
 	*t = true
 
@@ -63,31 +42,12 @@ func Hunting(update tgbotapi.Update) {
 			validationMessage = helpers.Trans("wait", state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
-		if message.Text == helpers.Trans("continue") && mob.LifePoint > 0 {
+		state := helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
+		if state == (nnsdk.PlayerState{}) {
 			validationFlag = true
-		} else if mob.LifePoint == 0 {
-			validationFlag = true
-
-			// Delete the enemy from table
-			_, err = providers.DeleteEnemy(mob.ID)
-			if err != nil {
-				services.ErrorHandler("Cant delete enemy", err)
-			}
-
-			state.Stage = 4 //Drop
-			state, _ = providers.UpdatePlayerState(state)
-		}
-	case 3:
-		if strings.Contains(message.Text, helpers.Trans("combat.attack_with")) {
-			validationFlag = true
-		}
-	case 4:
-		if message.Text == helpers.Trans("continue") {
-			validationFlag = true
-			state.Stage = 0
-		} else if message.Text == helpers.Trans("nope") {
-			validationFlag = true
-			state.Stage = 5
+		} else {
+			MapController(update)
+			return
 		}
 	}
 
@@ -97,13 +57,10 @@ func Hunting(update tgbotapi.Update) {
 			services.SendMessage(validatorMsg)
 		}
 	}
-
 	//====================================
 	// LOGIC FLUX:
-	// Searching -> Finding -> Fight [Loop] -> Drop
+	// Waiting -> Map -> Drop -> Finish
 	//====================================
-
-	// FIGHT SYSTEM : Enemy Card / Choose Attack -> Calculate Damage -> Apply Damage
 
 	//====================================
 	// Stage
@@ -111,130 +68,22 @@ func Hunting(update tgbotapi.Update) {
 	switch state.Stage {
 	case 0:
 		// Set timer
-		state.FinishAt = helpers.GetEndTime(0, int(5*(payload.Score/3)), 0)
+		state.FinishAt = helpers.GetEndTime(0, 10, 0)
 		state.ToNotify = t
 		state.Stage = 1
-
-		mob, err = providers.Spawn(nnsdk.Enemy{})
+		_, err := providers.UpdatePlayerState(state)
 		if err != nil {
-			services.ErrorHandler("Cant spawn enemy", err)
+			services.ErrorHandler("Cant update state", err)
 		}
-
-		payload.MobID = mob.ID
-		payload.Score = 1
-		payloadUpdated, _ := json.Marshal(payload)
-		state.Payload = string(payloadUpdated)
-		state, _ = providers.UpdatePlayerState(state)
-
-		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", state.FinishAt.Format("15:04:05"))))
+		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.searching", state.FinishAt.Format("04:05"))))
 	case 1:
 		if validationFlag {
-			// Enemy found
+			// Join Map
 			state.Stage = 2
 			state, _ = providers.UpdatePlayerState(state)
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.found", mob.Name))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
-				),
-			)
-			services.SendMessage(msg)
+			MapController(update)
 		}
 	case 2:
-		if validationFlag {
-			state.Stage = 3
-			state, _ = providers.UpdatePlayerState(state)
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.enemy.card", mob.Name, mob.LifePoint, helpers.Player.Stats.LifePoint))
-			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-				ResizeKeyboard: true,
-				Keyboard:       helpers.GenerateWeaponKeyboard(),
-			}
-			services.SendMessage(msg)
-		}
-	case 3:
-		if validationFlag {
-			// Calculating damage
-
-			weaponName := strings.SplitN(message.Text, " ", 3)[2]
-
-			var weapon nnsdk.Weapon
-			weapon, err = providers.FindWeaponByName(weaponName)
-			if err != nil {
-				services.ErrorHandler("Cant find weapon", err)
-			}
-
-			var playerDamage uint
-
-			switch weapon.WeaponCategory.Slug {
-			case "knife":
-				// Knife damage
-				playerDamage = uint(rand.Int31n(6)+1) + (weapon.RawDamage + ((helpers.Player.Stats.Strength + helpers.Player.Stats.Dexterity) / 2))
-			default:
-				playerDamage = uint(rand.Int31n(6)+1) + (weapon.RawDamage + ((helpers.Player.Stats.Intelligence + helpers.Player.Stats.Dexterity) / 2))
-			}
-
-			mob.LifePoint -= playerDamage
-
-			mob, err = providers.UpdateEnemy(mob)
-			if err != nil {
-				services.ErrorHandler("Cant update enemy", err)
-			}
-
-			var text string
-			if mob.LifePoint == 0 {
-				text = helpers.Trans("combat.last_hit")
-			} else {
-				mobDamage := uint(rand.Int31n(17) + 1)
-
-				var stats nnsdk.PlayerStats
-				stats, err = providers.GetPlayerStats(helpers.Player)
-				if err != nil {
-					services.ErrorHandler("Cant get player stats", err)
-				}
-
-				stats = helpers.DecrementLife(mobDamage, stats)
-				if *stats.LifePoint == 0 {
-					// Player Die
-					helpers.DeleteRedisAndDbState(helpers.Player)
-					msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie"))
-					msg.ParseMode = "HTML"
-					services.SendMessage(msg)
-				}
-
-				text = helpers.Trans("combat.damage", playerDamage, mobDamage)
-			}
-
-			state.Stage = 2
-			state, _ = providers.UpdatePlayerState(state)
-
-			msg := services.NewMessage(helpers.Player.ChatID, text)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
-				),
-			)
-			services.SendMessage(msg)
-		}
-	case 4:
-		if validationFlag {
-			helpers.Player.Stats.Experience++
-			_, err = providers.UpdatePlayer(helpers.Player)
-			if err != nil {
-				services.ErrorHandler("Cant update player", err)
-			}
-
-			msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.experience_earned", 1))
-			services.SendMessage(msg)
-			msg = services.NewMessage(helpers.Player.ChatID, helpers.Trans("hunting.continue"))
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("continue")),
-					tgbotapi.NewKeyboardButton(helpers.Trans("nope")),
-				),
-			)
-			services.SendMessage(msg)
-		}
-	case 5:
 		if validationFlag {
 			//====================================
 			// IMPORTANT!

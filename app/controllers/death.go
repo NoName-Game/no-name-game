@@ -44,7 +44,7 @@ func PlayerDeath(update tgbotapi.Update) {
 		state.FinishAt = time.Now().Add((time.Hour * time.Duration(12)))
 		state, _ = providers.UpdatePlayerState(state)
 
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie", state.FinishAt.Format("3:04PM")))
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("playerDie", state.FinishAt.Format("04:05")))
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:

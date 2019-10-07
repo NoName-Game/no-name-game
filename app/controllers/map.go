@@ -52,6 +52,17 @@ func MapController(update tgbotapi.Update) {
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	} else {
+		if update.Message != nil {
+			msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(m))
+			if strings.Contains(helpers.TextDisplay(m), "*") {
+				msg.ReplyMarkup = &fightKeyboard
+			} else {
+				msg.ReplyMarkup = &mapKeyboard
+			}
+			msg.ParseMode = "HTML"
+			services.SendMessage(msg)
+			return
+		}
 		if time.Since(m.UpdatedAt).Seconds() > 1.0 {
 
 			if payload.InFight {
