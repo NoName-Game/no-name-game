@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -14,58 +15,93 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// Crafting
-func Crafting(update tgbotapi.Update) {
-	//====================================
-	// Init Func!
-	//====================================
-	type craftingPayload struct {
+type CraftingController struct {
+	Update     tgbotapi.Update
+	Message    *tgbotapi.Message
+	RouteName  string
+	Validation struct {
+		HasErrors bool
+		Message   string
+	}
+	Payload struct {
 		Item      string
 		Category  string
 		Resources map[uint]int
 	}
+	// Additional Data
+	AddResourceFlag bool
+}
 
-	message := update.Message
-	routeName := "route.crafting"
-	state := helpers.StartAndCreatePlayerState(routeName, helpers.Player)
-	var payload craftingPayload
-	helpers.UnmarshalPayload(state.Payload, &payload)
-	var addResourceFlag bool
+//====================================
+// Handle
+//====================================
+func (c CraftingController) Handle(update tgbotapi.Update) {
+	// Current Controller instance
+	c.RouteName = "route.crafting"
+	c.Update = update
+	c.Message = update.Message
 
-	//====================================
-	// Validator
-	//====================================
-	validationFlag := false
-	validationMessage := helpers.Trans("validationMessage")
+	// Set Additional Data
+	c.AddResourceFlag = false
+
+	// Check current state for this routes
+	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+
+	// It's first message
+	if isNewState {
+		c.Stage(state)
+		return
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(state.Payload, c.Payload)
+
+	// Go to validator
+	c.Validation.HasErrors, state = c.Validator(state)
+
+	if !c.Validation.HasErrors {
+		state, _ = providers.UpdatePlayerState(state)
+		c.Stage(state)
+		return
+	}
+
+	// Validator goes errors
+	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+	services.SendMessage(validatorMsg)
+	return
+}
+
+//====================================
+// Validator
+//====================================
+func (c CraftingController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+	c.Validation.Message = helpers.Trans("validationMessage")
+
 	switch state.Stage {
 	case 0:
-		if helpers.InArray(message.Text, []string{
+		if helpers.InArray(c.Message.Text, []string{
 			helpers.Trans("armors"),
 			helpers.Trans("weapons"),
 		}) {
 			state.Stage = 1
-			state, _ = providers.UpdatePlayerState(state)
-			validationFlag = true
+			return false, state
 		}
 	case 1:
-		if helpers.InArray(message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
+		if helpers.InArray(c.Message.Text, helpers.GetAllTranslatedSlugCategoriesByLocale()) {
 			state.Stage = 2
-			state, _ = providers.UpdatePlayerState(state)
-			validationFlag = true
+			return false, state
 		}
 	case 2:
-		if strings.Contains(message.Text, helpers.Trans("crafting.add")) {
-			addResourceFlag = true
-			validationFlag = true
-		} else if message.Text == helpers.Trans("crafting.craft") {
-			if len(payload.Resources) > 0 {
-				state.Stage = 3
-				state, _ = providers.UpdatePlayerState(state)
-				validationFlag = true
-			}
+		if strings.Contains(c.Message.Text, helpers.Trans("crafting.add")) {
+			c.AddResourceFlag = true
+			// FIXME!
+			return false, state
+		} else if c.Message.Text == helpers.Trans("crafting.craft") && len(c.Payload.Resources) > 0 {
+			state.Stage = 3
+			return false, state
 		}
 	case 3:
-		if message.Text == helpers.Trans("confirm") {
+		if c.Message.Text == helpers.Trans("confirm") {
 			state.FinishAt = helpers.GetEndTime(0, 1, 10)
 			state.Stage = 4
 
@@ -74,40 +110,28 @@ func Crafting(update tgbotapi.Update) {
 			*t = true
 			state.ToNotify = t
 
+			// Force Update
 			state, _ = providers.UpdatePlayerState(state)
-			validationMessage = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
-			validationFlag = false
+			c.Validation.Message = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
+			return true, state
 		}
 	case 4:
+		c.Validation.Message = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
 		if time.Now().After(state.FinishAt) {
-			validationFlag = true
-		} else {
-			validationMessage = helpers.Trans("crafting.wait", state.FinishAt.Format("15:04:05"))
+			return false, state
 		}
 	}
 
-	if !validationFlag {
-		if state.Stage != 0 {
-			validatorMsg := services.NewMessage(message.Chat.ID, validationMessage)
-			validatorMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			services.SendMessage(validatorMsg)
-		}
-	}
+	return true, state
+}
 
-	// Logic flux
-	//		0		1		 	2			3
-	// -> What -> Category -> Resources -> craft
-
-	//====================================
-	// Stage
-	//====================================
+//====================================
+// Stage  0 -> 1 - What -> 2 - Category -> 3 - Resources -> 4 - Craft
+//====================================
+func (c CraftingController) Stage(state nnsdk.PlayerState) {
 	switch state.Stage {
 	case 0:
-		payloadUpdated, _ := json.Marshal(craftingPayload{})
-		state.Payload = string(payloadUpdated)
-		state, _ = providers.UpdatePlayerState(state)
-
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.what"))
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.what"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("armors")),
@@ -122,16 +146,13 @@ func Crafting(update tgbotapi.Update) {
 		)
 		services.SendMessage(msg)
 	case 1:
-		// If is valid input
-		if validationFlag {
-			payload.Item = message.Text
-			payloadUpdated, _ := json.Marshal(payload)
-			state.Payload = string(payloadUpdated)
-			state, _ = providers.UpdatePlayerState(state)
-		}
+		c.Payload.Item = c.Message.Text
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		state.Payload = string(payloadUpdated)
+		state, _ = providers.UpdatePlayerState(state)
 
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
-		switch payload.Item {
+		switch c.Payload.Item {
 		case helpers.Trans("armors"):
 			armorCategories, err := providers.GetAllArmorCategory()
 			if err != nil {
@@ -160,7 +181,7 @@ func Crafting(update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		))
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.type"))
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.type"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -168,7 +189,6 @@ func Crafting(update tgbotapi.Update) {
 		services.SendMessage(msg)
 
 	case 2:
-
 		////////////////////////////////////
 		// ONLY FOR DEBUG - Add one resource
 		_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
@@ -180,68 +200,70 @@ func Crafting(update tgbotapi.Update) {
 		}
 		////////////////////////////////////
 
+		// Get Player inventory
 		inventory, err := providers.GetPlayerInventory(helpers.Player)
 		if err != nil {
 			services.ErrorHandler("Cant get player inventory", err)
 		}
 
+		// Get player resource from inventory
 		playerResources := helpers.InventoryToMap(inventory)
 
-		// If is valid input
-		if validationFlag {
-			// Id Add new resource
-			if addResourceFlag {
-				if payload.Resources == nil {
-					payload.Resources = make(map[uint]int)
-				}
+		// Add new resource
+		if c.AddResourceFlag {
+			log.Panicln("Here")
+			if c.Payload.Resources == nil {
+				c.Payload.Resources = make(map[uint]int)
+			}
 
-				// Clear text from Add and other shit.
-				resourceName := strings.Split(
-					strings.Split(message.Text, " (")[0],
-					helpers.Trans("crafting.add")+" ")[1]
+			// Clear text from Add and other shit.
+			resourceName := strings.Split(
+				strings.Split(c.Message.Text, " (")[0],
+				helpers.Trans("crafting.add")+" ")[1]
 
-				resource, err := providers.FindResourceByName(resourceName)
-				if err != nil {
-					services.ErrorHandler("Cant find resource", err)
-				}
+			resource, err := providers.FindResourceByName(resourceName)
+			if err != nil {
+				services.ErrorHandler("Cant find resource", err)
+			}
 
-				resourceID := resource.ID
-				resourceMaxQuantity := playerResources[resourceID]
+			resourceID := resource.ID
+			resourceMaxQuantity := playerResources[resourceID]
 
-				if helpers.KeyInMap(resourceID, payload.Resources) {
-					if payload.Resources[resourceID] < resourceMaxQuantity {
-						payload.Resources[resourceID]++
-					}
-				} else {
-					payload.Resources[resourceID] = 1
+			if helpers.KeyInMap(resourceID, c.Payload.Resources) {
+				if c.Payload.Resources[resourceID] < resourceMaxQuantity {
+					c.Payload.Resources[resourceID]++
 				}
 			} else {
-				payload.Category = helpers.Slugger(message.Text)
+				c.Payload.Resources[resourceID] = 1
 			}
-			payloadUpdated, _ := json.Marshal(payload)
-			state.Payload = string(payloadUpdated)
-			state, _ = providers.UpdatePlayerState(state)
+		} else {
+			c.Payload.Category = helpers.Slugger(c.Message.Text)
 		}
+
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		state.Payload = string(payloadUpdated)
+		state, _ = providers.UpdatePlayerState(state)
 
 		// Keyboard with resources
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
 		for r, q := range playerResources {
 			// If PayloadResouces < Inventory quantity ok :)
-			if payload.Resources[r] < q {
+			if c.Payload.Resources[r] < q {
 				resource, err := providers.GetResourceByID(r)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
 				}
 
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					helpers.Trans("crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(q - payload.Resources[r])) + ")",
+					helpers.Trans("crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(q - c.Payload.Resources[r])) + ")",
 				))
 				keyboardRowResources = append(keyboardRowResources, keyboardRow)
 			}
 		}
 
 		// If PayloadResources is not empty show craft button
-		if len(payload.Resources) > 0 {
+		// log.Panicln(c.Payload.Resources)
+		if len(c.Payload.Resources) > 0 {
 			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans("crafting.craft"),
@@ -259,8 +281,8 @@ func Crafting(update tgbotapi.Update) {
 
 		//Add recipe message
 		var recipe string
-		if len(payload.Resources) > 0 {
-			for k, v := range payload.Resources {
+		if len(c.Payload.Resources) > 0 {
+			for k, v := range c.Payload.Resources {
 				resource, err := providers.GetResourceByID(k)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
@@ -270,7 +292,7 @@ func Crafting(update tgbotapi.Update) {
 			}
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.choose_resources")+"\n"+recipe)
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.choose_resources")+"\n"+recipe)
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,
@@ -280,8 +302,8 @@ func Crafting(update tgbotapi.Update) {
 	case 3:
 		//Add recipe message
 		var recipe string
-		if len(payload.Resources) > 0 {
-			for k, v := range payload.Resources {
+		if len(c.Payload.Resources) > 0 {
+			for k, v := range c.Payload.Resources {
 				resource, err := providers.GetResourceByID(k)
 				if err != nil {
 					services.ErrorHandler("Cant get resource", err)
@@ -291,7 +313,7 @@ func Crafting(update tgbotapi.Update) {
 			}
 		}
 
-		msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.confirm_choose_resources")+"\n\n "+recipe)
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.confirm_choose_resources")+"\n\n "+recipe)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("confirm")),
@@ -303,73 +325,71 @@ func Crafting(update tgbotapi.Update) {
 		)
 		services.SendMessage(msg)
 	case 4:
-		if validationFlag {
-			var craftingResult string
+		var craftingResult string
 
-			switch payload.Item {
-			case helpers.Trans("armors"):
-
-				var craftingRequest nnsdk.ArmorCraft
-				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
-				crafted, err := providers.CraftArmor(craftingRequest)
-				if err != nil {
-					services.ErrorHandler("Cant create armor craft", err)
-				}
-
-				// Associate craft result tu player
-				crafted.PlayerID = helpers.Player.ID
-				crafted, err = providers.UpdateArmor(crafted)
-				if err != nil {
-					services.ErrorHandler("Cant associate armor craft", err)
-				}
-
-				// For message
-				craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
-			case helpers.Trans("weapons"):
-
-				var craftingRequest nnsdk.WeaponCraft
-				helpers.UnmarshalPayload(state.Payload, &craftingRequest)
-				crafted, err := providers.CraftWeapon(craftingRequest)
-				if err != nil {
-					services.ErrorHandler("Cant create weapon craft", err)
-				}
-
-				// Associate craft result tu player
-				crafted.PlayerID = helpers.Player.ID
-				crafted, err = providers.UpdateWeapon(crafted)
-				if err != nil {
-					services.ErrorHandler("Cant associate armor craft", err)
-				}
-
-				// For message
-				craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
+		switch c.Payload.Item {
+		case helpers.Trans("armors"):
+			// Call WS to craft armor
+			var craftingRequest nnsdk.ArmorCraft
+			helpers.UnmarshalPayload(state.Payload, &craftingRequest)
+			crafted, err := providers.CraftArmor(craftingRequest)
+			if err != nil {
+				services.ErrorHandler("Cant create armor craft", err)
 			}
 
-			// Remove resources from player inventory
-			for k, q := range payload.Resources {
-				_, err := providers.RemoveResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
-					ItemID:   k,
-					Quantity: q,
-				})
-
-				if err != nil {
-					services.ErrorHandler("Cant add resource to player inventory", err)
-				}
+			// Associate craft result tu player
+			crafted.PlayerID = helpers.Player.ID
+			crafted, err = providers.UpdateArmor(crafted)
+			if err != nil {
+				services.ErrorHandler("Cant associate armor craft", err)
 			}
 
-			//====================================
-			// IMPORTANT!
-			//====================================
-			helpers.FinishAndCompleteState(state, helpers.Player)
-			//====================================
+			// For message
+			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.ArmorCategory.Name + "\nRarity: " + crafted.Rarity.Name
+		case helpers.Trans("weapons"):
+			// Call WS to craft weapon
+			var craftingRequest nnsdk.WeaponCraft
+			helpers.UnmarshalPayload(state.Payload, &craftingRequest)
+			crafted, err := providers.CraftWeapon(craftingRequest)
+			if err != nil {
+				services.ErrorHandler("Cant create weapon craft", err)
+			}
 
-			msg := services.NewMessage(message.Chat.ID, helpers.Trans("crafting.craft_completed")+"\n\n"+craftingResult)
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				),
-			)
-			services.SendMessage(msg)
+			// Associate craft result tu player
+			crafted.PlayerID = helpers.Player.ID
+			crafted, err = providers.UpdateWeapon(crafted)
+			if err != nil {
+				services.ErrorHandler("Cant associate armor craft", err)
+			}
+
+			// For message
+			craftingResult = "Name: " + crafted.Name + "\nCategory: " + crafted.WeaponCategory.Name + "\nRarity: " + crafted.Rarity.Name
 		}
+
+		// Remove resources from player inventory
+		for k, q := range c.Payload.Resources {
+			_, err := providers.RemoveResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
+				ItemID:   k,
+				Quantity: q,
+			})
+
+			if err != nil {
+				services.ErrorHandler("Cant add resource to player inventory", err)
+			}
+		}
+
+		//====================================
+		// IMPORTANT!
+		//====================================
+		helpers.FinishAndCompleteState(state, helpers.Player)
+		//====================================
+
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.craft_completed")+"\n\n"+craftingResult)
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+			),
+		)
+		services.SendMessage(msg)
 	}
 }

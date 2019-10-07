@@ -11,9 +11,9 @@ var (
 	// Routes
 	//
 	Routes = map[string]interface{}{
-		"route.start":   new(controllers.TutorialController), // tutorial.go  - MAIN
-		"route.mission": new(controllers.MissionController),  // mission.go   - MAIN
-		// "route.crafting":    new(controllers.Crafting),      // crafting.go  - MAIN
+		"route.start":    new(controllers.TutorialController), // tutorial.go  - MAIN
+		"route.mission":  new(controllers.MissionController),  // mission.go   - MAIN
+		"route.crafting": new(controllers.CraftingController), // crafting.go  - MAIN
 		// "route.abilityTree": new(controllers.AbilityTree),   // ability.go - MAIN
 		// "route.hunting":     new(controllers.Hunting),       // hunting.go
 		// "route.menu":        new(controllers.Menu),          // menu.go

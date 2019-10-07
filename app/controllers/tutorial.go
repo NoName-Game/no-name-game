@@ -11,11 +11,14 @@ import (
 )
 
 type TutorialController struct {
-	RouteName  string
-	Validation bool
 	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
-	Payload    struct{}
+	RouteName  string
+	Validation struct {
+		HasErrors bool
+		Message   string
+	}
+	Payload struct{}
 }
 
 //====================================
@@ -36,12 +39,20 @@ func (c TutorialController) Handle(update tgbotapi.Update) {
 		return
 	}
 
+	// Set and load payload
+	// helpers.UnmarshalPayload(state.Payload, c.Payload)
+
 	// Go to validator
-	c.Validation, state = c.Validator(state)
-	if !c.Validation {
+	c.Validation.HasErrors, state = c.Validator(state)
+	if !c.Validation.HasErrors {
 		state, _ = providers.UpdatePlayerState(state)
 		c.Stage(state)
+		return
 	}
+
+	// Validator goes errors
+	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+	services.SendMessage(validatorMsg)
 	return
 }
 
@@ -49,7 +60,7 @@ func (c TutorialController) Handle(update tgbotapi.Update) {
 // Validator
 //====================================
 func (c TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
-	validationMessage := helpers.Trans("validationMessage")
+	c.Validation.Message = helpers.Trans("validationMessage")
 
 	switch state.Stage {
 	case 1:
@@ -69,34 +80,30 @@ func (c TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, 
 			return false, state
 		}
 	case 3:
-		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
 		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); state == (nnsdk.PlayerState{}) {
 			return false, state
 		}
 	case 4:
-		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
 		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting"); state == (nnsdk.PlayerState{}) {
 			return false, state
 		}
 	case 5:
-		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
 		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip"); state == (nnsdk.PlayerState{}) {
 			return false, state
 		}
 	case 6:
-		validationMessage = helpers.Trans("route.start.error.functionNotCompleted")
+		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
 		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting"); state == (nnsdk.PlayerState{}) {
 			return false, state
 		}
 	}
-
-	// Validator goes errors
-	validatorMsg := services.NewMessage(c.Message.Chat.ID, validationMessage)
-	services.SendMessage(validatorMsg)
 
 	return true, state
 }
@@ -110,6 +117,9 @@ func (c TutorialController) Stage(state nnsdk.PlayerState) {
 	//====================================
 	switch state.Stage {
 	case 0:
+		state.Stage = 1
+		state, _ = providers.UpdatePlayerState(state)
+
 		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
 
 		languages, err := providers.GetLanguages()
@@ -123,8 +133,6 @@ func (c TutorialController) Stage(state nnsdk.PlayerState) {
 		}
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
-		state.Stage = 1
-		state, _ = providers.UpdatePlayerState(state)
 		services.SendMessage(msg)
 	case 1:
 		// Messages
@@ -169,7 +177,9 @@ func (c TutorialController) Stage(state nnsdk.PlayerState) {
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
 		state.Stage = 4
 		state, _ = providers.UpdatePlayerState(state)
-		Crafting(c.Update)
+
+		// Call crafting controller
+		new(CraftingController).Handle(c.Update)
 	case 4:
 		// Equip weapon
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))

@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 
@@ -42,7 +43,7 @@ func Hunting(update tgbotapi.Update) {
 			validationMessage = helpers.Trans("wait", state.FinishAt.Format("15:04:05"))
 		}
 	case 2:
-		state := helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
+		state, _ := helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
 		if state == (nnsdk.PlayerState{}) {
 			validationFlag = true
 		} else {

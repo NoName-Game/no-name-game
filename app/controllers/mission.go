@@ -14,11 +14,14 @@ import (
 )
 
 type MissionController struct {
-	RouteName  string
-	Validation bool
 	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
-	Payload    struct {
+	RouteName  string
+	Validation struct {
+		HasErrors bool
+		Message   string
+	}
+	Payload struct {
 		ExplorationType string
 		Times           int
 		Material        nnsdk.Resource
@@ -52,13 +55,20 @@ func (c MissionController) Handle(update tgbotapi.Update) {
 		return
 	}
 
+	// Set and load payload
+	helpers.UnmarshalPayload(state.Payload, c.Payload)
+
 	// Go to validator
-	c.Validation, state = c.Validator(state)
-	if !c.Validation {
+	c.Validation.HasErrors, state = c.Validator(state)
+	if !c.Validation.HasErrors {
 		state, _ = providers.UpdatePlayerState(state)
 		c.Stage(state)
+		return
 	}
 
+	// Validator goes errors
+	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+	services.SendMessage(validatorMsg)
 	return
 }
 
@@ -66,7 +76,7 @@ func (c MissionController) Handle(update tgbotapi.Update) {
 // Validator
 //====================================
 func (c MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
-	validationMessage := helpers.Trans("validationMessage")
+	c.Validation.Message = helpers.Trans("validationMessage")
 
 	switch state.Stage {
 	case 1:
@@ -75,7 +85,7 @@ func (c MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, n
 			return false, state
 		}
 	case 2:
-		validationMessage = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
+		c.Validation.Message = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
 		if time.Now().After(state.FinishAt) && c.Payload.Times < 10 {
 			c.Payload.Times++
 			c.Payload.Quantity = rand.Intn(3)*c.Payload.Times + 1
@@ -93,10 +103,6 @@ func (c MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, n
 			return false, state
 		}
 	}
-
-	// Validator goes errors
-	validatorMsg := services.NewMessage(c.Message.Chat.ID, validationMessage)
-	services.SendMessage(validatorMsg)
 
 	return true, state
 }
