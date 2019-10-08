@@ -185,12 +185,12 @@ func (c *TutorialController) Stage(state nnsdk.PlayerState) {
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
 		state.Stage = 5
 		state, _ = providers.UpdatePlayerState(state)
-		InventoryEquip(c.Update)
+		// InventoryEquip(c.Update)
 	case 5:
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
 		state.Stage = 6
 		state, _ = providers.UpdatePlayerState(state)
-		Hunting(c.Update)
+		// Hunting(c.Update)
 	case 6:
 		helpers.FinishAndCompleteState(state, helpers.Player)
 

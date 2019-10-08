@@ -16,7 +16,7 @@ var (
 		"route.mission":     new(controllers.MissionController),  // mission.go   - MAIN
 		"route.crafting":    new(controllers.CraftingController), // crafting.go  - MAIN
 		"route.abilityTree": new(controllers.AbilityController),  // ability.go - MAIN
-		// "route.hunting":     new(controllers.Hunting),       // hunting.go
+		"route.hunting":     new(controllers.HuntingController),  // hunting.go
 
 		// "route.inventory":         new(controllers.Inventory),        // inventory.go - KEYBOARD
 		// "route.inventory.recap":   new(controllers.InventoryRecap),   // inventory.go - MAIN
