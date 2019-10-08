@@ -18,5 +18,7 @@ func Back(update tgbotapi.Update) {
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		services.SendMessage(msg)
 	}
-	Menu(update)
+
+	// Call menu controller
+	new(MenuController).Handle(update)
 }

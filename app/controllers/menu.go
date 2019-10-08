@@ -4,34 +4,46 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// Menu - create a menu with tasks to finish and other messages.
-func Menu(update tgbotapi.Update) {
+/*
+Example:
+Computer di bordo di reloonfire
+Task in corso:
+Tutorial.
+Crafting: Termina alle ore xx:xx:xx.
+Versione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale.
+*/
 
+type MenuController struct {
+	Update    tgbotapi.Update
+	Message   *tgbotapi.Message
+	RouteName string
+}
+
+//====================================
+// Handle
+//====================================
+func (c *MenuController) Handle(update tgbotapi.Update) {
+	// Current Controller instance
+	c.RouteName = "route.abilityTree"
+	c.Update = update
+	c.Message = update.Message
+
+	// Keyboard menu
 	var keyboardMenu = [][]tgbotapi.KeyboardButton{
 		{tgbotapi.NewKeyboardButton(helpers.Trans("route.mission")), tgbotapi.NewKeyboardButton(helpers.Trans("route.hunting"))},
 		{tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory"))},
 		{tgbotapi.NewKeyboardButton(helpers.Trans("route.crafting")), tgbotapi.NewKeyboardButton(helpers.Trans("route.abilityTree"))},
 	}
 
-	/* Computer di bordo di reloonfire
-	Task in corso:
-	Tutorial.
-	Crafting: Termina alle ore xx:xx:xx.
-	Versione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale.
-	*/
-
-	// No state in DB, only show task and a keyboard.
-
 	var tasks string
 	var keyboardRows [][]tgbotapi.KeyboardButton
+	msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("menu", helpers.Player.Username, tasks))
+	msg.ParseMode = "HTML"
 
-	states, _ := providers.GetPlayerStates(helpers.Player)
-
-	for _, state := range states {
+	for _, state := range helpers.Player.States {
 		if *state.ToNotify {
 			// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
 			stateText := helpers.Trans(state.Function) + helpers.Trans("menu.finishAt", state.FinishAt.Format("15:04:05"))
@@ -43,8 +55,7 @@ func Menu(update tgbotapi.Update) {
 		keyboardRows = append(keyboardRows, keyboardRow)
 	}
 
-	msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("menu", helpers.Player.Username, tasks))
-	for _, state := range states {
+	for _, state := range helpers.Player.States {
 		if state.Function == "route.tutorial" {
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				Keyboard: keyboardRows,
@@ -56,7 +67,7 @@ func Menu(update tgbotapi.Update) {
 			}
 		}
 	}
-	msg.ParseMode = "HTML"
-	services.SendMessage(msg)
 
+	// Send recap message
+	services.SendMessage(msg)
 }
