@@ -17,8 +17,6 @@ Versione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la relea
 */
 
 type MenuController struct {
-	Update    tgbotapi.Update
-	Message   *tgbotapi.Message
 	RouteName string
 }
 
@@ -28,8 +26,6 @@ type MenuController struct {
 func (c *MenuController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
 	c.RouteName = "route.abilityTree"
-	c.Update = update
-	c.Message = update.Message
 
 	// Keyboard menu
 	var keyboardMenu = [][]tgbotapi.KeyboardButton{
@@ -42,6 +38,8 @@ func (c *MenuController) Handle(update tgbotapi.Update) {
 	var keyboardRows [][]tgbotapi.KeyboardButton
 	msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("menu", helpers.Player.Username, tasks))
 	msg.ParseMode = "HTML"
+
+	// log.Panicln(helpers.Player.States)
 
 	for _, state := range helpers.Player.States {
 		if *state.ToNotify {
@@ -56,7 +54,7 @@ func (c *MenuController) Handle(update tgbotapi.Update) {
 	}
 
 	for _, state := range helpers.Player.States {
-		if state.Function == "route.tutorial" {
+		if state.Function == "route.start" {
 			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 				Keyboard: keyboardRows,
 			}

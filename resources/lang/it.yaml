@@ -27,7 +27,7 @@ route.force.die: "Delete"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
-route.breaker.clears: "Lascia stare"
+route.breaker.clears: "Abbandona"
 
 # ROUTES (CALLBACK)
 callback.map: "map"

@@ -39,8 +39,8 @@ var (
 	}
 
 	BreakerRoutes = map[string]interface{}{
-		"route.breaker.back":   controllers.Back,   // back.go      - MAIN (breaker)
-		"route.breaker.clears": controllers.Clears, // clears.go    - MAIN (breaker)
+		"route.breaker.back":   new(controllers.BackController),   // breaker.go      - MAIN (breaker)
+		"route.breaker.clears": new(controllers.ClearsController), // breaker.go    - MAIN (breaker)
 	}
 	//
 	// End routes
