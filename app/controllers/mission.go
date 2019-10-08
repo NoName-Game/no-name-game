@@ -34,7 +34,7 @@ type MissionController struct {
 //====================================
 // Handle
 //====================================
-func (c MissionController) Handle(update tgbotapi.Update) {
+func (c *MissionController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
 	c.RouteName = "route.mission"
 	c.Update = update
@@ -75,7 +75,7 @@ func (c MissionController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
 	switch state.Stage {
@@ -110,7 +110,7 @@ func (c MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, n
 //====================================
 // Stage
 //====================================
-func (c MissionController) Stage(state nnsdk.PlayerState) {
+func (c *MissionController) Stage(state nnsdk.PlayerState) {
 	switch state.Stage {
 	case 0:
 		state.Stage = 1

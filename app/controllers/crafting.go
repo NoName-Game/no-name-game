@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +34,7 @@ type CraftingController struct {
 //====================================
 // Handle
 //====================================
-func (c CraftingController) Handle(update tgbotapi.Update) {
+func (c *CraftingController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
 	c.RouteName = "route.crafting"
 	c.Update = update
@@ -58,7 +57,6 @@ func (c CraftingController) Handle(update tgbotapi.Update) {
 
 	// Go to validator
 	c.Validation.HasErrors, state = c.Validator(state)
-
 	if !c.Validation.HasErrors {
 		state, _ = providers.UpdatePlayerState(state)
 		c.Stage(state)
@@ -74,7 +72,7 @@ func (c CraftingController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c CraftingController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *CraftingController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
 	switch state.Stage {
@@ -94,7 +92,6 @@ func (c CraftingController) Validator(state nnsdk.PlayerState) (hasErrors bool, 
 	case 2:
 		if strings.Contains(c.Message.Text, helpers.Trans("crafting.add")) {
 			c.AddResourceFlag = true
-			// FIXME!
 			return false, state
 		} else if c.Message.Text == helpers.Trans("crafting.craft") && len(c.Payload.Resources) > 0 {
 			state.Stage = 3
@@ -128,7 +125,7 @@ func (c CraftingController) Validator(state nnsdk.PlayerState) (hasErrors bool, 
 //====================================
 // Stage  0 -> 1 - What -> 2 - Category -> 3 - Resources -> 4 - Craft
 //====================================
-func (c CraftingController) Stage(state nnsdk.PlayerState) {
+func (c *CraftingController) Stage(state nnsdk.PlayerState) {
 	switch state.Stage {
 	case 0:
 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("crafting.what"))
@@ -211,7 +208,6 @@ func (c CraftingController) Stage(state nnsdk.PlayerState) {
 
 		// Add new resource
 		if c.AddResourceFlag {
-			log.Panicln("Here")
 			if c.Payload.Resources == nil {
 				c.Payload.Resources = make(map[uint]int)
 			}

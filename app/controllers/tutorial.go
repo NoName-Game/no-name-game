@@ -24,7 +24,7 @@ type TutorialController struct {
 //====================================
 // Handle
 //====================================
-func (c TutorialController) Handle(update tgbotapi.Update) {
+func (c *TutorialController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
 	c.RouteName = "route.start"
 	c.Update = update
@@ -59,7 +59,7 @@ func (c TutorialController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
 	switch state.Stage {
@@ -111,7 +111,7 @@ func (c TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, 
 //====================================
 // Stage
 //====================================
-func (c TutorialController) Stage(state nnsdk.PlayerState) {
+func (c *TutorialController) Stage(state nnsdk.PlayerState) {
 	//====================================
 	// Language -> Messages -> Exploration -> Crafting -> Hunting
 	//====================================
