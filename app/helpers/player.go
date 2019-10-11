@@ -86,3 +86,15 @@ func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState
 
 	return playerState, errors.New("State not found!")
 }
+
+// CheckPlayerHaveOneEquippedWeapon
+// Verifica se il player ha almeno un'arma equipaggiata
+func CheckPlayerHaveOneEquippedWeapon(player nnsdk.Player) bool {
+	for _, weapon := range player.Weapons {
+		if *weapon.Equipped == true {
+			return true
+		}
+	}
+
+	return false
+}

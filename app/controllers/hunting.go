@@ -101,9 +101,9 @@ func (c *HuntingController) Handle(update tgbotapi.Update) {
 func (c *HuntingController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
-	// FIXME: prendere da cache
-	// Check if the player have a weapon equipped.
-	if _, noWeapon := providers.GetPlayerWeapons(helpers.Player, "true"); noWeapon != nil {
+	// Il player deve avere sempre e porfoza un'arma equipaggiata
+	// Indipendentemente dallo stato
+	if !helpers.CheckPlayerHaveOneEquippedWeapon(helpers.Player) {
 		c.Validation.Message = helpers.Trans("hunting.error.noWeaponEquipped")
 		helpers.FinishAndCompleteState(state, helpers.Player)
 		return true, state
@@ -111,19 +111,8 @@ func (c *HuntingController) Validator(state nnsdk.PlayerState) (hasErrors bool, 
 
 	switch state.Stage {
 	case 0:
-		// state.Stage = 1
 		return false, state
 	case 1:
-		// state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "callback.map")
-		// if state == (nnsdk.PlayerState{}) {
-		// 	return false, state
-		// }
-
-		// else {
-		// 	MapController(update)
-		// 	// new(MenuController).Handle(update)
-		// 	return
-		// }
 		return false, state
 	}
 
@@ -237,6 +226,7 @@ func (c *HuntingController) move(action string, huntingMap nnsdk.Map) {
 		}
 	}
 
+	// TODO: Non aggiornare a db usare redis
 	// Aggiorno posizione player
 	_, err = providers.UpdateMap(huntingMap)
 	if err != nil {
@@ -271,6 +261,8 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.State.Payload = string(payloadUpdated)
 		c.State, _ = providers.UpdatePlayerState(c.State)
+
+		//TODO: Aggiornare qui la mappa e posizione del player
 
 		// editMessage = services.NewEditMessage(helpers.Player.ChatID, callback.Message.MessageID, helpers.Trans("combat.card", mob.Name, mob.LifePoint, mob.LifeMax, helpers.Trans(bodyParts[payload.Selection])))
 		// editMessage.ReplyMarkup = &mobKeyboard
