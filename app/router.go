@@ -102,6 +102,6 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
 	parsed = callback.Data
-	parsed = strings.Split(parsed, "_")[0]
+	parsed = strings.Split(parsed, ".")[0]
 	return strings.ToLower(parsed)
 }
