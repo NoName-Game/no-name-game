@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -21,6 +22,26 @@ func GetRedisState(player nnsdk.Player) string {
 // SetRedisState - set function state in Redis
 func SetRedisState(player nnsdk.Player, function string) {
 	err := services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), function, 0).Err()
+	if err != nil {
+		services.ErrorHandler("Error SET player state in redis", err)
+	}
+}
+
+// GetHuntingRedisState - get hunting state in Redis
+func GetHuntingRedisState(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map) {
+	state, err := services.Redis.Get(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID)).Result()
+	if err != nil {
+		services.ErrorHandler("Error getting hunting state in redis", err)
+	}
+
+	json.Unmarshal([]byte(state), &huntingMap)
+	return
+}
+
+// SetRedisState - set function state in Redis
+func SetHuntingRedisState(IDMap uint, player nnsdk.Player, value interface{}) {
+	jsonValue, _ := json.Marshal(value)
+	err := services.Redis.Set(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID), string(jsonValue), 0).Err()
 	if err != nil {
 		services.ErrorHandler("Error SET player state in redis", err)
 	}

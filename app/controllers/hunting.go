@@ -141,17 +141,26 @@ func (c *HuntingController) Stage(state nnsdk.PlayerState) {
 			),
 		)
 		services.SendMessage(msg)
-
 	}
 }
 
 func (c *HuntingController) Hunting() {
 	// Recupero mappa
-	huntingMap, _ := providers.GetMapByID(helpers.Player.ID)
+	// huntingMap, _ := providers.GetMapByID(helpers.Player.ID)
 
-	// Se non esiste la creo e visualizzo
-	if huntingMap.ID < 1 {
-		huntingMap, _ = providers.CreateMap(helpers.Player.ID)
+	// // Se non esiste la creo e visualizzo
+	// if huntingMap.ID < 1 {
+
+	// }
+
+	huntingMap, isNew := helpers.GetHuntingMap(c.Payload.IDMap, helpers.Player)
+
+	if isNew {
+		c.Payload.IDMap = huntingMap.ID
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, _ = providers.UpdatePlayerState(c.State)
+
 		msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(huntingMap))
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
@@ -159,12 +168,12 @@ func (c *HuntingController) Hunting() {
 		return
 	}
 
-	// Blocker antiflood
+	// Blocker antifloodx
 	if time.Since(huntingMap.UpdatedAt).Seconds() > antiFloodSeconds {
 		// Controllo tipo di callback data - move / fight
 		actionType := strings.Split(c.Callback.Data, ".")
 
-		// Verifica subito se il player è in fase di combattimento
+		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
 		if actionType[1] == "move" && !c.Payload.InFight {
 			c.move(actionType[2], huntingMap)
 		} else if actionType[1] == "fight" {
@@ -228,10 +237,12 @@ func (c *HuntingController) move(action string, huntingMap nnsdk.Map) {
 
 	// TODO: Non aggiornare a db usare redis
 	// Aggiorno posizione player
-	_, err = providers.UpdateMap(huntingMap)
-	if err != nil {
-		services.ErrorHandler("Error while updating map", err)
-	}
+	// _, err = providers.UpdateMap(huntingMap)
+	// if err != nil {
+	// 	services.ErrorHandler("Error while updating map", err)
+	// }
+
+	helpers.UpdateHuntingMap(huntingMap, helpers.Player)
 
 	if actionCompleted {
 		msg := services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.TextDisplay(huntingMap))

@@ -18,7 +18,6 @@ var (
 		"route.abilityTree": new(controllers.AbilityController),  // ability.go - MAIN
 
 		"route.hunting": new(controllers.HuntingController), // hunting.go
-		// "callback.map":  new(controllers.HuntingController), // hunting.go
 
 		// "route.inventory":         new(controllers.Inventory),        // inventory.go - KEYBOARD
 		// "route.inventory.recap":   new(controllers.InventoryRecap),   // inventory.go - MAIN
