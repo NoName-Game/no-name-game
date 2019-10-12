@@ -22,7 +22,7 @@ func GenerateWeaponKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 	return keyboardRows
 }
 
-func GetHuntingMap(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map, isNew bool) {
+func GetHuntingMapRedis(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map, isNew bool) {
 	if IDMap > 0 {
 		huntingMap = GetHuntingRedisState(IDMap, player)
 		return huntingMap, false
@@ -34,7 +34,7 @@ func GetHuntingMap(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map, isNew
 	return huntingMap, true
 }
 
-func UpdateHuntingMap(huntingMap nnsdk.Map, player nnsdk.Player) {
+func UpdateHuntingMapRedis(huntingMap nnsdk.Map, player nnsdk.Player) {
 	SetHuntingRedisState(huntingMap.ID, player, huntingMap)
 	return
 }
