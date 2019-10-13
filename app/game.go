@@ -19,10 +19,10 @@ var (
 
 		"route.hunting": new(controllers.HuntingController), // hunting.go
 
-		"route.inventory":       new(controllers.InventoryController),      // inventory.go - KEYBOARD
-		"route.inventory.recap": new(controllers.InventoryRecapController), // inventory.go - MAIN
-		"route.inventory.equip": new(controllers.InventoryEquipController), // inventory.go - MAIN
-		// "route.inventory.destroy": new(controllers.InventoryDestroy), // inventory.go - MAIN
+		"route.inventory":         new(controllers.InventoryController),        // inventory.go - KEYBOARD
+		"route.inventory.recap":   new(controllers.InventoryRecapController),   // inventory.go - MAIN
+		"route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory.go - MAIN
+		"route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory.go - MAIN
 
 		// "route.ship":             new(controllers.Ship),            // ship.go
 		// "route.ship.exploration": new(controllers.ShipExploration), // ship.go

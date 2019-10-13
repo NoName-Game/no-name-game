@@ -33,10 +33,16 @@ func (c *InventoryEquipController) Handle(update tgbotapi.Update) {
 	c.Message = update.Message
 
 	// Check current state for this routes
-	state, _ := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
 	// Set and load payload
-	helpers.UnmarshalPayload(state.Payload, &c.Payload)
+	helpers.UnmarshalPayload(state.Payload, c.Payload)
+
+	// It's first message
+	if isNewState {
+		c.Stage(state)
+		return
+	}
 
 	// Go to validator
 	c.Validation.HasErrors, state = c.Validator(state)

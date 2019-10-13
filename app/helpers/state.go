@@ -113,7 +113,8 @@ func DeleteRedisAndDbState(player nnsdk.Player) {
 		playerState, _ := GetPlayerStateByFunction(player, rediState)
 		_, err := providers.DeletePlayerState(playerState) // Delete
 		if err != nil {
-			services.ErrorHandler("Error delete player state", err)
+			// FIXME: loggare ma non entrare in panic
+			// services.ErrorHandler("Error delete player state", err)
 		}
 	}
 
