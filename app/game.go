@@ -24,10 +24,9 @@ var (
 		"route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory_equip.go - MAIN
 		"route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory_destroy.go - MAIN
 
-		// "route.ship":             new(controllers.Ship),            // ship.go
-		// "route.ship.exploration": new(controllers.ShipExploration), // ship.go
-
-		// "route.ship.repairs": new(controllers.ShipRepairs), // ship.go
+		"route.ship":             new(controllers.ShipController),            // ship.go
+		"route.ship.exploration": new(controllers.ShipExplorationController), // ship.go
+		"route.ship.repairs":     new(controllers.ShipRepairsController),     // ship.go
 
 		"route.testing.multiStageRevelution": new(controllers.TestingController),
 	}
