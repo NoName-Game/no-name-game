@@ -21,20 +21,13 @@ var (
 
 		"route.inventory":         new(controllers.InventoryController),        // inventory.go - KEYBOARD
 		"route.inventory.recap":   new(controllers.InventoryRecapController),   // inventory.go - MAIN
-		"route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory.go - MAIN
-		"route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory.go - MAIN
+		"route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory_equip.go - MAIN
+		"route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory_destroy.go - MAIN
 
 		// "route.ship":             new(controllers.Ship),            // ship.go
 		// "route.ship.exploration": new(controllers.ShipExploration), // ship.go
 
 		// "route.ship.repairs": new(controllers.ShipRepairs), // ship.go
-
-		// "route.testing.theAnswerIs": new(controllers.TheAnswerIs),    // testing.go
-		// "route.testing.multiState":  new(controllers.TestMultiState), // testing.go
-		// "route.testing.multiStage":  new(controllers.TestMultiStage), // testing.go
-		// "route.testing.time":        new(controllers.TestTimedQuest), // testing.go
-
-		// "callback.map": new(controllers.MapController),
 
 		"route.testing.multiStageRevelution": new(controllers.TestingController),
 	}

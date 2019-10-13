@@ -49,14 +49,14 @@ func (c *MissionController) Handle(update tgbotapi.Update) {
 	// Check current state for this routes
 	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
+	// Set and load payload
+	helpers.UnmarshalPayload(state.Payload, &c.Payload)
+
 	// It's first message
 	if isNewState {
 		c.Stage(state)
 		return
 	}
-
-	// Set and load payload
-	helpers.UnmarshalPayload(state.Payload, c.Payload)
 
 	// Go to validator
 	c.Validation.HasErrors, state = c.Validator(state)
