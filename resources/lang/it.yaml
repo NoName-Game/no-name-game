@@ -33,11 +33,7 @@ route.breaker.clears: "Abbandona"
 callback.map: "map"
 
 # ROUTES (TESTING)
-route.testing.theAnswerIs: "the-answer-is"
-route.testing.multiState: "multi-state"
 route.testing.multiStage: "multi-stage"
-route.testing.time: "test-time"
-route.testing.multiStageRevelution: "test-revo"
 
 # GENERAL
 complete: "Fatto!"

@@ -31,7 +31,6 @@ func (c *InventoryDestroyController) Handle(update tgbotapi.Update) {
 	var isNewState bool
 	c.RouteName, c.Update, c.Message = "route.inventory.destroy", update, update.Message
 
-
 	// Check current state for this routes
 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 

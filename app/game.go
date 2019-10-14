@@ -28,7 +28,7 @@ var (
 		"route.ship.exploration": new(controllers.ShipExplorationController), // ship.go
 		"route.ship.repairs":     new(controllers.ShipRepairsController),     // ship.go
 
-		"route.testing.multiStageRevelution": new(controllers.TestingController),
+		"route.testing.multiStage": new(controllers.TestingController),
 	}
 
 	BreakerRoutes = map[string]interface{}{
