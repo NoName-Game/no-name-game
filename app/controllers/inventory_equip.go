@@ -13,7 +13,7 @@ import (
 )
 
 //====================================
-// Inventory
+// InventoryEquipController
 //====================================
 type InventoryEquipController struct {
 	BaseController
@@ -28,27 +28,31 @@ type InventoryEquipController struct {
 //====================================
 func (c *InventoryEquipController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
-	c.RouteName = "route.inventory.equip"
-	c.Update = update
-	c.Message = update.Message
+	var err error
+	var isNewState bool
+	c.RouteName, c.Update, c.Message = "route.inventory.equip", update, update.Message
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
 	// Set and load payload
-	helpers.UnmarshalPayload(state.Payload, c.Payload)
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
 	// It's first message
 	if isNewState {
-		c.Stage(state)
+		c.Stage()
 		return
 	}
 
 	// Go to validator
-	c.Validation.HasErrors, state = c.Validator(state)
-	if !c.Validation.HasErrors {
-		state, _ = providers.UpdatePlayerState(state)
-		c.Stage(state)
+	if !c.Validator() {
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Ok! Run!
+		c.Stage()
 		return
 	}
 
@@ -61,38 +65,40 @@ func (c *InventoryEquipController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c *InventoryEquipController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *InventoryEquipController) Validator() (hasErrors bool) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
-	switch state.Stage {
+	switch c.State.Stage {
 	case 0:
 		if helpers.InArray(c.Message.Text, []string{
 			helpers.Trans("armors"),
 			helpers.Trans("weapons"),
 		}) {
-			state.Stage = 1
-			return false, state
+			c.State.Stage = 1
+			return false
 		}
 	case 1:
 		if strings.Contains(c.Message.Text, helpers.Trans("equip")) {
-			state.Stage = 2
-			return false, state
+			c.State.Stage = 2
+			return false
 		}
 	case 2:
 		if c.Message.Text == helpers.Trans("confirm") {
-			state.Stage = 3
-			return false, state
+			c.State.Stage = 3
+			return false
 		}
 	}
 
-	return true, state
+	return true
 }
 
 //====================================
 // Stage
 //====================================
-func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
-	switch state.Stage {
+func (c *InventoryEquipController) Stage() {
+	var err error
+
+	switch c.State.Stage {
 	case 0:
 		//====================================
 		// TODO: RISCRIVIMI!
@@ -136,54 +142,46 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 		)
 		services.SendMessage(msg)
 	case 1:
-		// If is valid input
-		c.Payload.Type = c.Message.Text
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
-
+		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch c.Payload.Type {
 		case helpers.Trans("armors"):
-			armors, err := providers.GetPlayerArmors(helpers.Player, "false")
-			if err != nil {
-				services.ErrorHandler("Cant get player armors", err)
-			}
-
 			// Each player armors
-			for _, armor := range armors {
+			for _, armor := range helpers.Player.Armors {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + armor.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case helpers.Trans("weapons"):
-			weapons, err := providers.GetPlayerWeapons(helpers.Player, "false")
-			if err != nil {
-				services.ErrorHandler("Cant get player weapons", err)
-			}
-
-			// Each player weapons
-			for _, weapon := range weapons {
+			// Ciclo armi player
+			for _, weapon := range helpers.Player.Weapons {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + weapon.Name))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
 
-		// Clear and exit
+		// Aggiungo tasti back and clears
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
 			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
 		))
 
+		// Invio messaggio
 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.what"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
 		}
 		services.SendMessage(msg)
+
+		// Aggiorno stato
+		c.Payload.Type = c.Message.Text
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, _ = providers.UpdatePlayerState(c.State)
 	case 2:
 		var equipmentName string
 
-		// Clear text from Add and other shit.
+		// Ripulisco messaggio
 		equipmentName = strings.Split(c.Message.Text, helpers.Trans("equip")+" ")[1]
 
 		var equipmentID uint
@@ -206,11 +204,7 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 			equipmentID = weapon.ID
 		}
 
-		c.Payload.EquipID = equipmentID
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
-
+		// Invio messaggio per conferma equipaggiamento
 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.equip.confirm")+"\n\n "+equipmentName)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -222,6 +216,15 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 			),
 		)
 		services.SendMessage(msg)
+
+		// Aggiorno stato
+		c.Payload.EquipID = equipmentID
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 3:
 		switch c.Payload.Type {
 		case helpers.Trans("armors"):
@@ -230,11 +233,8 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 				services.ErrorHandler("Cant find armor by ID", err)
 			}
 
-			// Stupid poninter stupid json pff
-			t := new(bool)
-			*t = true
-			equipment.Equipped = t
-
+			// Aggiorno equipped
+			equipment.Equipped = helpers.SetTrue()
 			_, err = providers.UpdateArmor(equipment)
 			if err != nil {
 				services.ErrorHandler("Cant update armor", err)
@@ -245,23 +245,15 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 				services.ErrorHandler("Cant find weapon by ID", err)
 			}
 
-			// Stupid poninter stupid json pff
-			t := new(bool)
-			*t = true
-			equipment.Equipped = t
-
+			// Aggiorno equipped
+			equipment.Equipped = helpers.SetTrue()
 			_, err = providers.UpdateWeapon(equipment)
 			if err != nil {
 				services.ErrorHandler("Cant update weapon", err)
 			}
 		}
 
-		//====================================
-		// IMPORTANT!
-		//====================================
-		helpers.FinishAndCompleteState(state, helpers.Player)
-		//====================================
-
+		// Invio messaggio
 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.equip.completed"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -269,5 +261,11 @@ func (c *InventoryEquipController) Stage(state nnsdk.PlayerState) {
 			),
 		)
 		services.SendMessage(msg)
+
+		//====================================
+		// COMPLETE!
+		//====================================
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
 	}
 }
