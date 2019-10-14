@@ -177,7 +177,10 @@ func (c *InventoryEquipController) Stage() {
 		c.Payload.Type = c.Message.Text
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 2:
 		var equipmentName string
 
