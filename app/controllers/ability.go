@@ -1,28 +1,18 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//====================================
+// AbilityController
+//====================================
 type AbilityController struct {
-	Update     tgbotapi.Update
-	Message    *tgbotapi.Message
-	RouteName  string
-	Validation struct {
-		HasErrors bool
-		Message   string
-	}
-	Payload struct {
-		Item      string
-		Category  string
-		Resources map[uint]int
-	}
-	// Additional Data
-	AddResourceFlag bool
+	BaseController
+	Payload struct {}
 }
 
 //====================================
@@ -30,30 +20,31 @@ type AbilityController struct {
 //====================================
 func (c *AbilityController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
-	c.RouteName = "route.abilityTree"
-	c.Update = update
-	c.Message = update.Message
-
-	// Set Additional Data
-	c.AddResourceFlag = false
+	var err error
+	var isNewState bool
+	c.RouteName, c.Update, c.Message = "route.abilityTree", update, update.Message
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
 	// It's first message
 	if isNewState {
-		c.Stage(state)
+		c.Stage()
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(state.Payload, c.Payload)
-
 	// Go to validator
-	c.Validation.HasErrors, state = c.Validator(state)
-	if !c.Validation.HasErrors {
-		state, _ = providers.UpdatePlayerState(state)
-		c.Stage(state)
+	if !c.Validator() {
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Ok! Run!
+		c.Stage()
 		return
 	}
 
@@ -66,37 +57,41 @@ func (c *AbilityController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c *AbilityController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *AbilityController) Validator() (hasErrors bool) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
-	switch state.Stage {
+	switch c.State.Stage {
 	case 0:
+		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
 		if helpers.InStatsStruct(c.Message.Text) && helpers.Player.Stats.AbilityPoint > 0 {
-			state.Stage = 1
-			return false, state
+			c.State.Stage = 1
+			return false
 		} else if helpers.Player.Stats.AbilityPoint == 0 {
-			state.Stage = 2
-			return false, state
+			c.State.Stage = 2
+			return false
 		}
 	case 1:
 		if c.Message.Text == helpers.Trans("ability.back") {
-			state.Stage = 0
-			return false, state
+			c.State.Stage = 0
+			return false
 		} else if c.Message.Text == helpers.Trans("exit") {
-			state.Stage = 2
-			return false, state
+			c.State.Stage = 2
+			return false
 		}
 	}
 
-	return true, state
+	return true
 }
 
 //====================================
 // Stage
 //====================================
-func (c *AbilityController) Stage(state nnsdk.PlayerState) {
-	switch state.Stage {
+func (c *AbilityController) Stage() {
+	var err error
+
+	switch c.State.Stage {
 	case 0:
+		// Invio messaggio con recao stats
 		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&helpers.Player.Stats))
 		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", helpers.Player.Stats.AbilityPoint)
 
@@ -105,14 +100,7 @@ func (c *AbilityController) Stage(state nnsdk.PlayerState) {
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	case 1:
-		// Increment player stats
-		helpers.PlayerStatsIncrement(&helpers.Player.Stats, c.Message.Text)
-
-		_, err := providers.UpdatePlayerStats(helpers.Player.Stats)
-		if err != nil {
-			services.ErrorHandler("Cant update player stats", err)
-		}
-
+		// Invio Messaggio di incremento abilità
 		text := helpers.Trans("ability.stats.completed", c.Message.Text)
 		msg := services.NewMessage(helpers.Player.ChatID, text)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -123,13 +111,14 @@ func (c *AbilityController) Stage(state nnsdk.PlayerState) {
 		)
 		services.SendMessage(msg)
 
+		// Incremento statistiche e aggiorno
+		helpers.PlayerStatsIncrement(&helpers.Player.Stats, c.Message.Text)
+		_, err = providers.UpdatePlayerStats(helpers.Player.Stats)
+		if err != nil {
+			services.ErrorHandler("Cant update player stats", err)
+		}
 	case 2:
-		// ====================================
-		// IMPORTANT!
-		// ====================================
-		helpers.FinishAndCompleteState(state, helpers.Player)
-		// ====================================
-
+		// Recap statistiche player
 		text := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&helpers.Player.Stats))
 		if helpers.Player.Stats.AbilityPoint == 0 {
 			text += "\n" + helpers.Trans("ability.no_point_left")
@@ -137,6 +126,7 @@ func (c *AbilityController) Stage(state nnsdk.PlayerState) {
 			text += helpers.Trans("ability.stats.total_point", helpers.Player.Stats.AbilityPoint)
 		}
 
+		// Invio messaggio
 		msg := services.NewMessage(helpers.Player.ChatID, text)
 		msg.ParseMode = "HTML"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -145,5 +135,11 @@ func (c *AbilityController) Stage(state nnsdk.PlayerState) {
 			),
 		)
 		services.SendMessage(msg)
+
+		// ====================================
+		// COMPLETE!
+		// ====================================
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		// ====================================
 	}
 }
