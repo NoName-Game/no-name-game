@@ -15,15 +15,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//====================================
+// HuntingController
+//====================================
 type HuntingController struct {
-	Update     tgbotapi.Update
-	Message    *tgbotapi.Message
-	Callback   *tgbotapi.CallbackQuery
-	RouteName  string
-	Validation struct {
-		HasErrors bool
-		Message   string
-	}
+	BaseController
 	Payload struct {
 		IDMap     uint
 		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
@@ -32,12 +28,16 @@ type HuntingController struct {
 		Kill      uint
 	}
 	// Additional Data
-	State nnsdk.PlayerState
+	Callback   *tgbotapi.CallbackQuery
 }
 
+// Settings
 var (
-	// Settings
+	// Antiflood
 	antiFloodSeconds float64 = 1.0
+
+	// Parti di corpo disponibili per l'attacco
+	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
 
 	// Keyboards
 	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
@@ -61,8 +61,11 @@ var (
 // Handle
 //====================================
 func (c *HuntingController) Handle(update tgbotapi.Update) {
-	c.RouteName = "route.hunting"
-	c.Update = update
+	// Current Controller instance
+	var err error
+	c.RouteName, c.Update, c.Message = "route.hunting", update, update.Message
+
+	// Check current state for this routes
 	c.State, _ = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
 	// Set and load payload
@@ -74,10 +77,13 @@ func (c *HuntingController) Handle(update tgbotapi.Update) {
 		c.Message = update.Message
 
 		// Go to validator
-		c.Validation.HasErrors, c.State = c.Validator(c.State)
-		if !c.Validation.HasErrors {
-			c.State, _ = providers.UpdatePlayerState(c.State)
-			c.Stage(c.State)
+		if !c.Validator() {
+			c.State, err = providers.UpdatePlayerState(c.State)
+			if err != nil {
+				services.ErrorHandler("Cant update player stats", err)
+			}
+
+			c.Stage()
 			return
 		}
 
@@ -99,42 +105,43 @@ func (c *HuntingController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c *HuntingController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *HuntingController) Validator() (hasErrors bool) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
 	// Il player deve avere sempre e perfoza un'arma equipaggiata
 	// Indipendentemente dallo stato
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(helpers.Player) {
 		c.Validation.Message = helpers.Trans("hunting.error.noWeaponEquipped")
-		helpers.FinishAndCompleteState(state, helpers.Player)
-		return true, state
+
+		//====================================
+		// FORCED COMPLETE!
+		//====================================
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
+
+		return true
 	}
 
-	switch state.Stage {
+	switch c.State.Stage {
 	case 0:
-		return false, state
+		return false
 	case 1:
-		return false, state
+		return false
 	}
 
-	return true, state
+	return true
 }
 
 //====================================
 // Stage Waiting -> Map -> Drop -> Finish
 //====================================
-func (c *HuntingController) Stage(state nnsdk.PlayerState) {
-	switch state.Stage {
+func (c *HuntingController) Stage() {
+	switch c.State.Stage {
 	case 0:
 		// Join Map
 		c.Hunting()
 	case 1:
-		//====================================
-		// IMPORTANT!
-		//====================================
-		helpers.FinishAndCompleteState(state, helpers.Player)
-		//====================================
-
+		// Invio messaggio
 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("hunting.complete"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -142,22 +149,35 @@ func (c *HuntingController) Stage(state nnsdk.PlayerState) {
 			),
 		)
 		services.SendMessage(msg)
+
+		//====================================
+		// COMPLETE!
+		//====================================
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
 	}
 }
 
 func (c *HuntingController) Hunting() {
+	var err error
+
 	// Recupero mappa da redis, se non esiste l'istanza la creo
 	huntingMap, isNew := helpers.GetHuntingMapRedis(c.Payload.IDMap, helpers.Player)
 	if isNew {
-		c.Payload.IDMap = huntingMap.ID
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
-
+		// Invio messaggio contenente la mappa
 		msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(huntingMap))
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
+
+		// Aggiorno stato
+		c.Payload.IDMap = huntingMap.ID
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player stats", err)
+		}
 		return
 	}
 
@@ -193,7 +213,7 @@ func (c *HuntingController) move(action string, huntingMap nnsdk.Map) {
 	var actionCompleted bool
 	err := json.Unmarshal([]byte(huntingMap.Cell), &cellMap)
 	if err != nil {
-		services.ErrorHandler("Error during unmarshal", err)
+		services.ErrorHandler("Error unmarshal map", err)
 	}
 
 	// Eseguo azione
@@ -230,8 +250,8 @@ func (c *HuntingController) move(action string, huntingMap nnsdk.Map) {
 
 	// Aggiorno orario (serve per il controllo del delay) e aggiorno record su redis
 	huntingMap.UpdatedAt = time.Now()
-	helpers.UpdateHuntingMapRedis(huntingMap, helpers.Player)
 
+	// Se l'azione è valida e completa aggiorno risultato
 	if actionCompleted {
 		msg := services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.TextDisplay(huntingMap))
 		if strings.Contains(helpers.TextDisplay(huntingMap), "*") {
@@ -243,16 +263,18 @@ func (c *HuntingController) move(action string, huntingMap nnsdk.Map) {
 		msg.ParseMode = "HTML"
 		services.SendMessage(msg)
 	}
+
+	// Aggiorno redis map
+	helpers.UpdateHuntingMapRedis(huntingMap, helpers.Player)
 }
 
 //====================================
 // Fight
 //====================================
 func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
-	bodyParts := [4]string{"head", "chest", "gauntlets", "leg"}
-
-	var editMessage tgbotapi.EditMessageTextConfig
+	var err error
 	var enemy nnsdk.Enemy
+	var editMessage tgbotapi.EditMessageTextConfig
 
 	// Se impostato recupero informazioni più aggiornate del mob
 	if c.Payload.IDEnemies > 0 {
@@ -263,61 +285,50 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 	}
 
 	switch action {
+	// Avvio di un nuovo combattimento
 	case "start":
-		// Aggiorno lo stato
+		// Setto nuove informazioni stato
 		c.Payload.IDEnemies = enemy.ID
 		c.Payload.InFight = true
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
 	case "up":
+		// Setto nuova parte del corpo da colpire
 		if c.Payload.Selection > 0 {
 			c.Payload.Selection--
 		} else {
 			c.Payload.Selection = 3
 		}
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
 	case "down":
+		// Setto nuova parte del corpo da colpire
 		if c.Payload.Selection < 3 {
 			c.Payload.Selection++
 		} else {
 			c.Payload.Selection = 0
 		}
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
 	case "hit":
-
 		// DA RIVEDERE E SPOSTARE SUL WS
 		mobDistance, _ := providers.Distance(huntingMap, enemy)
-		mobPercentage := ((1000 - mobDistance) / 1000) // What percentage I see of the body? Number between 0 -> 1
+		mobPercentage := (1000 - mobDistance) / 1000 // What percentage I see of the body? Number between 0 -> 1
 		precision, _ := providers.PlayerPrecision(helpers.Player.ID, c.Payload.Selection)
 		precision *= (85.0 / 37.0) * mobPercentage // Base precision
 
 		// DA CHIEDERE
 		if rand.Float64() < precision {
 			// Hitted
-			// ARMI GIÀ RECUPERATE
-			_, err := providers.GetPlayerWeapons(helpers.Player, "true")
-			if err != nil {
-				services.ErrorHandler("Error while retriving weapons", err)
-			}
 			playerDamage, _ := providers.PlayerDamage(helpers.Player.ID)
 
 			// DA SPOSTARE SUL WS
 			damageToMob := uint(playerDamage)
 			enemy.LifePoint = enemy.LifePoint - damageToMob
 
+			// Mob ucciso
 			if enemy.LifePoint > enemy.LifeMax || enemy.LifePoint == 0 {
-				// enemy die
-				c.Payload.Kill++
-				enemy.LifePoint = 0
+				// Eseguo softdelete enemy
 				_, err = providers.DeleteEnemy(enemy.ID)
 				if err != nil {
 					services.ErrorHandler("Cant delete enemy.", err)
 				}
+
+				// Aggiorno modifica del messaggio
 				editMessage = services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans("combat.mob_killed"))
 				var ok tgbotapi.InlineKeyboardMarkup
 				if c.Payload.Kill == uint(len(huntingMap.Enemies)) {
@@ -326,22 +337,31 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 					ok = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action")))
 				}
 				editMessage.ReplyMarkup = &ok
-				// Add drop
+
+				// Incremento Statistiche player
 				stats, _ := providers.GetPlayerStats(helpers.Player)
 				helpers.IncrementExp(1, stats)
 
+				// Setto stato
+				c.Payload.Kill++
 				c.Payload.InFight = false
-				payloadUpdated, _ := json.Marshal(c.Payload)
-				c.State.Payload = string(payloadUpdated)
-				c.State, _ = providers.UpdatePlayerState(c.State)
 			} else {
+				// Il player subisce danno
 				damageToPlayer, _ := providers.EnemyDamage(enemy.ID)
 				stats, _ := providers.GetPlayerStats(helpers.Player)
 				stats = helpers.DecrementLife(uint(damageToPlayer), stats)
+
+				// Verifico se il danno ricevuto ha ucciso il player
 				if *stats.LifePoint == 0 {
-					// Player Die
-					helpers.DeleteRedisAndDbState(helpers.Player)
+					//====================================
+					// COMPLETE! - Il player non è più in grado di fare nulla, esco!
+					//====================================
+					helpers.FinishAndCompleteState(c.State, helpers.Player)
+					//====================================
+
+					// Invoco player Death
 					PlayerDeath(c.Update)
+					return
 				} else {
 					// Messagio di notifica per vedere risultato attacco
 					editMessage = services.NewEditMessage(
@@ -357,22 +377,31 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 					editMessage.ReplyMarkup = &ok
 				}
 
+				// Aggiorno vita enemy
 				_, err = providers.UpdateEnemy(enemy)
 				if err != nil {
 					services.ErrorHandler("Error while updating enemy", err)
 				}
 
+				// Aggiorno hunting map in redis in quanto contine informazione sui mob
 				helpers.UpdateHuntingMapRedis(huntingMap, helpers.Player)
 			}
 		} else {
-			// Miss by player
+			// Schivata!
 			damageToPlayer, _ := providers.EnemyDamage(enemy.ID)
 			stats, _ := providers.GetPlayerStats(helpers.Player)
 			stats = helpers.DecrementLife(uint(damageToPlayer), stats)
+
 			if *stats.LifePoint == 0 {
-				// Player Die
-				helpers.DeleteRedisAndDbState(helpers.Player)
+				//====================================
+				// COMPLETE! - Il player non è più in grado di fare nulla, esco!
+				//====================================
+				helpers.FinishAndCompleteState(c.State, helpers.Player)
+				//====================================
+
+				// Invoco player Death
 				PlayerDeath(c.Update)
+				return
 			} else {
 				editMessage = services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans("combat.miss", damageToPlayer))
 				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action")))
@@ -381,9 +410,6 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 		}
 	case "returnMap":
 		c.Payload.InFight = false
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, _ = providers.UpdatePlayerState(c.State)
 
 		// Forzo invio messaggio contenente la mappa
 		editMessage = services.NewEditMessage(
@@ -394,14 +420,19 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 		editMessage.ParseMode = "HTML"
 		editMessage.ReplyMarkup = &mapKeyboard
 	case "finish":
+		//====================================
+		// COMPLETE!
+		//====================================
 		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
+
 		services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans("complete")))
 		return
 	case "no-action":
 		//
 	}
 
-	// Standard Message
+	// Non sono state fatte modifiche al messaggio
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
 		stats, _ := providers.GetPlayerStats(helpers.Player)
 		editMessage = services.NewEditMessage(
@@ -420,5 +451,14 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 		editMessage.ReplyMarkup = &mobKeyboard
 	}
 
+	// Invio messaggio modificato
 	services.SendMessage(editMessage)
+
+	// Aggiorno lo stato
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
+	c.State, err = providers.UpdatePlayerState(c.State)
+	if err != nil {
+		services.ErrorHandler("Cant update player stats", err)
+	}
 }
