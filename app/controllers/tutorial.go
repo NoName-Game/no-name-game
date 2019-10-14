@@ -10,14 +10,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//====================================
+// TutorialController
+//====================================
 type TutorialController struct {
-	Update     tgbotapi.Update
-	Message    *tgbotapi.Message
-	RouteName  string
-	Validation struct {
-		HasErrors bool
-		Message   string
-	}
+	BaseController
 	Payload struct{}
 }
 
@@ -26,27 +23,31 @@ type TutorialController struct {
 //====================================
 func (c *TutorialController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
-	c.RouteName = "route.start"
-	c.Update = update
-	c.Message = update.Message
+	var isNewState bool
+	var err error
+	c.RouteName, c.Update, c.Message = "route.start", update, update.Message
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
 	// It's first message
 	if isNewState {
-		c.Stage(state)
+		c.Stage()
 		return
 	}
 
-	// Set and load payload
-	// helpers.UnmarshalPayload(state.Payload, c.Payload)
+	// Validate
+	if !c.Validator() {
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 
-	// Go to validator
-	c.Validation.HasErrors, state = c.Validator(state)
-	if !c.Validation.HasErrors {
-		state, _ = providers.UpdatePlayerState(state)
-		c.Stage(state)
+		// Ok! Run!
+		c.Stage()
 		return
 	}
 
@@ -59,10 +60,10 @@ func (c *TutorialController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c *TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *TutorialController) Validator() (hasErrors bool) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
-	switch state.Stage {
+	switch c.State.Stage {
 	case 1:
 		lang, err := providers.FindLanguageBy(c.Message.Text, "name")
 		if err != nil {
@@ -74,125 +75,162 @@ func (c *TutorialController) Validator(state nnsdk.PlayerState) (hasErrors bool,
 			services.ErrorHandler("Cant update player", err)
 		}
 
-		return false, state
+		return false
 	case 2:
 		if c.Message.Text == helpers.Trans("route.start.openEye") {
-			return false, state
+			return false
 		}
 	case 3:
 		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); state == (nnsdk.PlayerState{}) {
-			return false, state
+		if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); c.State == (nnsdk.PlayerState{}) {
+			return false
 		}
 	case 4:
 		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting"); state == (nnsdk.PlayerState{}) {
-			return false, state
+		if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.crafting"); c.State == (nnsdk.PlayerState{}) {
+			return false
 		}
 	case 5:
 		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip"); state == (nnsdk.PlayerState{}) {
-			return false, state
+		if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.inventory.equip"); c.State == (nnsdk.PlayerState{}) {
+			return false
 		}
 	case 6:
 		c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 		// Check if the player finished the previous function.
-		if state, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting"); state == (nnsdk.PlayerState{}) {
-			return false, state
+		if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.hunting"); c.State == (nnsdk.PlayerState{}) {
+			return false
 		}
 	}
 
-	return true, state
+	return true
 }
 
 //====================================
-// Stage
+// Stage - Language -> Messages -> Exploration -> Crafting -> Hunting
 //====================================
-func (c *TutorialController) Stage(state nnsdk.PlayerState) {
-	//====================================
-	// Language -> Messages -> Exploration -> Crafting -> Hunting
-	//====================================
-	switch state.Stage {
+func (c *TutorialController) Stage() {
+	var err error
+
+	switch c.State.Stage {
 	case 0:
-		state.Stage = 1
-		state, _ = providers.UpdatePlayerState(state)
-
-		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
-
+		// Recupero lingue disponibili
 		languages, err := providers.GetLanguages()
 		if err != nil {
 			services.ErrorHandler("Cant get languages", err)
 		}
 
+		// Aggiungo lingue alla tastiera
 		keyboard := make([]tgbotapi.KeyboardButton, len(languages))
 		for i, lang := range languages {
 			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
 		}
 
+		// Invio messaggio
+		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		services.SendMessage(msg)
+
+		// Aggiorna stato
+		c.State.Stage = 1
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 1:
 		// Messages
 		texts := helpers.GenerateTextArray(c.RouteName)
 		msg := services.NewMessage(helpers.Player.ChatID, texts[0])
-		//msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		lastMessage := services.SendMessage(msg)
+
 		var previousText string
 		for i := 1; i < 3; i++ {
 			time.Sleep(2 * time.Second)
 			services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, texts[i])) //.Text
 		}
+
 		for i := 3; i < 12; i++ {
 			time.Sleep(2 * time.Second)
 			previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
 		}
+
 		lastMessage = services.SendMessage(services.NewMessage(helpers.Player.ChatID, texts[12]))
 		previousText = lastMessage.Text
 		for i := 13; i < len(texts); i++ {
 			time.Sleep(time.Second)
 			previousText = services.SendMessage(services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, previousText+"\n"+texts[i])).Text
 		}
+
 		edit := services.NewEditMessage(helpers.Player.ChatID, lastMessage.MessageID, helpers.Trans("route.start.explosion"))
 		edit.ParseMode = "HTML"
 		services.SendMessage(edit)
+
+		// Ultimo step apri gli occhi
 		msg = services.NewMessage(helpers.Player.ChatID, "...")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.start.openEye"))))
 		services.SendMessage(msg)
-		state.Stage = 2
-		state, _ = providers.UpdatePlayerState(state)
 
+		// Aggiorna stato
+		c.State.Stage = 2
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 2:
 		// First Exploration
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
-		state.Stage = 3
-		state, _ = providers.UpdatePlayerState(state)
+
+		// Aggiorna stato
+		c.State.Stage = 3
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 
 		// Call mission controller
 		new(MissionController).Handle(c.Update)
 	case 3:
 		// First Crafting
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
-		state.Stage = 4
-		state, _ = providers.UpdatePlayerState(state)
+
+		// Aggiorna stato
+		c.State.Stage = 4
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 
 		// Call crafting controller
 		new(CraftingController).Handle(c.Update)
 	case 4:
 		// Equip weapon
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))
-		state.Stage = 5
-		state, _ = providers.UpdatePlayerState(state)
-		// InventoryEquip(c.Update)
+
+		// Aggiorna stato
+		c.State.Stage = 5
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Call InventoryEquipController
+		new(InventoryEquipController).Handle(c.Update)
 	case 5:
 		services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstHunting")))
-		state.Stage = 6
-		state, _ = providers.UpdatePlayerState(state)
-		// Hunting(c.Update)
-	case 6:
-		helpers.FinishAndCompleteState(state, helpers.Player)
 
+		// Aggiorna stato
+		c.State.Stage = 6
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Call InventoryEquipController
+		new(HuntingController).Handle(c.Update)
+	case 6:
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
 	}
 }

@@ -42,7 +42,6 @@ func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
 
 // GenerateTextArray - generate text's array from a common word in key.
 func GenerateTextArray(common string) (texts []string) {
-
 	var counter int
 	for {
 		keyText := common + "_" + strconv.Itoa(counter)

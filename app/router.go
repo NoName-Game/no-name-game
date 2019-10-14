@@ -66,7 +66,7 @@ func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bo
 // Invoke - Dinamicaly call method interface
 func Invoke(any interface{}, name string, args ...interface{}) {
 	inputs := make([]reflect.Value, len(args))
-	for i, _ := range args {
+	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
 	}
 
