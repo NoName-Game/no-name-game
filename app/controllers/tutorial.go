@@ -231,6 +231,10 @@ func (c *TutorialController) Stage() {
 		// Call InventoryEquipController
 		new(HuntingController).Handle(c.Update)
 	case 6:
+		//====================================
+		// COMPLETE!
+		//====================================
 		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
 	}
 }

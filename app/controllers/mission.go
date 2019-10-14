@@ -12,6 +12,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//====================================
+// MissionController
+//====================================
 type MissionController struct {
 	BaseController
 	Payload struct {
@@ -199,9 +202,6 @@ func (c *MissionController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		services.SendMessage(msg)
 
-		// Exit
-		helpers.FinishAndCompleteState(c.State, helpers.Player)
-
 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
 			ItemID:   c.Payload.Material.ID,
@@ -211,5 +211,11 @@ func (c *MissionController) Stage() {
 		if err != nil {
 			services.ErrorHandler("Cant add resource to player inventory", err)
 		}
+
+		//====================================
+		// COMPLETE!
+		//====================================
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+		//====================================
 	}
 }
