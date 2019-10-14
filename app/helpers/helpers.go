@@ -112,3 +112,10 @@ func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
 	return
 }
+
+// SetTrue - Ritorno un truePTR di un boolean type per il salvataggio a DB
+func SetTrue() *bool {
+	truePtr := new(bool)
+	*truePtr = true
+	return truePtr
+}

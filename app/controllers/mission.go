@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"math/rand"
 	"time"
 
@@ -14,13 +13,7 @@ import (
 )
 
 type MissionController struct {
-	Update     tgbotapi.Update
-	Message    *tgbotapi.Message
-	RouteName  string
-	Validation struct {
-		HasErrors bool
-		Message   string
-	}
+	BaseController
 	Payload struct {
 		ExplorationType string
 		Times           int
@@ -36,9 +29,9 @@ type MissionController struct {
 //====================================
 func (c *MissionController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
-	c.RouteName = "route.mission"
-	c.Update = update
-	c.Message = update.Message
+	var err error
+	var isNewState bool
+	c.RouteName, c.Update, c.Message = "route.mission", update, update.Message
 
 	// Set mission types
 	c.MissionTypes = make([]string, 3)
@@ -47,22 +40,26 @@ func (c *MissionController) Handle(update tgbotapi.Update) {
 	c.MissionTypes[2] = helpers.Trans("mission.atmosphere")
 
 	// Check current state for this routes
-	state, isNewState := helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
 	// Set and load payload
-	helpers.UnmarshalPayload(state.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
 	// It's first message
 	if isNewState {
-		c.Stage(state)
+		c.Stage()
 		return
 	}
 
 	// Go to validator
-	c.Validation.HasErrors, state = c.Validator(state)
-	if !c.Validation.HasErrors {
-		state, _ = providers.UpdatePlayerState(state)
-		c.Stage(state)
+	if !c.Validator() {
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Ok! Run!
+		c.Stage()
 		return
 	}
 
@@ -75,93 +72,95 @@ func (c *MissionController) Handle(update tgbotapi.Update) {
 //====================================
 // Validator
 //====================================
-func (c *MissionController) Validator(state nnsdk.PlayerState) (hasErrors bool, newState nnsdk.PlayerState) {
+func (c *MissionController) Validator() (hasErrors bool) {
 	c.Validation.Message = helpers.Trans("validationMessage")
 
-	switch state.Stage {
+	switch c.State.Stage {
 	case 1:
+		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
 		if helpers.StringInSlice(c.Message.Text, c.MissionTypes) {
 			c.Payload.ExplorationType = c.Message.Text
-			return false, state
+			return false
 		}
 	case 2:
-		c.Validation.Message = helpers.Trans("mission.wait", state.FinishAt.Format("2006-01-02 15:04:05"))
-		if time.Now().After(state.FinishAt) && c.Payload.Times < 10 {
+		c.Validation.Message = helpers.Trans("mission.wait", c.State.FinishAt.Format("2006-01-02 15:04:05"))
+		if time.Now().After(c.State.FinishAt) && c.Payload.Times < 10 {
 			c.Payload.Times++
 			c.Payload.Quantity = rand.Intn(3)*c.Payload.Times + 1
-			return false, state
+			return false
 		}
 	case 3:
 		if c.Message.Text == helpers.Trans("mission.continue") {
-			state.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
-			t := new(bool)
-			*t = true
-			state.ToNotify = t
-			return false, state
+			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
+			c.State.ToNotify = helpers.SetTrue()
+			return false
 		} else if c.Message.Text == helpers.Trans("mission.comeback") {
-			state.Stage = 4
-			return false, state
+			c.State.Stage = 4
+			return false
 		}
 	}
 
-	return true, state
+	return true
 }
 
 //====================================
 // Stage
 //====================================
-func (c *MissionController) Stage(state nnsdk.PlayerState) {
-	switch state.Stage {
+func (c *MissionController) Stage() {
+	var err error
+
+	switch c.State.Stage {
 	case 0:
-		state.Stage = 1
-		state, _ = providers.UpdatePlayerState(state)
-
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration"))
-
+		// Creo messaggio con la lista delle esplorazioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, eType := range c.MissionTypes {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(eType))
+		for _, mType := range c.MissionTypes {
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(mType))
 			keyboardRows = append(keyboardRows, keyboardRow)
 		}
+
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
 		}
 		services.SendMessage(msg)
+
+		// Aggiorno stato
+		c.State.Stage = 1
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 1:
+		// Recupero materiali random
 		material, err := providers.GetRandomResource(helpers.GetMissionCategoryID(c.Message.Text))
 		if err != nil {
-			log.Println(err)
-			services.ErrorHandler("Cant add resource to player inventory", err)
+			services.ErrorHandler("Cant get random resources", err)
 		}
 
-		// Updating state
+		// Imposto nuovo stato
 		c.Payload.Material = material
 		jsonPayload, _ := json.Marshal(c.Payload)
-		state.Payload = string(jsonPayload)
-		state.Stage = 2
+		c.State.Payload = string(jsonPayload)
+		c.State.Stage = 2
+		c.State.ToNotify = helpers.SetTrue()
+		c.State.FinishAt = helpers.GetEndTime(0, 10, 0)
 
-		t := new(bool)
-		*t = true
-		state.ToNotify = t
-
-		// Set finishAt
-		state.FinishAt = helpers.GetEndTime(0, 10, 0)
-		state, _ = providers.UpdatePlayerState(state)
-
-		// Remove current redist stare
-		helpers.DelRedisState(helpers.Player)
-
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
+		// Invio messaggio di attesa
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(c.State.FinishAt.Format("15:04:05"))))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.Menu"))))
 		services.SendMessage(msg)
 
-	case 2:
-		jsonPayload, _ := json.Marshal(c.Payload)
-		state.Payload = string(jsonPayload)
-		state.Stage = 3
-		state, _ = providers.UpdatePlayerState(state)
+		// Aggiorno stato
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 
+		// Remove current redis state
+		// helpers.DelRedisState(helpers.Player)
+	case 2:
+		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", c.Payload.Material.Name, c.Payload.Quantity))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -171,21 +170,39 @@ func (c *MissionController) Stage(state nnsdk.PlayerState) {
 		)
 		services.SendMessage(msg)
 
+		// Aggiorno lo stato
+		jsonPayload, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(jsonPayload)
+		c.State.Stage = 3
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
 	case 3:
-		state.Stage = 2
-		state, _ = providers.UpdatePlayerState(state)
-
-		// Remove current redist stare
-		helpers.DelRedisState(helpers.Player)
-
-		// Continue
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(state.FinishAt.Format("15:04:05"))))
+		// CONTINUE - Il player ha scelto di continuare la ricerca
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(c.State.FinishAt.Format("15:04:05"))))
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		services.SendMessage(msg)
-	case 4:
-		// Exit
-		helpers.FinishAndCompleteState(state, helpers.Player)
 
+		// Aggiorno lo stato
+		c.State.Stage = 2
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player", err)
+		}
+
+		// Remove current redist stare
+		//helpers.DelRedisState(helpers.Player)
+	case 4:
+		// Invio messaggio di chiusura missione
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_ended"))
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		services.SendMessage(msg)
+
+		// Exit
+		helpers.FinishAndCompleteState(c.State, helpers.Player)
+
+		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
 			ItemID:   c.Payload.Material.ID,
 			Quantity: c.Payload.Quantity,
@@ -194,9 +211,5 @@ func (c *MissionController) Stage(state nnsdk.PlayerState) {
 		if err != nil {
 			services.ErrorHandler("Cant add resource to player inventory", err)
 		}
-
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_ended"))
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		services.SendMessage(msg)
 	}
 }

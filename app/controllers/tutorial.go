@@ -23,8 +23,8 @@ type TutorialController struct {
 //====================================
 func (c *TutorialController) Handle(update tgbotapi.Update) {
 	// Current Controller instance
-	var isNewState bool
 	var err error
+	var isNewState bool
 	c.RouteName, c.Update, c.Message = "route.start", update, update.Message
 
 	// Check current state for this routes

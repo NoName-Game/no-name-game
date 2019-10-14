@@ -37,8 +37,6 @@ func (c *MenuController) Handle(update tgbotapi.Update) {
 	msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("menu", helpers.Player.Username, tasks))
 	msg.ParseMode = "HTML"
 
-	// log.Panicln(helpers.Player.States)
-
 	for _, state := range helpers.Player.States {
 		if *state.ToNotify {
 			// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
