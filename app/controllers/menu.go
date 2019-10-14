@@ -16,9 +16,7 @@ Crafting: Termina alle ore xx:xx:xx.
 Versione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale.
 */
 
-type MenuController struct {
-	RouteName string
-}
+type MenuController BaseController
 
 //====================================
 // Handle

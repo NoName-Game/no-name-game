@@ -431,7 +431,12 @@ func (c *ShipRepairsController) Stage(state nnsdk.PlayerState) {
 		// START Repair ship
 		responseStart, err := providers.StartShipRepair(c.Payload.Ship)
 		if err != nil {
-			services.ErrorHandler("Cant repair ship", err)
+			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
+			errorMsg := services.NewMessage(c.Message.Chat.ID,
+				fmt.Sprintf("%s", err),
+			)
+			services.SendMessage(errorMsg)
+			return
 		}
 
 		recapResourceUsed := fmt.Sprintf("%s\n", helpers.Trans("ship.repairs.used_resources"))
