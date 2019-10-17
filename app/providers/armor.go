@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"net/url"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -25,7 +26,12 @@ func GetArmorByID(id uint) (nnsdk.Armor, error) {
 
 func FindArmorByName(name string) (nnsdk.Armor, error) {
 	var armor nnsdk.Armor
-	resp, err := services.NnSDK.MakeRequest("search/armor?name="+name, nil).Get()
+
+	// Encode paramiters
+	params := url.Values{}
+	params.Add("name", name)
+
+	resp, err := services.NnSDK.MakeRequest("search/armor?"+params.Encode(), nil).Get()
 	if err != nil {
 		return armor, err
 	}

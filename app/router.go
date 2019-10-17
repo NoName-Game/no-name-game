@@ -5,82 +5,51 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
-	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 )
 
 // Routing - Check message type and call if exist the correct function
 func routing(update tgbotapi.Update) {
+	// ************************
+	// Switch by message type
+	// ************************
+	var callingRoute string
 	if update.Message != nil {
-		if helpers.HandleUser(update.Message.From) {
-			callingRoute := parseMessage(update.Message)
-
-			// ******************************************
-			// Check if player have PlayerDeath active
-			// ******************************************
-			states, _ := providers.GetPlayerStates(helpers.Player)
-			for _, state := range states {
-				if state.Function == "route.death" {
-					// Player Morto
-					controllers.PlayerDeath(update)
-					return
-				}
-			}
-			// ******************************************
-			// Check if callingRoute it's breaker routes
-			// ******************************************
-			isBreakerRoute, route := inRoutes(callingRoute, breakerRoutes)
-			if isBreakerRoute {
-				_, err := Call(breakerRoutes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-
-			// ******************************************
-			// Check if player have route in cache
-			// ******************************************
-			isCachedRoute := helpers.GetRedisState(helpers.Player)
-			if isCachedRoute != "" {
-				_, err := Call(routes, isCachedRoute, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-
-			// ******************************************
-			// Check if it's normal route
-			// ******************************************
-			isRoute, route := inRoutes(callingRoute, routes)
-			if isRoute {
-				_, err := Call(routes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-		}
+		callingRoute = parseMessage(update.Message)
 	} else if update.CallbackQuery != nil {
-		// It's a callback query
-		if helpers.HandleUser(update.CallbackQuery.From) {
-			callingRoute := parseCallback(update.CallbackQuery)
-			//log.Println(callingRoute)
-			isRoute, route := inRoutes(callingRoute, routes)
-			if isRoute {
-				_, err := Call(routes, route, update)
-				if err != nil {
-					services.ErrorHandler("Error in call command", err)
-				}
-				return
-			}
-		}
+		callingRoute = parseCallback(update.CallbackQuery)
 	}
 
+	// ******************************************
+	// Check if callingRoute it's breaker routes
+	// ******************************************
+	isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
+	if isBreakerRoute {
+		Invoke(BreakerRoutes[route], "Handle", update)
+		return
+	}
+
+	// ******************************************
+	// Check if player have route in cache
+	// ******************************************
+	isCachedRoute := helpers.GetRedisState(helpers.Player)
+	if isCachedRoute != "" {
+		Invoke(Routes[isCachedRoute], "Handle", update)
+		return
+	}
+
+	// ******************************************
+	// Check if it's normal route
+	// ******************************************
+	isRoute, route := inRoutes(callingRoute, Routes)
+	if isRoute {
+		Invoke(Routes[route], "Handle", update)
+		return
+	}
+
+	return
 }
 
 // inRoutes - Check if message is translated command
@@ -92,6 +61,16 @@ func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bo
 	}
 
 	return false, ""
+}
+
+// Invoke - Dinamicaly call method interface
+func Invoke(any interface{}, name string, args ...interface{}) {
+	inputs := make([]reflect.Value, len(args))
+	for i := range args {
+		inputs[i] = reflect.ValueOf(args[i])
+	}
+
+	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
 
 // Call - Method to call another func and check needed parameters
@@ -123,6 +102,6 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
 	parsed = callback.Data
-	parsed = strings.Split(parsed, "_")[0]
+	parsed = strings.Split(parsed, ".")[0]
 	return strings.ToLower(parsed)
 }

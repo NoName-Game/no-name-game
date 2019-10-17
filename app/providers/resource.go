@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"net/url"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -40,7 +41,12 @@ func GetRandomResource(categoryID uint) (nnsdk.Resource, error) {
 
 func FindResourceByName(name string) (nnsdk.Resource, error) {
 	var resource nnsdk.Resource
-	resp, err := services.NnSDK.MakeRequest("search/resource?name="+name, nil).Get()
+
+	// Encode paramiters
+	params := url.Values{}
+	params.Add("name", name)
+
+	resp, err := services.NnSDK.MakeRequest("search/resource?"+params.Encode(), nil).Get()
 	if err != nil {
 		return resource, err
 	}

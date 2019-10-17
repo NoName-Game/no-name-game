@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -41,11 +42,18 @@ func StartShipRepair(ship nnsdk.Ship) (map[uint]interface{}, error) {
 
 	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/repairs/start", ship.ID), nil).Post()
 	if err != nil {
+		services.ErrorHandler("Can't call ship repairs", err)
 		return info, err
+	}
+
+	// Verifico se sono ritornati degli errori dalla chiamata
+	if resp.Error != "" {
+		return info, errors.New(resp.Message)
 	}
 
 	err = json.Unmarshal(resp.Data, &info)
 	if err != nil {
+		services.ErrorHandler("Can't unmarshal ship repairs", err)
 		return info, err
 	}
 

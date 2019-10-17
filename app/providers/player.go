@@ -3,6 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -26,7 +27,12 @@ func GetPlayerByID(id uint) (nnsdk.Player, error) {
 
 func FindPlayerByUsername(username string) (nnsdk.Player, error) {
 	var player nnsdk.Player
-	resp, err := services.NnSDK.MakeRequest("search/player?username="+username, nil).Get()
+
+	// Encode paramiters
+	params := url.Values{}
+	params.Add("username", username)
+
+	resp, err := services.NnSDK.MakeRequest("search/player?"+params.Encode(), nil).Get()
 	if err != nil {
 		return player, err
 	}

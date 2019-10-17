@@ -27,16 +27,13 @@ route.force.die: "Delete"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"
-route.breaker.clears: "Lascia stare"
+route.breaker.clears: "Abbandona"
 
 # ROUTES (CALLBACK)
 callback.map: "map"
 
 # ROUTES (TESTING)
-route.testing.theAnswerIs: "the-answer-is"
-route.testing.multiState: "multi-state"
 route.testing.multiStage: "multi-stage"
-route.testing.time: "test-time"
 
 # GENERAL
 complete: "Fatto!"
@@ -111,6 +108,7 @@ crafting.choose_resources: "Quali risorse vuoi usare?"
 crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per craftare"
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"

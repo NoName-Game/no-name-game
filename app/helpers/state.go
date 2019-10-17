@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -26,6 +27,26 @@ func SetRedisState(player nnsdk.Player, function string) {
 	}
 }
 
+// GetHuntingRedisState - get hunting state in Redis
+func GetHuntingRedisState(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map) {
+	state, err := services.Redis.Get(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID)).Result()
+	if err != nil {
+		services.ErrorHandler("Error getting hunting state in redis", err)
+	}
+
+	json.Unmarshal([]byte(state), &huntingMap)
+	return
+}
+
+// SetRedisState - set function state in Redis
+func SetHuntingRedisState(IDMap uint, player nnsdk.Player, value interface{}) {
+	jsonValue, _ := json.Marshal(value)
+	err := services.Redis.Set(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID), string(jsonValue), 0).Err()
+	if err != nil {
+		services.ErrorHandler("Error SET player state in redis", err)
+	}
+}
+
 // DelRedisState - del function state in Redis
 func DelRedisState(player nnsdk.Player) {
 	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
@@ -36,7 +57,7 @@ func DelRedisState(player nnsdk.Player) {
 
 // StartAndCreatePlayerState - create and set redis state
 func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState) {
-	playerState = GetPlayerStateByFunction(player, route)
+	playerState, _ = GetPlayerStateByFunction(player, route)
 
 	if playerState.ID < 1 {
 		newPlayerState := nnsdk.PlayerState{
@@ -45,6 +66,26 @@ func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState n
 		}
 
 		playerState, _ = providers.CreatePlayerState(newPlayerState)
+	}
+
+	SetRedisState(player, route)
+	return
+}
+
+// CheckState - create and set redis state
+func CheckState(route string, payload interface{}, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
+	playerState, _ = GetPlayerStateByFunction(player, route)
+
+	if playerState.ID < 1 {
+		jsonPayload, _ := json.Marshal(payload)
+		newPlayerState := nnsdk.PlayerState{
+			Function: route,
+			PlayerID: player.ID,
+			Payload:  string(jsonPayload),
+		}
+
+		playerState, _ = providers.CreatePlayerState(newPlayerState)
+		isNewState = true
 	}
 
 	SetRedisState(player, route)
@@ -69,10 +110,11 @@ func DeleteRedisAndDbState(player nnsdk.Player) {
 	rediState := GetRedisState(player)
 
 	if rediState != "" {
-		playerState := GetPlayerStateByFunction(player, rediState)
+		playerState, _ := GetPlayerStateByFunction(player, rediState)
 		_, err := providers.DeletePlayerState(playerState) // Delete
 		if err != nil {
-			services.ErrorHandler("Error delete player state", err)
+			// FIXME: loggare ma non entrare in panic
+			// services.ErrorHandler("Error delete player state", err)
 		}
 	}
 

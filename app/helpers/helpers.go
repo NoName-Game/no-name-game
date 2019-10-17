@@ -5,18 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
-)
-
-var (
-	//===================================
-	// Public
-
-	Player nnsdk.Player
-
-	//=====================================
 )
 
 // InArray - check if val exist in array
@@ -121,4 +111,11 @@ func GetAllSlugCategories() (categories []string) {
 func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
 	return
+}
+
+// SetTrue - Ritorno un truePTR di un boolean type per il salvataggio a DB
+func SetTrue() *bool {
+	truePtr := new(bool)
+	*truePtr = true
+	return truePtr
 }

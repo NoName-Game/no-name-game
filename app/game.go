@@ -10,35 +10,30 @@ var (
 	//===================================
 	// Routes
 	//
-	routes = map[string]interface{}{
-		"route.start":       controllers.StartTutorial, // tutorial.go  - MAIN
-		"route.mission":     controllers.StartMission,  // mission.go   - MAIN
-		"route.crafting":    controllers.Crafting,      // crafting.go  - MAIN
-		"route.abilityTree": controllers.AbilityTree,   // ability.go - MAIN
-		"route.hunting":     controllers.Hunting,       // hunting.go
-		"route.menu":        controllers.Menu,          // menu.go
+	Routes = map[string]interface{}{
+		"route.menu":        new(controllers.MenuController),     // menu.go
+		"route.start":       new(controllers.TutorialController), // tutorial.go  - MAIN
+		"route.mission":     new(controllers.MissionController),  // mission.go   - MAIN
+		"route.crafting":    new(controllers.CraftingController), // crafting.go  - MAIN
+		"route.abilityTree": new(controllers.AbilityController),  // ability.go - MAIN
 
-		"route.inventory":         controllers.Inventory,        // inventory.go - KEYBOARD
-		"route.inventory.recap":   controllers.InventoryRecap,   // inventory.go - MAIN
-		"route.inventory.equip":   controllers.InventoryEquip,   // inventory.go - MAIN
-		"route.inventory.destroy": controllers.InventoryDestroy, // inventory.go - MAIN
+		"route.hunting": new(controllers.HuntingController), // hunting.go
 
-		"route.ship":             controllers.Ship,            // ship.go
-		"route.ship.exploration": controllers.ShipExploration, // ship.go
+		"route.inventory":         new(controllers.InventoryController),        // inventory.go - KEYBOARD
+		"route.inventory.recap":   new(controllers.InventoryRecapController),   // inventory.go - MAIN
+		"route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory_equip.go - MAIN
+		"route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory_destroy.go - MAIN
 
-		"route.ship.repairs": controllers.ShipRepairs, // ship.go
+		"route.ship":             new(controllers.ShipController),            // ship.go
+		"route.ship.exploration": new(controllers.ShipExplorationController), // ship.go
+		"route.ship.repairs":     new(controllers.ShipRepairsController),     // ship.go
 
-		"route.testing.theAnswerIs": controllers.TheAnswerIs,    // testing.go
-		"route.testing.multiState":  controllers.TestMultiState, // testing.go
-		"route.testing.multiStage":  controllers.TestMultiStage, // testing.go
-		"route.testing.time":        controllers.TestTimedQuest, // testing.go
-
-		"callback.map": controllers.MapController,
+		"route.testing.multiStage": new(controllers.TestingController),
 	}
 
-	breakerRoutes = map[string]interface{}{
-		"route.breaker.back":   controllers.Back,   // back.go      - MAIN (breaker)
-		"route.breaker.clears": controllers.Clears, // clears.go    - MAIN (breaker)
+	BreakerRoutes = map[string]interface{}{
+		"route.breaker.back":   new(controllers.BackController),   // breaker.go      - MAIN (breaker)
+		"route.breaker.clears": new(controllers.ClearsController), // breaker.go    - MAIN (breaker)
 	}
 	//
 	// End routes
@@ -55,17 +50,18 @@ func Run() {
 	if err != nil {
 		services.ErrorHandler("Update channel error", err)
 	}
-	for update := range updates {
-		if update.Message != nil {
-			if update.Message.From.UserName == "" {
-				msg := services.NewMessage(update.Message.Chat.ID, helpers.Trans("miss_username"))
-				services.SendMessage(msg)
-				continue
-			}
 
-			routing(update)
-		} else if update.CallbackQuery != nil {
-			routing(update)
+	for update := range updates {
+		// ***************
+		// Handle users
+		// ***************
+		if !helpers.HandleUser(update) {
+			continue
 		}
+
+		// ***************
+		// Routing update
+		// ***************
+		routing(update)
 	}
 }
