@@ -360,7 +360,7 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 					//====================================
 
 					// Invoco player Death
-					PlayerDeath(c.Update)
+					new(DeathController).Handle(c.Update)
 					return
 				} else {
 					// Messagio di notifica per vedere risultato attacco
@@ -400,7 +400,7 @@ func (c *HuntingController) fight(action string, huntingMap nnsdk.Map) {
 				//====================================
 
 				// Invoco player Death
-				PlayerDeath(c.Update)
+				new(DeathController).Handle(c.Update)
 				return
 			} else {
 				editMessage = services.NewEditMessage(helpers.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans("combat.miss", damageToPlayer))
