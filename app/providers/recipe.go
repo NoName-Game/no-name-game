@@ -24,7 +24,7 @@ func GetRecipeByID(id uint) (nnsdk.Recipe, error) {
 
 func GetAllRecipe() (nnsdk.Recipes, error) {
 	var resource nnsdk.Recipes
-	resp, err := services.NnSDK.MakeRequest("recipe/", nil).Get()
+	resp, err := services.NnSDK.MakeRequest("recipe", nil).Get()
 	if err != nil {
 		return resource, err
 	}

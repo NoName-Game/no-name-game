@@ -8,7 +8,11 @@ import (
 	"strconv"
 )
 
-func GetCraftedByID(id uint) (nnsdk.Crafted, error) {
+// Writer: reloonfire
+// Starting on: 20/01/2020
+// Project: no-name-game
+
+func GetItemByID(id uint) (nnsdk.Crafted, error) {
 	var resource nnsdk.Crafted
 	resp, err := services.NnSDK.MakeRequest("craftable/"+strconv.FormatUint(uint64(id), 10), nil).Get()
 	if err != nil {
@@ -23,7 +27,7 @@ func GetCraftedByID(id uint) (nnsdk.Crafted, error) {
 	return resource, nil
 }
 
-func GetAllCraftableItems() (nnsdk.Crafts, error) {
+func GetAllItems() (nnsdk.Crafts, error) {
 	var crafts nnsdk.Crafts
 	resp, err := services.NnSDK.MakeRequest("craftable", nil).Get()
 
@@ -40,14 +44,14 @@ func GetAllCraftableItems() (nnsdk.Crafts, error) {
 	return crafts, nil
 }
 
-func GetCraftedByName(name string) (nnsdk.Crafted, error) {
+func GetItemByName(name string) (nnsdk.Crafted, error) {
 
 	var craft nnsdk.Crafted
 
 	params := url.Values{}
 	params.Add("name", name)
 
-	resp, err := services.NnSDK.MakeRequest("search/craft?"+params.Encode(), nil).Get()
+	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
 
 	if err != nil {
 		return craft, err
