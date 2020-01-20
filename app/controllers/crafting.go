@@ -14,6 +14,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// Crafting:
+// I craft possono essere affidati a NPC o essere eseguiti dal player (solo craft semplici).
+
 //====================================
 // CraftingController
 //====================================
@@ -259,7 +262,7 @@ func (c *CraftingController) Stage() {
 				}
 
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					helpers.Trans("crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(q - c.Payload.Resources[r])) + ")",
+					helpers.Trans("crafting.add") + " " + resource.Item.Name + " (" + (strconv.Itoa(q - c.Payload.Resources[r])) + ")",
 				))
 				keyboardRowResources = append(keyboardRowResources, keyboardRow)
 			}
@@ -291,7 +294,7 @@ func (c *CraftingController) Stage() {
 					services.ErrorHandler("Cant get resource", err)
 				}
 
-				recipe += resource.Name + " x " + strconv.Itoa(v) + "\n"
+				recipe += resource.Item.Name + " x " + strconv.Itoa(v) + "\n"
 			}
 		}
 
@@ -302,7 +305,6 @@ func (c *CraftingController) Stage() {
 			Keyboard:       keyboardRowResources,
 		}
 		services.SendMessage(msg)
-
 
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.State.Payload = string(payloadUpdated)
@@ -320,7 +322,7 @@ func (c *CraftingController) Stage() {
 					services.ErrorHandler("Cant get resource", err)
 				}
 
-				recipe += resource.Name + " x " + strconv.Itoa(v) + "\n"
+				recipe += resource.Item.Name + " x " + strconv.Itoa(v) + "\n"
 			}
 		}
 

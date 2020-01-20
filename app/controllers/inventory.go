@@ -68,7 +68,7 @@ func (c *InventoryRecapController) Handle(update tgbotapi.Update) {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
 
-		recap += "- " + resource.Name + " (" + (strconv.Itoa(q)) + ")\n"
+		recap += "- " + resource.Item.Name + " (" + (strconv.Itoa(q)) + ")\n"
 	}
 
 	// Summary Weapons

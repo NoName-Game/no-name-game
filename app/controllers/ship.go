@@ -80,7 +80,6 @@ func (c *ShipExplorationController) Handle(update tgbotapi.Update) {
 	var isNewState bool
 	c.RouteName, c.Update, c.Message = "route.ship.exploration", update, update.Message
 
-
 	// Check current state for this routes
 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 
@@ -467,7 +466,7 @@ func (c *ShipRepairsController) Stage() {
 				services.ErrorHandler("Cant get resource", err)
 			}
 
-			recapResourceUsed += fmt.Sprintf("- %s : %v\n", resource.Name, quantity)
+			recapResourceUsed += fmt.Sprintf("- %s : %v\n", resource.Item.Name, quantity)
 		}
 
 		// Setto timer
