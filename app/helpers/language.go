@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"log"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
@@ -23,6 +24,7 @@ func Trans(key string, args ...interface{}) (message string) {
 	}
 
 	if err != nil {
+		log.Println("WARNING TRANSLATION: No match found for key: ", key)
 		// If an error has been generated, it returns an empty string
 		message = ""
 	}

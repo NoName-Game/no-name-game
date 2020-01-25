@@ -47,7 +47,7 @@ func HandleUser(update tgbotapi.Update) bool {
 
 	// If Player does not exists, create!
 	if Player.ID < 1 {
-		language, _ := providers.FindLanguageBySlug("en")
+		language, _ := providers.FindLanguageBySlug("it")
 
 		Player, _ = providers.CreatePlayer(nnsdk.Player{
 			Username: user.UserName,

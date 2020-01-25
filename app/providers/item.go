@@ -12,9 +12,9 @@ import (
 // Starting on: 20/01/2020
 // Project: no-name-game
 
-func GetItemByID(id uint) (nnsdk.Crafted, error) {
-	var resource nnsdk.Crafted
-	resp, err := services.NnSDK.MakeRequest("craftable/"+strconv.FormatUint(uint64(id), 10), nil).Get()
+func GetItemByID(id uint) (nnsdk.Item, error) {
+	var resource nnsdk.Item
+	resp, err := services.NnSDK.MakeRequest("items/"+strconv.FormatUint(uint64(id), 10), nil).Get()
 	if err != nil {
 		return resource, err
 	}
@@ -27,9 +27,9 @@ func GetItemByID(id uint) (nnsdk.Crafted, error) {
 	return resource, nil
 }
 
-func GetAllItems() (nnsdk.Crafts, error) {
-	var crafts nnsdk.Crafts
-	resp, err := services.NnSDK.MakeRequest("craftable", nil).Get()
+func GetAllItems() (nnsdk.Items, error) {
+	var crafts nnsdk.Items
+	resp, err := services.NnSDK.MakeRequest("items", nil).Get()
 
 	if err != nil {
 		return crafts, err
@@ -44,9 +44,9 @@ func GetAllItems() (nnsdk.Crafts, error) {
 	return crafts, nil
 }
 
-func GetItemByName(name string) (nnsdk.Crafted, error) {
+func GetItemByName(name string) (nnsdk.Item, error) {
 
-	var craft nnsdk.Crafted
+	var craft nnsdk.Item
 
 	params := url.Values{}
 	params.Add("name", name)
