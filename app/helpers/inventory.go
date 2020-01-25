@@ -33,7 +33,7 @@ func InventoryToString(i nnsdk.Inventory) string {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
 
-		result += strconv.Itoa(value) + "x " + resource.Name + "\n"
+		result += strconv.Itoa(value) + "x " + resource.Item.Name + "\n"
 	}
 
 	return result
@@ -55,7 +55,7 @@ func InventoryToKeyboardAddCraft(i nnsdk.Inventory) (results []string) {
 			services.ErrorHandler("Error in ToKeyBoardAddCraft", err)
 		}
 
-		results = append(results, "Add "+resource.Name+" ("+strconv.Itoa(value)+")")
+		results = append(results, "Add "+resource.Item.Name+" ("+strconv.Itoa(value)+")")
 	}
 
 	return

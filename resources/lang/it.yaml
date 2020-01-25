@@ -100,7 +100,8 @@ mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcol
 mission.continue: "Continua ad esplorare"
 
 # CRAFTING
-crafting.craft: "Costruisci"
+crafting.craft: "Assembla: "
+crafting.craft_different_item: "Crea altro!"
 crafting.what: "Cosa vuoi realizzare?"
 crafting.type: "Quale tipologia ti interessa realizzare?"
 crafting.add: "Aggiungi"
@@ -109,6 +110,10 @@ crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguent
 crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
 crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per craftare"
+crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la ricetta!"
+
+crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
+crafting.item_does_not_exist: "L'item scelto non esiste!"
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"

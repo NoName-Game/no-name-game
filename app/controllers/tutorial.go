@@ -10,6 +10,10 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// Tutorial:
+// Tutorial iniziale fake per introdurre il player alle meccaniche base di NoName.
+// Flow: Atterraggio d'emergenza -> ricerca materiali per riparare nave -> semplice crafting -> hunting (?) -> volo nel sistema di spawn -> Fine Tutorial
+
 //====================================
 // TutorialController
 //====================================

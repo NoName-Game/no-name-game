@@ -63,12 +63,12 @@ func (c *InventoryRecapController) Handle(update tgbotapi.Update) {
 	recap += "\n" + helpers.Trans("resources") + ":\n"
 	playerResources := helpers.InventoryToMap(playerInventory)
 	for r, q := range playerResources {
-		resource, errResouce := providers.GetResourceByID(r)
+		item, errResouce := providers.GetItemByID(r)
 		if errResouce != nil {
 			services.ErrorHandler("Error in InventoryToString", err)
 		}
 
-		recap += "- " + resource.Name + " (" + (strconv.Itoa(q)) + ")\n"
+		recap += "- " + item.Name + " (" + (strconv.Itoa(q)) + ")\n"
 	}
 
 	// Summary Weapons

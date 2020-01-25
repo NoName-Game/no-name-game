@@ -164,7 +164,7 @@ func (c *MissionController) Stage() {
 		// helpers.DelRedisState(helpers.Player)
 	case 2:
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
-		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", c.Payload.Material.Name, c.Payload.Quantity))
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", c.Payload.Material.Item.Name, c.Payload.Quantity))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans("mission.continue")),
