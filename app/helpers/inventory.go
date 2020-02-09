@@ -2,10 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
-	"strconv"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
@@ -24,39 +21,39 @@ func unmarshalInventory(inventory string) (items map[uint]int) {
 }
 
 // ToString - return inventory like a string
-func InventoryToString(i nnsdk.Inventory) string {
-	var result string
-	mapInventory := unmarshalInventory(i.Items)
-	for key, value := range mapInventory {
-		resource, err := providers.GetResourceByID(key)
-		if err != nil {
-			services.ErrorHandler("Error in InventoryToString", err)
-		}
-
-		result += strconv.Itoa(value) + "x " + resource.Item.Name + "\n"
-	}
-
-	return result
-}
-
-// ToMap - return inventory unmarshal
-func InventoryToMap(i nnsdk.Inventory) (items map[uint]int) {
-	items = unmarshalInventory(i.Items)
-
-	return
-}
-
-// ToKeyboardAddCraft - return inventory for keyboard
-func InventoryToKeyboardAddCraft(i nnsdk.Inventory) (results []string) {
-	mapInventory := unmarshalInventory(i.Items)
-	for key, value := range mapInventory {
-		resource, err := providers.GetResourceByID(key)
-		if err != nil {
-			services.ErrorHandler("Error in ToKeyBoardAddCraft", err)
-		}
-
-		results = append(results, "Add "+resource.Item.Name+" ("+strconv.Itoa(value)+")")
-	}
-
-	return
-}
+// func InventoryToString(i nnsdk.Inventory) string {
+// 	var result string
+// 	mapInventory := unmarshalInventory(i.Items)
+// 	for key, value := range mapInventory {
+// 		resource, err := providers.GetResourceByID(key)
+// 		if err != nil {
+// 			services.ErrorHandler("Error in InventoryToString", err)
+// 		}
+//
+// 		result += strconv.Itoa(value) + "x " + resource.Item.Name + "\n"
+// 	}
+//
+// 	return result
+// }
+//
+// // ToMap - return inventory unmarshal
+// func InventoryToMap(i nnsdk.Inventory) (items map[uint]int) {
+// 	items = unmarshalInventory(i.Items)
+//
+// 	return
+// }
+//
+// // ToKeyboardAddCraft - return inventory for keyboard
+// func InventoryToKeyboardAddCraft(i nnsdk.Inventory) (results []string) {
+// 	mapInventory := unmarshalInventory(i.Items)
+// 	for key, value := range mapInventory {
+// 		resource, err := providers.GetResourceByID(key)
+// 		if err != nil {
+// 			services.ErrorHandler("Error in ToKeyBoardAddCraft", err)
+// 		}
+//
+// 		results = append(results, "Add "+resource.Item.Name+" ("+strconv.Itoa(value)+")")
+// 	}
+//
+// 	return
+// }

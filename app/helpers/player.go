@@ -53,9 +53,6 @@ func HandleUser(update tgbotapi.Update) bool {
 			Username: user.UserName,
 			ChatID:   int64(user.ID),
 			Language: language,
-			Inventory: nnsdk.Inventory{
-				Items: "{}",
-			},
 			Stats: nnsdk.PlayerStats{
 				AbilityPoint: 1,
 			},

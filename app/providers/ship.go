@@ -10,7 +10,7 @@ import (
 )
 
 type ResponseExplorationInfo struct {
-	Star     nnsdk.Star
+	Star     nnsdk.Planet
 	Distance float64
 	Fuel     float64
 	Time     float64

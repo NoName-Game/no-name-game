@@ -25,7 +25,7 @@ func GetMapByID(id uint) (nnsdk.Map, error) {
 
 func CreateMap(playerID uint) (nnsdk.Map, error) {
 	var Map nnsdk.Map
-	Map.PlayerID = playerID
+	Map.PlanetID = playerID
 	resp, err := services.NnSDK.MakeRequest("maps", Map).Post()
 	if err != nil {
 		return Map, err

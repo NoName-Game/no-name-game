@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
+	// Avvio bot/client telegram
 	app.Run()
 }

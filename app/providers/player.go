@@ -172,8 +172,8 @@ func GetPlayerLastPosition(player nnsdk.Player) (nnsdk.PlayerPosition, error) {
 	return position, nil
 }
 
-func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
+func GetPlayerInventory(player nnsdk.Player) (nnsdk.PlayerInventories, error) {
+	var inventory nnsdk.PlayerInventories
 
 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory", nil).Get()
 	if err != nil {
@@ -188,37 +188,37 @@ func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
 	return inventory, nil
 }
 
-func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
+// func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
+// 	var inventory nnsdk.PlayerInventories
+//
+// 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/add", request).Post()
+// 	if err != nil {
+// 		return inventory, err
+// 	}
+//
+// 	err = json.Unmarshal(resp.Data, &inventory)
+// 	if err != nil {
+// 		return inventory, err
+// 	}
+//
+// 	return inventory, nil
+// }
 
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/add", request).Post()
-	if err != nil {
-		return inventory, err
-	}
-
-	err = json.Unmarshal(resp.Data, &inventory)
-	if err != nil {
-		return inventory, err
-	}
-
-	return inventory, nil
-}
-
-func RemoveResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/remove", request).Post()
-	if err != nil {
-		return inventory, err
-	}
-
-	err = json.Unmarshal(resp.Data, &inventory)
-	if err != nil {
-		return inventory, err
-	}
-
-	return inventory, nil
-}
+// func RemoveResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
+// 	var inventory nnsdk.Inventory
+//
+// 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/remove", request).Post()
+// 	if err != nil {
+// 		return inventory, err
+// 	}
+//
+// 	err = json.Unmarshal(resp.Data, &inventory)
+// 	if err != nil {
+// 		return inventory, err
+// 	}
+//
+// 	return inventory, nil
+// }
 
 func PlayerDamage(id uint) (float64, error) {
 	var damage float64

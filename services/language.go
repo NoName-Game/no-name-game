@@ -13,52 +13,51 @@ import (
 
 var (
 	bundle *i18n.Bundle
-	//Langs -
+
+	// Lingue attualmente disponibili per questo client
 	Langs = map[string]string{
 		"en": "English",
 		"it": "Italian",
 	}
 )
 
-// LanguageUp - LanguageUp
-func LanguageUp() {
-	var err error
-
-	// Create a Bundle to use for the lifetime of your application
-	bundle, err = createLocalizerBundle(Langs)
+// LanguageUp - Servizio di gestione multilingua
+func LanguageUp() (err error) {
+	// Creo bundle andando a caricare le diverse lingue
+	bundle, err = createLocalizerBundle()
 	if err != nil {
-		ErrorHandler("Error initialising localization", err)
+		return err
 	}
 
+	// Mostro a video stato servizio
 	log.Println("************************************************")
 	log.Println("Languages: OK!")
 	log.Println("************************************************")
+
+	return
 }
 
-// CreateLocalizerBundle reads language files and registers them in i18n bundle
-func createLocalizerBundle(Langs map[string]string) (*i18n.Bundle, error) {
-	// Bundle stores a set of messages
-	//bundle = &i18n.Bundle{DefaultLanguage: language.Italian}
-	bundle = i18n.NewBundle(language.Italian)
-	// Enable bundle to understand yaml
+// CreateLocalizerBundle - Legge tutte le varie traduzione nei vari file e registra
+func createLocalizerBundle() (bundle *i18n.Bundle, err error) {
+	// Istanzio bundle con lingua di default
+	bundle = i18n.NewBundle(language.English)
+
+	// Abilito bundle a riconoscere i file di lingua
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
+	// Ciclo traduzioni
 	var translations []byte
-	var err error
 	for file := range Langs {
-
-		// Read our language yaml file
 		translations, err = ioutil.ReadFile("resources/lang/" + file + ".yaml")
 		if err != nil {
-			ErrorHandler("Unable to read translation file", err)
-			return nil, err
+			return bundle, err
 		}
 
-		// It parses the bytes in buffer to add translations to the bundle
+		// Parso il file
 		bundle.MustParseMessageFileBytes(translations, "resources/lang/"+file+".yaml")
 	}
 
-	return bundle, nil
+	return
 }
 
 // GetTranslation - Return text from key translated to locale.

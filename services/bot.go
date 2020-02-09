@@ -14,29 +14,35 @@ var (
 	botAPI *tgbotapi.BotAPI
 )
 
-//BotUp - BotUp
-func BotUp() {
+// BotUp - Metodo per la connessione ai server telegram
+func BotUp() (err error) {
+	// Recupero da env chiave telegram
 	telegramAPIKey := os.Getenv("TELEGRAM_APIKEY")
 	if telegramAPIKey == "" {
-		ErrorHandler("$TELEGRAM_APIKEY must be set", errors.New("TelegramApiKey Missing"))
+		err = errors.New("telegram ApiKey missing")
+		return err
 	}
 
-	var err error
+	// Istanzio comunicazione con il servizio dedicato
 	botAPI, err = tgbotapi.NewBotAPI(telegramAPIKey)
+	if err != nil {
+		return err
+	}
+
+	// Nel caso in cui fosse in ambiente di sviluppo abilito il debug
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
 		botAPI.Debug = true
 	}
 
-	if err != nil {
-		ErrorHandler("tgbotapi.NewBotAPI(telegramAPIKey) return Error!", err)
-	}
-
+	// Riporto a video lo stato di connessione
 	log.Println("************************************************")
 	log.Println("Bot connected: " + botAPI.Self.UserName)
 	log.Println("************************************************")
+
+	return
 }
 
-// GetUpdates - return new updates
+// GetUpdates - Ritorna nuovi messagi da lavorare da telegram
 func GetUpdates() (tgbotapi.UpdatesChannel, error) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60

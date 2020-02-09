@@ -74,17 +74,17 @@ func DeleteWeapon(request nnsdk.Weapon) (nnsdk.Weapon, error) {
 	return weapon, nil
 }
 
-func CraftWeapon(request nnsdk.WeaponCraft) (nnsdk.Weapon, error) {
-	var weapon nnsdk.Weapon
-	resp, err := services.NnSDK.MakeRequest("weapons/craft", request).Post()
-	if err != nil {
-		return weapon, err
-	}
-
-	err = json.Unmarshal(resp.Data, &weapon)
-	if err != nil {
-		return weapon, err
-	}
-
-	return weapon, nil
-}
+// func CraftWeapon(request nnsdk.WeaponCraft) (nnsdk.Weapon, error) {
+// 	var weapon nnsdk.Weapon
+// 	resp, err := services.NnSDK.MakeRequest("weapons/craft", request).Post()
+// 	if err != nil {
+// 		return weapon, err
+// 	}
+//
+// 	err = json.Unmarshal(resp.Data, &weapon)
+// 	if err != nil {
+// 		return weapon, err
+// 	}
+//
+// 	return weapon, nil
+// }

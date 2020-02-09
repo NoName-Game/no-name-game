@@ -14,15 +14,15 @@ var (
 	NnSDK *nnsdk.NoNameSDK
 )
 
-// NnSDKUp
-func NnSDKUp() {
-	var err error
+// NnSDKUp - Metodo di verfica e connessione al WS principale di NoName
+func NnSDKUp() (err error) {
+	// Up del servizio per la comunicazione
 	NnSDK, err = nnsdk.NewNoNameSDK()
 	if err != nil {
-		ErrorHandler("Error connecting NoName WS", err)
+		return err
 	}
 
-	// Set Host and API version
+	// Imposto Host e versionamento del sistema API
 	NnSDK.SetWS(
 		nnsdk.WebService{
 			Host:       fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")),
@@ -30,7 +30,7 @@ func NnSDKUp() {
 		},
 	)
 
-	// Set Username and Password for WS-Authentication
+	// Imposto username e password per l'autenticazione
 	NnSDK.SetAuth(
 		nnsdk.Authentication{
 			Username: os.Getenv("WS_USER"),
@@ -38,17 +38,16 @@ func NnSDKUp() {
 		},
 	)
 
-	// Autenticate to WS
+	// Avvio autenticazione
 	_, err = NnSDK.Authenticate()
 	if err != nil {
-		ErrorHandler("NNSDK - Authentication error", err)
+		return err
 	}
 
-	// if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-	// 	NnSDK.Debug = true
-	// }
-
+	// Riporto a video stato servizio
 	log.Println("************************************************")
 	log.Println("NoName WS connection: OK!")
 	log.Println("************************************************")
+
+	return
 }
