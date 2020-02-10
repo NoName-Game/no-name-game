@@ -1,22 +1,14 @@
 package helpers
 
 import (
-	"log"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // Trans - late shortCut
-func Trans(key string, args ...interface{}) (message string) {
-	// Getting default or player language
-	locale := "en"
+func Trans(locale string, key string, args ...interface{}) (message string) {
 	var err error
-	if Player.Language.Slug != "" {
-		locale = Player.Language.Slug
-	}
-
-	// Check if the args are 0 or Null
 	if len(args) <= 0 {
 		message, err = services.GetTranslation(key, locale, nil)
 	} else {
@@ -24,9 +16,7 @@ func Trans(key string, args ...interface{}) (message string) {
 	}
 
 	if err != nil {
-		log.Println("WARNING TRANSLATION: No match found for key: ", key)
-		// If an error has been generated, it returns an empty string
-		message = ""
+		panic(err)
 	}
 
 	return

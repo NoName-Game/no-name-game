@@ -5,16 +5,16 @@ import (
 	"reflect"
 	"strings"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 )
 
-// Routing - Check message type and call if exist the correct function
-func routing(update tgbotapi.Update) {
-	// ************************
-	// Switch by message type
-	// ************************
+// Routing - Effetua check sul tipo di messagio ed esegue un routing
+func routing(player nnsdk.Player, update tgbotapi.Update) {
+	// Verifica il tipo di messaggio
 	var callingRoute string
 	if update.Message != nil {
 		callingRoute = parseMessage(update.Message)
@@ -22,28 +22,24 @@ func routing(update tgbotapi.Update) {
 		callingRoute = parseCallback(update.CallbackQuery)
 	}
 
-	// ******************************************
-	// Check if callingRoute it's breaker routes
-	// ******************************************
-	isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
+	// Verifico se è una rotta di chiusura
+	// Questa tipologia di rotta implica un blocco immediato dell'azione in corso
+	isBreakerRoute, route := inRoutes(player.Language.Slug, callingRoute, BreakerRoutes)
 	if isBreakerRoute {
 		Invoke(BreakerRoutes[route], "Handle", update)
 		return
 	}
 
-	// ******************************************
-	// Check if player have route in cache
-	// ******************************************
-	isCachedRoute := helpers.GetRedisState(helpers.Player)
+	// Verifico se in memorià è presente già una rotta
+	// userò quella come main per gestire ulteriori sottostati
+	isCachedRoute := helpers.GetRedisState(player)
 	if isCachedRoute != "" {
 		Invoke(Routes[isCachedRoute], "Handle", update)
 		return
 	}
 
-	// ******************************************
-	// Check if it's normal route
-	// ******************************************
-	isRoute, route := inRoutes(callingRoute, Routes)
+	// Dirigo ad una rotta normale
+	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
 		Invoke(Routes[route], "Handle", update)
 		return
@@ -52,10 +48,12 @@ func routing(update tgbotapi.Update) {
 	return
 }
 
-// inRoutes - Check if message is translated command
-func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
+// inRoutes - Verifica se esiste la rotta
+func inRoutes(lang string, messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
+	// Ciclo lista di rotte
 	for route := range routeList {
-		if strings.ToLower(helpers.Trans(route)) == messageRoute {
+		// Traduco le rotte in base alla lingua del player per trovare corrispondenza
+		if strings.ToLower(helpers.Trans(lang, route)) == messageRoute {
 			return true, route
 		}
 	}
@@ -90,7 +88,7 @@ func Call(m map[string]interface{}, name string, params ...interface{}) (result 
 	return
 }
 
-// Parse message text, if command it's like telegram format the message will be parsed and return simple text without "/" char
+// Metodo per il parsing del messaggio
 func parseMessage(message *tgbotapi.Message) (parsed string) {
 	parsed = message.Text
 	if message.IsCommand() {
@@ -100,8 +98,10 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 	return strings.ToLower(parsed)
 }
 
+// Metodo per il parsing della callback
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
 	parsed = callback.Data
+	// TODO: spiegare perchè facciamo così
 	parsed = strings.Split(parsed, ".")[0]
 	return strings.ToLower(parsed)
 }

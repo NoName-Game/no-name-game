@@ -1,11 +1,10 @@
 package app
 
 import (
-	"errors"
-	"log"
-
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
@@ -41,8 +40,6 @@ var (
 	//
 	// End routes
 	// =====================================
-
-	Counter = 0
 )
 
 // Init
@@ -61,15 +58,6 @@ func init() {
 func Run() {
 	var err error
 
-	// Differisco controllo panic/recover
-	defer func() {
-		// Nel caso in cui panicasse
-		if err := recover(); err != nil {
-			// Registro errore
-			services.ErrorHandler("recover error", err.(error))
-		}
-	}()
-
 	// Recupero stati/messaggio da telegram
 	updates, err := services.GetUpdates()
 	if err != nil {
@@ -86,30 +74,31 @@ func Run() {
 // handleUpdate - Gestisco singolo update
 func handleUpdate(update tgbotapi.Update) {
 	// Differisco controllo panic/recover
-	defer func() {
-		// Nel caso in cui panicasse
-		if err := recover(); err != nil {
-			// Registro errore
-			services.ErrorHandler("recover handle update", err.(error))
-		}
-	}()
+	// defer func() {
+	// 	// Nel caso in cui panicasse
+	// 	if err := recover(); err != nil {
+	// 		// Registro errore
+	// 		services.ErrorHandler("recover handle update", err.(error))
+	// // Mando un messaggio dicendogli di inserire un username
+	// msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
+	// services.SendMessage(msg)
+	// 	}
+	// }()
 
-	if Counter > 2 {
-		Counter = 0
-		err := errors.New("prova die")
+	var err error
+	// Gestisco utente
+	var player nnsdk.Player
+	player, err = helpers.HandleUser(update)
+	if err != nil {
 		panic(err)
 	}
 
-	log.Println(update)
-	Counter++
+	// Gestisco update
+	routing(player, update)
 
-	// Gestisco utente
-	// if !helpers.HandleUser(update) {
-	// 	continue
+	// Se è un player già registrato verifico che non sia morto per continuare
+	// if player.Stats.Dead == true {
+	// 	// controllers.PlayerDeath(update) TODO: FIXME
+	// 	return false
 	// }
-
-	// // ***************
-	// // Routing update
-	// // ***************
-	// routing(update)
 }

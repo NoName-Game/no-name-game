@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -34,6 +35,15 @@ func FindPlayerByUsername(username string) (nnsdk.Player, error) {
 
 	resp, err := services.NnSDK.MakeRequest("search/player?"+params.Encode(), nil).Get()
 	if err != nil {
+		return player, err
+	}
+
+	// TODO: da gestire meglio
+	// Verifico il tipo di risposta
+	if resp.StatusCode == 404 {
+		return player, err
+	} else if resp.StatusCode == 400 {
+		err = errors.New(resp.Error)
 		return player, err
 	}
 
@@ -246,4 +256,19 @@ func PlayerPrecision(id uint, selection uint) (float64, error) {
 		return 0, err
 	}
 	return damage, nil
+}
+
+func SignIn(request nnsdk.Player) (nnsdk.Player, error) {
+	var player nnsdk.Player
+	resp, err := services.NnSDK.MakeRequest("players/signin", request).Post()
+	if err != nil {
+		return player, err
+	}
+
+	err = json.Unmarshal(resp.Data, &player)
+	if err != nil {
+		return player, err
+	}
+
+	return player, nil
 }
