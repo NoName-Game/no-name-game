@@ -35,9 +35,13 @@ callback.map: "map"
 # ROUTES (TESTING)
 route.testing.multiStage: "multi-stage"
 
+# VALIDATOR
+validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
+validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
+validator.not_valid: "Il parametro inserito non è valido"
+
 # GENERAL
 complete: "Fatto!"
-validationMessage: "Una tempesta solare ha corrotto i dati, riprova!"
 continue: "Continua"
 exit: "Esci"
 wait: "Sei in attesa fino alle %s"
