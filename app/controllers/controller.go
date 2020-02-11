@@ -8,10 +8,11 @@ import (
 type BaseController struct {
 	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
-	RouteName  string
+	Controller string
 	Validation struct {
 		HasErrors bool
 		Message   string
 	}
-	State nnsdk.PlayerState
+	Player nnsdk.Player
+	State  nnsdk.PlayerState
 }

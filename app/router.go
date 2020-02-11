@@ -26,22 +26,22 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 	// Questa tipologia di rotta implica un blocco immediato dell'azione in corso
 	isBreakerRoute, route := inRoutes(player.Language.Slug, callingRoute, BreakerRoutes)
 	if isBreakerRoute {
-		Invoke(BreakerRoutes[route], "Handle", update)
+		invoke(BreakerRoutes[route], "Handle", player, update)
 		return
 	}
 
 	// Verifico se in memorià è presente già una rotta
 	// userò quella come main per gestire ulteriori sottostati
-	isCachedRoute := helpers.GetRedisState(player)
+	isCachedRoute, _ := helpers.GetRedisState(player)
 	if isCachedRoute != "" {
-		Invoke(Routes[isCachedRoute], "Handle", update)
+		invoke(Routes[isCachedRoute], "Handle", player, update)
 		return
 	}
 
 	// Dirigo ad una rotta normale
 	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
-		Invoke(Routes[route], "Handle", update)
+		invoke(Routes[route], "Handle", player, update)
 		return
 	}
 
@@ -61,8 +61,9 @@ func inRoutes(lang string, messageRoute string, routeList map[string]interface{}
 	return false, ""
 }
 
-// Invoke - Dinamicaly call method interface
-func Invoke(any interface{}, name string, args ...interface{}) {
+// invoke - Invoco dinamicamente un metodo di un controller
+func invoke(any interface{}, name string, args ...interface{}) {
+	// Recupero possibili input e li trasformo come argomenti da passare al metodo
 	inputs := make([]reflect.Value, len(args))
 	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
@@ -71,8 +72,8 @@ func Invoke(any interface{}, name string, args ...interface{}) {
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
 
-// Call - Method to call another func and check needed parameters
-func Call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
+// call - Metodo dedicato al richiamare dinamicamente una specifca funzione
+func call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(m[name])
 	if len(params) != f.Type().NumIn() {
 		err = errors.New("The number of params is not adapted")

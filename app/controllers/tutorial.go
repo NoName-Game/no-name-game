@@ -1,70 +1,77 @@
 package controllers
 
-//
-// import (
-// 	"time"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-// 	"bitbucket.org/no-name-game/nn-telegram/services"
-// 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-// )
-//
-// // Tutorial:
-// // Tutorial iniziale fake per introdurre il player alle meccaniche base di NoName.
-// // Flow: Atterraggio d'emergenza -> ricerca materiali per riparare nave -> semplice crafting -> hunting (?) -> volo nel sistema di spawn -> Fine Tutorial
-//
-// //====================================
-// // TutorialController
-// //====================================
-// type TutorialController struct {
-// 	BaseController
-// 	Payload struct{}
-// }
-//
-// //====================================
-// // Handle
-// //====================================
-// func (c *TutorialController) Handle(update tgbotapi.Update) {
-// 	// Current Controller instance
-// 	var err error
-// 	var isNewState bool
-// 	c.RouteName, c.Update, c.Message = "route.start", update, update.Message
-//
-// 	// Check current state for this routes
-// 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
-//
-// 	// Set and load payload
-// 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
-//
-// 	// It's first message
-// 	if isNewState {
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Validate
-// 	if !c.Validator() {
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-//
-// 		// Ok! Run!
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Validator goes errors
-// 	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-// 	services.SendMessage(validatorMsg)
-// 	return
-// }
-//
-// //====================================
-// // Validator
-// //====================================
+import (
+	"log"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// Tutorial:
+// Tutorial iniziale fake per introdurre il player alle meccaniche base di NoName.
+// Flow: Atterraggio d'emergenza -> ricerca materiali per riparare nave -> semplice crafting ->
+// hunting (?) -> volo nel sistema di spawn -> Fine Tutorial
+
+// ====================================
+// TutorialController
+// ====================================
+type TutorialController struct {
+	BaseController
+	Payload struct{}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+	var isNewState bool
+	c.Controller = "route.start"
+	c.Player = player
+	c.Update = update
+	c.Message = update.Message
+
+	// Verifico lo stato della player
+	c.State, isNewState, err = helpers.CheckState(player, c.Controller, c.Payload)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
+
+	// Stato recuperto correttamente
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+
+	log.Panicln(isNewState)
+
+	// It's first message
+	// if isNewState {
+	// 	c.Stage()
+	// 	return
+	// }
+	//
+	// // Validate
+	// if !c.Validator() {
+	// 	c.State, err = providers.UpdatePlayerState(c.State)
+	// 	if err != nil {
+	// 		services.ErrorHandler("Cant update player", err)
+	// 	}
+	//
+	// 	// Ok! Run!
+	// 	c.Stage()
+	// 	return
+	// }
+	//
+	// // Validator goes errors
+	// validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+	// services.SendMessage(validatorMsg)
+	return
+}
+
+// ====================================
+// Validator
+// ====================================
 // func (c *TutorialController) Validator() (hasErrors bool) {
 // 	c.Validation.Message = helpers.Trans("validationMessage")
 //

@@ -11,20 +11,22 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-// GetRedisState - set function state in Redis
-func GetRedisState(player nnsdk.Player) string {
-	var route string
-	route, _ = services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
-
-	return route
+// GetRedisState - Metodo generico per il recupero degli stati di un player
+func GetRedisState(player nnsdk.Player) (controller string, err error) {
+	controller, err = services.Redis.Get(strconv.FormatUint(uint64(player.ID), 10)).Result()
+	return
 }
 
-// SetRedisState - set function state in Redis
-func SetRedisState(player nnsdk.Player, function string) {
-	err := services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), function, 0).Err()
-	if err != nil {
-		services.ErrorHandler("Error SET player state in redis", err)
-	}
+// SetRedisState - Metodo generico per il settaggio di uno stato su redis di un determinato player
+func SetRedisState(player nnsdk.Player, data string) (err error) {
+	err = services.Redis.Set(strconv.FormatUint(uint64(player.ID), 10), data, 0).Err()
+	return
+}
+
+// DelRedisState - Metodo generico per la cancellazione degli stati di un determinato player
+func DelRedisState(player nnsdk.Player) (err error) {
+	err = services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
+	return
 }
 
 // GetHuntingRedisState - get hunting state in Redis
@@ -47,48 +49,38 @@ func SetHuntingRedisState(IDMap uint, player nnsdk.Player, value interface{}) {
 	}
 }
 
-// DelRedisState - del function state in Redis
-func DelRedisState(player nnsdk.Player) {
-	err := services.Redis.Del(strconv.FormatUint(uint64(player.ID), 10)).Err()
-	if err != nil {
-		services.ErrorHandler("Error DEL player state in redis", err)
-	}
-}
+// CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
+func CheckState(player nnsdk.Player, controller string, payload interface{}) (playerState nnsdk.PlayerState, isNewState bool, err error) {
+	// Filtro gli stati del player recuperando lo stato appartente a questa specifica rotta
+	playerState, _ = GetPlayerStateByFunction(player.States, controller)
 
-// StartAndCreatePlayerState - create and set redis state
-func StartAndCreatePlayerState(route string, player nnsdk.Player) (playerState nnsdk.PlayerState) {
-	playerState, _ = GetPlayerStateByFunction(player, route)
-
-	if playerState.ID < 1 {
-		newPlayerState := nnsdk.PlayerState{
-			Function: route,
-			PlayerID: player.ID,
-		}
-
-		playerState, _ = providers.CreatePlayerState(newPlayerState)
-	}
-
-	SetRedisState(player, route)
-	return
-}
-
-// CheckState - create and set redis state
-func CheckState(route string, payload interface{}, player nnsdk.Player) (playerState nnsdk.PlayerState, isNewState bool) {
-	playerState, _ = GetPlayerStateByFunction(player, route)
-
-	if playerState.ID < 1 {
+	// Non ho trovato nessuna corrispondenza creo una nuova
+	if playerState.ID <= 0 {
 		jsonPayload, _ := json.Marshal(payload)
-		newPlayerState := nnsdk.PlayerState{
-			Function: route,
-			PlayerID: player.ID,
-			Payload:  string(jsonPayload),
+
+		// Creo il nuovo stato
+		playerState, err = providers.CreatePlayerState(nnsdk.PlayerState{
+			Controller: controller,
+			PlayerID:   player.ID,
+			Payload:    string(jsonPayload),
+		})
+
+		// Ritoro errore se non riesco a creare lo stato
+		if err != nil {
+			return playerState, true, err
 		}
 
-		playerState, _ = providers.CreatePlayerState(newPlayerState)
+		// Ritorno indicando che si tratta di un nuovo stato, questo
+		// mi servirà per escludere il validator
 		isNewState = true
 	}
 
-	SetRedisState(player, route)
+	// Se tutto ok imposto e setto il nuovo stato su redis
+	err = SetRedisState(player, controller)
+	if err != nil {
+		return playerState, false, err
+	}
+
 	return
 }
 
@@ -107,18 +99,18 @@ func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
 
 // DeleteRedisAndDbState - delete redis and db state
 func DeleteRedisAndDbState(player nnsdk.Player) {
-	rediState := GetRedisState(player)
-
-	if rediState != "" {
-		playerState, _ := GetPlayerStateByFunction(player, rediState)
-		_, err := providers.DeletePlayerState(playerState) // Delete
-		if err != nil {
-			// FIXME: loggare ma non entrare in panic
-			// services.ErrorHandler("Error delete player state", err)
-		}
-	}
-
-	DelRedisState(player)
+	// rediState, _ := GetRedisState(player)
+	//
+	// if rediState != "" {
+	// 	playerState, _ := GetPlayerStateByFunction(player, rediState)
+	// 	_, err := providers.DeletePlayerState(playerState) // Delete
+	// 	if err != nil {
+	// 		// FIXME: loggare ma non entrare in panic
+	// 		// services.ErrorHandler("Error delete player state", err)
+	// 	}
+	// }
+	//
+	// DelRedisState(player)
 }
 
 // UnmarshalPayload - Unmarshal payload state

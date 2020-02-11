@@ -64,15 +64,16 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 }
 
 // GetPlayerStateByFunction - Check if function exist in player states
-func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState, err error) {
-	for i, state := range player.States {
-		if state.Function == function {
-			playerState = player.States[i]
+func GetPlayerStateByFunction(states nnsdk.PlayerStates, controller string) (playerState nnsdk.PlayerState, err error) {
+	for i, state := range states {
+		if state.Controller == controller {
+			playerState = states[i]
 			return playerState, nil
 		}
 	}
 
-	return playerState, errors.New("State not found!")
+	err = errors.New("state not found")
+	return playerState, err
 }
 
 // CheckPlayerHaveOneEquippedWeapon

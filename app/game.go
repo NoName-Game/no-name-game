@@ -2,6 +2,7 @@ package app
 
 import (
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -14,7 +15,7 @@ var (
 	//
 	Routes = map[string]interface{}{
 		// "route.menu":        new(controllers.MenuController),       // menu.go
-		// "route.start":       new(controllers.TutorialController),   // tutorial.go  - MAIN
+		"route.start": new(controllers.TutorialController), // tutorial.go  - MAIN
 		// "route.mission":     new(controllers.MissionController),    // mission.go   - MAIN
 		// "route.crafting":    new(controllers.CraftingV2Controller), // crafting.go  - MAIN
 		// "route.abilityTree": new(controllers.AbilityController),    // ability.go - MAIN
@@ -67,7 +68,8 @@ func Run() {
 	// Gestisco update ricevuti
 	for update := range updates {
 		// Gestisco singolo update in worker dedicato
-		go handleUpdate(update)
+		// go handleUpdate(update)
+		handleUpdate(update)
 	}
 }
 

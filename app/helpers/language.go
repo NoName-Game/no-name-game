@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	"strconv"
-
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
@@ -23,27 +21,27 @@ func Trans(locale string, key string, args ...interface{}) (message string) {
 }
 
 // GetAllTranslatedSlugCategories - return weapon and armor slug category translated
-func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
-	categories := GetAllSlugCategories()
-	for _, category := range categories {
-		results = append(results, Trans(category))
-	}
-
-	return
-}
-
-// GenerateTextArray - generate text's array from a common word in key.
-func GenerateTextArray(common string) (texts []string) {
-	var counter int
-	for {
-		keyText := common + "_" + strconv.Itoa(counter)
-		if text := Trans(keyText); text != "" {
-			texts = append(texts, text)
-			counter++
-		} else {
-			break
-		}
-	}
-
-	return
-}
+// func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
+// 	categories := GetAllSlugCategories()
+// 	for _, category := range categories {
+// 		results = append(results, Trans(category))
+// 	}
+//
+// 	return
+// }
+//
+// // GenerateTextArray - generate text's array from a common word in key.
+// func GenerateTextArray(common string) (texts []string) {
+// 	var counter int
+// 	for {
+// 		keyText := common + "_" + strconv.Itoa(counter)
+// 		if text := Trans(keyText); text != "" {
+// 			texts = append(texts, text)
+// 			counter++
+// 		} else {
+// 			break
+// 		}
+// 	}
+//
+// 	return
+// }
