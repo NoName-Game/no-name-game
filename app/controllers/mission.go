@@ -1,77 +1,84 @@
 package controllers
 
-//
-// import (
-// 	"encoding/json"
-// 	"math/rand"
-// 	"time"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-// 	"bitbucket.org/no-name-game/nn-telegram/services"
-// 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-// )
-//
-// //====================================
-// // MissionController
-// //====================================
-// type MissionController struct {
-// 	BaseController
-// 	Payload struct {
-// 		ExplorationType string
-// 		Times           int
-// 		Material        nnsdk.Resource
-// 		Quantity        int
-// 	}
-// 	// Additional Data
-// 	MissionTypes []string
-// }
-//
-// //====================================
-// // Handle
-// //====================================
-// func (c *MissionController) Handle(update tgbotapi.Update) {
-// 	// Current Controller instance
-// 	var err error
-// 	var isNewState bool
-// 	c.RouteName, c.Update, c.Message = "route.mission", update, update.Message
-//
-// 	// Set mission types
-// 	c.MissionTypes = make([]string, 3)
-// 	c.MissionTypes[0] = helpers.Trans("mission.underground")
-// 	c.MissionTypes[1] = helpers.Trans("mission.surface")
-// 	c.MissionTypes[2] = helpers.Trans("mission.atmosphere")
-//
-// 	// Check current state for this routes
-// 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
-//
-// 	// Set and load payload
-// 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
-//
-// 	// It's first message
-// 	if isNewState {
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Go to validator
-// 	if !c.Validator() {
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-//
-// 		// Ok! Run!
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Validator goes errors
-// 	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-// 	services.SendMessage(validatorMsg)
-// 	return
-// }
+import (
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// ====================================
+// MissionController
+// ====================================
+type MissionController struct {
+	BaseController
+	Payload struct {
+		ExplorationType string
+		Times           int
+		Material        nnsdk.Resource
+		Quantity        int
+	}
+	// Additional Data
+	MissionTypes []string
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+	// var isNewState bool
+	c.Controller = "route.mission"
+	c.Player = player
+	c.Update = update
+	c.Message = update.Message
+
+	// Set mission types
+	c.MissionTypes = make([]string, 3)
+	c.MissionTypes[0] = helpers.Trans(c.Player.Language.Slug, "mission.underground")
+	c.MissionTypes[1] = helpers.Trans(c.Player.Language.Slug, "mission.surface")
+	c.MissionTypes[2] = helpers.Trans(c.Player.Language.Slug, "mission.atmosphere")
+
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
+
+	// Stato recuperto correttamente
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+
+	// Validate
+	// var hasError bool
+	// hasError, err = c.Validator()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// // Se ritornano degli errori
+	// if hasError == true {
+	// 	// Invio il messaggio in caso di errore e chiudo
+	// 	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+	// 	services.SendMessage(validatorMsg)
+	// 	return
+	// }
+	//
+	// // Ok! Run!
+	// err = c.Stage()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// // Aggiorno stato finale
+	// _, err = providers.UpdatePlayerState(c.State)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// return
+}
+
 //
 // //====================================
 // // Validator

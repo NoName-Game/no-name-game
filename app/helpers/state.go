@@ -50,7 +50,7 @@ func SetHuntingRedisState(IDMap uint, player nnsdk.Player, value interface{}) {
 }
 
 // CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
-func CheckState(player nnsdk.Player, controller string, payload interface{}) (playerState nnsdk.PlayerState, isNewState bool, err error) {
+func CheckState(player nnsdk.Player, controller string, payload interface{}, father uint) (playerState nnsdk.PlayerState, isNewState bool, err error) {
 	// Filtro gli stati del player recuperando lo stato appartente a questa specifica rotta
 	playerState, _ = GetPlayerStateByFunction(player.States, controller)
 
@@ -63,6 +63,7 @@ func CheckState(player nnsdk.Player, controller string, payload interface{}) (pl
 			Controller: controller,
 			PlayerID:   player.ID,
 			Payload:    string(jsonPayload),
+			Father:     father,
 		})
 
 		// Ritoro errore se non riesco a creare lo stato

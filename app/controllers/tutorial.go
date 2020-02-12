@@ -36,7 +36,7 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	c.Message = update.Message
 
 	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload)
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
 	if err != nil {
 		panic(err)
@@ -62,16 +62,11 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 
 	// Se ritornano degli errori
 	if hasError == true {
-		// Invio il messaggio e chiudo
+		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
 		services.SendMessage(validatorMsg)
 		return
 	}
-
-	// c.State, err = providers.UpdatePlayerState(c.State)
-	// if err != nil {
-	// 	services.ErrorHandler("Cant update player", err)
-	// }
 
 	// Ok! Run!
 	err = c.Stage()
@@ -79,7 +74,7 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 		panic(err)
 	}
 
-	// Aggiorno stato
+	// Aggiorno stato finale
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -99,6 +94,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, nil
+
+	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
 		lang, err := providers.FindLanguageBy(c.Message.Text, "name")
@@ -113,16 +110,23 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		}
 
 		return false, nil
-	// case 2:
-	// 	if c.Message.Text == helpers.Trans("route.start.openEye") {
-	// 		return false
-	// 	}
+
+	// In questo stage devo verificare unicamente che venga passata una stringa
+	case 2:
+		// Verifico che l'azione passata sia quella di aprire gli occhi
+		if c.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.openEye") {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+			return true, nil
+		}
+
+		return false, nil
+
 	// case 3:
-	// 	c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
-	// 	// Check if the player finished the previous function.
-	// 	if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); c.State == (nnsdk.PlayerState{}) {
-	// 		return false
-	// 	}
+	// c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
+	// // Check if the player finished the previous function.
+	// if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); c.State == (nnsdk.PlayerState{}) {
+	// 	return false
+	// }
 	// case 4:
 	// 	c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 	// 	// Check if the player finished the previous function.
@@ -234,19 +238,29 @@ func (c *TutorialController) Stage() (err error) {
 		// Aggiorna stato
 		c.State.Stage = 2
 
-		// case 2:
-		// 	// First Exploration
-		// 	services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstExploration")))
-		//
-		// 	// Aggiorna stato
-		// 	c.State.Stage = 3
-		// 	c.State, err = providers.UpdatePlayerState(c.State)
-		// 	if err != nil {
-		// 		services.ErrorHandler("Cant update player", err)
-		// 	}
-		//
-		// 	// Call mission controller
-		// 	new(MissionController).Handle(c.Update)
+	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
+	case 2:
+		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
+		services.SendMessage(
+			services.NewMessage(
+				c.Player.ChatID,
+				helpers.Trans(c.Player.Language.Slug, "route.start.firstExploration"),
+			),
+		)
+
+		// Forzo a mano l'aggiornamento dello stato del player
+		// in quanto adesso devo richiamare un'altro controller
+		c.State.Stage = 3
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			return err
+		}
+
+		// Richiamo missione come sottoprocesso di questo controller
+		missionController := new(MissionController)
+		missionController.Father = c.State.ID
+		missionController.Handle(c.Player, c.Update)
+
 		// case 3:
 		// 	// First Crafting
 		// 	services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))

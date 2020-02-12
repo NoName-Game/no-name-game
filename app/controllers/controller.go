@@ -9,6 +9,7 @@ type BaseController struct {
 	Update     tgbotapi.Update
 	Message    *tgbotapi.Message
 	Controller string
+	Father     uint
 	Validation struct {
 		HasErrors bool
 		Message   string

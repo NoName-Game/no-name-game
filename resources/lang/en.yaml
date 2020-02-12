@@ -8,3 +8,5 @@ miss_username: "Enter a username to play."
 
 route.start: "Start"
 validator.not_valid: "Il parametro inserito non è valido"
+validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
+validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
