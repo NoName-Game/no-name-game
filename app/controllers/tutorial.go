@@ -300,19 +300,28 @@ func (c *TutorialController) Stage() (err error) {
 		missionController.Father = c.State.ID
 		missionController.Handle(c.Player, c.Update)
 
-		// case 3:
-		// 	// First Crafting
-		// 	services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstCrafting")))
-		//
-		// 	// Aggiorna stato
-		// 	c.State.Stage = 4
-		// 	c.State, err = providers.UpdatePlayerState(c.State)
-		// 	if err != nil {
-		// 		services.ErrorHandler("Cant update player", err)
-		// 	}
-		//
-		// 	// Call crafting controller
-		// 	new(CraftingController).Handle(c.Update)
+	case 3:
+		// First Crafting
+		_, err = services.SendMessage(
+			services.NewMessage(
+				c.Player.ChatID,
+				helpers.Trans(c.Player.Language.Slug, "route.start.firstCrafting"),
+			),
+		)
+		if err != nil {
+			return err
+		}
+
+		// Forzo a mano l'aggiornamento dello stato del player
+		// in quanto adesso devo richiamare un'altro controller
+		c.State.Stage = 4
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			return err
+		}
+
+		// Call crafting controller
+		new(CraftingV2Controller).Handle(c.Update)
 		// case 4:
 		// 	// Equip weapon
 		// 	services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))

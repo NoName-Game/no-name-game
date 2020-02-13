@@ -1,80 +1,96 @@
 package controllers
 
-//
-// import (
-// 	"encoding/json"
-// 	"log"
-// 	"os"
-// 	"strings"
-// 	"time"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-// 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-// 	"bitbucket.org/no-name-game/nn-telegram/services"
-// 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-// )
-//
-// // Writer: reloonfire
-// // Starting on: 17/01/2020
-// // Project: no-name-game
-//
-// // Crafting:
-// // Craft Base effettuati dal player
-//
-// //====================================
-// // CraftingController
-// //====================================
-// type CraftingV2Controller struct {
-// 	BaseController
-// 	Payload struct {
-// 		Crafted   nnsdk.Crafted // Item da craftare
-// 		Resources map[uint]int  // Materiali necessari
-// 	}
-// }
-//
-// //====================================
-// // Handle
-// //====================================
-// func (c *CraftingV2Controller) Handle(update tgbotapi.Update) {
-// 	// Current Controller instance
-// 	var err error
-// 	var isNewState bool
-// 	c.RouteName, c.Update, c.Message = "route.crafting", update, update.Message
-//
-// 	// Check current state for this routes
-// 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
-//
-// 	// Set and load payload
-// 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
-//
-// 	// It's first message
-// 	if isNewState {
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Go to validator
-// 	if !c.Validator() {
-//
-// 		log.Println("STAGE: ", c.State.Stage)
-//
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-//
-// 		// Ok! Run!
-// 		c.Stage()
-// 		return
-// 	}
-//
-// 	// Validator goes errors
-// 	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-// 	services.SendMessage(validatorMsg)
-// 	return
-// }
-//
+import (
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// Crafting:
+// Craft Base effettuati dal player
+
+// ====================================
+// CraftingController
+// ====================================
+type CraftingV2Controller struct {
+	BaseController
+	Payload struct {
+		Item      nnsdk.Item   // Item da craftare
+		Resources map[uint]int // Materiali necessari
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+
+	c.Controller = "route.crafting"
+	c.Player = player
+	c.Update = update
+	c.Message = update.Message
+
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+
+	// Validate
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
+	}
+
+	// Se ritornano degli errori
+	if hasError == true {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		_, err = services.SendMessage(validatorMsg)
+		if err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	_, err = providers.UpdatePlayerState(c.State)
+	if err != nil {
+		panic(err)
+	}
+
+	// Verifico se lo stato è completato chiudo
+	if *c.State.Completed == true {
+		_, err = providers.DeletePlayerState(c.State) // Delete
+		if err != nil {
+			panic(err)
+		}
+
+		err = helpers.DelRedisState(player)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return
+}
+
 // //====================================
 // // Validator
 // //====================================
