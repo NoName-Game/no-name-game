@@ -1,6 +1,5 @@
 package controllers
 
-import "C"
 import (
 	"encoding/json"
 	"time"
@@ -65,7 +64,11 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-		services.SendMessage(validatorMsg)
+		_, err = services.SendMessage(validatorMsg)
+		if err != nil {
+			panic(err)
+		}
+
 		return
 	}
 
@@ -188,7 +191,10 @@ func (c *MissionController) Stage() (err error) {
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
 		}
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return
+		}
 
 		// Avanzo di stage
 		c.State.Stage = 1
@@ -212,7 +218,10 @@ func (c *MissionController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu")),
 			),
 		)
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return
+		}
 
 		// Importo nel payload la scelta del player
 		c.Payload.ExplorationType = c.Message.Text
@@ -223,9 +232,6 @@ func (c *MissionController) Stage() (err error) {
 		c.State.Stage = 2
 		c.State.ToNotify = helpers.SetTrue()
 		c.State.FinishAt = endTime
-
-		// Remove current redis state
-		// helpers.DelRedisState(helpers.Player)
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
@@ -320,10 +326,10 @@ func (c *MissionController) Stage() (err error) {
 				"resources",
 				drop.Quantity,
 			)
-		}
 
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 
 		// Completo lo stato

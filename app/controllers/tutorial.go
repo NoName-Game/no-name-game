@@ -184,7 +184,10 @@ func (c *TutorialController) Stage() (err error) {
 		// Invio messaggio
 		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorna stato
 		c.State.Stage = 1
@@ -203,28 +206,43 @@ func (c *TutorialController) Stage() (err error) {
 		var previousText string
 		for i := 1; i < 3; i++ {
 			time.Sleep(2 * time.Second)
-			services.SendMessage(
-				services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, textList[i]),
-			)
+			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, textList[i])
+			_, err := services.SendMessage(edited)
+			if err != nil {
+				return err
+			}
 		}
 
 		// Invio altro set di messaggi
 		for i := 3; i < 12; i++ {
 			time.Sleep(2 * time.Second)
-			// TODO: da ricontrollare
 			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
-			sendedMessage, _ := services.SendMessage(edited)
+
+			var sendedMessage tgbotapi.Message
+			sendedMessage, err = services.SendMessage(edited)
+			if err != nil {
+				return
+			}
+
 			previousText = sendedMessage.Text
 		}
 
-		lastMessage, _ = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
+		lastMessage, err = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
+		if err != nil {
+			return
+		}
+
 		previousText = lastMessage.Text
 		for i := 13; i < len(textList); i++ {
 			time.Sleep(time.Second)
-
-			// TODO: da ricontrollare
 			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
-			sendedMessage, _ := services.SendMessage(edited)
+
+			var sendedMessage tgbotapi.Message
+			sendedMessage, err = services.SendMessage(edited)
+			if err != nil {
+				return
+			}
+
 			previousText = sendedMessage.Text
 		}
 
@@ -234,8 +252,12 @@ func (c *TutorialController) Stage() (err error) {
 			lastMessage.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "route.start.explosion"),
 		)
+
 		edit.ParseMode = "HTML"
-		services.SendMessage(edit)
+		_, err = services.SendMessage(edit)
+		if err != nil {
+			return
+		}
 
 		// Ultimo step apri gli occhi
 		msg = services.NewMessage(c.Player.ChatID, "...")
@@ -244,7 +266,10 @@ func (c *TutorialController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.start.openEye")),
 			),
 		)
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return
+		}
 
 		// Aggiorna stato
 		c.State.Stage = 2
@@ -252,12 +277,15 @@ func (c *TutorialController) Stage() (err error) {
 	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 2:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
-		services.SendMessage(
+		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "route.start.firstExploration"),
 			),
 		)
+		if err != nil {
+			return
+		}
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
