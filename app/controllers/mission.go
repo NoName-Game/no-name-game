@@ -112,7 +112,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
 			"mission.wait",
-			c.State.FinishAt.Format("2006-01-02 15:04:05"),
+			c.State.FinishAt.Format("15:04:05"),
 		)
 
 		// Verifico che l'utente stia accedendo a questa funzionalità solo dopo
@@ -192,10 +192,15 @@ func (c *MissionController) Stage() (err error) {
 		)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.Menu")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu")),
 			),
 		)
 		services.SendMessage(msg)
+
+		// Importo nel payload la scelta del player
+		c.Payload.ExplorationType = c.Message.Text
+		jsonPayload, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(jsonPayload)
 
 		// Avanzo di stato
 		c.State.Stage = 2
@@ -243,7 +248,12 @@ func (c *MissionController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.comeback")),
 			),
 		)
-		services.SendMessage(msg)
+
+		//TODO: capire perchè qui non procede
+		go services.SendMessage(msg)
+		// if err != nil {
+		// 	return
+		// }
 
 		// Aggiorno lo stato
 		jsonPayload, _ := json.Marshal(c.Payload)

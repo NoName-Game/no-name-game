@@ -76,13 +76,13 @@ func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessa
 }
 
 // SendMessage - send message
-func SendMessage(chattable tgbotapi.Chattable) tgbotapi.Message {
-	message, err := botAPI.Send(chattable)
+func SendMessage(chattable tgbotapi.Chattable) (message tgbotapi.Message, err error) {
+	message, err = botAPI.Send(chattable)
 	if err != nil {
-		ErrorHandler("Can't send message.", err)
+		return message, err
 	}
 
-	return message
+	return
 }
 
 func NewAnswer(callbackQueryID string, text string, alert bool) tgbotapi.CallbackConfig {

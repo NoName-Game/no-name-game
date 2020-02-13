@@ -181,7 +181,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Prendo il primo testo della intro e lo invio
 		msg := services.NewMessage(c.Player.ChatID, textList[0])
-		lastMessage := services.SendMessage(msg)
+		lastMessage, _ := services.SendMessage(msg)
 
 		// Mando primo set di messaggi
 		var previousText string
@@ -195,18 +195,21 @@ func (c *TutorialController) Stage() (err error) {
 		// Invio altro set di messaggi
 		for i := 3; i < 12; i++ {
 			time.Sleep(2 * time.Second)
-			previousText = services.SendMessage(
-				services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i]),
-			).Text
+			// TODO: da ricontrollare
+			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
+			sendedMessage, _ := services.SendMessage(edited)
+			previousText = sendedMessage.Text
 		}
 
-		lastMessage = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
+		lastMessage, _ = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
 		previousText = lastMessage.Text
 		for i := 13; i < len(textList); i++ {
 			time.Sleep(time.Second)
-			previousText = services.SendMessage(
-				services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i]),
-			).Text
+
+			// TODO: da ricontrollare
+			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
+			sendedMessage, _ := services.SendMessage(edited)
+			previousText = sendedMessage.Text
 		}
 
 		// Mando esplosione

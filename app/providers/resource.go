@@ -40,7 +40,7 @@ func DropResource(typeExploration string, qtyExploration int, playerID uint, pla
 	}
 
 	var resource nnsdk.DropItem
-	resp, err := services.NnSDK.MakeRequest("resources/drop/", request).Post()
+	resp, err := services.NnSDK.MakeRequest("resources/drop", request).Post()
 	if err != nil {
 		return resource, err
 	}
