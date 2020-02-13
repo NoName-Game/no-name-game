@@ -56,7 +56,11 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-		services.SendMessage(validatorMsg)
+		_, err = services.SendMessage(validatorMsg)
+		if err != nil {
+			panic(err)
+		}
+
 		return
 	}
 
@@ -72,8 +76,20 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 		panic(err)
 	}
 
-	return
+	// Verifico se lo stato è completato chiudo
+	if *c.State.Completed == true {
+		_, err = providers.DeletePlayerState(c.State) // Delete
+		if err != nil {
+			panic(err)
+		}
 
+		err = helpers.DelRedisState(player)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return
 }
 
 // ====================================

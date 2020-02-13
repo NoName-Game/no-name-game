@@ -81,6 +81,19 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		panic(err)
 	}
 
+	// Verifico se lo stato è completato chiudo
+	if *c.State.Completed == true {
+		_, err = providers.DeletePlayerState(c.State) // Delete
+		if err != nil {
+			panic(err)
+		}
+
+		err = helpers.DelRedisState(player)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	return
 }
 
@@ -144,6 +157,10 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 		}
 
 		return true, err
+
+	default:
+		// Stato non riconosciuto ritorno errore
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
 	}
 
 	// Ritorno errore generico
@@ -249,14 +266,16 @@ func (c *MissionController) Stage() (err error) {
 			),
 		)
 
-		//TODO: capire perchè qui non procede
-		go services.SendMessage(msg)
-		// if err != nil {
-		// 	return
-		// }
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorno lo stato
-		jsonPayload, _ := json.Marshal(c.Payload)
+		jsonPayload, err := json.Marshal(c.Payload)
+		if err != nil {
+			return err
+		}
 		c.State.Payload = string(jsonPayload)
 		c.State.Stage = 3
 
@@ -275,21 +294,23 @@ func (c *MissionController) Stage() (err error) {
 
 		// Rimuovo keyboard
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorno lo stato
 		c.State.Stage = 2
 
-		// Remove current redist stare
-		//helpers.DelRedisState(helpers.Player)
-
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
 		// Invio messaggio di chiusura missione
-
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"))
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		for _, drop := range c.Payload.Dropped {
@@ -305,11 +326,8 @@ func (c *MissionController) Stage() (err error) {
 			return err
 		}
 
-		// ====================================
-		// COMPLETE!
-		// ====================================
-		helpers.FinishAndCompleteState(c.State, c.Player)
-		// ====================================
+		// Completo lo stato
+		c.State.Completed = helpers.SetTrue()
 	}
 
 	return

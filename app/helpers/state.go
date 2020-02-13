@@ -86,17 +86,26 @@ func CheckState(player nnsdk.Player, controller string, payload interface{}, fat
 }
 
 // FinishAndCompleteState - finish and set completed in playerstate
-func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) {
-	// Stupid poninter stupid json pff
-	t := new(bool)
-	*t = true
-
-	state.Completed = t
-	state, _ = providers.UpdatePlayerState(state) // Update
-	state, _ = providers.DeletePlayerState(state) // Delete
-
-	DelRedisState(player)
-}
+// func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) (err error) {
+// 	// Stupid poninter stupid json pff
+// 	t := new(bool)
+// 	*t = true
+// 	state.Completed = t
+//
+// 	// Aggiunro
+// 	state, err = providers.UpdatePlayerState(state) // Update
+// 	if err != nil {
+// 		return err
+// 	}
+//
+// 	state, err = providers.DeletePlayerState(state) // Delete
+// 	if err != nil {
+// 		return err
+// 	}
+//
+// 	err = DelRedisState(player)
+// 	return
+// }
 
 // DeleteRedisAndDbState - delete redis and db state
 func DeleteRedisAndDbState(player nnsdk.Player) {

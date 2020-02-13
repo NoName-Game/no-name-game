@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -56,7 +57,7 @@ func UpdatePlayerState(request nnsdk.PlayerState) (nnsdk.PlayerState, error) {
 
 func DeletePlayerState(request nnsdk.PlayerState) (nnsdk.PlayerState, error) {
 	var playerState nnsdk.PlayerState
-	resp, err := services.NnSDK.MakeRequest("player-states/"+strconv.FormatUint(uint64(request.ID), 10), request).Delete()
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", request.ID), request).Delete()
 	if err != nil {
 		return playerState, err
 	}
