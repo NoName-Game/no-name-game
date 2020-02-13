@@ -45,14 +45,6 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	// Stato recuperto correttamente
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
-	// log.Panicln(isNewState)
-
-	// It's first message
-	// if isNewState {
-	// 	c.Stage()
-	// 	return
-	// }
-
 	// Validate
 	var hasError bool
 	hasError, err = c.Validator()

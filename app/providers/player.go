@@ -198,6 +198,30 @@ func GetPlayerInventory(player nnsdk.Player) (nnsdk.PlayerInventories, error) {
 	return inventory, nil
 }
 
+func ManagePlayerInventory(playerID uint, itemID uint, itemType string, quantity int) (err error) {
+	// Todo: spostare in SDK
+	type ManageInventoryRequest struct {
+		ItemID   uint
+		ItemType string
+		Quantity int
+	}
+
+	request := ManageInventoryRequest{
+		ItemID:   itemID,
+		ItemType: itemType,
+		Quantity: quantity,
+	}
+
+	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/manage", playerID), request).Post()
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+//
 // func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
 // 	var inventory nnsdk.PlayerInventories
 //

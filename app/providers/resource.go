@@ -24,9 +24,23 @@ func GetResourceByID(id uint) (nnsdk.Resource, error) {
 	return resource, nil
 }
 
-func GetRandomResource(categoryID uint) (nnsdk.Resource, error) {
-	var resource nnsdk.Resource
-	resp, err := services.NnSDK.MakeRequest("resources/drop/"+strconv.FormatUint(uint64(categoryID), 10), nil).Get()
+func DropResource(typeExploration string, qtyExploration int, playerID uint, planetID uint) (nnsdk.DropItem, error) {
+	type dropRequest struct {
+		TypeExploration string
+		QtyExploration  int
+		PlayerID        uint
+		PlanetID        uint
+	}
+
+	request := dropRequest{
+		TypeExploration: typeExploration,
+		QtyExploration:  qtyExploration,
+		PlayerID:        playerID,
+		PlanetID:        planetID,
+	}
+
+	var resource nnsdk.DropItem
+	resp, err := services.NnSDK.MakeRequest("resources/drop/", request).Post()
 	if err != nil {
 		return resource, err
 	}

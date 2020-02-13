@@ -1,8 +1,14 @@
 package controllers
 
+import "C"
 import (
+	"encoding/json"
+	"time"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -12,10 +18,9 @@ import (
 type MissionController struct {
 	BaseController
 	Payload struct {
-		ExplorationType string
-		Times           int
-		Material        nnsdk.Resource
-		Quantity        int
+		ExplorationType string // Indica il tipo di esplorazione scelta
+		Times           int    // Indica quante volte ha ripetuto
+		Dropped         []nnsdk.DropItem
 	}
 	// Additional Data
 	MissionTypes []string
@@ -27,13 +32,13 @@ type MissionController struct {
 func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	// var isNewState bool
+
 	c.Controller = "route.mission"
 	c.Player = player
 	c.Update = update
 	c.Message = update.Message
 
-	// Set mission types
+	// Registro tipi di missione
 	c.MissionTypes = make([]string, 3)
 	c.MissionTypes[0] = helpers.Trans(c.Player.Language.Slug, "mission.underground")
 	c.MissionTypes[1] = helpers.Trans(c.Player.Language.Slug, "mission.surface")
@@ -50,180 +55,252 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
 	// Validate
-	// var hasError bool
-	// hasError, err = c.Validator()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// // Se ritornano degli errori
-	// if hasError == true {
-	// 	// Invio il messaggio in caso di errore e chiudo
-	// 	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-	// 	services.SendMessage(validatorMsg)
-	// 	return
-	// }
-	//
-	// // Ok! Run!
-	// err = c.Stage()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// // Aggiorno stato finale
-	// _, err = providers.UpdatePlayerState(c.State)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// return
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
+	}
+
+	// Se ritornano degli errori
+	if hasError == true {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		services.SendMessage(validatorMsg)
+		return
+	}
+
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	_, err = providers.UpdatePlayerState(c.State)
+	if err != nil {
+		panic(err)
+	}
+
+	return
 }
 
-//
-// //====================================
-// // Validator
-// //====================================
-// func (c *MissionController) Validator() (hasErrors bool) {
-// 	c.Validation.Message = helpers.Trans("validationMessage")
-//
-// 	switch c.State.Stage {
-// 	case 1:
-// 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-// 		if helpers.StringInSlice(c.Message.Text, c.MissionTypes) {
-// 			c.Payload.ExplorationType = c.Message.Text
-// 			return false
-// 		}
-// 	case 2:
-// 		c.Validation.Message = helpers.Trans("mission.wait", c.State.FinishAt.Format("2006-01-02 15:04:05"))
-// 		if time.Now().After(c.State.FinishAt) && c.Payload.Times < 10 {
-// 			c.Payload.Times++
-// 			c.Payload.Quantity = rand.Intn(3)*c.Payload.Times + 1
-// 			return false
-// 		}
-// 	case 3:
-// 		if c.Message.Text == helpers.Trans("mission.continue") {
-// 			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
-// 			c.State.ToNotify = helpers.SetTrue()
-// 			return false
-// 		} else if c.Message.Text == helpers.Trans("mission.comeback") {
-// 			c.State.Stage = 4
-// 			return false
-// 		}
-// 	}
-//
-// 	return true
-// }
-//
-// //====================================
-// // Stage
-// //====================================
-// func (c *MissionController) Stage() {
-// 	var err error
-//
-// 	switch c.State.Stage {
-// 	case 0:
-// 		// Creo messaggio con la lista delle esplorazioni possibili
-// 		var keyboardRows [][]tgbotapi.KeyboardButton
-// 		for _, mType := range c.MissionTypes {
-// 			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(mType))
-// 			keyboardRows = append(keyboardRows, keyboardRow)
-// 		}
-//
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.exploration"))
-// 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-// 			Keyboard:       keyboardRows,
-// 			ResizeKeyboard: true,
-// 		}
-// 		services.SendMessage(msg)
-//
-// 		// Aggiorno stato
-// 		c.State.Stage = 1
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-// 	case 1:
-// 		// Recupero materiali random
-// 		material, err := providers.GetRandomResource(helpers.GetMissionCategoryID(c.Message.Text))
-// 		if err != nil {
-// 			services.ErrorHandler("Cant get random resources", err)
-// 		}
-//
-// 		// Imposto nuovo stato
-// 		c.Payload.Material = material
-// 		jsonPayload, _ := json.Marshal(c.Payload)
-// 		c.State.Payload = string(jsonPayload)
-// 		c.State.Stage = 2
-// 		c.State.ToNotify = helpers.SetTrue()
-// 		c.State.FinishAt = helpers.GetEndTime(0, 10, 0)
-//
-// 		// Invio messaggio di attesa
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(c.State.FinishAt.Format("15:04:05"))))
-// 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("route.Menu"))))
-// 		services.SendMessage(msg)
-//
-// 		// Aggiorno stato
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-//
-// 		// Remove current redis state
-// 		// helpers.DelRedisState(helpers.Player)
-// 	case 2:
-// 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_recap", c.Payload.Material.Item.Name, c.Payload.Quantity))
-// 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-// 			tgbotapi.NewKeyboardButtonRow(
-// 				tgbotapi.NewKeyboardButton(helpers.Trans("mission.continue")),
-// 				tgbotapi.NewKeyboardButton(helpers.Trans("mission.comeback")),
-// 			),
-// 		)
-// 		services.SendMessage(msg)
-//
-// 		// Aggiorno lo stato
-// 		jsonPayload, _ := json.Marshal(c.Payload)
-// 		c.State.Payload = string(jsonPayload)
-// 		c.State.Stage = 3
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-// 	case 3:
-// 		// CONTINUE - Il player ha scelto di continuare la ricerca
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.wait", string(c.State.FinishAt.Format("15:04:05"))))
-// 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-// 		services.SendMessage(msg)
-//
-// 		// Aggiorno lo stato
-// 		c.State.Stage = 2
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player", err)
-// 		}
-//
-// 		// Remove current redist stare
-// 		//helpers.DelRedisState(helpers.Player)
-// 	case 4:
-// 		// Invio messaggio di chiusura missione
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.Trans("mission.extraction_ended"))
-// 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-// 		services.SendMessage(msg)
-//
-// 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
-// 		_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
-// 			ItemID:   c.Payload.Material.ID,
-// 			Quantity: c.Payload.Quantity,
-// 		})
-//
-// 		if err != nil {
-// 			services.ErrorHandler("Cant add resource to player inventory", err)
-// 		}
-//
-// 		//====================================
-// 		// COMPLETE!
-// 		//====================================
-// 		helpers.FinishAndCompleteState(c.State, helpers.Player)
-// 		//====================================
-// 	}
-// }
+// ====================================
+// Validator
+// ====================================
+func (c *MissionController) Validator() (hasErrors bool, err error) {
+	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+
+	switch c.State.Stage {
+	// È il primo stato non c'è nessun controllo
+	case 0:
+		return false, err
+
+	// In questo stage è necessario controllare che venga scelto
+	// un tipo di missione tra quelli disponibili
+	case 1:
+		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
+		if helpers.StringInSlice(c.Message.Text, c.MissionTypes) {
+			c.Payload.ExplorationType = c.Message.Text
+
+			return false, err
+		}
+
+		return true, err
+
+	// In questo stage andremo a verificare lo stato della missione
+	case 2:
+		c.Validation.Message = helpers.Trans(
+			c.Player.Language.Slug,
+			"mission.wait",
+			c.State.FinishAt.Format("2006-01-02 15:04:05"),
+		)
+
+		// Verifico che l'utente stia accedendo a questa funzionalità solo dopo
+		// che abbia finito lo stato attuale e che non abbia raggiunto il limite
+		// di volte per il quale è possibile ripetere la stessa azione
+		if time.Now().After(c.State.FinishAt) && c.Payload.Times < 10 {
+			c.Payload.Times++
+
+			return false, err
+		}
+
+		return true, err
+
+	// In questo stage verifico l'azione che vuole intraprendere l'utente
+	case 3:
+		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
+		if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
+			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
+			c.State.ToNotify = helpers.SetTrue()
+
+			return false, err
+
+			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
+		} else if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
+			// Passo allo stadio conclusivo
+			c.State.Stage = 4
+
+			return false, err
+		}
+
+		return true, err
+	}
+
+	// Ritorno errore generico
+	return true, err
+}
+
+// ====================================
+// Stage
+// ====================================
+func (c *MissionController) Stage() (err error) {
+	switch c.State.Stage {
+	// Primo avvio di missione, restituisco al player
+	// i vari tipi di missioni disponibili
+	case 0:
+		// Creo messaggio con la lista delle missioni possibili
+		var keyboardRows [][]tgbotapi.KeyboardButton
+		for _, mType := range c.MissionTypes {
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(mType))
+			keyboardRows = append(keyboardRows, keyboardRow)
+		}
+
+		// Invio messaggi con il tipo di missioni come tastierino
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.exploration"))
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard:       keyboardRows,
+			ResizeKeyboard: true,
+		}
+		services.SendMessage(msg)
+
+		// Avanzo di stage
+		c.State.Stage = 1
+
+	// In questo stage verrà recuperato il tempo di attesa per il
+	// completamnto della missione e notificato al player
+	case 1:
+		var endTime time.Time
+		endTime = helpers.GetEndTime(0, 10, 0)
+
+		// Invio messaggio di attesa
+		msg := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(
+				c.Player.Language.Slug,
+				"mission.wait",
+				endTime.Format("15:04:05"),
+			),
+		)
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.Menu")),
+			),
+		)
+		services.SendMessage(msg)
+
+		// Avanzo di stato
+		c.State.Stage = 2
+		c.State.ToNotify = helpers.SetTrue()
+		c.State.FinishAt = endTime
+
+		// Remove current redis state
+		// helpers.DelRedisState(helpers.Player)
+
+	// In questo stage recupero quali risorse il player ha recuperato
+	// dalla missione e glielo notifico
+	case 2:
+		// Recupera tipologia di missione
+		missionType := helpers.GetMissionCategory(c.Player.Language.Slug, c.Payload.ExplorationType)
+		//TODO: migliorare qui sopra e recupeare ID pianeta da passare al drop
+
+		// Recupero drop
+		var drop nnsdk.DropItem
+		drop, err = providers.DropResource(
+			missionType,
+			c.Payload.Times,
+			c.Player.ID,
+			1,
+		)
+		if err != nil {
+			return err
+		}
+
+		// Se ho recuperato il drop lo inserisco nella lista degli elementi droppati
+		c.Payload.Dropped = append(c.Payload.Dropped, drop)
+
+		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
+		msg := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(
+				c.Player.Language.Slug,
+				"mission.extraction_recap",
+				drop.Resource.Name,
+				drop.Quantity,
+			),
+		)
+
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.continue")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.comeback")),
+			),
+		)
+		services.SendMessage(msg)
+
+		// Aggiorno lo stato
+		jsonPayload, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(jsonPayload)
+		c.State.Stage = 3
+
+	// In questo stage verifico cosa ha scelto di fare il player
+	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
+	// mentre se ha deciso di concludere andrò avanti di stato
+	case 3:
+		// Il player ha scelto di continuare la ricerca
+		msg := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(
+				c.Player.Language.Slug,
+				"mission.wait",
+				c.State.FinishAt.Format("15:04:05"),
+			),
+		)
+
+		// Rimuovo keyboard
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		services.SendMessage(msg)
+
+		// Aggiorno lo stato
+		c.State.Stage = 2
+
+		// Remove current redist stare
+		//helpers.DelRedisState(helpers.Player)
+
+	// Ritorno il messaggio con gli elementi droppati
+	case 4:
+		// Invio messaggio di chiusura missione
+
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"))
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		services.SendMessage(msg)
+
+		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
+		for _, drop := range c.Payload.Dropped {
+			err = providers.ManagePlayerInventory(
+				c.Player.ID,
+				drop.Resource.ID,
+				"resources",
+				drop.Quantity,
+			)
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// ====================================
+		// COMPLETE!
+		// ====================================
+		helpers.FinishAndCompleteState(c.State, c.Player)
+		// ====================================
+	}
+
+	return
+}

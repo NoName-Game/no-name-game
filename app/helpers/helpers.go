@@ -45,7 +45,7 @@ func KeyInMap(a uint, list map[uint]int) bool {
 	return false
 }
 
-// StringInSlice - Check if strin is in slice
+// StringInSlice - Verifica che sia presente una string un uno slice di stringhe
 func StringInSlice(v string, a []string) bool {
 	for _, e := range a {
 		if e == v {
@@ -107,7 +107,7 @@ func GetAllSlugCategories() (categories []string) {
 	return
 }
 
-// GetEndTime - Add to Now() the value passed.
+// GetEndTime - Aggiunge un tempo di durata T.
 func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
 	return
