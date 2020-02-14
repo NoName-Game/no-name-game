@@ -121,18 +121,20 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 			return false, err
 		}
 
-		// // In questo stage è necessario che venga validato se il player ha tutti i
-		// // materiali necessario al crafting dell'item da lui scelto
-		// case 2:
-		// 	if c.Message.Text != helpers.Trans(c.Player.Language.Slug, "yep") {
-		//
-		// 		return false
-		// 	} /*else if c.Message.Text == helpers.Trans("crafting.craft_different_item") {
-		// 		log.Println("CHANGE CRAFT 1: PASSED")
-		// 		c.State.Stage = 0
-		// 		return false
-		// 	// PERCHE' LO STAGE TORNA A 1???
-		// 	}*/
+	// In questo stage è necessario che venga validato se il player ha tutti i
+	// materiali necessario al crafting dell'item da lui scelto
+	case 2:
+		if c.Message.Text != helpers.Trans(c.Player.Language.Slug, "yep") {
+			return false, err
+		}
+
+		return false, err
+		/*else if c.Message.Text == helpers.Trans("crafting.craft_different_item") {
+			log.Println("CHANGE CRAFT 1: PASSED")
+			c.State.Stage = 0
+			return false
+		// PERCHE' LO STAGE TORNA A 1???
+		}*/
 		// case 3:
 		// 	log.Println("Validation 2")
 		//
@@ -225,29 +227,28 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		// Aggiorno stato
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.State.Payload = string(payloadUpdated)
+		c.State.Stage = 2
 
-		// case 2:
-		//
-		// 	var msg tgbotapi.MessageConfig
-		//
-		// 	// =============
-		// 	// START TIMER
-		// 	// =============
-		//
-		// 	// Se il player possiede gli item necessari
-		//
-		// 	c.State.FinishAt = helpers.GetEndTime(0, 0, int(c.Payload.Crafted.Recipe.WaitingTime))
-		// 	c.State.ToNotify = helpers.SetTrue()
-		//
-		// 	msg = services.NewMessage(helpers.Player.ChatID, helpers.Trans("crafting.wait", c.State.FinishAt.Format("15:04:05")))
-		//
-		// 	services.SendMessage(msg)
-		//
-		// 	// Aggiorno stato
-		// 	c.State, err = providers.UpdatePlayerState(c.State)
-		// 	if err != nil {
-		// 		services.ErrorHandler("Cant update player", err)
-		// 	}
+	case 2:
+
+		var msg tgbotapi.MessageConfig
+
+		// =============
+		// START TIMER
+		// =============
+
+		// Se il player possiede gli item necessari
+
+		c.State.FinishAt = helpers.GetEndTime(0, 0, int(c.Payload.Crafted.Recipe.WaitingTime))
+		c.State.ToNotify = helpers.SetTrue()
+
+		msg = services.NewMessage(helpers.Player.ChatID, helpers.Trans("crafting.wait", c.State.FinishAt.Format("15:04:05")))
+
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
 		// case 3:
 		// 	// Aggiungo item all'inventario e rimuovo item
 		// 	_, err := providers.AddResourceToPlayerInventory(helpers.Player, nnsdk.AddResourceRequest{
