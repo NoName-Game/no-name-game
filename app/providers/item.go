@@ -1,59 +1,60 @@
 package providers
 
-// Writer: reloonfire
-// Starting on: 20/01/2020
-// Project: no-name-game
+import (
+	"encoding/json"
+	"fmt"
+	"net/url"
 
-// func GetItemByID(id uint) (nnsdk.Item, error) {
-// 	var resource nnsdk.Item
-// 	resp, err := services.NnSDK.MakeRequest("items/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-// 	if err != nil {
-// 		return resource, err
-// 	}
-//
-// 	err = json.Unmarshal(resp.Data, &resource)
-// 	if err != nil {
-// 		return resource, err
-// 	}
-//
-// 	return resource, nil
-// }
-//
-// func GetAllItems() (nnsdk.Items, error) {
-// 	var crafts nnsdk.Items
-// 	resp, err := services.NnSDK.MakeRequest("items", nil).Get()
-//
-// 	if err != nil {
-// 		return crafts, err
-// 	}
-//
-// 	err = json.Unmarshal(resp.Data, &crafts)
-//
-// 	if err != nil {
-// 		return crafts, err
-// 	}
-//
-// 	return crafts, nil
-// }
-//
-// func GetItemByName(name string) (nnsdk.Item, error) {
-//
-// 	var craft nnsdk.Item
-//
-// 	params := url.Values{}
-// 	params.Add("name", name)
-//
-// 	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
-//
-// 	if err != nil {
-// 		return craft, err
-// 	}
-//
-// 	err = json.Unmarshal(resp.Data, &craft)
-//
-// 	if err != nil {
-// 		return craft, err
-// 	}
-// 	return craft, nil
-//
-// }
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/services"
+)
+
+func GetItemByID(id uint) (nnsdk.Item, error) {
+	var item nnsdk.Item
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("items/%v", id), nil).Get()
+	if err != nil {
+		return item, err
+	}
+
+	err = json.Unmarshal(resp.Data, &item)
+	if err != nil {
+		return item, err
+	}
+
+	return item, nil
+}
+
+func GetAllItems() (nnsdk.Items, error) {
+	var items nnsdk.Items
+	resp, err := services.NnSDK.MakeRequest("items", nil).Get()
+	if err != nil {
+		return items, err
+	}
+
+	err = json.Unmarshal(resp.Data, &items)
+	if err != nil {
+		return items, err
+	}
+
+	return items, nil
+}
+
+func GetItemByName(name string) (nnsdk.Item, error) {
+	var item nnsdk.Item
+	params := url.Values{}
+	params.Add("name", name)
+
+	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
+
+	if err != nil {
+		return item, err
+	}
+
+	err = json.Unmarshal(resp.Data, &item)
+
+	if err != nil {
+		return item, err
+	}
+	return item, nil
+
+}
