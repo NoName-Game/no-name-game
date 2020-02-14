@@ -198,62 +198,6 @@ func GetPlayerInventory(player nnsdk.Player) (nnsdk.PlayerInventories, error) {
 	return inventory, nil
 }
 
-func ManagePlayerInventory(playerID uint, itemID uint, itemType string, quantity int) (err error) {
-	// Todo: spostare in SDK
-	type ManageInventoryRequest struct {
-		ItemID   uint
-		ItemType string
-		Quantity int
-	}
-
-	request := ManageInventoryRequest{
-		ItemID:   itemID,
-		ItemType: itemType,
-		Quantity: quantity,
-	}
-
-	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/manage", playerID), request).Post()
-	if err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
-//
-// func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-// 	var inventory nnsdk.PlayerInventories
-//
-// 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/add", request).Post()
-// 	if err != nil {
-// 		return inventory, err
-// 	}
-//
-// 	err = json.Unmarshal(resp.Data, &inventory)
-// 	if err != nil {
-// 		return inventory, err
-// 	}
-//
-// 	return inventory, nil
-// }
-
-// func RemoveResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-// 	var inventory nnsdk.Inventory
-//
-// 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/remove", request).Post()
-// 	if err != nil {
-// 		return inventory, err
-// 	}
-//
-// 	err = json.Unmarshal(resp.Data, &inventory)
-// 	if err != nil {
-// 		return inventory, err
-// 	}
-//
-// 	return inventory, nil
-// }
-
 func PlayerDamage(id uint) (float64, error) {
 	var damage float64
 	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10)+"/damage", nil).Get()
@@ -295,4 +239,41 @@ func SignIn(request nnsdk.Player) (nnsdk.Player, error) {
 	}
 
 	return player, nil
+}
+
+func ManagePlayerInventory(playerID uint, itemID uint, itemType string, quantity int) (err error) {
+	// Todo: spostare in SDK
+	type ManageInventoryRequest struct {
+		ItemID   uint
+		ItemType string
+		Quantity int
+	}
+
+	request := ManageInventoryRequest{
+		ItemID:   itemID,
+		ItemType: itemType,
+		Quantity: quantity,
+	}
+
+	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/manage", playerID), request).Post()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetPlayerResources(playerID uint) (nnsdk.PlayerInventories, error) {
+	var playerInventory nnsdk.PlayerInventories
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/resources", playerID), nil).Get()
+	if err != nil {
+		return playerInventory, err
+	}
+
+	err = json.Unmarshal(resp.Data, &playerInventory)
+	if err != nil {
+		return playerInventory, err
+	}
+
+	return playerInventory, nil
 }
