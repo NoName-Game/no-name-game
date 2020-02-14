@@ -320,8 +320,11 @@ func (c *TutorialController) Stage() (err error) {
 			return err
 		}
 
-		// Call crafting controller
-		// new(CraftingV2Controller).Handle(c.Update)
+		// Richiamo crafting come sottoprocesso di questo controller
+		missionController := new(CraftingV2Controller)
+		missionController.Father = c.State.ID
+		missionController.Handle(c.Player, c.Update)
+
 		// case 4:
 		// 	// Equip weapon
 		// 	services.SendMessage(services.NewMessage(helpers.Player.ChatID, helpers.Trans("route.start.firstWeaponEquipped")))

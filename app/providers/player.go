@@ -120,8 +120,7 @@ func GetPlayerStats(player nnsdk.Player) (nnsdk.PlayerStats, error) {
 
 func GetPlayerArmors(player nnsdk.Player, equipped string) (nnsdk.Armors, error) {
 	var armors nnsdk.Armors
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/armors?equipped="+equipped, nil).Get()
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/armors?equipped=%v", player.ID, equipped), nil).Get()
 	if err != nil {
 		return armors, err
 	}
@@ -136,8 +135,7 @@ func GetPlayerArmors(player nnsdk.Player, equipped string) (nnsdk.Armors, error)
 
 func GetPlayerWeapons(player nnsdk.Player, equipped string) (nnsdk.Weapons, error) {
 	var weapons nnsdk.Weapons
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/weapons?equipped="+equipped, nil).Get()
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/weapons?equipped=%v", player.ID, equipped), nil).Get()
 	if err != nil {
 		return weapons, err
 	}
@@ -266,6 +264,21 @@ func ManagePlayerInventory(playerID uint, itemID uint, itemType string, quantity
 func GetPlayerResources(playerID uint) (nnsdk.PlayerInventories, error) {
 	var playerInventory nnsdk.PlayerInventories
 	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/resources", playerID), nil).Get()
+	if err != nil {
+		return playerInventory, err
+	}
+
+	err = json.Unmarshal(resp.Data, &playerInventory)
+	if err != nil {
+		return playerInventory, err
+	}
+
+	return playerInventory, nil
+}
+
+func GetPlayerItems(playerID uint) (nnsdk.PlayerInventories, error) {
+	var playerInventory nnsdk.PlayerInventories
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/items", playerID), nil).Get()
 	if err != nil {
 		return playerInventory, err
 	}

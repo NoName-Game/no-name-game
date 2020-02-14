@@ -22,8 +22,8 @@ var (
 		//
 		// "route.hunting": new(controllers.HuntingController), // hunting.go
 		//
-		// "route.inventory":         new(controllers.InventoryController),        // inventory.go - KEYBOARD
-		// "route.inventory.recap":   new(controllers.InventoryRecapController),   // inventory.go - MAIN
+		"route.inventory":       new(controllers.InventoryController),      // inventory.go - KEYBOARD
+		"route.inventory.recap": new(controllers.InventoryRecapController), // inventory.go - MAIN
 		// "route.inventory.equip":   new(controllers.InventoryEquipController),   // inventory_equip.go - MAIN
 		// "route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory_destroy.go - MAIN
 		//
