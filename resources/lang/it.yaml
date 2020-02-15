@@ -129,7 +129,7 @@ inventory.recap: "Recap inventario"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
 
-inventory.equip.equipped: "\n\nIl tuo equipaggiamento attuale:\n"
+inventory.equip.equipped: "Il tuo equipaggiamento attuale:"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
 
