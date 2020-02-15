@@ -98,6 +98,9 @@ func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Updat
 		if err != nil {
 			panic(err)
 		}
+
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
 	}
 
 	return

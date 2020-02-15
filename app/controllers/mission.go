@@ -95,6 +95,9 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		if err != nil {
 			panic(err)
 		}
+
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
 	}
 
 	return
@@ -218,6 +221,14 @@ func (c *MissionController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu")),
 			),
 		)
+
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return

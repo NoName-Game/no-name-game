@@ -29,7 +29,10 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 	if user.UserName == "" {
 		// Mando un messaggio dicendogli di inserire un username
 		msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return player, err
+		}
 
 		err = errors.New("missing username")
 		return player, err

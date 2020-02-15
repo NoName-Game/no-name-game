@@ -14,7 +14,7 @@ var (
 	// Routes
 	//
 	Routes = map[string]interface{}{
-		// "route.menu":        new(controllers.MenuController),       // menu.go
+		"route.menu":     new(controllers.MenuController),       // menu.go
 		"route.start":    new(controllers.TutorialController),   // tutorial.go  - MAIN
 		"route.mission":  new(controllers.MissionController),    // mission.go   - MAIN
 		"route.crafting": new(controllers.CraftingV2Controller), // crafting.go  - MAIN
@@ -35,8 +35,8 @@ var (
 	}
 
 	BreakerRoutes = map[string]interface{}{
-		// "route.breaker.back":   new(controllers.BackController),   // breaker.go      - MAIN (breaker)
-		// "route.breaker.clears": new(controllers.ClearsController), // breaker.go    - MAIN (breaker)
+		"route.breaker.back":   new(controllers.BackController),   // breaker.go      - MAIN (breaker)
+		"route.breaker.clears": new(controllers.ClearsController), // breaker.go    - MAIN (breaker)
 	}
 	//
 	// End routes

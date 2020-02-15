@@ -29,6 +29,27 @@ func DelRedisState(player nnsdk.Player) (err error) {
 	return
 }
 
+// DeleteRedisAndDbState - Cancella record da redis e dal DB
+func DeleteRedisAndDbState(player nnsdk.Player) (err error) {
+	rediState, _ := GetRedisState(player)
+
+	if rediState != "" {
+		var playerState nnsdk.PlayerState
+		playerState, err = GetPlayerStateByFunction(player.States, rediState)
+		if err != nil {
+			return err
+		}
+
+		_, err = providers.DeletePlayerState(playerState) // Delete
+		if err != nil {
+			return err
+		}
+	}
+
+	err = DelRedisState(player)
+	return err
+}
+
 // GetHuntingRedisState - get hunting state in Redis
 func GetHuntingRedisState(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map) {
 	state, err := services.Redis.Get(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID)).Result()
@@ -83,44 +104,6 @@ func CheckState(player nnsdk.Player, controller string, payload interface{}, fat
 	}
 
 	return
-}
-
-// FinishAndCompleteState - finish and set completed in playerstate
-// func FinishAndCompleteState(state nnsdk.PlayerState, player nnsdk.Player) (err error) {
-// 	// Stupid poninter stupid json pff
-// 	t := new(bool)
-// 	*t = true
-// 	state.Completed = t
-//
-// 	// Aggiunro
-// 	state, err = providers.UpdatePlayerState(state) // Update
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	state, err = providers.DeletePlayerState(state) // Delete
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	err = DelRedisState(player)
-// 	return
-// }
-
-// DeleteRedisAndDbState - delete redis and db state
-func DeleteRedisAndDbState(player nnsdk.Player) {
-	// rediState, _ := GetRedisState(player)
-	//
-	// if rediState != "" {
-	// 	playerState, _ := GetPlayerStateByFunction(player, rediState)
-	// 	_, err := providers.DeletePlayerState(playerState) // Delete
-	// 	if err != nil {
-	// 		// FIXME: loggare ma non entrare in panic
-	// 		// services.ErrorHandler("Error delete player state", err)
-	// 	}
-	// }
-	//
-	// DelRedisState(player)
 }
 
 // UnmarshalPayload - Unmarshal payload state
