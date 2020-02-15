@@ -1,209 +1,266 @@
 package controllers
 
+import (
+	"encoding/json"
+	"strings"
+	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// ====================================
+// HuntingController
 //
-// import (
-// 	"encoding/json"
-// 	"math/rand"
-// 	"strings"
-// 	"time"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-//
-// 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-// 	"bitbucket.org/no-name-game/nn-telegram/services"
-// 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-// )
-//
-// //====================================
-// // HuntingController
-// //====================================
-// type HuntingController struct {
-// 	BaseController
-// 	Payload struct {
-// 		IDMap     uint
-// 		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
-// 		IDEnemies uint
-// 		InFight   bool
-// 		Kill      uint
-// 	}
-// 	// Additional Data
-// 	Callback   *tgbotapi.CallbackQuery
-// }
-//
-// // Settings
-// var (
-// 	// Antiflood
-// 	antiFloodSeconds float64 = 1.0
-//
-// 	// Parti di corpo disponibili per l'attacco
-// 	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
-//
-// 	// Keyboards
-// 	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"), tgbotapi.NewInlineKeyboardButtonData("⭕", "hunting.move.action"), tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
-// 	)
-// 	fightKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"), tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.start"), tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
-// 	)
-// 	mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.returnMap"), tgbotapi.NewInlineKeyboardButtonData("⚔", "hunting.fight.hit")),
-// 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
-// 	)
-// )
-//
-// //====================================
-// // Handle
-// //====================================
-// func (c *HuntingController) Handle(update tgbotapi.Update) {
-// 	// Current Controller instance
-// 	var err error
-// 	c.RouteName, c.Update, c.Message = "route.hunting", update, update.Message
-//
-// 	// Check current state for this routes
-// 	c.State, _ = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
-//
-// 	// Set and load payload
-// 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
-//
-// 	// Check message type
-// 	if update.Message != nil {
-// 		// Current Controller instance
-// 		c.Message = update.Message
-//
-// 		// Go to validator
-// 		if !c.Validator() {
-// 			c.State, err = providers.UpdatePlayerState(c.State)
-// 			if err != nil {
-// 				services.ErrorHandler("Cant update player stats", err)
-// 			}
-//
-// 			c.Stage()
-// 			return
-// 		}
-//
-// 		// Validator goes errors
-// 		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-// 		services.SendMessage(validatorMsg)
-// 		return
-// 	} else if update.CallbackQuery != nil {
-// 		// Current Controller instance
-// 		c.Callback = update.CallbackQuery
-//
-// 		c.Hunting()
-// 		return
-// 	}
-//
-// 	return
-// }
-//
-// //====================================
-// // Validator
-// //====================================
-// func (c *HuntingController) Validator() (hasErrors bool) {
-// 	c.Validation.Message = helpers.Trans("validationMessage")
-//
-// 	// Il player deve avere sempre e perfoza un'arma equipaggiata
-// 	// Indipendentemente dallo stato
-// 	if !helpers.CheckPlayerHaveOneEquippedWeapon(helpers.Player) {
-// 		c.Validation.Message = helpers.Trans("hunting.error.noWeaponEquipped")
-//
-// 		//====================================
-// 		// FORCED COMPLETE!
-// 		//====================================
-// 		helpers.FinishAndCompleteState(c.State, helpers.Player)
-// 		//====================================
-//
-// 		return true
-// 	}
-//
-// 	switch c.State.Stage {
-// 	case 0:
-// 		return false
-// 	case 1:
-// 		return false
-// 	}
-//
-// 	return true
-// }
-//
-// //====================================
-// // Stage Waiting -> Map -> Drop -> Finish
-// //====================================
-// func (c *HuntingController) Stage() {
-// 	switch c.State.Stage {
-// 	case 0:
-// 		// Join Map
-// 		c.Hunting()
-// 	case 1:
-// 		// Invio messaggio
-// 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("hunting.complete"))
-// 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-// 			tgbotapi.NewKeyboardButtonRow(
-// 				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-// 			),
-// 		)
-// 		services.SendMessage(msg)
-//
-// 		//====================================
-// 		// COMPLETE!
-// 		//====================================
-// 		helpers.FinishAndCompleteState(c.State, helpers.Player)
-// 		//====================================
-// 	}
-// }
-//
-// func (c *HuntingController) Hunting() {
-// 	var err error
-//
-// 	// Recupero mappa da redis, se non esiste l'istanza la creo
-// 	huntingMap, isNew := helpers.GetHuntingMapRedis(c.Payload.IDMap, helpers.Player)
-// 	if isNew {
-// 		// Invio messaggio contenente la mappa
-// 		msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(huntingMap))
-// 		msg.ReplyMarkup = mapKeyboard
-// 		msg.ParseMode = "HTML"
-// 		services.SendMessage(msg)
-//
-// 		// Aggiorno stato
-// 		c.Payload.IDMap = huntingMap.ID
-// 		payloadUpdated, _ := json.Marshal(c.Payload)
-// 		c.State.Payload = string(payloadUpdated)
-// 		c.State, err = providers.UpdatePlayerState(c.State)
-// 		if err != nil {
-// 			services.ErrorHandler("Cant update player stats", err)
-// 		}
-// 		return
-// 	}
-//
-// 	// Blocker antiflood
-// 	if time.Since(huntingMap.UpdatedAt).Seconds() > antiFloodSeconds {
-// 		// Controllo tipo di callback data - move / fight
-// 		actionType := strings.Split(c.Callback.Data, ".")
-//
-// 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-// 		if actionType[1] == "move" && !c.Payload.InFight {
-// 			c.move(actionType[2], huntingMap)
-// 		} else if actionType[1] == "fight" {
-// 			c.fight(actionType[2], huntingMap)
-// 		}
-//
-// 		// Rimuove rotella di caricamento dal bottone
-// 		services.AnswerCallbackQuery(services.NewAnswer(c.Callback.ID, "", false))
-// 		return
-// 	}
-//
-// 	// Mostro errore antiflood
-// 	answer := services.NewAnswer(c.Callback.ID, "1 second delay", false)
-// 	services.AnswerCallbackQuery(answer)
-// 	return
-// }
+// In questo controller il player avrà la possibilità di esplorare
+// la mappa del pianeta che sta visitando, e di conseguenza affrontare mob,
+// recupeare tesori e cascare in delle trappole
+// ====================================
+type HuntingController struct {
+	BaseController
+	Payload struct {
+		MapID     uint
+		EnemyID   uint
+		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
+		InFight   bool
+		Kill      uint
+	}
+	// Additional Data
+	Callback *tgbotapi.CallbackQuery
+}
+
+// Settings generali
+var (
+	// Antiflood
+	antiFloodSeconds float64 = 1.0
+
+	// Parti di corpo disponibili per l'attacco
+	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
+
+	// Keyboards
+	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
+			tgbotapi.NewInlineKeyboardButtonData("⭕", "hunting.move.action"),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+		),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+	)
+	fightKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.start"),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+		),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+	)
+
+	mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.returnMap"),
+			tgbotapi.NewInlineKeyboardButtonData("⚔", "hunting.fight.hit"),
+		),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
+	)
+)
+
+// ====================================
+// Handle
+// ====================================
+func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+
+	c.Controller = "route.hunting"
+	c.Player = player
+	c.Update = update
+	// Verifico il tipo di messaggio
+	if update.CallbackQuery != nil {
+		c.Callback = update.CallbackQuery
+	} else {
+		c.Message = update.Message
+	}
+
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+
+	// Validate
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
+	}
+
+	// Se ritornano degli errori
+	if hasError == true {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			),
+		)
+
+		_, err = services.SendMessage(validatorMsg)
+		if err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	_, err = providers.UpdatePlayerState(c.State)
+	if err != nil {
+		panic(err)
+	}
+
+	// Verifico se lo stato è completato chiudo
+	if *c.State.Completed == true {
+		_, err = providers.DeletePlayerState(c.State) // Delete
+		if err != nil {
+			panic(err)
+		}
+
+		err = helpers.DelRedisState(player)
+		if err != nil {
+			panic(err)
+		}
+
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
+	}
+
+	return
+}
+
+// ====================================
+// Validator
+// ====================================
+func (c *HuntingController) Validator() (hasErrors bool, err error) {
+	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+
+	// Il player deve avere sempre e perfoza un'arma equipaggiata
+	// Indipendentemente dallo stato in cui si trovi
+	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.noWeaponEquipped")
+
+		return true, err
+	}
+
+	// Al momento non ci sono particolari controlli da fare
+	switch c.State.Stage {
+	case 0:
+		return false, err
+	case 1:
+		return false, err
+	}
+
+	return true, err
+}
+
+// ====================================
+// Stage Map -> Drop -> Finish
+// ====================================
+func (c *HuntingController) Stage() (err error) {
+	switch c.State.Stage {
+	// In questo stage faccio entrare il player nella mappa
+	case 0:
+		// Avvio ufficialmente la caccia!
+		err = c.Hunting()
+		if err != nil {
+			return err
+		}
+
+	// In questo stage notifico al player il completamento della mappa
+	case 1:
+		// Invio messaggio
+		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "hunting.complete"))
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			),
+		)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Completo lo stato
+		c.State.Completed = helpers.SetTrue()
+	}
+}
+
+// Hunting
+func (c *HuntingController) Hunting() (err error) {
+	// Se nel payload non è presente un ID della mappa lo
+	// recupero dalla posizione del player
+	if c.Payload.MapID <= 0 {
+		//TODO: continuare qui con il provider recuperando la mappa dal pianeta
+	}
+
+	// Recupero mappa da redis, se non esiste l'istanza la creo
+	huntingMap, isNew := helpers.GetHuntingMapRedis(c.Payload.IDMap, helpers.Player)
+	if isNew {
+		// Invio messaggio contenente la mappa
+		msg := services.NewMessage(helpers.Player.ChatID, helpers.TextDisplay(huntingMap))
+		msg.ReplyMarkup = mapKeyboard
+		msg.ParseMode = "HTML"
+		services.SendMessage(msg)
+
+		// Aggiorno stato
+		c.Payload.IDMap = huntingMap.ID
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			services.ErrorHandler("Cant update player stats", err)
+		}
+		return
+	}
+
+	// Blocker antiflood
+	if time.Since(huntingMap.UpdatedAt).Seconds() > antiFloodSeconds {
+		// Controllo tipo di callback data - move / fight
+		actionType := strings.Split(c.Callback.Data, ".")
+
+		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
+		if actionType[1] == "move" && !c.Payload.InFight {
+			c.move(actionType[2], huntingMap)
+		} else if actionType[1] == "fight" {
+			c.fight(actionType[2], huntingMap)
+		}
+
+		// Rimuove rotella di caricamento dal bottone
+		services.AnswerCallbackQuery(services.NewAnswer(c.Callback.ID, "", false))
+		return
+	}
+
+	// Mostro errore antiflood
+	answer := services.NewAnswer(c.Callback.ID, "1 second delay", false)
+	services.AnswerCallbackQuery(answer)
+	return
+}
+
 //
 // //====================================
 // // Movements
