@@ -164,6 +164,7 @@ func GetPlayerShips(player nnsdk.Player, equipped bool) (nnsdk.Ships, error) {
 	return ships, nil
 }
 
+// GetPlayerLastPosition - Recupera ultima posizione del player
 func GetPlayerLastPosition(player nnsdk.Player) (nnsdk.PlayerPosition, error) {
 	var position nnsdk.PlayerPosition
 

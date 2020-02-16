@@ -50,24 +50,51 @@ func DeleteRedisAndDbState(player nnsdk.Player) (err error) {
 	return err
 }
 
-// GetHuntingRedisState - get hunting state in Redis
-func GetHuntingRedisState(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map) {
-	state, err := services.Redis.Get(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID)).Result()
+// GetRedisPlayerHuntingPosition - recupero posizione di una player in una specifica mappa
+func GetRedisPlayerHuntingPosition(maps nnsdk.Map, player nnsdk.Player, positionType string) (value int, err error) {
+	var state string
+	state, err = services.Redis.Get(fmt.Sprintf("hunting_map_%v_player_%v_position_%s", maps.ID, player.ID, positionType)).Result()
 	if err != nil {
-		services.ErrorHandler("Error getting hunting state in redis", err)
+		return value, err
 	}
 
-	json.Unmarshal([]byte(state), &huntingMap)
+	value, err = strconv.Atoi(state)
+	if err != nil {
+		return value, err
+	}
+
+	return value, err
+}
+
+// SetRedisPlayerHuntingPosition - Imposto posizione di un player su una determinata mappa
+func SetRedisPlayerHuntingPosition(maps nnsdk.Map, player nnsdk.Player, positionType string, value int) (err error) {
+	err = services.Redis.Set(fmt.Sprintf("hunting_map_%v_player_%v_position_%s", maps.ID, player.ID, positionType), value, 0).Err()
 	return
 }
 
-// SetRedisState - set function state in Redis
-func SetHuntingRedisState(IDMap uint, player nnsdk.Player, value interface{}) {
-	jsonValue, _ := json.Marshal(value)
-	err := services.Redis.Set(fmt.Sprintf("hunting_%v_%v", IDMap, player.ID), string(jsonValue), 0).Err()
+// GetRedisMapHunting - Recupera mappa su redis
+func GetRedisMapHunting(IDMap uint) (maps nnsdk.Map, err error) {
+	var state string
+	state, err = services.Redis.Get(fmt.Sprintf("hunting_map_%v", IDMap)).Result()
 	if err != nil {
-		services.ErrorHandler("Error SET player state in redis", err)
+		return maps, err
 	}
+
+	err = json.Unmarshal([]byte(state), &maps)
+
+	return maps, err
+}
+
+// SetRedisPlayerHuntingPosition - Salvo mappa su redis
+func SetRedisMapHunting(maps nnsdk.Map) (err error) {
+	var jsonValue []byte
+	jsonValue, err = json.Marshal(maps)
+	if err != nil {
+		return err
+	}
+
+	err = services.Redis.Set(fmt.Sprintf("hunting_map_%v", maps.ID), string(jsonValue), 0).Err()
+	return
 }
 
 // CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller

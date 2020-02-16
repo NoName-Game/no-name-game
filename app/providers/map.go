@@ -23,22 +23,6 @@ func GetMapByID(id uint) (nnsdk.Map, error) {
 	return Map, nil
 }
 
-func CreateMap(playerID uint) (nnsdk.Map, error) {
-	var Map nnsdk.Map
-	Map.PlanetID = playerID
-	resp, err := services.NnSDK.MakeRequest("maps", Map).Post()
-	if err != nil {
-		return Map, err
-	}
-
-	err = json.Unmarshal(resp.Data, &Map)
-	if err != nil {
-		return Map, err
-	}
-
-	return Map, nil
-}
-
 func UpdateMap(request nnsdk.Map) (nnsdk.Map, error) {
 	var Map nnsdk.Map
 

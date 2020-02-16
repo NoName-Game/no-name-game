@@ -1,10 +1,5 @@
 package helpers
 
-import (
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-)
-
 // func GenerateWeaponKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 // 	// FIXME: remove this
 // 	weapons, err := providers.GetPlayerWeapons(Player, "true")
@@ -19,20 +14,3 @@ import (
 //
 // 	return keyboardRows
 // }
-
-func GetHuntingMapRedis(IDMap uint, player nnsdk.Player) (huntingMap nnsdk.Map, isNew bool) {
-	if IDMap > 0 {
-		huntingMap = GetHuntingRedisState(IDMap, player)
-		return huntingMap, false
-	}
-
-	// Se IDMap non viene passato genero nuova mappa
-	huntingMap, _ = providers.CreateMap(player.ID)
-	SetHuntingRedisState(huntingMap.ID, player, huntingMap)
-	return huntingMap, true
-}
-
-func UpdateHuntingMapRedis(huntingMap nnsdk.Map, player nnsdk.Player) {
-	SetHuntingRedisState(huntingMap.ID, player, huntingMap)
-	return
-}
