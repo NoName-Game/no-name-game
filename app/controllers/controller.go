@@ -6,7 +6,8 @@ import (
 )
 
 type BaseController struct {
-	Update     tgbotapi.Update
+	Update tgbotapi.Update
+	// Callback   tgbotapi.CallbackQuery
 	Message    *tgbotapi.Message
 	Controller string
 	Father     uint

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -28,7 +29,7 @@ type HuntingController struct {
 		Kill      uint
 	}
 	// Additional Data
-	Callback *tgbotapi.CallbackQuery
+	// Callback *tgbotapi.CallbackQuery
 }
 
 // Settings generali
@@ -39,7 +40,7 @@ var (
 	// Parti di corpo disponibili per l'attacco
 	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
 
-	// Keyboards
+	// Keyboard inline di esplorazione
 	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
 		tgbotapi.NewInlineKeyboardRow(
@@ -49,6 +50,7 @@ var (
 		),
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
 	)
+
 	fightKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
 		tgbotapi.NewInlineKeyboardRow(
@@ -79,12 +81,13 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Controller = "route.hunting"
 	c.Player = player
 	c.Update = update
+
 	// Verifico il tipo di messaggio
-	if update.CallbackQuery != nil {
-		c.Callback = update.CallbackQuery
-	} else {
-		c.Message = update.Message
-	}
+	// if update.CallbackQuery != nil {
+	// 	c.Callback = update.CallbackQuery
+	// } else {
+	// 	c.Message = update.Message
+	// }
 
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
@@ -109,7 +112,9 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
 			),
 		)
 
@@ -122,6 +127,7 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Ok! Run!
+	// go c.Stage()
 	err = c.Stage()
 	if err != nil {
 		panic(err)
@@ -147,6 +153,12 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 			panic(err)
 		}
 
+		// Cancello messaggio contentente la mappa
+		err = services.DeleteMessage(c.Update.CallbackQuery.Message.Chat.ID, c.Update.CallbackQuery.Message.MessageID)
+		if err != nil {
+			panic(err)
+		}
+
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update)
 	}
@@ -168,15 +180,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 		return true, err
 	}
 
-	// Al momento non ci sono particolari controlli da fare
-	switch c.State.Stage {
-	case 0:
-		return false, err
-	case 1:
-		return false, err
-	}
-
-	return true, err
+	return false, err
 }
 
 // ====================================
@@ -191,23 +195,6 @@ func (c *HuntingController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
-
-	// In questo stage notifico al player il completamento della mappa
-	case 1:
-		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "hunting.complete"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
-			),
-		)
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
-		}
-
-		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
 	}
 
 	return
@@ -218,7 +205,7 @@ func (c *HuntingController) Hunting() (err error) {
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
-	if c.Payload.MapID <= 0 {
+	if c.Payload.MapID <= 0 || c.Update.CallbackQuery == nil {
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		var lastPosition nnsdk.PlayerPosition
@@ -261,10 +248,10 @@ func (c *HuntingController) Hunting() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, decodedMap)
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
-		}
+		go services.SendMessage(msg)
+		// if err != nil {
+		// 	return err
+		// }
 
 		// Aggiorno lo stato e ritorno
 		c.Payload.MapID = maps.ID
@@ -286,11 +273,8 @@ func (c *HuntingController) Hunting() (err error) {
 	playerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
 	playerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
 
-	// Blocker antiflood
-	// if time.Since(maps.UpdatedAt).Seconds() > antiFloodSeconds {
-
 	// Controllo tipo di callback data - move / fight
-	actionType := strings.Split(c.Callback.Data, ".")
+	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
 	// Verifica tipo di movimento e mi assicuro che non sia in combattimento
 	if actionType[1] == "move" && !c.Payload.InFight {
@@ -299,19 +283,7 @@ func (c *HuntingController) Hunting() (err error) {
 		err = c.Fight(actionType[2], maps, playerPositionX, playerPositionY)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	// Rimuove rotella di caricamento dal bottone
-	services.AnswerCallbackQuery(services.NewAnswer(c.Callback.ID, "", false))
-	return
-	// }
-
-	// Mostro errore antiflood
-	// answer := services.NewAnswer(c.Callback.ID, "1 second delay", false)
-	// services.AnswerCallbackQuery(answer)
-	// return
+	return err
 }
 
 // ====================================
@@ -320,7 +292,6 @@ func (c *HuntingController) Hunting() (err error) {
 func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX int, playerPositionY int) (err error) {
 	// Refresh della mappa
 	var cellGrid [][]bool
-	// var actionCompleted bool
 	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
 	if err != nil {
 		return err
@@ -331,31 +302,35 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 	case "up":
 		if !cellGrid[playerPositionX-1][playerPositionY] {
 			playerPositionX--
-			// actionCompleted = true
 		} else {
 			playerPositionX++
 		}
 	case "down":
 		if !cellGrid[playerPositionX+1][playerPositionY] {
 			playerPositionX++
-			// actionCompleted = true
 		} else {
 			playerPositionX--
 		}
 	case "left":
 		if !cellGrid[playerPositionX][playerPositionY-1] {
 			playerPositionY--
-			// actionCompleted = true
 		} else {
 			playerPositionY++
 		}
 	case "right":
 		if !cellGrid[playerPositionX][playerPositionY+1] {
 			playerPositionY++
-			// actionCompleted = true
 		} else {
 			playerPositionY--
 		}
+	case "action":
+		// Al momento viene usato per ucsire dalla mappa
+		c.State.Completed = helpers.SetTrue()
+
+		return
+	default:
+		err = errors.New("action not recognized")
+		return err
 	}
 
 	// Aggiorno nuova posizione del player
@@ -365,8 +340,6 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 		return
 	}
 
-	// if actionCompleted {
-
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
 	decodedMap, err = helpers.DecodeMapToDisplay(maps, playerPositionX, playerPositionY)
@@ -375,23 +348,34 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 	}
 
 	// Se l'azione è valida e completa aggiorno risultato
-	msg := services.NewEditMessage(c.Player.ChatID, c.Callback.Message.MessageID, decodedMap)
+	msg := services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
 
 	// Se nella mappa viene visualizzato un mob allora mostro la fight keyboard
 	// TODO: migliorare
-	if strings.Contains(decodedMap, "*") {
+
+	var nearMob bool
+	_, nearMob = helpers.CheckForMob(maps, playerPositionX, playerPositionY)
+	if true == nearMob {
 		msg.ReplyMarkup = &fightKeyboard
 	} else {
 		msg.ReplyMarkup = &mapKeyboard
 	}
 
-	msg.ParseMode = "HTML"
-	_, err = services.SendMessage(msg)
-	if err != nil {
-		return err
-	}
-
+	// if strings.Contains(decodedMap, "*") {
+	// 	msg.ReplyMarkup = &fightKeyboard
+	// } else {
+	// 	msg.ReplyMarkup = &mapKeyboard
 	// }
+
+	msg.ParseMode = "HTML"
+	go services.SendMessage(msg)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// Rimuove rotella di caricamento dal bottone
+	services.AnswerCallbackQuery(services.NewAnswer(c.Update.CallbackQuery.ID, "", false))
+
 	return
 }
 
@@ -402,18 +386,12 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 	var enemy nnsdk.Enemy
 	var editMessage tgbotapi.EditMessageTextConfig
 
-	// Se impostato recupero informazioni più aggiornate del mob
 	if c.Payload.EnemyID > 0 {
+		// Se impostato recupero informazioni più aggiornate del mob
 		enemy, _ = providers.GetEnemyByID(c.Payload.EnemyID)
 	} else {
 		// Recupero il mob più vicino con il quale combattere e me lo setto nel payload
-		var coicheEnemyID int
-		coicheEnemyID, err = helpers.ChooseEnemyInMap(maps, playerPositionX, playerPositionY)
-		if err != nil {
-			return err
-		}
-
-		enemy = maps.Enemies[coicheEnemyID]
+		enemy, _ = helpers.CheckForMob(maps, playerPositionX, playerPositionY)
 	}
 
 	switch action {
@@ -460,14 +438,16 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 			// Aggiorno modifica del messaggio
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
-				c.Callback.Message.MessageID,
+				c.Update.CallbackQuery.Message.MessageID,
 				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed"),
 			)
 
 			var ok tgbotapi.InlineKeyboardMarkup
 			ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.returnMap"),
+					tgbotapi.NewInlineKeyboardButtonData(
+						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.returnMap",
+					),
 				),
 			)
 
@@ -502,6 +482,24 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 		// Verifico se il PLAYER è morto
 		if hitResponse.PlayerDie == true {
+			// Aggiorno modifica del messaggio
+			editMessage = services.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+			)
+
+			var ok tgbotapi.InlineKeyboardMarkup
+			ok = tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData(
+						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.returnMap",
+					),
+				),
+			)
+
+			editMessage.ReplyMarkup = &ok
+
 			c.State.Completed = helpers.SetTrue()
 
 			// Invoco player Death
@@ -514,13 +512,13 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		if hitResponse.DodgeAttack == true {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
-				c.Callback.Message.MessageID,
+				c.Update.CallbackQuery.Message.MessageID,
 				helpers.Trans(c.Player.Language.Slug, "combat.miss", hitResponse.EnemyDamage),
 			)
 		} else {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
-				c.Callback.Message.MessageID,
+				c.Update.CallbackQuery.Message.MessageID,
 				helpers.Trans(c.Player.Language.Slug, "combat.damage", hitResponse.PlayerDamage, hitResponse.EnemyDamage),
 			)
 		}
@@ -545,24 +543,12 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		// Forzo invio messaggio contenente la mappa
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
-			c.Callback.Message.MessageID,
+			c.Update.CallbackQuery.Message.MessageID,
 			decodedMap,
 		)
 
 		editMessage.ParseMode = "HTML"
 		editMessage.ReplyMarkup = &mapKeyboard
-	case "finish":
-		c.State.Completed = helpers.SetTrue()
-
-		_, err = services.SendMessage(
-			services.NewEditMessage(
-				c.Player.ChatID,
-				c.Callback.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "complete"),
-			),
-		)
-
-		return
 	case "no-action":
 		//
 	}
@@ -572,7 +558,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		stats, _ := providers.GetPlayerStats(c.Player)
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
-			c.Callback.Message.MessageID,
+			c.Update.CallbackQuery.Message.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "combat.card",
 				enemy.Name,
 				enemy.LifePoint,
@@ -591,6 +577,9 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 	if err != nil {
 		return err
 	}
+
+	// Rimuove rotella di caricamento dal bottone
+	services.AnswerCallbackQuery(services.NewAnswer(c.Update.CallbackQuery.ID, "", false))
 
 	return
 }

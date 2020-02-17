@@ -38,14 +38,17 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 					if x == playerPositionX && y == playerPositionY {
 						result += "P"
 						continue
-
-						// Verifico se è un mob
-					} else if checkForMob(maps, x, y) {
-						result += "*"
-						// Lo gestisco come terreno calpestabile
-					} else {
-						result += " "
 					}
+
+					// Verifico se è un mob
+					_, isMob := CheckForMob(maps, x, y)
+					if isMob {
+						result += "*"
+						continue
+					}
+
+					// Lo gestisco come terreno calpestabile
+					result += " "
 				}
 			} else {
 				result += "#"
@@ -61,14 +64,15 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 	return
 }
 
-// checkForMob - Verifica posizione dei mob
-func checkForMob(maps nnsdk.Map, x int, y int) bool {
+// CheckForMob - Verifica posizione dei mob
+func CheckForMob(maps nnsdk.Map, x int, y int) (enemy nnsdk.Enemy, result bool) {
 	for i := 0; i < len(maps.Enemies); i++ {
 		if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
-			return true
+			return maps.Enemies[i], true
 		}
 	}
-	return false
+
+	return
 }
 
 // ChooseMob - viene richiamato principalmente dalla mappa, la sua funzione è
