@@ -2,6 +2,7 @@ package providers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -69,16 +70,15 @@ func Spawn(request nnsdk.Enemy) (nnsdk.Enemy, error) {
 	return enemy, nil
 }
 
-func EnemyDamage(id uint) (float64, error) {
-	var damage float64
-	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(id), 10)+"/damage", nil).Get()
+func HitEnemy(enemy nnsdk.Enemy, request nnsdk.HitEnemyRequest) (response nnsdk.HitEnemyResponse, err error) {
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("enemies/%v/hit", enemy.ID), request).Post()
 	if err != nil {
-		return 0, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &damage)
+	err = json.Unmarshal(resp.Data, &response)
 	if err != nil {
-		return 0, err
+		return response, err
 	}
-	return damage, nil
+	return response, nil
 }

@@ -1,12 +1,5 @@
 package helpers
 
-import (
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/services"
-)
-
 // PlayerStatsToString - Convert player stats to string
 // func PlayerStatsToString(playerStats *nnsdk.PlayerStats) (result string) {
 // 	val := reflect.ValueOf(playerStats).Elem()
@@ -34,28 +27,28 @@ import (
 // }
 
 // DecrementLife - Handle the life points
-func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
-	// MaxLife = 100 + Level * 10
-	if *stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
-		*stats.LifePoint = 0
-	} else {
-		*stats.LifePoint -= lifePoint
-	}
+// func DecrementLife(lifePoint uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
+// 	// MaxLife = 100 + Level * 10
+// 	if *stats.LifePoint-lifePoint > 100+stats.Level*10 { // Overflow problem
+// 		*stats.LifePoint = 0
+// 	} else {
+// 		*stats.LifePoint -= lifePoint
+// 	}
+//
+// 	var err error
+// 	stats, err = providers.UpdatePlayerStats(stats)
+// 	if err != nil {
+// 		services.ErrorHandler("Cant update player stats", err)
+// 	}
+//
+// 	return stats
+// }
 
-	var err error
-	stats, err = providers.UpdatePlayerStats(stats)
-	if err != nil {
-		services.ErrorHandler("Cant update player stats", err)
-	}
-
-	return stats
-}
-
-func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
-	stats.Experience++
-	_, err := providers.UpdatePlayerStats(stats)
-	if err != nil {
-		services.ErrorHandler("Can't update player stats.", err)
-	}
-	return stats
-}
+// func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
+// 	stats.Experience++
+// 	_, err := providers.UpdatePlayerStats(stats)
+// 	if err != nil {
+// 		services.ErrorHandler("Can't update player stats.", err)
+// 	}
+// 	return stats
+// }

@@ -211,20 +211,6 @@ func PlayerDamage(id uint) (float64, error) {
 	return damage, nil
 }
 
-func PlayerPrecision(id uint, selection uint) (float64, error) {
-	var damage float64
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10)+"/precision/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return 0, err
-	}
-
-	err = json.Unmarshal(resp.Data, &damage)
-	if err != nil {
-		return 0, err
-	}
-	return damage, nil
-}
-
 func SignIn(request nnsdk.Player) (nnsdk.Player, error) {
 	var player nnsdk.Player
 	resp, err := services.NnSDK.MakeRequest("players/signin", request).Post()

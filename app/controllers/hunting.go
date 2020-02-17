@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"math/rand"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -24,7 +23,7 @@ type HuntingController struct {
 	Payload struct {
 		MapID     uint
 		EnemyID   uint
-		Selection uint // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
+		Selection int // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight   bool
 		Kill      uint
 	}
@@ -129,6 +128,8 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -403,10 +404,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 	// Se impostato recupero informazioni più aggiornate del mob
 	if c.Payload.EnemyID > 0 {
-		enemy, err = providers.GetEnemyByID(c.Payload.EnemyID)
-		if err != nil {
-			return err
-		}
+		enemy, _ = providers.GetEnemyByID(c.Payload.EnemyID)
 	} else {
 		// Recupero il mob più vicino con il quale combattere e me lo setto nel payload
 		var coicheEnemyID int
@@ -414,6 +412,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		if err != nil {
 			return err
 		}
+
 		enemy = maps.Enemies[coicheEnemyID]
 	}
 
@@ -423,6 +422,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		// Setto nuove informazioni stato
 		c.Payload.EnemyID = enemy.ID
 		c.Payload.InFight = true
+
 	case "up":
 		// Setto nuova parte del corpo da colpire
 		if c.Payload.Selection > 0 {
@@ -430,6 +430,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		} else {
 			c.Payload.Selection = 3
 		}
+
 	case "down":
 		// Setto nuova parte del corpo da colpire
 		if c.Payload.Selection < 3 {
@@ -437,104 +438,100 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		} else {
 			c.Payload.Selection = 0
 		}
+
 	case "hit":
-		// DA RIVEDERE E SPOSTARE SUL WS
-		mobDistance, _ := providers.Distance(maps, enemy)
-		mobPercentage := (1000 - mobDistance) / 1000 // What percentage I see of the body? Number between 0 -> 1
-		precision, _ := providers.PlayerPrecision(c.Player.ID, c.Payload.Selection)
-		precision *= (85.0 / 37.0) * mobPercentage // Base precision
-
-		// DA CHIEDERE
-		if rand.Float64() < precision {
-			// Hitted
-			playerDamage, _ := providers.PlayerDamage(c.Player.ID)
-
-			// DA SPOSTARE SUL WS
-			damageToMob := uint(playerDamage)
-			enemy.LifePoint = enemy.LifePoint - damageToMob
-
-			// Mob ucciso
-			if enemy.LifePoint > enemy.LifeMax || enemy.LifePoint == 0 {
-				// Eseguo softdelete enemy
-				_, err = providers.DeleteEnemy(enemy.ID)
-				if err != nil {
-					services.ErrorHandler("Cant delete enemy.", err)
-				}
-
-				// Aggiorno modifica del messaggio
-				editMessage = services.NewEditMessage(c.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "combat.mob_killed"))
-				var ok tgbotapi.InlineKeyboardMarkup
-				if c.Payload.Kill == uint(len(maps.Enemies)) {
-					ok = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.finish")))
-				} else {
-					ok = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action")))
-				}
-				editMessage.ReplyMarkup = &ok
-
-				// Incremento Statistiche player
-				stats, _ := providers.GetPlayerStats(c.Player)
-				helpers.IncrementExp(1, stats)
-
-				// Setto stato
-				c.Payload.Kill++
-				c.Payload.InFight = false
-			} else {
-				// Il player subisce danno
-				damageToPlayer, _ := providers.EnemyDamage(enemy.ID)
-				stats, _ := providers.GetPlayerStats(c.Player)
-				stats = helpers.DecrementLife(uint(damageToPlayer), stats)
-
-				// Verifico se il danno ricevuto ha ucciso il player
-				if *stats.LifePoint == 0 {
-					c.State.Completed = helpers.SetTrue()
-
-					// Invoco player Death
-					// new(DeathController).Handle(c.Update)
-
-					// TODO: devo impostare che il player è morto
-					return
-				} else {
-					// Messagio di notifica per vedere risultato attacco
-					editMessage = services.NewEditMessage(
-						c.Player.ChatID,
-						c.Callback.Message.MessageID,
-						helpers.Trans(c.Player.Language.Slug, "combat.damage", damageToMob, uint(damageToPlayer)),
-					)
-					ok := tgbotapi.NewInlineKeyboardMarkup(
-						tgbotapi.NewInlineKeyboardRow(
-							tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action"),
-						),
-					)
-					editMessage.ReplyMarkup = &ok
-				}
-
-				// Aggiorno vita enemy
-				_, err = providers.UpdateEnemy(enemy)
-				if err != nil {
-					services.ErrorHandler("Error while updating enemy", err)
-				}
-
-				// Aggiorno hunting map in redis in quanto contine informazione sui mob
-				// helpers.UpdateHuntingMapRedis(maps, helpers.Player)
-			}
-		} else {
-			// Schivata!
-			damageToPlayer, _ := providers.EnemyDamage(enemy.ID)
-			stats, _ := providers.GetPlayerStats(c.Player)
-			stats = helpers.DecrementLife(uint(damageToPlayer), stats)
-
-			if *stats.LifePoint == 0 {
-				c.State.Completed = helpers.SetTrue()
-
-				// Invoco player Death
-				// new(DeathController).Handle(c.Update)
-				return
-			} else {
-				editMessage = services.NewEditMessage(c.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "combat.miss", damageToPlayer))
-				ok := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action")))
-				editMessage.ReplyMarkup = &ok
-			}
+		// Effettuo chiamata al ws e recupero response dell'attacco
+		var hitRequest nnsdk.HitEnemyRequest
+		hitRequest = nnsdk.HitEnemyRequest{
+			PlayerID:        c.Player.ID,
+			PlayerPositionX: playerPositionX,
+			PlayerPositionY: playerPositionY,
+			BodySelection:   c.Payload.Selection,
 		}
+
+		var hitResponse nnsdk.HitEnemyResponse
+		hitResponse, err = providers.HitEnemy(enemy, hitRequest)
+		if err != nil {
+			return err
+		}
+
+		// Verifico se il MOB è morto
+		if hitResponse.EnemyDie == true {
+			// Aggiorno modifica del messaggio
+			editMessage = services.NewEditMessage(
+				c.Player.ChatID,
+				c.Callback.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed"),
+			)
+
+			var ok tgbotapi.InlineKeyboardMarkup
+			ok = tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.returnMap"),
+				),
+			)
+
+			editMessage.ReplyMarkup = &ok
+
+			// Setto stato
+			c.Payload.Kill++
+			c.Payload.InFight = false
+			c.Payload.EnemyID = 0
+
+			// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
+			var maps nnsdk.Map
+			maps, err = providers.GetMapByID(c.Payload.MapID)
+			if err != nil {
+				return err
+			}
+
+			// Registro mappa e posizione iniziale del player
+			err = helpers.SetRedisMapHunting(maps)
+			if err != nil {
+				return err
+			}
+
+			// Invio messaggio
+			_, err = services.SendMessage(editMessage)
+			if err != nil {
+				return err
+			}
+
+			return
+		}
+
+		// Verifico se il PLAYER è morto
+		if hitResponse.PlayerDie == true {
+			c.State.Completed = helpers.SetTrue()
+
+			// Invoco player Death
+			// new(DeathController).Handle(c.Update)
+			return
+		}
+
+		// Se ne il player e ne il mob è morto, continua lo scontro
+		// Messagio di notifica per vedere risultato attacco
+		if hitResponse.DodgeAttack == true {
+			editMessage = services.NewEditMessage(
+				c.Player.ChatID,
+				c.Callback.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "combat.miss", hitResponse.EnemyDamage),
+			)
+		} else {
+			editMessage = services.NewEditMessage(
+				c.Player.ChatID,
+				c.Callback.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "combat.damage", hitResponse.PlayerDamage, hitResponse.EnemyDamage),
+			)
+		}
+
+		ok := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action"),
+			),
+		)
+		editMessage.ReplyMarkup = &ok
+
 	case "returnMap":
 		c.Payload.InFight = false
 
@@ -557,7 +554,14 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 	case "finish":
 		c.State.Completed = helpers.SetTrue()
 
-		services.SendMessage(services.NewEditMessage(c.Player.ChatID, c.Callback.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "complete")))
+		_, err = services.SendMessage(
+			services.NewEditMessage(
+				c.Player.ChatID,
+				c.Callback.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "complete"),
+			),
+		)
+
 		return
 	case "no-action":
 		//
@@ -583,11 +587,10 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 	}
 
 	// Invio messaggio modificato
-	services.SendMessage(editMessage)
-
-	// Aggiorno lo stato
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	_, err = services.SendMessage(editMessage)
+	if err != nil {
+		return err
+	}
 
 	return
 }

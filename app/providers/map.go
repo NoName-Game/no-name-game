@@ -54,17 +54,3 @@ func DeleteMap(request nnsdk.Map) (nnsdk.Map, error) {
 
 	return Map, nil
 }
-
-func Distance(request nnsdk.Map, mob nnsdk.Enemy) (float64, error) {
-	var distance float64
-	resp, err := services.NnSDK.MakeRequest("maps/"+strconv.FormatUint(uint64(request.ID), 10)+"/distance/"+strconv.FormatUint(uint64(mob.ID), 10), nil).Get()
-	if err != nil {
-		return 0, err
-	}
-
-	err = json.Unmarshal(resp.Data, &distance)
-	if err != nil {
-		return 0, err
-	}
-	return distance, nil
-}

@@ -42,7 +42,6 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 						// Verifico se è un mob
 					} else if checkForMob(maps, x, y) {
 						result += "*"
-
 						// Lo gestisco come terreno calpestabile
 					} else {
 						result += " "
