@@ -200,7 +200,13 @@ func (c *HuntingController) Hunting() (err error) {
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
-	if c.Payload.MapID <= 0 && c.Update.CallbackQuery == nil {
+	if c.Payload.MapID <= 0 || c.Update.Message != nil {
+		// if  c.Update.Message != nil {
+		// 	if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") {
+		// 		return
+		// 	}
+		// }
+
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		var lastPosition nnsdk.PlayerPosition

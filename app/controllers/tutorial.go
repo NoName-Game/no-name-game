@@ -201,18 +201,18 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Prendo il primo testo della intro e lo invio
 		msg := services.NewMessage(c.Player.ChatID, textList[0])
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-		var lastMessage tgbotapi.Message
-		lastMessage, err = services.SendMessage(msg)
+		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
+		var firstMessage tgbotapi.Message
+		firstMessage, err = services.SendMessage(msg)
 		if err != nil {
 			return err
 		}
 
 		// Mando primo set di messaggi
-		var previousText string
 		for i := 1; i < 3; i++ {
 			time.Sleep(2 * time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, textList[i])
+			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
 			_, err := services.SendMessage(edited)
 			if err != nil {
 				return err
@@ -220,9 +220,10 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Invio altro set di messaggi
+		var previousText string
 		for i := 3; i < 12; i++ {
 			time.Sleep(2 * time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
+			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, previousText+"\n"+textList[i])
 
 			var sendedMessage tgbotapi.Message
 			sendedMessage, err = services.SendMessage(edited)
@@ -233,6 +234,7 @@ func (c *TutorialController) Stage() (err error) {
 			previousText = sendedMessage.Text
 		}
 
+		var lastMessage tgbotapi.Message
 		lastMessage, err = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
 		if err != nil {
 			return
@@ -241,7 +243,7 @@ func (c *TutorialController) Stage() (err error) {
 		previousText = lastMessage.Text
 		for i := 13; i < len(textList); i++ {
 			time.Sleep(time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, lastMessage.MessageID, previousText+"\n"+textList[i])
+			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, previousText+"\n"+textList[i])
 
 			var sendedMessage tgbotapi.Message
 			sendedMessage, err = services.SendMessage(edited)
@@ -255,7 +257,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Mando esplosione
 		edit := services.NewEditMessage(
 			c.Player.ChatID,
-			lastMessage.MessageID,
+			firstMessage.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "route.start.explosion"),
 		)
 

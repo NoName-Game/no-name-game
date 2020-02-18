@@ -58,7 +58,7 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
 				),
 			),
 		)
@@ -279,7 +279,6 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		// Aggiungo tasti back and clears
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 		))
 
@@ -339,7 +338,6 @@ func (c *InventoryEquipController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
@@ -386,12 +384,6 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err

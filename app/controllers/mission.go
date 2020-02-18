@@ -216,16 +216,12 @@ func (c *MissionController) Stage() (err error) {
 				endTime.Format("15:04:05"),
 			),
 		)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu")),
-			),
-		)
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
 			),
 		)
 
@@ -302,8 +298,14 @@ func (c *MissionController) Stage() (err error) {
 			),
 		)
 
-		// Rimuovo keyboard
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
+			),
+		)
+
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
