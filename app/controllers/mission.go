@@ -31,11 +31,9 @@ type MissionController struct {
 func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-
 	c.Controller = "route.mission"
 	c.Player = player
 	c.Update = update
-	c.Message = update.Message
 
 	// Registro tipi di missione
 	c.MissionTypes = make([]string, 3)
@@ -63,7 +61,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Se ritornano degli errori
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
 			panic(err)
@@ -79,6 +77,8 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -118,8 +118,8 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// un tipo di missione tra quelli disponibili
 	case 1:
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		if helpers.StringInSlice(c.Message.Text, c.MissionTypes) {
-			c.Payload.ExplorationType = c.Message.Text
+		if helpers.StringInSlice(c.Update.Message.Text, c.MissionTypes) {
+			c.Payload.ExplorationType = c.Update.Message.Text
 
 			return false, err
 		}
@@ -148,14 +148,14 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// In questo stage verifico l'azione che vuole intraprendere l'utente
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
-		if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
 			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
 			c.State.ToNotify = helpers.SetTrue()
 
 			return false, err
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
-		} else if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
 			// Passo allo stadio conclusivo
 			c.State.Stage = 4
 
@@ -235,9 +235,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Importo nel payload la scelta del player
-		c.Payload.ExplorationType = c.Message.Text
-		jsonPayload, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(jsonPayload)
+		c.Payload.ExplorationType = c.Update.Message.Text
 
 		// Avanzo di stato
 		c.State.Stage = 2
@@ -289,11 +287,6 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		jsonPayload, err := json.Marshal(c.Payload)
-		if err != nil {
-			return err
-		}
-		c.State.Payload = string(jsonPayload)
 		c.State.Stage = 3
 
 	// In questo stage verifico cosa ha scelto di fare il player

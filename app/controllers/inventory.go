@@ -20,9 +20,9 @@ type InventoryController BaseController
 // ====================================
 func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
-	c.Message = update.Message
+	c.Update = update
 
-	msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
+	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.recap")),
@@ -56,7 +56,7 @@ type InventoryRecapController BaseController
 // ====================================
 func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
-	c.Message = update.Message
+	c.Update = update
 
 	var finalRecap string
 
@@ -109,9 +109,9 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Summary Armors
 	// *******************
 	var playerArmors nnsdk.Armors
-	playerArmors, errArmors := providers.GetPlayerArmors(player, "false")
-	if errArmors != nil {
-		services.ErrorHandler("Can't get player armors", err)
+	playerArmors, err = providers.GetPlayerArmors(player, "false")
+	if err != nil {
+		panic(err)
 	}
 
 	var recapArmors string
@@ -129,7 +129,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 		recapArmors,
 	)
 
-	msg := services.NewMessage(c.Message.Chat.ID, finalRecap)
+	msg := services.NewMessage(c.Update.Message.Chat.ID, finalRecap)
 	_, err = services.SendMessage(msg)
 	if err != nil {
 		panic(err)

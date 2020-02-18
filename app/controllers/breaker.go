@@ -28,7 +28,7 @@ func (c *BackController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 
 	// Inizializzo
 	c.Controller = "route.breaker.back"
-	c.Message = update.Message
+	c.Update = update
 
 	// Delete redis state
 	err = helpers.DelRedisState(player)
@@ -66,16 +66,15 @@ func (c *ClearsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 
 	// Inizializzo
 	c.Controller = "route.breaker.back"
-	c.Message = update.Message
+	c.Update = update
 
 	err = helpers.DeleteRedisAndDbState(player)
 	if err != nil {
 		panic(err)
 	}
 
-	message := update.Message
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-		msg := services.NewMessage(message.Chat.ID,
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			"***************************\nDEBUG: DELETE DB AND REDIS STATE.\n***************************\n",
 		)
 		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)

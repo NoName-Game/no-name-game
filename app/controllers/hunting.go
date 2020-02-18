@@ -28,8 +28,8 @@ type HuntingController struct {
 		InFight   bool
 		Kill      uint
 	}
-	// Additional Data
-	// Callback *tgbotapi.CallbackQuery
+	PlayerPositionX int
+	PlayerPositionY int
 }
 
 // Settings generali
@@ -82,13 +82,6 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Player = player
 	c.Update = update
 
-	// Verifico il tipo di messaggio
-	// if update.CallbackQuery != nil {
-	// 	c.Callback = update.CallbackQuery
-	// } else {
-	// 	c.Message = update.Message
-	// }
-
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
@@ -109,11 +102,11 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Se ritornano degli errori
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
 				),
 			),
 		)
@@ -127,7 +120,6 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Ok! Run!
-	// go c.Stage()
 	err = c.Stage()
 	if err != nil {
 		panic(err)
@@ -153,13 +145,16 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 			panic(err)
 		}
 
-		// Cancello messaggio contentente la mappa
-		err = services.DeleteMessage(c.Update.CallbackQuery.Message.Chat.ID, c.Update.CallbackQuery.Message.MessageID)
-		if err != nil {
-			panic(err)
+		// Cancello messaggio contentente la mappa accertandomi che l'azione
+		// arrivi da un messaggio di callback
+		if c.Update.CallbackQuery != nil {
+			err = services.DeleteMessage(c.Update.CallbackQuery.Message.Chat.ID, c.Update.CallbackQuery.Message.MessageID)
+			if err != nil {
+				panic(err)
+			}
 		}
 
-		// Call menu controller
+		// Ritorno al menu
 		new(MenuController).Handle(c.Player, c.Update)
 	}
 
@@ -200,12 +195,12 @@ func (c *HuntingController) Stage() (err error) {
 	return
 }
 
-// Hunting
+// Hunting - in questo passo mi restituisco la mappa al player
 func (c *HuntingController) Hunting() (err error) {
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
-	if c.Payload.MapID <= 0 || c.Update.CallbackQuery == nil {
+	if c.Payload.MapID <= 0 && c.Update.CallbackQuery == nil {
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		var lastPosition nnsdk.PlayerPosition
@@ -248,39 +243,51 @@ func (c *HuntingController) Hunting() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, decodedMap)
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
-		go services.SendMessage(msg)
-		// if err != nil {
-		// 	return err
-		// }
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorno lo stato e ritorno
 		c.Payload.MapID = maps.ID
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
 
 		return
 	}
 
-	// Recupero mappa da redis
-	var maps nnsdk.Map
-	maps, err = helpers.GetRedisMapHunting(c.Payload.MapID)
-	if err != nil {
-		return err
-	}
+	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
+	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
+	if c.Payload.MapID > 0 && c.Update.CallbackQuery != nil {
+		var maps nnsdk.Map
+		maps, err = helpers.GetRedisMapHunting(c.Payload.MapID)
+		if err != nil {
+			return err
+		}
 
-	// Recupero posizione player
-	var playerPositionX, playerPositionY int
-	playerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
-	playerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
+		// Recupero posizione player
+		// var playerPositionX, playerPositionY int
+		c.PlayerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
+		c.PlayerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
 
-	// Controllo tipo di callback data - move / fight
-	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+		// Controllo tipo di callback data - move / fight
+		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
-	// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-	if actionType[1] == "move" && !c.Payload.InFight {
-		err = c.Move(actionType[2], maps, playerPositionX, playerPositionY)
-	} else if actionType[1] == "fight" {
-		err = c.Fight(actionType[2], maps, playerPositionX, playerPositionY)
+		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
+		if actionType[1] == "move" && !c.Payload.InFight {
+			err = c.Move(actionType[2], maps)
+		} else if actionType[1] == "fight" {
+			err = c.Fight(actionType[2], maps)
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// Rimuove rotella di caricamento dal bottone
+		err = services.AnswerCallbackQuery(
+			services.NewAnswer(c.Update.CallbackQuery.ID, "", false),
+		)
+
+		return
 	}
 
 	return err
@@ -289,7 +296,7 @@ func (c *HuntingController) Hunting() (err error) {
 // ====================================
 // Movements
 // ====================================
-func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX int, playerPositionY int) (err error) {
+func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 	// Refresh della mappa
 	var cellGrid [][]bool
 	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
@@ -300,28 +307,28 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 	// Eseguo azione
 	switch action {
 	case "up":
-		if !cellGrid[playerPositionX-1][playerPositionY] {
-			playerPositionX--
+		if !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
+			c.PlayerPositionX--
 		} else {
-			playerPositionX++
+			c.PlayerPositionX++
 		}
 	case "down":
-		if !cellGrid[playerPositionX+1][playerPositionY] {
-			playerPositionX++
+		if !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
+			c.PlayerPositionX++
 		} else {
-			playerPositionX--
+			c.PlayerPositionX--
 		}
 	case "left":
-		if !cellGrid[playerPositionX][playerPositionY-1] {
-			playerPositionY--
+		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
+			c.PlayerPositionY--
 		} else {
-			playerPositionY++
+			c.PlayerPositionY++
 		}
 	case "right":
-		if !cellGrid[playerPositionX][playerPositionY+1] {
-			playerPositionY++
+		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
+			c.PlayerPositionY++
 		} else {
-			playerPositionY--
+			c.PlayerPositionY--
 		}
 	case "action":
 		// Al momento viene usato per ucsire dalla mappa
@@ -334,15 +341,15 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 	}
 
 	// Aggiorno nuova posizione del player
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", playerPositionX)
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", playerPositionY)
+	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", c.PlayerPositionX)
+	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", c.PlayerPositionY)
 	if err != nil {
 		return
 	}
 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
-	decodedMap, err = helpers.DecodeMapToDisplay(maps, playerPositionX, playerPositionY)
+	decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY)
 	if err != nil {
 		return err
 	}
@@ -351,30 +358,20 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 	msg := services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
 
 	// Se nella mappa viene visualizzato un mob allora mostro la fight keyboard
-	// TODO: migliorare
-
+	// TODO: migliorare adesso verifica solo se ci sei sopra
 	var nearMob bool
-	_, nearMob = helpers.CheckForMob(maps, playerPositionX, playerPositionY)
+	_, nearMob = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
 	if true == nearMob {
 		msg.ReplyMarkup = &fightKeyboard
 	} else {
 		msg.ReplyMarkup = &mapKeyboard
 	}
 
-	// if strings.Contains(decodedMap, "*") {
-	// 	msg.ReplyMarkup = &fightKeyboard
-	// } else {
-	// 	msg.ReplyMarkup = &mapKeyboard
-	// }
-
 	msg.ParseMode = "HTML"
-	go services.SendMessage(msg)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// Rimuove rotella di caricamento dal bottone
-	services.AnswerCallbackQuery(services.NewAnswer(c.Update.CallbackQuery.ID, "", false))
+	_, err = services.SendMessage(msg)
+	if err != nil {
+		return err
+	}
 
 	return
 }
@@ -382,7 +379,7 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map, playerPositionX 
 // ====================================
 // Fight
 // ====================================
-func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX int, playerPositionY int) (err error) {
+func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 	var enemy nnsdk.Enemy
 	var editMessage tgbotapi.EditMessageTextConfig
 
@@ -391,7 +388,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		enemy, _ = providers.GetEnemyByID(c.Payload.EnemyID)
 	} else {
 		// Recupero il mob più vicino con il quale combattere e me lo setto nel payload
-		enemy, _ = helpers.CheckForMob(maps, playerPositionX, playerPositionY)
+		enemy, _ = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
 	}
 
 	switch action {
@@ -422,8 +419,8 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 		var hitRequest nnsdk.HitEnemyRequest
 		hitRequest = nnsdk.HitEnemyRequest{
 			PlayerID:        c.Player.ID,
-			PlayerPositionX: playerPositionX,
-			PlayerPositionY: playerPositionY,
+			PlayerPositionX: c.PlayerPositionX,
+			PlayerPositionY: c.PlayerPositionY,
 			BodySelection:   c.Payload.Selection,
 		}
 
@@ -435,6 +432,8 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 		// Verifico se il MOB è morto
 		if hitResponse.EnemyDie == true {
+			// TODO: ricevere monete e riconpensa
+
 			// Aggiorno modifica del messaggio
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
@@ -482,7 +481,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 		// Verifico se il PLAYER è morto
 		if hitResponse.PlayerDie == true {
-			// Aggiorno modifica del messaggio
+			// Aggiorno messaggio notificando al player che è morto
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
@@ -500,6 +499,13 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 			editMessage.ReplyMarkup = &ok
 
+			// Invio messaggio
+			_, err = services.SendMessage(editMessage)
+			if err != nil {
+				return err
+			}
+
+			// Il player è morto non mi r
 			c.State.Completed = helpers.SetTrue()
 
 			// Invoco player Death
@@ -535,7 +541,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		decodedMap, err = helpers.DecodeMapToDisplay(maps, playerPositionX, playerPositionY)
+		decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY)
 		if err != nil {
 			return err
 		}
@@ -574,12 +580,6 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map, playerPositionX
 
 	// Invio messaggio modificato
 	_, err = services.SendMessage(editMessage)
-	if err != nil {
-		return err
-	}
-
-	// Rimuove rotella di caricamento dal bottone
-	services.AnswerCallbackQuery(services.NewAnswer(c.Update.CallbackQuery.ID, "", false))
 
 	return
 }

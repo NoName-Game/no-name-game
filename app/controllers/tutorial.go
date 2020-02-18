@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -29,11 +30,9 @@ type TutorialController struct {
 func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	// var isNewState bool
 	c.Controller = "route.start"
 	c.Player = player
 	c.Update = update
-	c.Message = update.Message
 
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
@@ -55,7 +54,7 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	// Se ritornano degli errori
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
 			panic(err)
@@ -71,6 +70,8 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	}
 
 	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -106,7 +107,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		lang, err := providers.FindLanguageBy(c.Message.Text, "name")
+		lang, err := providers.FindLanguageBy(c.Update.Message.Text, "name")
 		if err != nil {
 			return false, err
 		}
@@ -122,7 +123,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage devo verificare unicamente che venga passata una stringa
 	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
-		if c.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.openEye") {
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.openEye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true, nil
 		}
@@ -182,7 +183,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, "Select language")
+		msg := services.NewMessage(c.Update.Message.Chat.ID, "Select language")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -200,7 +201,12 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Prendo il primo testo della intro e lo invio
 		msg := services.NewMessage(c.Player.ChatID, textList[0])
-		lastMessage, _ := services.SendMessage(msg)
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
+		var lastMessage tgbotapi.Message
+		lastMessage, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Mando primo set di messaggi
 		var previousText string

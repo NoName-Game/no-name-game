@@ -30,11 +30,9 @@ type InventoryEquipController struct {
 func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-
 	c.Controller = "route.inventory.equip"
 	c.Player = player
 	c.Update = update
-	c.Message = update.Message
 
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
@@ -56,10 +54,12 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Se ritornano degli errori
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
 			),
 		)
 
@@ -78,6 +78,8 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -115,7 +117,7 @@ func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 
 	// Verifico che la tipologia di equip che vuole il player esista
 	case 1:
-		if helpers.InArray(c.Message.Text, []string{
+		if helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "armors"),
 			helpers.Trans(c.Player.Language.Slug, "weapons"),
 		}) {
@@ -127,7 +129,7 @@ func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 
 	// Verifico che il player voglia continuare con l'equip
 	case 2:
-		if strings.Contains(c.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")) {
+		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")) {
 			return false, err
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -136,7 +138,7 @@ func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 
 	// Verifico la conferma dell'equip
 	case 3:
-		if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return false, err
 		}
 
@@ -192,7 +194,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Invio messagio con recap e con selettore categoria
-		msg := services.NewMessage(c.Message.Chat.ID,
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s \n %s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
@@ -225,7 +227,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 	case 1:
 		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
-		c.Payload.Type = c.Message.Text
+		c.Payload.Type = c.Update.Message.Text
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
@@ -282,7 +284,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		))
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.what"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.what"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -293,8 +295,6 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
 		c.State.Stage = 2
 
 	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
@@ -304,7 +304,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		var equipmentID uint
 
 		// Ripulisco messaggio per recupermi solo il nome
-		equipmentName = strings.Split(c.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")+" ")[1]
+		equipmentName = strings.Split(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")+" ")[1]
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
@@ -326,7 +326,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Invio messaggio per conferma equipaggiamento
-		msg := services.NewMessage(c.Message.Chat.ID,
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s \n\n %s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm"),
@@ -351,8 +351,6 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
 		c.State.Stage = 3
 
 	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
@@ -387,7 +385,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),

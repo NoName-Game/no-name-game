@@ -38,7 +38,6 @@ func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Updat
 	c.Controller = "route.crafting"
 	c.Player = player
 	c.Update = update
-	c.Message = update.Message
 
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
@@ -60,10 +59,12 @@ func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Updat
 	// Se ritornano degli errori
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
 			),
 		)
 
@@ -82,6 +83,8 @@ func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Updat
 	}
 
 	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
 	_, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
@@ -119,8 +122,8 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 
 	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
 	case 1:
-		if strings.Contains(c.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.craft")) {
-			c.Payload.Item, err = providers.GetItemByName(strings.Split(c.Message.Text, ": ")[1])
+		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.craft")) {
+			c.Payload.Item, err = providers.GetItemByName(strings.Split(c.Update.Message.Text, ": ")[1])
 			// Item non esiste
 			if err != nil {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "crafting.item_does_not_exist")
@@ -134,7 +137,7 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario che venga validato se il player ha tutti i
 	// materiali necessario al crafting dell'item da lui scelto
 	case 2:
-		if c.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
 			var playerInventory nnsdk.PlayerInventories
 			playerInventory, _ = providers.GetPlayerResources(c.Player.ID)
@@ -258,8 +261,6 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
 		c.State.Stage = 2
 
 	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
@@ -317,7 +318,7 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID,
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed")+"\n\n"+c.Payload.Item.Name,
 		)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
