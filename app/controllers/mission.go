@@ -188,6 +188,13 @@ func (c *MissionController) Stage() (err error) {
 			keyboardRows = append(keyboardRows, keyboardRow)
 		}
 
+		// Aggiungo anche abbandona
+		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+			),
+		))
+
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.exploration"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{

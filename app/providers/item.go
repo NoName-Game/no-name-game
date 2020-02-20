@@ -58,3 +58,23 @@ func GetItemByName(name string) (nnsdk.Item, error) {
 	return item, nil
 
 }
+
+func GetItemByCategoryID(categoryID uint) (nnsdk.Items, error) {
+	var items nnsdk.Items
+	params := url.Values{}
+	params.Add("category_id", fmt.Sprintf("%v", categoryID))
+
+	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
+
+	if err != nil {
+		return items, err
+	}
+
+	err = json.Unmarshal(resp.Data, &items)
+
+	if err != nil {
+		return items, err
+	}
+	return items, nil
+
+}

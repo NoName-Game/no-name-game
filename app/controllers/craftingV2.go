@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -27,6 +28,15 @@ type CraftingV2Controller struct {
 		Resources map[uint]int // Materiali necessari
 	}
 }
+
+var (
+
+	// Categorie di crafting disponibili
+	craftingCategories = []string{
+		"medical",
+		"ship_support",
+	}
+)
 
 // ====================================
 // Handle
@@ -120,8 +130,21 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 	case 0:
 		return false, err
 
-	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
+	// In questo stage verifico se mi è stata passata una categoria che esiste realmente
 	case 1:
+		// category, err = providers.FindItemCategoryByName()
+		if !helpers.InArray(c.Update.Message.Text, []string{
+			helpers.Trans(c.Player.Language.Slug, "crafting.categories.medical"),
+			helpers.Trans(c.Player.Language.Slug, "crafting.categories.ship_support"),
+		}) {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+
+			return true, err
+		}
+
+		return false, err
+	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
+	case 2:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.craft")) {
 			c.Payload.Item, err = providers.GetItemByName(strings.Split(c.Update.Message.Text, ": ")[1])
 			// Item non esiste
@@ -136,7 +159,7 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 
 	// In questo stage è necessario che venga validato se il player ha tutti i
 	// materiali necessario al crafting dell'item da lui scelto
-	case 2:
+	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
 			var playerInventory nnsdk.PlayerInventories
@@ -170,7 +193,7 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
-	case 3:
+	case 4:
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
 			"crafting.wait",
@@ -192,17 +215,64 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 func (c *CraftingV2Controller) Stage() (err error) {
 	switch c.State.Stage {
 
-	// In questo stage recuperiamo la lista dei ITEMS, ovvero
-	// quegli oggetti che possono essere anche craftati dal player
+	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
-		// Lista oggetti craftabili
-		craftableItems, err := providers.GetAllItems()
+		var itemCategories nnsdk.ItemCategories
+		itemCategories, err = providers.GetAllItemCategories()
 		if err != nil {
 			return err
 		}
 
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
+
+		var keyboardRow [][]tgbotapi.KeyboardButton
+		for _, category := range itemCategories {
+			row := tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug))),
+			)
+			keyboardRow = append(keyboardRow, row)
+		}
+
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard:       keyboardRow,
+			ResizeKeyboard: false,
+		}
+
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Avanzo di stage
+		c.State.Stage = 1
+
+	// In questo stage recuperiamo la lista dei ITEMS, appartenenti alla categoria scelta
+	// che possono essere anche craftati dal player
+	case 1:
+		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
+		var itemCategories nnsdk.ItemCategories
+		itemCategories, err = providers.GetAllItemCategories()
+		if err != nil {
+			return err
+		}
+
+		var chosenCategory nnsdk.ItemCategory
+		for _, category := range itemCategories {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)) {
+				chosenCategory = category
+			}
+		}
+
+		// Lista oggetti craftabili
+		var craftableItems nnsdk.Items
+		craftableItems, err = providers.GetItemByCategoryID(chosenCategory.ID)
+		if err != nil {
+			return err
+		}
+
+		// Creo messaggio
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, item := range craftableItems {
@@ -223,11 +293,11 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.State.Stage = 2
 
 	// In questo stage riepilogo le risorse necessarie e
 	// chiedo al conferma al player se continuare il crafting dell'item
-	case 1:
+	case 2:
 		// Inserisco nel payload la recipelist per avere accesso più facile ad essa
 		helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
 
@@ -261,11 +331,11 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.State.Stage = 3
 
 	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
 	// procedo con il rimuovere le risorse associate e notificargli l'attesa per il crafting
-	case 2:
+	case 3:
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
 			err = providers.ManagePlayerInventory(
@@ -301,11 +371,11 @@ func (c *CraftingV2Controller) Stage() (err error) {
 		// Aggiorna stato
 		c.State.FinishAt = endTime
 		c.State.ToNotify = helpers.SetTrue()
-		c.State.Stage = 3
+		c.State.Stage = 4
 
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo
-	case 3:
+	case 4:
 		// Aggiungo item all'inventario
 		err = providers.ManagePlayerInventory(
 			c.Player.ID,
