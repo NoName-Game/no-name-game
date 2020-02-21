@@ -21,7 +21,7 @@ import (
 // ====================================
 // CraftingController
 // ====================================
-type CraftingController struct {
+type CraftingV2Controller struct {
 	BaseController
 	Payload struct {
 		Item      nnsdk.Item   // Item da craftare
@@ -41,7 +41,7 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -122,7 +122,7 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 // ====================================
 // Validator
 // ====================================
-func (c *CraftingController) Validator() (hasErrors bool, err error) {
+func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 
 	switch c.State.Stage {
@@ -225,7 +225,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
-func (c *CraftingController) Stage() (err error) {
+func (c *CraftingV2Controller) Stage() (err error) {
 	switch c.State.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
