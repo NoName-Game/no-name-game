@@ -68,10 +68,9 @@ func (c *ClearsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	c.Controller = "route.breaker.back"
 	c.Update = update
 
-	err = helpers.DeleteRedisAndDbState(player)
-	if err != nil {
-		panic(err)
-	}
+	// In questo caso non verifico l'errore potrebbe non essere necessario
+	// verificarne l'esistenza
+	_ = helpers.DeleteRedisAndDbState(player)
 
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,

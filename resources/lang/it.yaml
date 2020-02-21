@@ -108,20 +108,27 @@ mission.continue: "Continua ad esplorare"
 # CRAFTING
 crafting.categories.medical: "Medicine"
 crafting.categories.ship_support: "Supporto nave"
-crafting.craft: "Assembla: "
+crafting.craft: "Crafting:"
 crafting.craft_different_item: "Crea altro!"
 crafting.what: "Cosa vuoi realizzare?"
 crafting.type: "Quale tipologia ti interessa realizzare?"
 crafting.add: "Aggiungi"
 crafting.choose_resources: "Quali risorse vuoi usare?"
 crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
-crafting.craft_completed: "Il tuo item è stato craftato correttamente. Questo è il risultato:"
+crafting.craft_completed: "Il tuo item è stato craftato correttamente. Hai ottenuto: %s!"
 crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
 crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per craftare"
 crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la ricetta!"
-
 crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
 crafting.item_does_not_exist: "L'item scelto non esiste!"
+
+# CRAFTING ITEMS
+crafting.items.water: "Acqua"
+crafting.items.revitalizing_small: "Rivitalizzante piccolo"
+crafting.items.raw_fuel: "Carburante grezzo"
+crafting.items.refined_fuel: "Carburante raffinato"
+crafting.items.final_fuel: "Carburante finale"
+
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
