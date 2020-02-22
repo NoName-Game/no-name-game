@@ -13,15 +13,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// Crafting:
-// Craft Base effettuati dal player
-// TODO: andrebbe dato uno costo se comprato dall'npc una categoria per
-// per differenziare e una descrizione dell'oggetto
-
 // ====================================
 // CraftingController
+// Ogni player ha la possibilità di craftare al player degli item
+// che possono essere usati in diversi modo, es. per recuperare vita
+// o per ripristinare determinate cose
 // ====================================
-type CraftingV2Controller struct {
+type CraftingController struct {
 	BaseController
 	Payload struct {
 		Item      nnsdk.Item   // Item da craftare
@@ -29,19 +27,10 @@ type CraftingV2Controller struct {
 	}
 }
 
-var (
-
-	// Categorie di crafting disponibili
-	craftingCategories = []string{
-		"medical",
-		"ship_support",
-	}
-)
-
 // ====================================
 // Handle
 // ====================================
-func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -122,7 +111,7 @@ func (c *CraftingV2Controller) Handle(player nnsdk.Player, update tgbotapi.Updat
 // ====================================
 // Validator
 // ====================================
-func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
+func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 
 	switch c.State.Stage {
@@ -217,6 +206,8 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 		if time.Now().After(c.State.FinishAt) {
 			return false, err
 		}
+
+		return true, err
 	}
 
 	return true, err
@@ -225,7 +216,7 @@ func (c *CraftingV2Controller) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
-func (c *CraftingV2Controller) Stage() (err error) {
+func (c *CraftingController) Stage() (err error) {
 	switch c.State.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili

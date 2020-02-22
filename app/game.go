@@ -14,23 +14,23 @@ var (
 	// Routes
 	//
 	Routes = map[string]interface{}{
-		"route.menu":     new(controllers.MenuController),     // menu.go
-		"route.start":    new(controllers.TutorialController), // tutorial.go  - MAIN
-		"route.mission":  new(controllers.MissionController),  // mission.go   - MAIN
-		"route.crafting": new(controllers.CraftingController), // crafting.go  - MAIN
-		// "route.abilityTree": new(controllers.AbilityController),    // ability.go - MAIN
-		//
-		"route.hunting": new(controllers.HuntingController), // hunting.go
-		//
-		"route.inventory":       new(controllers.InventoryController),      // inventory.go - KEYBOARD
-		"route.inventory.recap": new(controllers.InventoryRecapController), // inventory.go - MAIN
-		"route.inventory.equip": new(controllers.InventoryEquipController), // inventory_equip.go - MAIN
-		// "route.inventory.destroy": new(controllers.InventoryDestroyController), // inventory_destroy.go - MAIN
-		//
-		// "route.ship":             new(controllers.ShipController),            // ship.go
-		// "route.ship.exploration": new(controllers.ShipExplorationController), // ship.go
-		// "route.ship.repairs":     new(controllers.ShipRepairsController),     // ship.go
-		//
+		"route.menu":     new(controllers.MenuController),
+		"route.start":    new(controllers.TutorialController),
+		"route.mission":  new(controllers.MissionController),
+		"route.crafting": new(controllers.CraftingController),
+		// "route.abilityTree": new(controllers.AbilityController),
+
+		"route.hunting": new(controllers.HuntingController),
+
+		"route.inventory":       new(controllers.InventoryController),
+		"route.inventory.recap": new(controllers.InventoryRecapController),
+		"route.inventory.equip": new(controllers.InventoryEquipController),
+		// "route.inventory.destroy": new(controllers.InventoryDestroyController),
+
+		"route.ship":             new(controllers.ShipController),
+		"route.ship.exploration": new(controllers.ShipExplorationController),
+		// "route.ship.repairs":     new(controllers.ShipRepairsController),
+
 		// "route.testing.multiStage": new(controllers.TestingController),
 	}
 

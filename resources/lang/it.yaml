@@ -208,13 +208,14 @@ ship.report: "Rapporto Nave"
 
 # SHIP - Exploration
 ship.exploration.info: "Vuoi avviare una nuova esplorazione?"
-ship.exploration.start: "Ricerca"
+ship.exploration.start: "Avvia esplorazione"
 ship.exploration.current_position: "La tua posizione attuale"
-ship.exploration.research: "Sono stati rilevati queste entità nelle vicinanze:"
+ship.exploration.research: "Sono stati rilevati questi pianeti nelle vicinanze:"
 ship.exploration.fuel_needed: "Carburante necessario"
 ship.exploration.time_needed: "Tempo necessario"
 ship.exploration.exploring: "Motori accesi, buon viaggio! Il tuo arrivo è previsto per le %s"
 ship.exploration.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli dell'esplorazione."
+ship.exploration.wait: "Il termine per del tuo viaggio è previsto alle %s, torna più tardi."
 
 # SHIP - Warehouse
 ship.warehouse.info: "Info warehouse"

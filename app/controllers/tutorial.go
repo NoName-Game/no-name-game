@@ -329,7 +329,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Richiamo crafting come sottoprocesso di questo controller
-		missionController := new(CraftingV2Controller)
+		missionController := new(CraftingController)
 		missionController.Father = c.State.ID
 		missionController.Handle(c.Player, c.Update)
 

@@ -9,18 +9,6 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-type ResponseExplorationInfo struct {
-	Star     nnsdk.Planet
-	Distance float64
-	Fuel     float64
-	Time     float64
-}
-
-type RequestExplorationEnd struct {
-	Position []float64
-	Tank     float64
-}
-
 func GetShipRepairInfo(ship nnsdk.Ship) (map[string]interface{}, error) {
 	var info map[string]interface{}
 
@@ -76,11 +64,9 @@ func EndShipRepair(ship nnsdk.Ship) (map[string]interface{}, error) {
 	return info, nil
 }
 
-func GetShipExplorationInfo(ship nnsdk.Ship) ([]ResponseExplorationInfo, error) {
-	// var info []map[string]interface{}
-	var info []ResponseExplorationInfo
-
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/explorations/info", ship.ID), nil).Get()
+func GetShipExplorationInfo(ship nnsdk.Ship) (info []nnsdk.ResponseExplorationInfo, err error) {
+	var resp nnsdk.APIResponse
+	resp, err = services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/explorations/info", ship.ID), nil).Get()
 	if err != nil {
 		return info, err
 	}
@@ -93,7 +79,7 @@ func GetShipExplorationInfo(ship nnsdk.Ship) ([]ResponseExplorationInfo, error) 
 	return info, nil
 }
 
-func EndShipExploration(ship nnsdk.Ship, request RequestExplorationEnd) (map[string]interface{}, error) {
+func EndShipExploration(ship nnsdk.Ship, request nnsdk.RequestExplorationEnd) (map[string]interface{}, error) {
 	var info map[string]interface{}
 
 	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("ships/%v/explorations/end", ship.ID), request).Post()
