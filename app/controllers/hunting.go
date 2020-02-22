@@ -128,34 +128,15 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	_, err = providers.UpdatePlayerState(c.State)
+	c.State, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
 
-	// Verifico se lo stato è completato chiudo
-	if *c.State.Completed == true {
-		_, err = providers.DeletePlayerState(c.State) // Delete
-		if err != nil {
-			panic(err)
-		}
-
-		err = helpers.DelRedisState(player)
-		if err != nil {
-			panic(err)
-		}
-
-		// Cancello messaggio contentente la mappa accertandomi che l'azione
-		// arrivi da un messaggio di callback
-		if c.Update.CallbackQuery != nil {
-			err = services.DeleteMessage(c.Update.CallbackQuery.Message.Chat.ID, c.Update.CallbackQuery.Message.MessageID)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		// Ritorno al menu
-		new(MenuController).Handle(c.Player, c.Update)
+	// Verifico completamento
+	err = c.Completing()
+	if err != nil {
+		panic(err)
 	}
 
 	return

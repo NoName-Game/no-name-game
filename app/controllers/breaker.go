@@ -37,16 +37,16 @@ func (c *BackController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	}
 
 	// Questo messaggio verrà mostrato solo in vase di debug
-	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-		msg := services.NewMessage(player.ChatID,
-			"***************************\nDEBUG: DELETE REDIS STATE.\n***************************\n",
-		)
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			panic(err)
-		}
-	}
+	// if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
+	// 	msg := services.NewMessage(player.ChatID,
+	// 		"***************************\nDEBUG: DELETE REDIS STATE.\n***************************\n",
+	// 	)
+	// 	// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+	// 	_, err = services.SendMessage(msg)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// }
 
 	// Call menu controller
 	new(MenuController).Handle(player, update)

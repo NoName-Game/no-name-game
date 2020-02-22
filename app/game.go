@@ -81,9 +81,9 @@ func handleUpdate(update tgbotapi.Update) {
 	// 	if err := recover(); err != nil {
 	// 		// Registro errore
 	// 		services.ErrorHandler("recover handle update", err.(error))
-	// // Mando un messaggio dicendogli di inserire un username
-	// msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
-	// services.SendMessage(msg)
+	// 		// Mando un messaggio dicendogli di inserire un username
+	// 		// msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
+	// 		// services.SendMessage(msg)
 	// 	}
 	// }()
 

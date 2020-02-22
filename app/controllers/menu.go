@@ -70,17 +70,23 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "menu", c.Player.Username, tasks))
 	msg.ParseMode = "HTML"
 
+	var inTutorial bool
 	for _, state := range c.Player.States {
 		// Se il player sta finendo il tutorial mostro il menù con i task personalizzati
 		if state.Controller == "route.start" {
-			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-				Keyboard: keyboardRows,
-			}
+			inTutorial = true
 			break
-		} else {
-			msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-				Keyboard: keyboardMenu,
-			}
+		}
+	}
+
+	// Verifico se è in tutorial o no
+	if inTutorial {
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard: keyboardRows,
+		}
+	} else {
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard: keyboardMenu,
 		}
 	}
 

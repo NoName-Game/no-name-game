@@ -80,25 +80,15 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	_, err = providers.UpdatePlayerState(c.State)
+	c.State, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
 
-	// Verifico se lo stato è completato chiudo
-	if *c.State.Completed == true {
-		_, err = providers.DeletePlayerState(c.State) // Delete
-		if err != nil {
-			panic(err)
-		}
-
-		err = helpers.DelRedisState(player)
-		if err != nil {
-			panic(err)
-		}
-
-		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update)
+	// Verifico completamento
+	err = c.Completing()
+	if err != nil {
+		panic(err)
 	}
 
 	return

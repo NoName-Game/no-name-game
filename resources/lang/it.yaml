@@ -190,9 +190,10 @@ route.start.explosion: "<code>\t\t\t\t\t\t\t\t--_--\n\t\t\t\t\t(\t\t-_\t\t\t\t_)
 route.start.open_eye: "Apri gli occhi..."
 route.start.first_exploration: "Ti ritrovi su un pianeta sconosciuto, ma nonostante tu abbia perso conoscenza, degli insegnamenti rimbombano nella tua testa e ti dicono che devi recuperare risorse per evitare la morte.\nL'esplorazione é una delle maniere più veloci per trovare materiali da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
 route.start.first_crafting: "Una volta che hai recuperato risorse, devi sicuramente creare qualcosa per evitare la morte in caso di avvicinamento di strani esseri.\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza e certe classi aprono molte strade."
-route.start.firstHunting: "Hai un'arma (e magari un'armatura)... Beh direi che è tempo di andare a caccia di insetti ripugnanti!\n La caccia è una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e soldi! Ovviamente se muori...beh muori."
-route.start.firstWeaponEquipped: "Certo, ma se non equipaggi quell'arma come fai ad usarla??"
+route.start.first_hunting: "Hai un'arma (e magari un'armatura)... Beh direi che è tempo di andare a caccia di insetti ripugnanti!\n La caccia è una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e soldi! Ovviamente se muori...beh muori."
+route.start.first_weapon_equipped: "Certo, ma se non equipaggi quell'arma come fai ad usarla??"
 route.start.error.function_not_completed: "Devi prima terminare la precedente missione..."
+route.start.tutorial_complete: "I tuoi ricordi al momento finiscono qui, ma di sicuro riuscirari a trovare delle risposte"
 
 # CRON
 cron.route.testing.time_alert: "End Test time"
