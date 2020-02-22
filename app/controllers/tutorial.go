@@ -35,7 +35,7 @@ type TutorialController struct {
 func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Controller = "route.start"
+	c.Controller = "route.tutorial"
 	c.Player = player
 	c.Update = update
 
@@ -126,7 +126,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage devo verificare unicamente che venga passata una stringa
 	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
-		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.open_eye") {
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true, nil
 		}
@@ -135,7 +135,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage verifico se il player ha completato correttamente la missione
 	case 3:
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.start.error.function_not_completed")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
@@ -153,7 +153,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 		return false, err
 	case 4:
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.start.error.function_not_completed")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
@@ -171,7 +171,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 		return false, err
 	case 5:
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.start.error.function_not_completed")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
@@ -189,7 +189,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 		return false, err
 	case 6:
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.start.error.function_not_completed")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
@@ -271,7 +271,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Mando primo set di messaggi
 		for i := 1; i < 3; i++ {
-			time.Sleep(2 * time.Second)
+			time.Sleep(3 * time.Second)
 			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
 			_, err := services.SendMessage(edited)
 			if err != nil {
@@ -318,7 +318,7 @@ func (c *TutorialController) Stage() (err error) {
 		edit := services.NewEditMessage(
 			c.Player.ChatID,
 			firstMessage.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "route.start.explosion"),
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.explosion"),
 		)
 
 		edit.ParseMode = "HTML"
@@ -331,7 +331,9 @@ func (c *TutorialController) Stage() (err error) {
 		msg = services.NewMessage(c.Player.ChatID, "...")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.start.open_eye")),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye"),
+				),
 			),
 		)
 		_, err = services.SendMessage(msg)
@@ -348,7 +350,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.first_exploration"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
 			),
 		)
 		if err != nil {
@@ -375,7 +377,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.first_crafting"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_crafting"),
 			),
 		)
 		if err != nil {
@@ -402,7 +404,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.first_weapon_equipped"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
 			),
 		)
 		if err != nil {
@@ -429,7 +431,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.first_hunting"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
 			),
 		)
 		if err != nil {
@@ -456,7 +458,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.tutorial_complete"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed"),
 			),
 		)
 		if err != nil {

@@ -73,7 +73,7 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var inTutorial bool
 	for _, state := range c.Player.States {
 		// Se il player sta finendo il tutorial mostro il menù con i task personalizzati
-		if state.Controller == "route.start" {
+		if state.Controller == "route.tutorial" {
 			inTutorial = true
 			break
 		}

@@ -7,7 +7,7 @@ validationMessage: "Wrong input, please repeat or exit."
 miss_username: "Enter a username to play."
 
 # ROUTES
-route.start: "Start"
+route.tutorial: "Tutorial"
 route.backToTutorial: "Ritorna al tutorial."
 route.mission: "Missione"
 route.crafting: "Crafting"

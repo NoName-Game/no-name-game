@@ -15,7 +15,8 @@ var (
 	//
 	Routes = map[string]interface{}{
 		"route.menu":     new(controllers.MenuController),
-		"route.start":    new(controllers.TutorialController),
+		"route.tutorial": new(controllers.TutorialController),
+
 		"route.mission":  new(controllers.MissionController),
 		"route.crafting": new(controllers.CraftingController),
 		// "route.abilityTree": new(controllers.AbilityController),

@@ -76,7 +76,7 @@ func invoke(any interface{}, name string, args ...interface{}) {
 func call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(m[name])
 	if len(params) != f.Type().NumIn() {
-		err = errors.New("The number of params is not adapted")
+		err = errors.New("the number of params is not adapted")
 		return
 	}
 
@@ -94,6 +94,10 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 	parsed = message.Text
 	if message.IsCommand() {
 		parsed = message.Command()
+		// Se è un comando ed è start lo parso come tutorial
+		if parsed == "start" {
+			parsed = "tutorial"
+		}
 	}
 
 	return strings.ToLower(parsed)
@@ -101,8 +105,8 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 
 // Metodo per il parsing della callback
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
-	parsed = callback.Data
-	// TODO: spiegare perchè facciamo così
-	parsed = strings.Split(parsed, ".")[0]
+	// Prendo la prima parte del callback che contiene la rotta
+	parsed = strings.Split(callback.Data, ".")[0]
+
 	return strings.ToLower(parsed)
 }
