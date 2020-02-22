@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -259,19 +260,24 @@ func (c *TutorialController) Stage() (err error) {
 		// Recupero set di messaggi
 		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Controller)
 
-		// Prendo il primo testo della intro e lo invio
-		msg := services.NewMessage(c.Player.ChatID, textList[0])
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		// ************************
+		// Primo set di messaggi
+		// ************************
+		time.Sleep(1 * time.Second)
+
+		var firstMessageConfig tgbotapi.MessageConfig
+		firstMessageConfig = services.NewMessage(c.Player.ChatID, textList[0])
+		firstMessageConfig.ParseMode = "markdown"
 
 		var firstMessage tgbotapi.Message
-		firstMessage, err = services.SendMessage(msg)
+		firstMessage, err = services.SendMessage(firstMessageConfig)
 		if err != nil {
 			return err
 		}
 
 		// Mando primo set di messaggi
-		for i := 1; i < 3; i++ {
-			time.Sleep(3 * time.Second)
+		for i := 1; i <= 7; i++ {
+			time.Sleep(1 * time.Second)
 			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
 			_, err := services.SendMessage(edited)
 			if err != nil {
@@ -279,45 +285,113 @@ func (c *TutorialController) Stage() (err error) {
 			}
 		}
 
-		// Invio altro set di messaggi
-		var previousText string
-		for i := 3; i < 12; i++ {
-			time.Sleep(2 * time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, previousText+"\n"+textList[i])
+		// ************************
+		// Secondo set di messaggi
+		// ************************
+		time.Sleep(1 * time.Second)
 
-			var sendedMessage tgbotapi.Message
-			sendedMessage, err = services.SendMessage(edited)
-			if err != nil {
-				return
-			}
+		var secondMessageConfig tgbotapi.MessageConfig
+		secondMessageConfig = services.NewMessage(c.Player.ChatID, textList[8])
+		secondMessageConfig.ParseMode = "markdown"
 
-			previousText = sendedMessage.Text
-		}
-
-		var lastMessage tgbotapi.Message
-		lastMessage, err = services.SendMessage(services.NewMessage(c.Player.ChatID, textList[12]))
+		var secondMessage tgbotapi.Message
+		secondMessage, err = services.SendMessage(secondMessageConfig)
 		if err != nil {
-			return
+			return err
 		}
 
-		previousText = lastMessage.Text
-		for i := 13; i < len(textList); i++ {
-			time.Sleep(time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, previousText+"\n"+textList[i])
+		// PreviusText mi serve per andare a modificare il messaggio
+		// inviato ed appendergli la nuova parte di messaggio
+		var previousSecondText string = secondMessage.Text
+		for i := 9; i <= 12; i++ {
+			time.Sleep(3 * time.Second)
+			edited := services.NewEditMessage(
+				c.Player.ChatID,
+				secondMessage.MessageID,
+				fmt.Sprintf("%s\n%s", previousSecondText, textList[i]),
+			)
+			edited.ParseMode = "markdown"
 
-			var sendedMessage tgbotapi.Message
-			sendedMessage, err = services.SendMessage(edited)
+			secondMessage, err = services.SendMessage(edited)
 			if err != nil {
 				return
 			}
 
-			previousText = sendedMessage.Text
+			previousSecondText = secondMessage.Text
 		}
 
-		// Mando esplosione
+		// ************************
+		// Terzo set di messaggi
+		// ************************
+		time.Sleep(1 * time.Second)
+
+		var thirdMessageConfig tgbotapi.MessageConfig
+		thirdMessageConfig = services.NewMessage(c.Player.ChatID, textList[13])
+		thirdMessageConfig.ParseMode = "markdown"
+
+		var thirdMessage tgbotapi.Message
+		thirdMessage, err = services.SendMessage(thirdMessageConfig)
+		if err != nil {
+			return err
+		}
+
+		// PreviusText mi serve per andare a modificare il messaggio
+		// inviato ed appendergli la nuova parte di messaggio
+		var previousThirdText string = thirdMessage.Text
+		for i := 14; i <= 16; i++ {
+			time.Sleep(3 * time.Second)
+			edited := services.NewEditMessage(
+				c.Player.ChatID,
+				thirdMessage.MessageID,
+				fmt.Sprintf("%s\n%s", previousThirdText, textList[i]),
+			)
+			edited.ParseMode = "markdown"
+
+			thirdMessage, err = services.SendMessage(edited)
+			if err != nil {
+				return
+			}
+
+			previousThirdText = thirdMessage.Text
+		}
+
+		// ************************
+		// Quarto set di messaggi
+		// ************************
+		time.Sleep(1 * time.Second)
+
+		var fourthMessageConfig tgbotapi.MessageConfig
+		fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[17])
+		fourthMessageConfig.ParseMode = "markdown"
+
+		var fourthMessage tgbotapi.Message
+		fourthMessage, err = services.SendMessage(fourthMessageConfig)
+		if err != nil {
+			return err
+		}
+
+		// Mando primo set di messaggi
+		for i := 18; i <= 23; i++ {
+			time.Sleep(1 * time.Second)
+			edited := services.NewEditMessage(
+				c.Player.ChatID,
+				fourthMessage.MessageID,
+				textList[i],
+			)
+
+			edited.ParseMode = "markdown"
+			_, err := services.SendMessage(edited)
+			if err != nil {
+				return err
+			}
+		}
+
+		// ************************
+		// Esplosione
+		// ************************
 		edit := services.NewEditMessage(
 			c.Player.ChatID,
-			firstMessage.MessageID,
+			fourthMessage.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.explosion"),
 		)
 
@@ -328,15 +402,16 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Ultimo step apri gli occhi
-		msg = services.NewMessage(c.Player.ChatID, "...")
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		var openEyeMessage tgbotapi.MessageConfig
+		openEyeMessage = services.NewMessage(c.Player.ChatID, "...")
+		openEyeMessage.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye"),
 				),
 			),
 		)
-		_, err = services.SendMessage(msg)
+		_, err = services.SendMessage(openEyeMessage)
 		if err != nil {
 			return
 		}
