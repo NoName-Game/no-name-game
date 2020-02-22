@@ -9,6 +9,21 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
+func GetPlayerStateByID(id uint) (nnsdk.PlayerState, error) {
+	var playerState nnsdk.PlayerState
+	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", id), nil).Get()
+	if err != nil {
+		return playerState, err
+	}
+
+	err = json.Unmarshal(resp.Data, &playerState)
+	if err != nil {
+		return playerState, err
+	}
+
+	return playerState, nil
+}
+
 func GetPlayerStateToNotify() (nnsdk.PlayerStates, error) {
 	var playerStates nnsdk.PlayerStates
 

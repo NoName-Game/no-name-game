@@ -62,6 +62,17 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				),
+			),
+		)
+
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
 			panic(err)
@@ -79,16 +90,19 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	_, err = providers.UpdatePlayerState(c.State)
+	c.State, err = providers.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
 
 	// Verifico se lo stato è completato chiudo
 	if *c.State.Completed == true {
-		_, err = providers.DeletePlayerState(c.State) // Delete
-		if err != nil {
-			panic(err)
+		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
+		if c.State.Father <= 0 {
+			_, err = providers.DeletePlayerState(c.State) // Delete
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		err = helpers.DelRedisState(player)

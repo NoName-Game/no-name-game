@@ -21,7 +21,9 @@ import (
 // ====================================
 type TutorialController struct {
 	BaseController
-	Payload struct{}
+	Payload struct {
+		MissionID uint
+	}
 }
 
 // ====================================
@@ -55,6 +57,14 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
+			),
+		)
+
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
 			panic(err)
@@ -107,13 +117,10 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		lang, err := providers.FindLanguageBy(c.Update.Message.Text, "name")
-		if err != nil {
-			return false, err
-		}
+		_, err := providers.FindLanguageBy(c.Update.Message.Text, "name")
 
-		// Verifico le la lingua esiste, se così non fosse ritorno errore
-		if lang.ID <= 0 {
+		// Verifico se la lingua esiste, se così non fosse ritorno errore
+		if err != nil {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true, nil
 		}
@@ -123,19 +130,32 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage devo verificare unicamente che venga passata una stringa
 	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
-		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.openEye") {
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.start.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true, nil
 		}
 
 		return false, nil
 
-	// case 3:
-	// c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
-	// // Check if the player finished the previous function.
-	// if c.State, _ = helpers.GetPlayerStateByFunction(helpers.Player, "route.mission"); c.State == (nnsdk.PlayerState{}) {
-	// 	return false
-	// }
+	// In questo stage verifico se il player ha completato correttamente la missione
+	case 3:
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.start.error.function_not_completed")
+
+		var stateNotFoundErr error
+		var missionState nnsdk.PlayerState
+		missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.MissionID)
+		// Non è stato trovato lo stato ritorno allo stato precedente
+		// e non ritorno errore
+		if stateNotFoundErr != nil {
+			c.State.Stage = 2
+			return false, err
+		}
+
+		if *missionState.Completed != true {
+			return true, err
+		}
+
+		return false, err
 	// case 4:
 	// 	c.Validation.Message = helpers.Trans("route.start.error.functionNotCompleted")
 	// 	// Check if the player finished the previous function.
@@ -196,6 +216,14 @@ func (c *TutorialController) Stage() (err error) {
 	// In questo stage è previsto un'invio di un set di messaggi
 	// che introducono al player cosa sta accadendo
 	case 1:
+		// Invio messaggio per eliminare la tastiera
+		initMessage := services.NewMessage(c.Update.Message.Chat.ID, "...")
+		initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		_, err = services.SendMessage(initMessage)
+		if err != nil {
+			return err
+		}
+
 		// Recupero set di messaggi
 		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Controller)
 
@@ -271,7 +299,7 @@ func (c *TutorialController) Stage() (err error) {
 		msg = services.NewMessage(c.Player.ChatID, "...")
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.start.openEye")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.start.open_eye")),
 			),
 		)
 		_, err = services.SendMessage(msg)
@@ -288,7 +316,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.firstExploration"),
+				helpers.Trans(c.Player.Language.Slug, "route.start.first_exploration"),
 			),
 		)
 		if err != nil {
@@ -308,12 +336,16 @@ func (c *TutorialController) Stage() (err error) {
 		missionController.Father = c.State.ID
 		missionController.Handle(c.Player, c.Update)
 
+		// Recupero l'ID del task, mi serivirà per i controlli
+		c.Payload.MissionID = missionController.State.ID
 	case 3:
+		// TODO: CONTINUARE QUI
+
 		// First Crafting
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.start.firstCrafting"),
+				helpers.Trans(c.Player.Language.Slug, "route.start.first_crafting"),
 			),
 		)
 		if err != nil {

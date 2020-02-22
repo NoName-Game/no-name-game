@@ -31,7 +31,7 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	}
 
 	// Inizializzo
-	c.Controller = "route.abilityTree"
+	c.Controller = "route.menu"
 	c.Player = player
 
 	// Keyboard menu
@@ -53,15 +53,18 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var keyboardRows [][]tgbotapi.KeyboardButton
 
 	for _, state := range c.Player.States {
-		if *state.ToNotify {
-			// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
-			stateText := helpers.Trans(c.Player.Language.Slug, state.Controller) + helpers.Trans(c.Player.Language.Slug, "menu.finishAt", state.FinishAt.Format("15:04:05"))
-			tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", stateText) + "\n"
-		} else {
-			tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", helpers.Trans(c.Player.Language.Slug, state.Controller)) + "\n"
+		if *state.Completed != true {
+			if *state.ToNotify {
+				// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
+				stateText := helpers.Trans(c.Player.Language.Slug, state.Controller) + helpers.Trans(c.Player.Language.Slug, "menu.finishAt", state.FinishAt.Format("15:04:05"))
+				tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", stateText) + "\n"
+			} else {
+				tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", helpers.Trans(c.Player.Language.Slug, state.Controller)) + "\n"
+			}
+
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)))
+			keyboardRows = append(keyboardRows, keyboardRow)
 		}
-		keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)))
-		keyboardRows = append(keyboardRows, keyboardRow)
 	}
 
 	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "menu", c.Player.Username, tasks))
