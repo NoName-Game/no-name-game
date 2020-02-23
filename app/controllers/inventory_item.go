@@ -116,10 +116,10 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 		}
 
 		// Recupero nome item che il player vuole usare
-		playerChoiche := strings.Split(c.Update.Message.Text, ": ")[1]
+		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
 		for _, item := range playerInventoryItems {
-			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "crafting.items."+item.Item.Slug) {
+			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
 				c.Payload.Item = item.Item
 				return false, err
 			}
@@ -161,9 +161,9 @@ func (c *InventoryItemController) Stage() (err error) {
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
-						"%s %s",
-						helpers.Trans(c.Player.Language.Slug, "inventory.items.use"),
-						helpers.Trans(c.Player.Language.Slug, "crafting.items."+item.Item.Slug),
+						"%s (%v)",
+						helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug),
+						*item.Quantity,
 					),
 				),
 			)
@@ -199,11 +199,14 @@ func (c *InventoryItemController) Stage() (err error) {
 		// Invio messaggio per conferma
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
-				"%s \n\n %s",
-				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm"),
-				helpers.Trans(c.Player.Language.Slug, "crafting.items."+c.Payload.Item.Slug),
+				"%s\n\n%s", // Domanda e descrizione
+				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
+					helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+				),
+				helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
 			),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -234,7 +237,13 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.items.completed"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			helpers.Trans(c.Player.Language.Slug, "inventory.items.completed",
+				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+			),
+		)
+		msg.ParseMode = "markdown"
+
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err

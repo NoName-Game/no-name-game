@@ -70,24 +70,24 @@ func Run() {
 	// Gestisco update ricevuti
 	for update := range updates {
 		// Gestisco singolo update in worker dedicato
-		go handleUpdate(update)
-		// handleUpdate(update)
+		// go handleUpdate(update)
+		handleUpdate(update)
 	}
 }
 
 // handleUpdate - Gestisco singolo update
 func handleUpdate(update tgbotapi.Update) {
 	// Differisco controllo panic/recover
-	defer func() {
-		// Nel caso in cui panicasse
-		if err := recover(); err != nil {
-			// Registro errore
-			services.ErrorHandler("recover handle update", err.(error))
-			// Mando un messaggio dicendogli di inserire un username
-			// msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
-			// services.SendMessage(msg)
-		}
-	}()
+	// defer func() {
+	// 	// Nel caso in cui panicasse
+	// 	if err := recover(); err != nil {
+	// 		// Registro errore
+	// 		services.ErrorHandler("recover handle update", err.(error))
+	// 		// Mando un messaggio dicendogli di inserire un username
+	// 		// msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
+	// 		// services.SendMessage(msg)
+	// 	}
+	// }()
 
 	var err error
 	// Gestisco utente

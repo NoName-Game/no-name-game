@@ -101,10 +101,11 @@ mission.exploration: "Seleziona campo di ricerca!"
 mission.underground: "Sottosuolo"
 mission.surface: "Superfice"
 mission.atmosphere: "Atmosfera"
-mission.extraction_recap: "Hai estratto %s per una quantità pari a %d, vuoi terminare l'estrazione?"
+mission.extraction_recap: "*Rapporto Missione:*\nHai estratto *%s (%s)*  per una quantità pari a *%d* unità, vuoi continuare la missione?"
 mission.extraction_ended: "Decidi di rientrare dall'esplorazione con le tue nuove risorse!"
 mission.comeback: "Rientra dalla missione"
-mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcoli dovresti tornare intorno alle %s"
+mission.validator.wait: "Se già in missione, il tuo rientro alla base è previsto alle *%s*"
+mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcoli dovresti tornare intorno alle *%s*"
 mission.continue: "Continua ad esplorare"
 
 # CRAFTING
@@ -124,13 +125,17 @@ crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la rice
 crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
 crafting.item_does_not_exist: "L'item scelto non esiste!"
 
-# CRAFTING ITEMS
-crafting.items.water: "Acqua"
-crafting.items.revitalizing_small: "Rivitalizzante piccolo"
-crafting.items.raw_fuel: "Carburante grezzo"
-crafting.items.refined_fuel: "Carburante raffinato"
-crafting.items.final_fuel: "Carburante finale"
-
+# ITEMS
+items.water: "Acqua"
+items.description.water: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
+items.revitalizing_small: "Rivitalizzante piccolo"
+items.description.revitalizing_small: "Permette di recuperare *%vHP*."
+items.raw_fuel: "Carburante grezzo"
+items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.refined_fuel: "Carburante raffinato"
+items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.final_fuel: "Carburante finale"
+items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
@@ -141,19 +146,22 @@ inventory.recap: "Recap inventario"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.what: "Cosa vorresti equipaggiare?"
 
+# Inventario - equipaggia
 inventory.equip.equipped: "Il tuo equipaggiamento attuale:"
 inventory.equip.confirm: "Confermi di voler equipaggiare?"
 inventory.equip.completed: "Equipaggiamento confermato!"
 
+# Inventario - distruggi
 inventory.destroy.type: "Quale tipologia vorresti distruggere?"
 inventory.destroy.what: "Cosa vorresti distruggere?"
 inventory.destroy.confirm: "Confermi di voler distruggere?"
 inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 
-inventory.items.what: "Quale oggetto vorresti usare?"
+# Inventario - oggetti
+inventory.items.what: "Quale item vorresti usare?"
 inventory.items.use: "Usa:"
-inventory.items.confirm: "Confermi di voler usare?"
-inventory.items.completed: "Oggetto usato!"
+inventory.items.confirm: "*Confermi di voler usare %v?*"
+inventory.items.completed: "Scegli di usare *%s* e di beneficiare delle sue caratteristiche."
 
 
 # ABILITY TREE
@@ -196,7 +204,7 @@ route.tutorial_17: "✅ On-Line"
 route.tutorial_18: "\n*Rotta navigazione:* "
 route.tutorial_19: "❌ Errata"
 
-route.tutorial_20: "⚠️ *ATTENZIONE!* ⚠️ \nIMPOSSIBILE MODIFICARE LA ROTTA.\nCOLLISIONE CON PIANETA SCONOSCIUTO IMMINENTE. IMPATTO TRA:"
+route.tutorial_20: "⚠️ *ATTENZIONE!* ⚠️ \nIMPOSSIBILE MODIFICARE LA ROTTA.\nCOLLISIONE CON PIANETA SCONOSCIUTO IMMINENTE.\nIMPATTO TRA:"
 
 route.tutorial_21: "*6!*"
 route.tutorial_22: "*5!*"
@@ -209,12 +217,12 @@ route.tutorial_27: "..."
 #SO BIG #route.explosion: "<code>\t\t\t\t\t\t\t\t\t____/\t(\t\t(\t\t\t\t)\t\t\t)\t\\\\___\n\t\t\t\t\t\t\t\t/(\t(\t\t(\t\t)\t\t\t_\t\t\t\t))\t\t)\t\t\t)\\\n\t\t\t\t\t\t((\t\t\t\t\t(\t\t\t)(\t\t\t\t)\t\t)\t\t\t(\t\t\t)\t\t)\n\t\t\t\t((/\t\t(\t_(\t\t\t)\t\t\t(\t\t\t_)\t)\t(\t\t()\t)\t\t)\n\t\t\t(\t(\t\t(\t(_)\t\t\t((\t\t\t\t(\t\t\t)\t\t.((_\t)\t.\t\t)_\n\t\t(\t(\t\t)\t\t\t\t(\t\t\t\t\t\t(\t\t)\t\t\t\t)\t\t\t)\t.\t)\t(\t\t\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t)\t(\t\t_\t\t(\t_)\t).\t\t)\t.\t)\t)\t(\t)\n\t(\t(\t\t(\t\t\t)\t(\t\t)\t\t\t(\t\t))\t\t\t\t\t)\t_)(\t\t\t)\t\t)\t\t)\n(\t(\t\t(\\\\\t)\t(\t\t\t\t(_\t\t(\t)\t(\t)\t\t)\t\t\t)\t)\t\t))\t(\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t(_\t(\t)\t(\t_\t\t\t\t)\t\t)\t(\t\t)\t\t)\t\t\t)\n(\t(\t\t(\t(\t\t(\t\t)\t\t\t\t\t(_\t\t)\t\t)\t)\t\t_)\t\t\t)\t_(\t(\t)\n\t((\t\t(\t\t\t)(\t\t\t\t(\t\t\t\t\t_\t\t\t\t)\t\t\t_)\t_(_\t(\t\t(_\t)\n\t\t\t(_((__(_(__((\t(\t(\t|\t\t)\t)\t)\t)_))__))_)___)\n\t\t((__)\t\t\t\t\t\t\t\\\\\\||lll|l||///\t\t\t\t\t\t\t\t\t\\\\_))\n\t\t\t\t\t\t\t\t\t\t\t(\t\t\t/(/\t(\t\t)\t\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t(\t(\t(\t|\t|\t)\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t\t(\t\t\t/(|\t/\t(\t))\t)\t)\t))\t)\n\t\t\t\t\t\t\t\t(\t\t\t\t\t(\t((((_(|)_)))))\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t\t||\\(|(|)|/||\t\t\t\t\t)\n\t\t\t\t\t\t\t(\t\t\t\t\t\t\t\t|(||(||)||||\t\t\t\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t//|/l|||)|\\\\\\\\\t\t\t\t\t)\n\t\t\t\t\t\t\t(/\t/\t//\t\t/|//||||\\\\\t\\\\\\\\\t\\\\\t_)\n</code>"
 route.tutorial.explosion: "<code>\t\t\t\t\t\t\t\t--_--\n\t\t\t\t\t(\t\t-_\t\t\t\t_).\n\t\t\t(\t~\t\t\t\t\t\t\t)\t\t\t)\n\t((\t)\t\t(\t\t\t\t)\t\t()\t\t)\n\t\t(.\t\t\t))\t(\t\t\t\t\t\t\t)\n\t\t\t\t``..\t\t\t\t\t..``\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t\t\t(=|\t|=)\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t(../(\t)\\.))\n</code>"
 route.tutorial.open_eye: "Apri gli occhi..."
-route.tutorial.first_use_item: "Ti ritrovi su un pianeta sconosciuto, piuttosto mal concio, verifichi se nel tuo zaino sia presente qualcosa per curarti."
-route.tutorial.first_exploration: "L'esplorazione é una delle maniere più veloci per trovare materiali da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
+route.tutorial.first_use_item: "Ti ritrovi su un pianeta sconosciuto, piuttosto malconcio.\nVerifichi immediatamente se nel tuo *inventario* sia presente qualcosa per recuperare un po' di energie..."
+route.tutorial.first_mission: "Sei riuscito a recuperare un po' di forze per continuare...\nTi rialzi in piedi e guardando verso la nave (non del tutto integra) decidi di tentare una missione di ricerca nella zona.\n\n*Descrizione Missione:*\né una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
 route.tutorial.first_crafting: "Una volta che hai recuperato risorse, devi sicuramente creare qualcosa per evitare la morte in caso di avvicinamento di strani esseri.\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza e certe classi aprono molte strade. (SKIPPABILE)"
 route.tutorial.first_hunting: "Hai un'arma (e magari un'armatura)... Beh direi che è tempo di andare a caccia di insetti ripugnanti!\n La caccia è una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e soldi! Ovviamente se muori...beh muori."
 route.tutorial.first_weapon_equipped: "Certo, ma se non equipaggi quell'arma come fai ad usarla??"
-route.tutorial.error.function_not_completed: "Devi prima terminare la precedente missione..."
+route.tutorial.error.function_not_completed: "Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
 route.tutorial.completed: "I tuoi ricordi al momento finiscono qui, ma di sicuro riuscirari a trovare delle risposte"
 
 # CRON

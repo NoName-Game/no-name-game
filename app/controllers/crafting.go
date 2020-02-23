@@ -136,7 +136,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 
 		var itemExists bool
 		for _, item := range items {
-			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.items.%s", item.Slug)) {
+			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", item.Slug)) {
 				itemExists = true
 				c.Payload.Item = item
 			}
@@ -284,7 +284,7 @@ func (c *CraftingController) Stage() (err error) {
 					fmt.Sprintf(
 						"%s %s",
 						helpers.Trans(c.Player.Language.Slug, "crafting.craft"),
-						helpers.Trans(c.Player.Language.Slug, "crafting.items."+item.Slug),
+						helpers.Trans(c.Player.Language.Slug, "items."+item.Slug),
 					),
 				),
 			)
@@ -328,7 +328,7 @@ func (c *CraftingController) Stage() (err error) {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"crafting.you_need",
-				helpers.Trans(c.Player.Language.Slug, "crafting.items."+c.Payload.Item.Slug),
+				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 				itemsRecipeList,
 			),
 		)
@@ -413,7 +413,7 @@ func (c *CraftingController) Stage() (err error) {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"crafting.craft_completed",
-				helpers.Trans(c.Player.Language.Slug, "crafting.items."+c.Payload.Item.Slug),
+				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 			),
 		)
 

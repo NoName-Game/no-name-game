@@ -460,12 +460,12 @@ func (c *TutorialController) Stage() (err error) {
 	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 2:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_use_item"),
-			),
+		firstUseMessage := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_use_item"),
 		)
+		firstUseMessage.ParseMode = "markdown"
+
+		_, err = services.SendMessage(firstUseMessage)
 		if err != nil {
 			return
 		}
@@ -489,12 +489,12 @@ func (c *TutorialController) Stage() (err error) {
 	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 3:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
-			),
+		firstMissionMessage := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_mission"),
 		)
+		firstMissionMessage.ParseMode = "markdown"
+
+		_, err = services.SendMessage(firstMissionMessage)
 		if err != nil {
 			return
 		}

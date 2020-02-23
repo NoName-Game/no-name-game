@@ -62,6 +62,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ParseMode = "markdown"
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
@@ -144,7 +145,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	case 2:
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
-			"mission.wait",
+			"mission.validator.wait",
 			c.State.FinishAt.Format("15:04:05"),
 		)
 
@@ -237,6 +238,7 @@ func (c *MissionController) Stage() (err error) {
 				endTime.Format("15:04:05"),
 			),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -287,9 +289,11 @@ func (c *MissionController) Stage() (err error) {
 				c.Player.Language.Slug,
 				"mission.extraction_recap",
 				drop.Resource.Name,
+				drop.Resource.Rarity.Slug,
 				drop.Quantity,
 			),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
