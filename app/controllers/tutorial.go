@@ -348,7 +348,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		var thirdMessageConfig tgbotapi.MessageConfig
 		thirdMessageConfig = services.NewMessage(c.Player.ChatID, textList[13])
-		thirdMessageConfig.ParseMode = "markdown"
+		thirdMessageConfig.ParseMode = "HTML"
 
 		var thirdMessage tgbotapi.Message
 		thirdMessage, err = services.SendMessage(thirdMessageConfig)
@@ -366,7 +366,7 @@ func (c *TutorialController) Stage() (err error) {
 				thirdMessage.MessageID,
 				fmt.Sprintf("%s\n%s", previousThirdText, textList[i]),
 			)
-			edited.ParseMode = "markdown"
+			edited.ParseMode = "HTML"
 
 			thirdMessage, err = services.SendMessage(edited)
 			if err != nil {
@@ -377,13 +377,13 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// ************************
-		// Quarto set di messaggi
+		// Quarto set di messaggi ( COUNTDOWN )
 		// ************************
 		time.Sleep(1 * time.Second)
 
 		var fourthMessageConfig tgbotapi.MessageConfig
 		fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[17])
-		fourthMessageConfig.ParseMode = "markdown"
+		fourthMessageConfig.ParseMode = "HTML"
 
 		var fourthMessage tgbotapi.Message
 		fourthMessage, err = services.SendMessage(fourthMessageConfig)
@@ -400,7 +400,7 @@ func (c *TutorialController) Stage() (err error) {
 				textList[i],
 			)
 
-			edited.ParseMode = "markdown"
+			edited.ParseMode = "HTML"
 			_, err := services.SendMessage(edited)
 			if err != nil {
 				return err
