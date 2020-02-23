@@ -270,16 +270,17 @@ func (c *TutorialController) Stage() (err error) {
 	// In questo stage è previsto un'invio di un set di messaggi
 	// che introducono al player cosa sta accadendo
 	case 1:
-		// Invio messaggio per eliminare la tastiera
+		// Recupero set di messaggi
+		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Controller)
+
+		// Invio il primo messaggio per eliminare la tastiera
 		initMessage := services.NewMessage(c.Update.Message.Chat.ID, "...")
+		initMessage.ParseMode = "markdown"
 		initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		_, err = services.SendMessage(initMessage)
 		if err != nil {
 			return err
 		}
-
-		// Recupero set di messaggi
-		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Controller)
 
 		// ************************
 		// Primo set di messaggi
@@ -300,6 +301,8 @@ func (c *TutorialController) Stage() (err error) {
 		for i := 1; i <= 7; i++ {
 			time.Sleep(1 * time.Second)
 			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
+			edited.ParseMode = "markdown"
+
 			_, err := services.SendMessage(edited)
 			if err != nil {
 				return err
@@ -310,9 +313,10 @@ func (c *TutorialController) Stage() (err error) {
 		// Secondo set di messaggi
 		// ************************
 		time.Sleep(1 * time.Second)
+		var secondSetText = textList[8]
 
 		var secondMessageConfig tgbotapi.MessageConfig
-		secondMessageConfig = services.NewMessage(c.Player.ChatID, textList[8])
+		secondMessageConfig = services.NewMessage(c.Player.ChatID, secondSetText)
 		secondMessageConfig.ParseMode = "markdown"
 
 		var secondMessage tgbotapi.Message
@@ -323,13 +327,14 @@ func (c *TutorialController) Stage() (err error) {
 
 		// PreviusText mi serve per andare a modificare il messaggio
 		// inviato ed appendergli la nuova parte di messaggio
-		var previousSecondText string = secondMessage.Text
 		for i := 9; i <= 12; i++ {
-			time.Sleep(3 * time.Second)
+			time.Sleep(2 * time.Second)
+			currentMessage := fmt.Sprintf("%s%s", secondSetText, textList[i])
+
 			edited := services.NewEditMessage(
 				c.Player.ChatID,
 				secondMessage.MessageID,
-				fmt.Sprintf("%s\n%s", previousSecondText, textList[i]),
+				currentMessage,
 			)
 			edited.ParseMode = "markdown"
 
@@ -338,17 +343,19 @@ func (c *TutorialController) Stage() (err error) {
 				return
 			}
 
-			previousSecondText = secondMessage.Text
+			// Concateno messaggi
+			secondSetText += textList[i]
 		}
 
 		// ************************
 		// Terzo set di messaggi
 		// ************************
 		time.Sleep(1 * time.Second)
+		thirdSetText := textList[13]
 
 		var thirdMessageConfig tgbotapi.MessageConfig
-		thirdMessageConfig = services.NewMessage(c.Player.ChatID, textList[13])
-		thirdMessageConfig.ParseMode = "HTML"
+		thirdMessageConfig = services.NewMessage(c.Player.ChatID, thirdSetText)
+		thirdMessageConfig.ParseMode = "markdown"
 
 		var thirdMessage tgbotapi.Message
 		thirdMessage, err = services.SendMessage(thirdMessageConfig)
@@ -358,32 +365,42 @@ func (c *TutorialController) Stage() (err error) {
 
 		// PreviusText mi serve per andare a modificare il messaggio
 		// inviato ed appendergli la nuova parte di messaggio
-		var previousThirdText string = thirdMessage.Text
-		for i := 14; i <= 16; i++ {
-			time.Sleep(3 * time.Second)
+		for i := 14; i <= 19; i++ {
+			currentMessage := fmt.Sprintf("%s%s", thirdSetText, textList[i])
+
+			time.Sleep(2 * time.Second)
 			edited := services.NewEditMessage(
 				c.Player.ChatID,
 				thirdMessage.MessageID,
-				fmt.Sprintf("%s\n%s", previousThirdText, textList[i]),
+				currentMessage,
 			)
-			edited.ParseMode = "HTML"
+			edited.ParseMode = "markdown"
 
 			thirdMessage, err = services.SendMessage(edited)
 			if err != nil {
 				return
 			}
 
-			previousThirdText = thirdMessage.Text
+			thirdSetText += textList[i]
+		}
+
+		// Mando messaggio allert
+		time.Sleep(1 * time.Second)
+		alertMessage := services.NewMessage(c.Update.Message.Chat.ID, textList[20])
+		alertMessage.ParseMode = "markdown"
+		alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		_, err = services.SendMessage(alertMessage)
+		if err != nil {
+			return err
 		}
 
 		// ************************
 		// Quarto set di messaggi ( COUNTDOWN )
 		// ************************
-		time.Sleep(1 * time.Second)
-
+		time.Sleep(2 * time.Second)
 		var fourthMessageConfig tgbotapi.MessageConfig
-		fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[17])
-		fourthMessageConfig.ParseMode = "HTML"
+		fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[21])
+		fourthMessageConfig.ParseMode = "markdown"
 
 		var fourthMessage tgbotapi.Message
 		fourthMessage, err = services.SendMessage(fourthMessageConfig)
@@ -392,7 +409,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Mando primo set di messaggi
-		for i := 18; i <= 23; i++ {
+		for i := 22; i <= 27; i++ {
 			time.Sleep(1 * time.Second)
 			edited := services.NewEditMessage(
 				c.Player.ChatID,
@@ -400,7 +417,7 @@ func (c *TutorialController) Stage() (err error) {
 				textList[i],
 			)
 
-			edited.ParseMode = "HTML"
+			edited.ParseMode = "markdown"
 			_, err := services.SendMessage(edited)
 			if err != nil {
 				return err
