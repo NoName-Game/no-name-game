@@ -76,5 +76,13 @@ func GetItemByCategoryID(categoryID uint) (nnsdk.Items, error) {
 		return items, err
 	}
 	return items, nil
+}
 
+func UseItem(request nnsdk.UseItemRequest) (err error) {
+	_, err = services.NnSDK.MakeRequest("items/use", request).Post()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

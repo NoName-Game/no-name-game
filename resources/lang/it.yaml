@@ -60,6 +60,7 @@ name: "Nome"
 category: "Categoria"
 rarity: "Rarità"
 integrity: "Integrità"
+use: "Usa"
 
 # MENU
 menu: "Computer di bordo di <b>%s</b>.\nTask in corso:\n\n%s\nVersione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale."
@@ -148,6 +149,12 @@ inventory.destroy.type: "Quale tipologia vorresti distruggere?"
 inventory.destroy.what: "Cosa vorresti distruggere?"
 inventory.destroy.confirm: "Confermi di voler distruggere?"
 inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
+
+inventory.items.what: "Quale oggetto vorresti usare?"
+inventory.items.use: "Usa:"
+inventory.items.confirm: "Confermi di voler usare?"
+inventory.items.completed: "Oggetto usato!"
+
 
 # ABILITY TREE
 ability.no_point_left: "Punti abilità non sufficienti"
