@@ -82,11 +82,13 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Verifico se è in tutorial o no
 	if inTutorial {
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			Keyboard: keyboardRows,
+			Keyboard:       keyboardRows,
+			ResizeKeyboard: true,
 		}
 	} else {
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			Keyboard: keyboardMenu,
+			Keyboard:       keyboardMenu,
+			ResizeKeyboard: true,
 		}
 	}
 

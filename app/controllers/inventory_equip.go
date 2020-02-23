@@ -148,14 +148,11 @@ func (c *InventoryEquipController) Stage() (err error) {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
 	case 0:
-		var currentPlayerEquipment string
-		currentPlayerEquipment = helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped")
-
 		// ******************
 		// Recupero armatura equipaggiata
 		// ******************
 		var currentArmorsEquipment string
-		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armors"))
+		currentArmorsEquipment = fmt.Sprintf("%s:", helpers.Trans(c.Player.Language.Slug, "armors"))
 
 		var armors nnsdk.Armors
 		armors, err = providers.GetPlayerArmors(c.Player, "true")
@@ -186,11 +183,17 @@ func (c *InventoryEquipController) Stage() (err error) {
 		// Invio messagio con recap e con selettore categoria
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
-				"%s \n %s",
+				"%s \n\n %s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
-				fmt.Sprintf("%s \n %s \n %s", currentPlayerEquipment, currentArmorsEquipment, currentWeaponsEquipment),
+				fmt.Sprintf(
+					"%s\n%s\n%s",
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
+					currentArmorsEquipment,
+					currentWeaponsEquipment,
+				),
 			),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -316,12 +319,9 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		// Invio messaggio per conferma equipaggiamento
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			fmt.Sprintf(
-				"%s \n\n %s",
-				helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm"),
-				equipmentName,
-			),
+			helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", equipmentName),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -373,7 +373,11 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"),
+		)
+		msg.ParseMode = "markdown"
+
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err

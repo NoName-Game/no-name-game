@@ -201,7 +201,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
 		if stateNotFoundErr != nil {
-			c.State.Stage = 4
+			c.State.Stage = 5
 			return false, err
 		}
 
@@ -542,12 +542,13 @@ func (c *TutorialController) Stage() (err error) {
 	// 	// Recupero l'ID del task, mi serivirà per i controlli
 	// 	c.Payload.CraftingID = craftingController.State.ID
 	case 5:
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
-			),
+		firstWeaponMessage := services.NewMessage(
+			c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
 		)
+		firstWeaponMessage.ParseMode = "markdown"
+
+		_, err = services.SendMessage(firstWeaponMessage)
 		if err != nil {
 			return err
 		}
@@ -569,12 +570,13 @@ func (c *TutorialController) Stage() (err error) {
 		c.Payload.InventoryEquipID = inventoryController.State.ID
 
 	case 6:
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
-			),
+		firstHuntingMessage := services.NewMessage(
+			c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
 		)
+		firstHuntingMessage.ParseMode = "markdown"
+
+		_, err = services.SendMessage(firstHuntingMessage)
 		if err != nil {
 			return err
 		}

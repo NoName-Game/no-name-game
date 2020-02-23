@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -175,6 +176,8 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 			c.State.Stage = 4
 
 			return false, err
+		} else {
+
 		}
 
 		return true, err
@@ -322,6 +325,7 @@ func (c *MissionController) Stage() (err error) {
 				c.State.FinishAt.Format("15:04:05"),
 			),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -341,8 +345,26 @@ func (c *MissionController) Stage() (err error) {
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
+		// Recap delle risorse ricavate da questa missione
+		var dropList string
+		for _, drop := range c.Payload.Dropped {
+			dropList += fmt.Sprintf(
+				"- %v x *%s* (%s)\n",
+				drop.Quantity,
+				drop.Resource.Name,
+				drop.Resource.Rarity.Slug,
+			)
+		}
+
 		// Invio messaggio di chiusura missione
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"))
+		msg := services.NewMessage(c.Player.ChatID,
+			fmt.Sprintf("%s%s",
+				helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"),
+				dropList,
+			),
+		)
+		msg.ParseMode = "markdown"
+
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		_, err = services.SendMessage(msg)
 		if err != nil {

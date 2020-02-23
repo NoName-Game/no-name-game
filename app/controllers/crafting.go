@@ -132,7 +132,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		}
 
 		// Recupero nome item che il player vuole craftare
-		playerChoiche := strings.Split(c.Update.Message.Text, ": ")[1]
+		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
 		var itemExists bool
 		for _, item := range items {
@@ -239,7 +239,7 @@ func (c *CraftingController) Stage() (err error) {
 
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRow,
-			ResizeKeyboard: false,
+			ResizeKeyboard: true,
 		}
 
 		_, err = services.SendMessage(msg)
@@ -274,17 +274,32 @@ func (c *CraftingController) Stage() (err error) {
 			return err
 		}
 
+		// Recupero tutti gli items del player
+		var playerInventoryItems nnsdk.PlayerInventories
+		playerInventoryItems, err = providers.GetPlayerItems(c.Player.ID)
+		if err != nil {
+			panic(err)
+		}
+
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, item := range craftableItems {
+			// Recupero quantità del player per quest'item
+			var playerQuantity int
+			for _, playerItem := range playerInventoryItems {
+				if playerItem.Item.ID == item.ID {
+					playerQuantity = *playerItem.Quantity
+				}
+			}
+
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
-						"%s %s",
-						helpers.Trans(c.Player.Language.Slug, "crafting.craft"),
+						"%s (%v)",
 						helpers.Trans(c.Player.Language.Slug, "items."+item.Slug),
+						playerQuantity,
 					),
 				),
 			)
@@ -300,7 +315,7 @@ func (c *CraftingController) Stage() (err error) {
 
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRow,
-			ResizeKeyboard: false,
+			ResizeKeyboard: true,
 		}
 
 		_, err = services.SendMessage(msg)
