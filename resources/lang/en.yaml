@@ -24,6 +24,7 @@ route.ship.repairs: "Ripara"
 route.ship.better: "Migliora"
 route.menu: "Computer di Bordo"
 route.force.die: "Delete"
+route.inventory.items: "Oggetti"
 
 # ROUTES (BREAKER)
 route.breaker.back: "Fai altro"

@@ -23,6 +23,7 @@ import (
 type TutorialController struct {
 	BaseController
 	Payload struct {
+		UseItemID        uint
 		MissionID        uint
 		CraftingID       uint
 		HuntingID        uint
@@ -134,13 +135,13 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 		return false, nil
 
-	// In questo stage verifico se il player ha completato correttamente la missione
+	// In questo stage verifico se il player ha usato il rivitalizzante
 	case 3:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.MissionID)
+		missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.UseItemID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
 		if stateNotFoundErr != nil {
@@ -153,12 +154,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		}
 
 		return false, err
-	case 4:
+
+	// In questo stage verifico se il player ha completato correttamente la missione
+	case 5:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.CraftingID)
+		missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.MissionID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
 		if stateNotFoundErr != nil {
@@ -171,7 +174,25 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		}
 
 		return false, err
-	case 5:
+	// case 5:
+	// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
+	//
+	// 	var stateNotFoundErr error
+	// 	var missionState nnsdk.PlayerState
+	// 	missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.CraftingID)
+	// 	// Non è stato trovato lo stato ritorno allo stato precedente
+	// 	// e non ritorno errore
+	// 	if stateNotFoundErr != nil {
+	// 		c.State.Stage = 4
+	// 		return false, err
+	// 	}
+	//
+	// 	if *missionState.Completed != true {
+	// 		return true, err
+	// 	}
+	//
+	// 	return false, err
+	case 6:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
@@ -189,7 +210,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		}
 
 		return false, err
-	case 6:
+	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var stateNotFoundErr error
@@ -198,7 +219,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
 		if stateNotFoundErr != nil {
-			c.State.Stage = 5
+			c.State.Stage = 6
 			return false, err
 		}
 
@@ -425,7 +446,7 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_use_item"),
 			),
 		)
 		if err != nil {
@@ -441,49 +462,24 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Richiamo missione come sottoprocesso di questo controller
-		missionController := new(MissionController)
-		missionController.Father = c.State.ID
-		missionController.Handle(c.Player, c.Update)
+		useItemController := new(InventoryItemController)
+		useItemController.Father = c.State.ID
+		useItemController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.MissionID = missionController.State.ID
+		c.Payload.UseItemID = useItemController.State.ID
+
+	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 3:
-		// Primo Craft
+		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_crafting"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
 			),
 		)
 		if err != nil {
-			return err
-		}
-
-		// Forzo a mano l'aggiornamento dello stato del player
-		// in quanto adesso devo richiamare un'altro controller
-		c.State.Stage = 4
-		c.State, err = providers.UpdatePlayerState(c.State)
-		if err != nil {
-			return err
-		}
-
-		// Richiamo crafting come sottoprocesso di questo controller
-		craftingController := new(CraftingController)
-		craftingController.Father = c.State.ID
-		craftingController.Handle(c.Player, c.Update)
-
-		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.CraftingID = craftingController.State.ID
-
-	case 4:
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
-			),
-		)
-		if err != nil {
-			return err
+			return
 		}
 
 		// Forzo a mano l'aggiornamento dello stato del player
@@ -494,19 +490,45 @@ func (c *TutorialController) Stage() (err error) {
 			return err
 		}
 
-		// Richiamo crafting come sottoprocesso di questo controller
-		inventoryController := new(InventoryEquipController)
-		inventoryController.Father = c.State.ID
-		inventoryController.Handle(c.Player, c.Update)
+		// Richiamo missione come sottoprocesso di questo controller
+		missionController := new(MissionController)
+		missionController.Father = c.State.ID
+		missionController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.InventoryEquipID = inventoryController.State.ID
-
+		c.Payload.MissionID = missionController.State.ID
+	// case 4:
+	// 	// Primo Craft
+	// 	_, err = services.SendMessage(
+	// 		services.NewMessage(
+	// 			c.Player.ChatID,
+	// 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_crafting"),
+	// 		),
+	// 	)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	// Forzo a mano l'aggiornamento dello stato del player
+	// 	// in quanto adesso devo richiamare un'altro controller
+	// 	c.State.Stage = 5
+	// 	c.State, err = providers.UpdatePlayerState(c.State)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	// Richiamo crafting come sottoprocesso di questo controller
+	// 	craftingController := new(CraftingController)
+	// 	craftingController.Father = c.State.ID
+	// 	craftingController.Handle(c.Player, c.Update)
+	//
+	// 	// Recupero l'ID del task, mi serivirà per i controlli
+	// 	c.Payload.CraftingID = craftingController.State.ID
 	case 5:
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
 			),
 		)
 		if err != nil {
@@ -522,6 +544,33 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Richiamo crafting come sottoprocesso di questo controller
+		inventoryController := new(InventoryEquipController)
+		inventoryController.Father = c.State.ID
+		inventoryController.Handle(c.Player, c.Update)
+
+		// Recupero l'ID del task, mi serivirà per i controlli
+		c.Payload.InventoryEquipID = inventoryController.State.ID
+
+	case 6:
+		_, err = services.SendMessage(
+			services.NewMessage(
+				c.Player.ChatID,
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
+			),
+		)
+		if err != nil {
+			return err
+		}
+
+		// Forzo a mano l'aggiornamento dello stato del player
+		// in quanto adesso devo richiamare un'altro controller
+		c.State.Stage = 7
+		c.State, err = providers.UpdatePlayerState(c.State)
+		if err != nil {
+			return err
+		}
+
+		// Richiamo crafting come sottoprocesso di questo controller
 		huntingController := new(HuntingController)
 		huntingController.Father = c.State.ID
 		huntingController.Handle(c.Player, c.Update)
@@ -529,7 +578,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.HuntingID = huntingController.State.ID
 
-	case 6:
+	case 7:
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
