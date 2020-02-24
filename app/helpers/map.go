@@ -30,8 +30,9 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 			mapHeight := len(cellGrid[0])
 			// Verifico che siamo all'interno dei limiti
 			if (x >= 0 && x < mapWith) && (y >= 0 && y < mapHeight) { // In bounds
-				// Se è true come da regola vuol dire che è un muro
+				// Se è true come da regola vuol dire che NON è calpestabile
 				if cellGrid[x][y] {
+					// Lo gestisco come terreno NON calpestabile
 					result += "#"
 				} else {
 					// Se corrisponde alla posizione del Player lo mostro
@@ -40,18 +41,24 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 						continue
 					}
 
-					// Verifico se è un mob
+					// Renderizzo mob sulla mppa
 					_, isMob := CheckForMob(maps, x, y)
 					if isMob {
-						result += "*"
+						result += "M"
 						continue
 					}
 
-					// Lo gestisco come terreno calpestabile
+					// Renderizzo mob sulla mppa
+					_, isTresure := CheckForTresure(maps, x, y)
+					if isTresure {
+						result += "T"
+						continue
+					}
+
 					result += " "
 				}
 			} else {
-				result += "#"
+				result += "X" // Delimito i bordi
 			}
 		}
 		result += "|"
@@ -69,6 +76,17 @@ func CheckForMob(maps nnsdk.Map, x int, y int) (enemy nnsdk.Enemy, result bool) 
 	for i := 0; i < len(maps.Enemies); i++ {
 		if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
 			return maps.Enemies[i], true
+		}
+	}
+
+	return
+}
+
+// CheckForTresure - Verifica posizione dei tesori
+func CheckForTresure(maps nnsdk.Map, x int, y int) (tresure nnsdk.Tresure, result bool) {
+	for i := 0; i < len(maps.Tresures); i++ {
+		if x == maps.Tresures[i].PositionX && y == maps.Tresures[i].PositionY {
+			return maps.Tresures[i], true
 		}
 	}
 
