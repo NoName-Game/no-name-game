@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
@@ -8,13 +10,6 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
-
-// Example:
-// Computer di bordo di reloonfire
-// Task in corso:
-// Tutorial.
-// Crafting: Termina alle ore xx:xx:xx.
-// Versione di sviluppo di NoNameGame, tutti i testi potranno cambiare con la release ufficiale.
 
 type MenuController BaseController
 
@@ -30,12 +25,103 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
-	// Inizializzo
+	// Init funzionalità
 	c.Controller = "route.menu"
 	c.Player = player
 
-	// Keyboard menu
-	var keyboardMenu = [][]tgbotapi.KeyboardButton{
+	// Recupero messaggio principale
+	var recap string
+	recap, err = c.GetRecap()
+	if err != nil {
+		panic(err)
+	}
+
+	msg := services.NewMessage(c.Player.ChatID, recap)
+	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+		Keyboard:       c.GetKeyboard(),
+		ResizeKeyboard: true,
+	}
+
+	// Send recap message
+	_, err = services.SendMessage(msg)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// GetPlayerTask
+func (c *MenuController) GetPlayerTasks() (tasks string) {
+	for _, state := range c.Player.States {
+		if *state.Completed != true {
+			// Se sono da notificare formatto con la data
+			if *state.ToNotify {
+				tasks += fmt.Sprintf("- %s (%s)\n",
+					helpers.Trans(c.Player.Language.Slug, state.Controller),
+					state.FinishAt.Format("15:04:05 01/02"),
+				)
+			} else {
+				tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
+			}
+		}
+	}
+
+	return
+}
+
+// GetRecap
+// BoardSystem v0.1
+// 🌏 Nomepianeta
+// 👨🏼‍🚀 Casteponters
+// ♥️ life/max-life
+//
+// ⏱ Task in corso:
+// - LIST
+func (c *MenuController) GetRecap() (message string, err error) {
+
+	// Recupero ultima posizione del player, dando per scontato che sia
+	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
+	var lastPosition nnsdk.PlayerPosition
+	lastPosition, err = providers.GetPlayerLastPosition(c.Player)
+	if err != nil {
+		return message, err
+	}
+
+	// Dalla ultima posizione recupero il pianeta corrente
+	var planet nnsdk.Planet
+	planet, err = providers.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	if err != nil {
+		return message, err
+	}
+
+	message = helpers.Trans(c.Player.Language.Slug, "menu",
+		planet.Name,
+		c.Player.Username,
+		*c.Player.Stats.LifePoint, 100,
+		c.GetPlayerTasks(),
+	)
+
+	return
+}
+
+// GetRecap
+func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
+	// Se il player sta finendo il tutorial mostro il menù con i task personalizzati
+	// var inTutorial bool
+	for _, state := range c.Player.States {
+		if state.Controller == "route.tutorial" {
+			return c.TutorialKeyboard()
+		} else if state.Controller == "route.ship.exploration" {
+			return c.ExplorationKeyboard()
+		}
+	}
+
+	return c.MainKeyboard()
+}
+
+// MainMenu
+func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
+	return [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.mission")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
@@ -44,57 +130,43 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.inventory")),
 		},
 		{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+		},
+		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.crafting")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.abilityTree")),
 		},
 	}
+}
 
-	var tasks string
-	var keyboardRows [][]tgbotapi.KeyboardButton
-
+// TutorialMenu
+func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
+	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.Player.States {
 		if *state.Completed != true {
-			if *state.ToNotify {
-				// If FinishAt is setted "On Going %TASKNAME: Finish at XX:XX:XX"
-				stateText := helpers.Trans(c.Player.Language.Slug, state.Controller) + helpers.Trans(c.Player.Language.Slug, "menu.finishAt", state.FinishAt.Format("15:04:05"))
-				tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", stateText) + "\n"
-			} else {
-				tasks += helpers.Trans(c.Player.Language.Slug, "menu.onGoing", helpers.Trans(c.Player.Language.Slug, state.Controller)) + "\n"
-			}
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
+			)
 
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)))
 			keyboardRows = append(keyboardRows, keyboardRow)
 		}
 	}
 
-	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "menu", c.Player.Username, tasks))
-	msg.ParseMode = "HTML"
+	return
+}
 
-	var inTutorial bool
-	for _, state := range c.Player.States {
-		// Se il player sta finendo il tutorial mostro il menù con i task personalizzati
-		if state.Controller == "route.tutorial" {
-			inTutorial = true
-			break
-		}
-	}
-
-	// Verifico se è in tutorial o no
-	if inTutorial {
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			Keyboard:       keyboardRows,
-			ResizeKeyboard: true,
-		}
-	} else {
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			Keyboard:       keyboardMenu,
-			ResizeKeyboard: true,
-		}
-	}
-
-	// Send recap message
-	_, err = services.SendMessage(msg)
-	if err != nil {
-		panic(err)
+// ExplorationKeyboard
+func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
+	return [][]tgbotapi.KeyboardButton{
+		{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.inventory")),
+		},
+		{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+		},
+		{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.crafting")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.abilityTree")),
+		},
 	}
 }

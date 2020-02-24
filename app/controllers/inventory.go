@@ -71,7 +71,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	var recapResources string
-	recapResources = helpers.Trans(player.Language.Slug, "resources") + ":\n"
+	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
 	for _, resource := range playerInventoryResources {
 		recapResources += fmt.Sprintf("- %s x %v \n", resource.Resource.Name, *resource.Quantity)
 	}
@@ -86,9 +86,9 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	var recapItems string
-	recapItems = helpers.Trans(player.Language.Slug, "items") + ":\n"
+	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
 	for _, resource := range playerInventoryItems {
-		recapItems += fmt.Sprintf("- %s x %v \n", resource.Item.Name, *resource.Quantity)
+		recapItems += fmt.Sprintf("- %s x %v \n", helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug), *resource.Quantity)
 	}
 
 	// *******************
@@ -101,7 +101,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	var recapWeapons string
-	recapWeapons = helpers.Trans(player.Language.Slug, "weapons") + ":\n"
+	recapWeapons = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "weapons"))
 	for _, weapon := range playerWeapons {
 		recapWeapons += fmt.Sprintf("- %s \n", weapon.Name)
 	}
@@ -116,14 +116,14 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	var recapArmors string
-	recapArmors = helpers.Trans(player.Language.Slug, "armors") + ":\n"
+	recapArmors = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "armors"))
 	for _, armor := range playerArmors {
 		recapArmors += fmt.Sprintf("- %s \n", armor.Name)
 	}
 
 	// Riassumo il tutto
-	finalRecap = fmt.Sprintf("%s: \n %s \n %s \n %s \n %s",
-		helpers.Trans(player.Language.Slug, "inventory.recap"),
+	finalRecap = fmt.Sprintf("%s \n %s \n %s \n %s \n %s",
+		helpers.Trans(player.Language.Slug, "inventory.recap"), // Ecco il tuo inventario
 		recapResources,
 		recapItems,
 		recapWeapons,
@@ -131,6 +131,8 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	)
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, finalRecap)
+	msg.ParseMode = "markdown"
+
 	_, err = services.SendMessage(msg)
 	if err != nil {
 		panic(err)

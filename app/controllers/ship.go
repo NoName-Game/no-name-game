@@ -33,7 +33,6 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	c.Update = update
 
 	// Recupero nave attiva de player
-
 	var eqippedShips nnsdk.Ships
 	eqippedShips, err = providers.GetPlayerShips(c.Player, true)
 	if err != nil {
@@ -43,18 +42,18 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var currentShipRecap string
 	for _, ship := range eqippedShips {
 		currentShipRecap = fmt.Sprintf(
-			"\n -%s:\n%s\n\n -%s:\n%s\n\n -%s:\n%s\n\n -%s:\n%v",
-			helpers.Trans(c.Player.Language.Slug, "name"), ship.Name,
-			helpers.Trans(c.Player.Language.Slug, "category"), ship.ShipCategory.Name,
-			helpers.Trans(c.Player.Language.Slug, "rarity"), ship.Rarity.Name,
-			helpers.Trans(c.Player.Language.Slug, "integrity"), ship.ShipStats.Integrity,
+			"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
+			ship.Name, ship.Rarity.Slug,
+			ship.ShipCategory.Name,
+			ship.ShipStats.Integrity, helpers.Trans(c.Player.Language.Slug, "integrity"),
+			ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
 		)
 	}
 
 	// Invio messaggio
 	msg := services.NewMessage(c.Update.Message.Chat.ID,
 		fmt.Sprintf(
-			"%s %s",
+			"%s:\n\n %s",
 			helpers.Trans(c.Player.Language.Slug, "ship.report"),
 			currentShipRecap,
 		),
@@ -124,6 +123,7 @@ func (c *ShipExplorationController) Handle(player nnsdk.Player, update tgbotapi.
 	if hasError == true {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ParseMode = "markdown"
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
@@ -177,6 +177,15 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	// In questo stage non faccio nulla di particolare, verifico solo se ha deciso
 	// di avviare una nuova esplorazione
 	case 1:
+		// A prescindere verifico se il player ha una missione o una caccia attiva
+		// tutte le attività di che si svolgono sui pianeti devono essere portati a termine
+		for _, state := range c.Player.States {
+			if helpers.StringInSlice(state.Controller, []string{"route.mission", "route.hunting"}) {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.exploration.error.function_not_completed")
+				return true, err
+			}
+		}
+
 		if !helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "ship.exploration.start"),
 		}) {
@@ -203,7 +212,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
 			"ship.exploration.wait",
-			c.State.FinishAt.Format("15:04:05"),
+			c.State.FinishAt.Format("15:04:05 01/02"),
 		)
 
 		// Verifico se ha finito il crafting
@@ -293,10 +302,12 @@ func (c *ShipExplorationController) Stage() (err error) {
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
 		for _, explorationInfo := range explorationInfos {
-			msgNearestStars += fmt.Sprintf("\n\n%s:%s\n", helpers.Trans(c.Player.Language.Slug, "name"), explorationInfo.Planet.Name)
-			msgNearestStars += fmt.Sprintf("%s:%v\n", helpers.Trans(c.Player.Language.Slug, "ship.exploration.fuel_needed"), explorationInfo.Fuel)
-			msgNearestStars += fmt.Sprintf("%s:%v\n", helpers.Trans(c.Player.Language.Slug, "ship.exploration.time_needed"), explorationInfo.Time)
-			msgNearestStars += fmt.Sprintf("X: %v \nY: %v \nZ: %v \n\n", explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z)
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\n⏱ %v (%s)\nX: %v \nY: %v \nZ: %v",
+				explorationInfo.Planet.Name,
+				explorationInfo.Fuel,
+				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
+				explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z,
+			)
 
 			// Aggiungo per la validazione
 			starNearestMapName[int(explorationInfo.Planet.ID)] = explorationInfo.Planet.Name
@@ -311,7 +322,6 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		keyboardRowStars = append(keyboardRowStars,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
@@ -364,8 +374,9 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.exploration.exploring", c.State.FinishAt.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.exploration.exploring", c.State.FinishAt.Format("15:04:05 01/02")),
 		)
+		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
