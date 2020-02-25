@@ -4,7 +4,6 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -36,18 +35,6 @@ func (c *BaseController) Completing() (err error) {
 		err = helpers.DelRedisState(c.Player)
 		if err != nil {
 			panic(err)
-		}
-
-		// Se si trova in hunting aggiunto un controllo
-		if c.Controller == "route.hunting" {
-			// Cancello messaggio contentente la mappa accertandomi che l'azione
-			// arrivi da un messaggio di callback
-			if c.Update.CallbackQuery != nil {
-				err = services.DeleteMessage(c.Update.CallbackQuery.Message.Chat.ID, c.Update.CallbackQuery.Message.MessageID)
-				if err != nil {
-					return err
-				}
-			}
 		}
 
 		// Call menu controller

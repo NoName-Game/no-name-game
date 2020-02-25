@@ -83,9 +83,16 @@ sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
 
 # HUNTING
-hunting.error.noWeaponEquipped: "Devi equipaggiare un arma per andare a caccia!"
+hunting.init: "Decidi di esplorare l'area circostante... fa' attenzione!"
+hunting.error.no_weapon_equipped: "Devi equipaggiare un arma per andare a caccia!"
 hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
 hunting.completed: "Caccia completata, torni alla base col bottino."
+hunting.leave: "Abbandona caccia"
+
+tresure.found.resource: "Hai trovato la risorsa %s"
+tresure.found.item: "Hai trovato un item %s"
+tresure.found.transaction: "Hai trovato %v monente"
+tresure.found.nothing: "Uhmm sembra essere vuoto"
 
 # COMBAT SYSTEM
 combat.attack: "Attacca"
@@ -101,8 +108,8 @@ mission.exploration: "Seleziona campo di ricerca!"
 mission.underground: "Sottosuolo"
 mission.surface: "Superfice"
 mission.atmosphere: "Atmosfera"
-mission.extraction_recap: "Hai estratto *%s (%s)*  per una quantità pari a *%d* unità, vuoi continuare la missione?"
-mission.extraction_ended: "Decidi di rientrare dalla missione con le tue nuove risorse!\n\n*Rapporto Missione:*\n"
+mission.extraction_recap: "Hai estratto 💠 *%s (%s)*  per una quantità pari a *%d* unità, vuoi continuare la missione?"
+mission.extraction_ended: "Sei rientrato dalla missione con le tue nuove risorse!\n\n💠 *Rapporto Missione:*\n"
 mission.comeback: "Rientra dalla missione"
 mission.validator.wait: "Se già in missione, il tuo rientro alla base è previsto alle *%s*"
 mission.wait: "Ti incammini alla ricerca di nuove risorse, secondo i tuoi calcoli dovresti tornare intorno alle *%s*"
@@ -221,7 +228,7 @@ route.tutorial.first_use_item: "💭: Ti ritrovi su un pianeta sconosciuto, piut
 route.tutorial.first_mission: "💭: Sei riuscito a recuperare un po' di forze per continuare...\nTi rialzi in piedi e guardando verso la nave (non del tutto integra) decidi di tentare una missione di ricerca nella zona.\n\n📖 *Missione:*\nÈ una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
 route.tutorial.first_crafting: "💭: Recuperate le risorse pensi a un modo per poter ripistinare parte dell'integrità della nave.\n\n📖 *Crafting:*\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza aprono molte strade. (SKIPPABILE)"
 route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante. Decidi quindi di equipaggiarla.\n\n📖 *Equipaggiamento:*\nArmi e armature, migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
-route.tutorial.first_hunting: "💭: Equipaggi l'arma e ti fai coraggio, decidi quindi di esplorare l'area intorno a te.\n\n*Caccia:*\nÈ una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e monete!\nOvviamente se muori...beh muori.. fai attenzione!."
+route.tutorial.first_hunting: "💭: Equipaggi l'arma e ti fai coraggio, decidi quindi di esplorare l'area intorno a te.\n\n📖 *Caccia:*\nÈ una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e monete!\nOvviamente se muori...beh muori.. fai attenzione!."
 
 route.tutorial.error.function_not_completed: "Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
 route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirari a trovare delle risposte."

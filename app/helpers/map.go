@@ -41,6 +41,8 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 						continue
 					}
 
+					// +---------------------+
+
 					// Renderizzo mob sulla mppa
 					_, isMob := CheckForMob(maps, x, y)
 					if isMob {
@@ -58,7 +60,7 @@ func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int
 					result += " "
 				}
 			} else {
-				result += "X" // Delimito i bordi
+				result += "." // Delimito i bordi
 			}
 		}
 		result += "|"

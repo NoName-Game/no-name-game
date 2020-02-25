@@ -22,11 +22,13 @@ import (
 type HuntingController struct {
 	BaseController
 	Payload struct {
-		MapID     uint
-		EnemyID   uint
-		Selection int // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
-		InFight   bool
-		Kill      uint
+		CallbackChatID    int64
+		CallbackMessageID int
+		MapID             uint
+		EnemyID           uint
+		Selection         int // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
+		InFight           bool
+		Kill              uint
 	}
 	PlayerPositionX int
 	PlayerPositionY int
@@ -63,11 +65,9 @@ var (
 
 	mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.returnMap"),
-			tgbotapi.NewInlineKeyboardButtonData("⚔", "hunting.fight.hit"),
-		),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⚔", "hunting.fight.hit")),
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.return_map")),
 	)
 )
 
@@ -133,7 +133,15 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		panic(err)
 	}
 
-	// Verifico completamento
+	// Verifico completamento aggiuntivo per cancellare il messaggio
+	if *c.State.Completed == true {
+		// Cancello messaggio contentente la mappa
+		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	err = c.Completing()
 	if err != nil {
 		panic(err)
@@ -151,7 +159,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 	// Il player deve avere sempre e perfoza un'arma equipaggiata
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.noWeaponEquipped")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
 
 		return true, err
 	}
@@ -166,6 +174,14 @@ func (c *HuntingController) Stage() (err error) {
 	switch c.State.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
+		// Verifico se il player vuole uscire dalla caccia
+		if c.Update.Message != nil {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
+				c.State.Completed = helpers.SetTrue()
+				return err
+			}
+		}
+
 		// Avvio ufficialmente la caccia!
 		err = c.Hunting()
 		if err != nil {
@@ -182,11 +198,19 @@ func (c *HuntingController) Hunting() (err error) {
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
 	if c.Payload.MapID <= 0 || c.Update.Message != nil {
-		// if  c.Update.Message != nil {
-		// 	if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") {
-		// 		return
-		// 	}
-		// }
+		// Questo messaggio è necessario per immettere il tasto di abbandona caccia
+		initHunting := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "hunting.init"))
+		initHunting.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "hunting.leave"),
+				),
+			),
+		)
+		_, err = services.SendMessage(initHunting)
+		if err != nil {
+			return err
+		}
 
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
@@ -230,14 +254,17 @@ func (c *HuntingController) Hunting() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, decodedMap)
 		msg.ReplyMarkup = mapKeyboard
 		msg.ParseMode = "HTML"
-		_, err = services.SendMessage(msg)
+
+		var huntingMessage tgbotapi.Message
+		huntingMessage, err = services.SendMessage(msg)
 		if err != nil {
 			return err
 		}
 
 		// Aggiorno lo stato e ritorno
 		c.Payload.MapID = maps.ID
-
+		c.Payload.CallbackChatID = huntingMessage.Chat.ID
+		c.Payload.CallbackMessageID = huntingMessage.MessageID
 		return
 	}
 
@@ -345,10 +372,70 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 			c.PlayerPositionY--
 		}
 	case "action":
-		// Al momento viene usato per ucsire dalla mappa
-		c.State.Completed = helpers.SetTrue()
+		// Verifico se si trova sopra un tesoro se così fosse lancio
+		// chiamata per verificare il drop
+		var nearTresure bool
+		var tresure nnsdk.Tresure
+		tresure, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
+		if nearTresure == true {
+			// Chiamo WS e recupero tesoro
+			var drop nnsdk.TresureDropResponse
+			drop, err = providers.DropTresure(c.Player.ID, tresure.ID)
+			if err != nil {
+				return err
+			}
 
-		return
+			// Verifico cosa è tornato e rispondo
+			var editMessage tgbotapi.EditMessageTextConfig
+			if drop.Resource.ID > 0 {
+
+				editMessage = services.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", drop.Resource.Name),
+				)
+
+			} else if drop.Item.ID > 0 {
+
+				editMessage = services.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.item", drop.Item.Name),
+				)
+
+			} else if drop.Transaction.ID > 0 {
+
+				editMessage = services.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", drop.Transaction.Value),
+				)
+
+			} else {
+				editMessage = services.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.nothing"),
+				)
+			}
+
+			ok := tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.move.no-action"),
+				),
+			)
+			editMessage.ReplyMarkup = &ok
+			editMessage.ParseMode = "HTML"
+
+			_, err = services.SendMessage(editMessage)
+			if err != nil {
+				return err
+			}
+
+			return
+		}
+	case "no-action":
+		// No action
 	default:
 		err = errors.New("action not recognized")
 		return err
@@ -371,8 +458,7 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 	// Se l'azione è valida e completa aggiorno risultato
 	msg := services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
 
-	// Se nella mappa viene visualizzato un mob allora mostro la fight keyboard
-	// TODO: migliorare adesso verifica solo se ci sei sopra
+	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
 	var nearMob bool
 	_, nearMob = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
 	if true == nearMob {
@@ -459,7 +545,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.returnMap",
+						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
 					),
 				),
 			)
@@ -506,7 +592,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.returnMap",
+						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
 					),
 				),
 			)
@@ -550,7 +636,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 		)
 		editMessage.ReplyMarkup = &ok
 
-	case "returnMap":
+	case "return_map":
 		c.Payload.InFight = false
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
