@@ -21,10 +21,15 @@ type MissionController struct {
 		ExplorationType string // Indica il tipo di esplorazione scelta
 		Times           int    // Indica quante volte ha ripetuto
 		Dropped         []nnsdk.DropItem
+		ForcedTime      int // Questo valore serve per forzare le tempistiche
 	}
 	// Additional Data
-	MissionTypes []string
+	// MissionTypes []string
 }
+
+var (
+	MissionTypes = []string{"underground", "surface", "atmosphere"}
+)
 
 // ====================================
 // Handle
@@ -37,10 +42,10 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Update = update
 
 	// Registro tipi di missione
-	c.MissionTypes = make([]string, 3)
-	c.MissionTypes[0] = helpers.Trans(c.Player.Language.Slug, "mission.underground")
-	c.MissionTypes[1] = helpers.Trans(c.Player.Language.Slug, "mission.surface")
-	c.MissionTypes[2] = helpers.Trans(c.Player.Language.Slug, "mission.atmosphere")
+	// c.MissionTypes = make([]string, 3)
+	// c.MissionTypes[0] = helpers.Trans(c.Player.Language.Slug, "mission.underground")
+	// c.MissionTypes[1] = helpers.Trans(c.Player.Language.Slug, "mission.surface")
+	// c.MissionTypes[2] = helpers.Trans(c.Player.Language.Slug, "mission.atmosphere")
 
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
@@ -134,10 +139,10 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// un tipo di missione tra quelli disponibili
 	case 1:
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		if helpers.StringInSlice(c.Update.Message.Text, c.MissionTypes) {
-			c.Payload.ExplorationType = c.Update.Message.Text
-
-			return false, err
+		for _, missionType := range MissionTypes {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
+				return false, err
+			}
 		}
 
 		return true, err
@@ -201,8 +206,11 @@ func (c *MissionController) Stage() (err error) {
 	case 0:
 		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, mType := range c.MissionTypes {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(mType))
+		for _, missionType := range MissionTypes {
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType))),
+			)
+
 			keyboardRows = append(keyboardRows, keyboardRow)
 		}
 
@@ -230,8 +238,16 @@ func (c *MissionController) Stage() (err error) {
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
 	case 1:
+		// È il tempo minimo di una missione
+		baseMissionTime := 10
+
+		// Verifico se è stato forzato il tempo della prima missione Es. da tutorial
+		if c.Payload.ForcedTime > 0 {
+			baseMissionTime = c.Payload.ForcedTime
+		}
+
 		var endTime time.Time
-		endTime = helpers.GetEndTime(0, 10, 0)
+		endTime = helpers.GetEndTime(0, baseMissionTime, 0)
 
 		// Invio messaggio di attesa
 		msg := services.NewMessage(c.Player.ChatID,
@@ -256,8 +272,13 @@ func (c *MissionController) Stage() (err error) {
 			return
 		}
 
-		// Importo nel payload la scelta del player
-		c.Payload.ExplorationType = c.Update.Message.Text
+		// Importo nel payload la scelta di tipologia di missione
+		for _, missionType := range MissionTypes {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
+				c.Payload.ExplorationType = missionType
+				break
+			}
+		}
 
 		// Avanzo di stato
 		c.State.Stage = 2
@@ -268,13 +289,13 @@ func (c *MissionController) Stage() (err error) {
 	// dalla missione e glielo notifico
 	case 2:
 		// Recupera tipologia di missione
-		missionType := helpers.GetMissionCategory(c.Player.Language.Slug, c.Payload.ExplorationType)
+		// missionType := helpers.GetMissionCategory(c.Player.Language.Slug, c.Payload.ExplorationType)
 		//TODO: migliorare qui sopra e recupeare ID pianeta da passare al drop
 
 		// Recupero drop
 		var drop nnsdk.DropItem
 		drop, err = providers.DropResource(
-			missionType,
+			c.Payload.ExplorationType,
 			c.Payload.Times,
 			c.Player.ID,
 			1,

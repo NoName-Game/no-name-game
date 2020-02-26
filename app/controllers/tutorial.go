@@ -385,7 +385,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Mando messaggio allert
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 		alertMessage := services.NewMessage(c.Update.Message.Chat.ID, textList[20])
 		alertMessage.ParseMode = "markdown"
 		alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -510,6 +510,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo missione come sottoprocesso di questo controller
 		missionController := new(MissionController)
 		missionController.Father = c.State.ID
+		missionController.Payload.ForcedTime = 1
 		missionController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli

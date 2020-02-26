@@ -74,19 +74,3 @@ func GetTranslation(key, locale string, args []interface{}) (string, error) {
 
 	return msg, err
 }
-
-// GenerateTextArray - generate text's array from a common word in key.
-// func GenerateTextArray(common string, lang string, args ...interface{}) []string {
-// 	var texts []string
-// 	var counter int
-// 	for {
-// 		keyText := common + "_" + strconv.Itoa(counter)
-// 		if text, _ := GetTranslation(keyText, lang, nil); text != "" {
-// 			texts = append(texts, text)
-// 			counter++
-// 		} else {
-// 			break
-// 		}
-// 	}
-// 	return texts
-// }

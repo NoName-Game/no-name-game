@@ -152,7 +152,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		// Recupero armatura equipaggiata
 		// ******************
 		var currentArmorsEquipment string
-		currentArmorsEquipment = fmt.Sprintf("%s:", helpers.Trans(c.Player.Language.Slug, "armors"))
+		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
 		var armors nnsdk.Armors
 		armors, err = providers.GetPlayerArmors(c.Player, "true")
@@ -160,15 +160,19 @@ func (c *InventoryEquipController) Stage() (err error) {
 			return err
 		}
 
-		for _, armor := range armors {
-			currentArmorsEquipment += fmt.Sprintf("- %s \n", armor.Name)
+		if len(armors) > 0 {
+			for _, armor := range armors {
+				currentArmorsEquipment += fmt.Sprintf("- %s \n", armor.Name)
+			}
+		} else {
+			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
 		}
 
 		// ******************
 		// Recupero armi equipaggiate
 		// ******************
 		var currentWeaponsEquipment string
-		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapons"))
+		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var weapons nnsdk.Weapons
 		weapons, err := providers.GetPlayerWeapons(c.Player, "true")
@@ -176,8 +180,12 @@ func (c *InventoryEquipController) Stage() (err error) {
 			return err
 		}
 
-		for _, weapon := range weapons {
-			currentWeaponsEquipment += fmt.Sprintf("- %s \n", weapon.Name)
+		if len(weapons) > 0 {
+			for _, weapon := range weapons {
+				currentWeaponsEquipment += fmt.Sprintf("- %s \n", weapon.Name)
+			}
+		} else {
+			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
 
 		// Invio messagio con recap e con selettore categoria
@@ -186,7 +194,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 				"%s \n\n %s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
 				fmt.Sprintf(
-					"%s\n%s\n%s",
+					"%s\n%s\n\n%s",
 					helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
 					currentArmorsEquipment,
 					currentWeaponsEquipment,
@@ -218,12 +226,15 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
+		var mainMessage string
 		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		c.Payload.Type = c.Update.Message.Text
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
+
 			// Recupero nuovamente armature player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
 			var armors nnsdk.Armors
@@ -247,6 +258,8 @@ func (c *InventoryEquipController) Stage() (err error) {
 			}
 
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
+
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
 			var weapons nnsdk.Weapons
@@ -276,7 +289,8 @@ func (c *InventoryEquipController) Stage() (err error) {
 		))
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.what"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID, mainMessage)
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,

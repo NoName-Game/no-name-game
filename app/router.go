@@ -96,7 +96,7 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 		parsed = message.Command()
 		// Se è un comando ed è start lo parso come tutorial
 		if parsed == "start" {
-			parsed = "tutorial"
+			parsed = "📖 Tutorial"
 		}
 	}
 
