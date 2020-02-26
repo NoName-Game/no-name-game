@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -47,7 +48,16 @@ var (
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
-			tgbotapi.NewInlineKeyboardButtonData("⭕", "hunting.move.action"),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+		),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+	)
+
+	tresureKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
+			tgbotapi.NewInlineKeyboardButtonData("❓️", "hunting.move.action"),
 			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
 		),
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
@@ -65,9 +75,11 @@ var (
 
 	mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⚔", "hunting.fight.hit")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.return_map"),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.hit"),
+		),
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.return_map")),
 	)
 )
 
@@ -379,7 +391,7 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 		tresure, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
 		if nearTresure == true {
 			// Chiamo WS e recupero tesoro
-			var drop nnsdk.TresureDropResponse
+			var drop nnsdk.DropResponse
 			drop, err = providers.DropTresure(c.Player.ID, tresure.ID)
 			if err != nil {
 				return err
@@ -388,30 +400,26 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 			// Verifico cosa è tornato e rispondo
 			var editMessage tgbotapi.EditMessageTextConfig
 			if drop.Resource.ID > 0 {
-
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
 					helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", drop.Resource.Name),
 				)
-
 			} else if drop.Item.ID > 0 {
-
+				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", drop.Item.Slug))
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.item", drop.Item.Name),
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.item", itemFound),
 				)
-
 			} else if drop.Transaction.ID > 0 {
-
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
 					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", drop.Transaction.Value),
 				)
-
 			} else {
+				// Non hai trovato nulla
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
@@ -425,7 +433,13 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 				),
 			)
 			editMessage.ReplyMarkup = &ok
-			editMessage.ParseMode = "HTML"
+			editMessage.ParseMode = "markdown"
+
+			// Un tesoro è stato aperto, devo refreshare la mappa per cancellarlo
+			err = c.RefreshMap()
+			if err != nil {
+				return err
+			}
 
 			_, err = services.SendMessage(editMessage)
 			if err != nil {
@@ -434,6 +448,8 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 
 			return
 		}
+
+		return err
 	case "no-action":
 		// No action
 	default:
@@ -459,10 +475,13 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 	msg := services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
 
 	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
-	var nearMob bool
+	var nearMob, nearTresure bool
 	_, nearMob = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
-	if true == nearMob {
+	_, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
+	if nearMob {
 		msg.ReplyMarkup = &fightKeyboard
+	} else if nearTresure {
+		msg.ReplyMarkup = &tresureKeyboard
 	} else {
 		msg.ReplyMarkup = &mapKeyboard
 	}
@@ -532,13 +551,26 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 
 		// Verifico se il MOB è morto
 		if hitResponse.EnemyDie == true {
-			// TODO: ricevere monete e riconpensa
+			// Costruisco messaggio di recap del drop
+			var dropRecap string
+			if hitResponse.EnemyDrop.Resource.ID > 0 {
+				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.resource", hitResponse.EnemyDrop.Resource.Name))
+			} else if hitResponse.EnemyDrop.Item.ID > 0 {
+				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", hitResponse.EnemyDrop.Item.Slug))
+				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound))
+			} else if hitResponse.EnemyDrop.Transaction.ID > 0 {
+				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", hitResponse.EnemyDrop.Transaction.Value))
+			} else {
+				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.nothing"))
+			}
+			// Aggiungo anche esperinza recuperata
+			dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", hitResponse.PlayerExperience))
 
 			// Aggiorno modifica del messaggio
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed"),
+				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", enemy.Name, dropRecap),
 			)
 
 			var ok tgbotapi.InlineKeyboardMarkup
@@ -549,7 +581,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 					),
 				),
 			)
-
+			editMessage.ParseMode = "markdown"
 			editMessage.ReplyMarkup = &ok
 
 			// Setto stato
@@ -557,15 +589,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			c.Payload.InFight = false
 			c.Payload.EnemyID = 0
 
-			// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
-			var maps nnsdk.Map
-			maps, err = providers.GetMapByID(c.Payload.MapID)
-			if err != nil {
-				return err
-			}
-
-			// Registro mappa e posizione iniziale del player
-			err = helpers.SetRedisMapHunting(maps)
+			err = c.RefreshMap()
 			if err != nil {
 				return err
 			}
@@ -638,6 +662,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 
 	case "return_map":
 		c.Payload.InFight = false
+		c.Payload.EnemyID = 0
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
@@ -666,7 +691,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "combat.card",
-				enemy.Name,
+				enemy.Name, enemy.Rarity.Slug,
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
@@ -675,11 +700,31 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 			),
 		)
+		editMessage.ParseMode = "markdown"
 		editMessage.ReplyMarkup = &mobKeyboard
 	}
 
 	// Invio messaggio modificato
 	_, err = services.SendMessage(editMessage)
+
+	return
+}
+
+// RefreshMap - Necessario per refreshare la mappa in caso
+// di sconfitta di mob o apertura di tesori.
+func (c *HuntingController) RefreshMap() (err error) {
+	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
+	var maps nnsdk.Map
+	maps, err = providers.GetMapByID(c.Payload.MapID)
+	if err != nil {
+		return err
+	}
+
+	// Registro mappa e posizione iniziale del player
+	err = helpers.SetRedisMapHunting(maps)
+	if err != nil {
+		return err
+	}
 
 	return
 }

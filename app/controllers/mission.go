@@ -288,9 +288,20 @@ func (c *MissionController) Stage() (err error) {
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
 	case 2:
-		// Recupera tipologia di missione
-		// missionType := helpers.GetMissionCategory(c.Player.Language.Slug, c.Payload.ExplorationType)
-		//TODO: migliorare qui sopra e recupeare ID pianeta da passare al drop
+		// Recupero ultima posizione del player, dando per scontato che sia
+		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
+		var lastPosition nnsdk.PlayerPosition
+		lastPosition, err = providers.GetPlayerLastPosition(c.Player)
+		if err != nil {
+			return err
+		}
+
+		// Dalla ultima posizione recupero il pianeta corrente
+		var planet nnsdk.Planet
+		planet, err = providers.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+		if err != nil {
+			return err
+		}
 
 		// Recupero drop
 		var drop nnsdk.DropItem
@@ -298,7 +309,7 @@ func (c *MissionController) Stage() (err error) {
 			c.Payload.ExplorationType,
 			c.Payload.Times,
 			c.Player.ID,
-			1,
+			planet.ID,
 		)
 		if err != nil {
 			return err

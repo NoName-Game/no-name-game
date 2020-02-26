@@ -7,13 +7,13 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func DropTresure(playerID uint, tresureID uint) (nnsdk.TresureDropResponse, error) {
+func DropTresure(playerID uint, tresureID uint) (nnsdk.DropResponse, error) {
 	request := nnsdk.TresureDropRequest{
 		PlayerID:  playerID,
 		TresureID: tresureID,
 	}
 
-	var drop nnsdk.TresureDropResponse
+	var drop nnsdk.DropResponse
 	resp, err := services.NnSDK.MakeRequest("tresures/drop", request).Post()
 	if err != nil {
 		return drop, err
