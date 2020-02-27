@@ -277,3 +277,18 @@ func GetPlayerItems(playerID uint) (nnsdk.PlayerInventories, error) {
 
 	return playerInventory, nil
 }
+
+func GetPlayerEconomy(playerID uint, economyType string) (money nnsdk.MoneyResponse, err error) {
+	var resp nnsdk.APIResponse
+	resp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/%s", playerID, economyType), nil).Get()
+	if err != nil {
+		return money, err
+	}
+
+	err = json.Unmarshal(resp.Data, &money)
+	if err != nil {
+		return money, err
+	}
+
+	return money, nil
+}

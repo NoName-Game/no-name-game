@@ -50,30 +50,12 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	}
 }
 
-// GetPlayerTask
-func (c *MenuController) GetPlayerTasks() (tasks string) {
-	for _, state := range c.Player.States {
-		if *state.Completed != true {
-			// Se sono da notificare formatto con la data
-			if *state.ToNotify {
-				tasks += fmt.Sprintf("- %s (%s)\n",
-					helpers.Trans(c.Player.Language.Slug, state.Controller),
-					state.FinishAt.Format("15:04:05 01/02"),
-				)
-			} else {
-				tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
-			}
-		}
-	}
-
-	return
-}
-
 // GetRecap
 // BoardSystem v0.1
 // 🌏 Nomepianeta
 // 👨🏼‍🚀 Casteponters
 // ♥️ life/max-life
+// 💰 XXXX 💎 XXXX
 //
 // ⏱ Task in corso:
 // - LIST
@@ -94,12 +76,53 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		return message, err
 	}
 
+	// Calcolo lato economico del player
+	var economy string
+	economy, err = c.GetPlayerEconomy()
+	if err != nil {
+		return message, err
+	}
+
 	message = helpers.Trans(c.Player.Language.Slug, "menu",
 		planet.Name,
 		c.Player.Username,
 		*c.Player.Stats.LifePoint, 100,
+		economy,
 		c.GetPlayerTasks(),
 	)
+
+	return
+}
+
+// GetPlayerTask
+func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
+	// Calcolo monete del player
+	var money nnsdk.MoneyResponse
+	money, _ = providers.GetPlayerEconomy(c.Player.ID, "money")
+
+	var diamond nnsdk.MoneyResponse
+	diamond, _ = providers.GetPlayerEconomy(c.Player.ID, "diamond")
+
+	economy = fmt.Sprintf("💰 %v 💎 %v", money.Value, diamond.Value)
+
+	return
+}
+
+// GetPlayerTask
+func (c *MenuController) GetPlayerTasks() (tasks string) {
+	for _, state := range c.Player.States {
+		if *state.Completed != true {
+			// Se sono da notificare formatto con la data
+			if *state.ToNotify {
+				tasks += fmt.Sprintf("- %s (%s)\n",
+					helpers.Trans(c.Player.Language.Slug, state.Controller),
+					state.FinishAt.Format("15:04:05 01/02"),
+				)
+			} else {
+				tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
+			}
+		}
+	}
 
 	return
 }
