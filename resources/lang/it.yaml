@@ -22,6 +22,7 @@ route.ship: "🚀 Nave"
 route.ship.exploration: "🔭 Nuova Esplorazione"
 route.ship.warehouse: "Deposito"
 route.ship.repairs: "🔧 Ripara"
+route.ship.rests: "💤 Riposa"
 route.ship.better: "Migliora"
 route.menu: "BoardSystem"
 route.force.die: "Delete"
@@ -140,10 +141,8 @@ crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuo
 crafting.item_does_not_exist: "L'item scelto non esiste!"
 
 # ITEMS
-items.water: "Acqua"
-items.description.water: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
 items.revitalizing_small: "Rivitalizzante piccolo"
-items.description.revitalizing_small: "Permette di recuperare *%vHP*."
+items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
 items.revitalizing_medium: "Rivitalizzante medio"
 items.description.revitalizing_medium: "Permette di recuperare *%vHP*."
 items.revitalizing_max: "Rivitalizzante grande"
@@ -277,13 +276,15 @@ route.exploration.error.function_not_completed: "Puoi accedere a questa funziona
 ship.warehouse.info: "Info warehouse"
 
 # SHIP - Repairs
-ship.repairs.info: "Dettagli di riparazione!"
-ship.repairs.time: "Tempo necessario"
-ship.repairs.quantity_resources: "Risorse necessarie"
-ship.repairs.used_resources: "Risorse usate per la riparazione"
+ship.repairs.info: "Dettagli di riparazione!\n\n"
+ship.repairs.time: "⏱ Tempo necessario: %v (minuti)"
+ship.repairs.quantity_resources: "💠 Risorse necessarie: %v (%s)"
+ship.repairs.used_resources: "💠 Risorse impiegate per la riparazione:\n"
+ship.repairs.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave.\nDevi recuperare più risorse della stessa rarità della tua nave."
 ship.repairs.dont_need: "La tua nave non necessita di riparazioni."
 ship.repairs.start: "Avvia riparazione"
-ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle %s"
+ship.repairs.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
+ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
 ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrità."
 
 # SHIP - Better
