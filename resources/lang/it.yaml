@@ -289,3 +289,12 @@ ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrit�
 
 # SHIP - Better
 ship.better.info: "Info better"
+
+# SHIP - RESTS
+
+ship.rests.info: "Quando se all'estremo delle tue forze mettersi a domire è il miglior modo per recuperare energie:\n"
+ship.rests.time: "⏱ Tempo necessario al recupero totale delle forze: %v"
+ship.rests.start: "Mettiti a dormire"
+ship.rests.dont_need: "Sei pieno di energie, ci provi ma proprio non riesci ad addormentarti"
+ship.rests.reparing: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
+ship.rests.reparing.finish: "Ti risvegli sentendoti meglio!"

@@ -292,3 +292,24 @@ func GetPlayerEconomy(playerID uint, economyType string) (money nnsdk.MoneyRespo
 
 	return money, nil
 }
+
+func GetRestsInfo(playerID uint) (info nnsdk.PlayerRestInfoResponse, err error) {
+	var resp nnsdk.APIResponse
+	resp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/rests/info", playerID), nil).Get()
+	if err != nil {
+		return info, err
+	}
+
+	err = json.Unmarshal(resp.Data, &info)
+	if err != nil {
+		return info, err
+	}
+
+	return
+}
+
+func EndPlayerRest(playerID uint, request nnsdk.PlayerRestEndRequest) (err error) {
+	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/rests/end", playerID), request).Post()
+
+	return
+}

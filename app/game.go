@@ -32,6 +32,7 @@ var (
 		"route.ship":             new(controllers.ShipController),
 		"route.ship.exploration": new(controllers.ShipExplorationController),
 		"route.ship.repairs":     new(controllers.ShipRepairsController),
+		"route.ship.rests":       new(controllers.ShipRestsController),
 
 		// "route.testing.multiStage": new(controllers.TestingController),
 	}
