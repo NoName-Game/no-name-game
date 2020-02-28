@@ -157,7 +157,7 @@ func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.crafting")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.abilityTree")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ability")),
 		},
 	}
 }
@@ -189,7 +189,7 @@ func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.crafting")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.abilityTree")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ability")),
 		},
 	}
 }

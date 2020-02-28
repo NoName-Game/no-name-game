@@ -19,7 +19,7 @@ var (
 
 		"route.mission":  new(controllers.MissionController),
 		"route.crafting": new(controllers.CraftingController),
-		// "route.abilityTree": new(controllers.AbilityController),
+		"route.ability":  new(controllers.AbilityController),
 
 		"route.hunting": new(controllers.HuntingController),
 

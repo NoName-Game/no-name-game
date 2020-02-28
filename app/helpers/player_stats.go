@@ -12,7 +12,7 @@ package helpers
 // 	return
 // }
 //
-// // Increment - Increment player stats by fieldName
+// Increment - Increment player stats by fieldName
 // func PlayerStatsIncrement(playerStats *nnsdk.PlayerStats, statToIncrement string) {
 // 	val := reflect.ValueOf(playerStats).Elem()
 // 	for i := 8; i < val.NumField()-1; i++ {
@@ -41,14 +41,5 @@ package helpers
 // 		services.ErrorHandler("Cant update player stats", err)
 // 	}
 //
-// 	return stats
-// }
-
-// func IncrementExp(exp uint, stats nnsdk.PlayerStats) nnsdk.PlayerStats {
-// 	stats.Experience++
-// 	_, err := providers.UpdatePlayerStats(stats)
-// 	if err != nil {
-// 		services.ErrorHandler("Can't update player stats.", err)
-// 	}
 // 	return stats
 // }
