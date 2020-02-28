@@ -298,7 +298,7 @@ func (c *HuntingController) Hunting() (err error) {
 		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-		if actionType[1] == "move" && !c.Payload.InFight {
+		if actionType[1] == "move" {
 			err = c.Move(actionType[2], maps)
 		} else if actionType[1] == "fight" {
 			err = c.Fight(actionType[2], maps)

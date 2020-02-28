@@ -101,9 +101,4 @@ func handleUpdate(update tgbotapi.Update) {
 	// Gestisco update
 	routing(player, update)
 
-	// Se è un player già registrato verifico che non sia morto per continuare
-	// if player.Stats.Dead == true {
-	// 	// controllers.PlayerDeath(update) TODO: FIXME
-	// 	return false
-	// }
 }

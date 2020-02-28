@@ -67,7 +67,7 @@ hours: "Ore"
 
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
-menu.tasks: "⏱ *Attività in corso:*"
+menu.tasks: "⏱ *Attività in corso:*\n"
 
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"
