@@ -66,7 +66,8 @@ fuel: "Carburante"
 hours: "Ore"
 
 # MENU
-menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n♥️ %v/%v HP\n%s\n\n⏱ *Task in corso:*\n%s"
+menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
+menu.tasks: "⏱ *Attività in corso:*"
 
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"

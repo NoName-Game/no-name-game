@@ -64,25 +64,17 @@ func (c *ClearsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo
 	c.Controller = "route.breaker.back"
 	c.Update = update
+	c.Player = player
 
-	// In questo caso non verifico l'errore potrebbe non essere necessario
-	// verificarne l'esistenza
-	err = helpers.DeleteRedisAndDbState(player)
-	if err != nil {
-		panic(err)
+	if *c.Player.Stats.Dead == false {
+		// In questo caso non verifico l'errore potrebbe non essere necessario
+		// verificarne l'esistenza
+		err = helpers.DeleteRedisAndDbState(player)
+		if err != nil {
+			panic(err)
+		}
+
+		// Call menu controller
+		new(MenuController).Handle(player, update)
 	}
-
-	// if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
-	// 	msg := services.NewMessage(c.Update.Message.Chat.ID,
-	// 		"***************************\nDEBUG: DELETE DB AND REDIS STATE.\n***************************\n",
-	// 	)
-	// 	// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-	// 	_, err = services.SendMessage(msg)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// }
-
-	// Call menu controller
-	new(MenuController).Handle(player, update)
 }

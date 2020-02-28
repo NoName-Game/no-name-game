@@ -48,6 +48,12 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	if err != nil {
 		panic(err)
 	}
+
+	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
+	if *c.Player.Stats.Dead {
+		restsController := new(ShipRestsController)
+		restsController.Handle(c.Player, c.Update)
+	}
 }
 
 // GetRecap
@@ -83,10 +89,17 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		return message, err
 	}
 
+	// Recupero status vitale del player
+	var life string
+	life, err = c.GetPlayerLife()
+	if err != nil {
+		return message, err
+	}
+
 	message = helpers.Trans(c.Player.Language.Slug, "menu",
 		planet.Name,
 		c.Player.Username,
-		*c.Player.Stats.LifePoint, 100,
+		life,
 		economy,
 		c.GetPlayerTasks(),
 	)
@@ -108,18 +121,35 @@ func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
 	return
 }
 
+// GetPlayerLife
+func (c *MenuController) GetPlayerLife() (life string, err error) {
+	// Calcolo stato vitale del player
+	status := "♥️"
+	if *c.Player.Stats.Dead {
+		status = "☠️"
+	}
+
+	life = fmt.Sprintf("%s️ %v/%v HP", status, *c.Player.Stats.LifePoint, 100)
+
+	return
+}
+
 // GetPlayerTask
 func (c *MenuController) GetPlayerTasks() (tasks string) {
-	for _, state := range c.Player.States {
-		if *state.Completed != true {
-			// Se sono da notificare formatto con la data
-			if *state.ToNotify {
-				tasks += fmt.Sprintf("- %s (%s)\n",
-					helpers.Trans(c.Player.Language.Slug, state.Controller),
-					state.FinishAt.Format("15:04:05 01/02"),
-				)
-			} else {
-				tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
+	if len(c.Player.States) > 0 {
+		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
+
+		for _, state := range c.Player.States {
+			if *state.Completed != true {
+				// Se sono da notificare formatto con la data
+				if *state.ToNotify {
+					tasks += fmt.Sprintf("- %s (%s)\n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+						state.FinishAt.Format("15:04:05 01/02"),
+					)
+				} else {
+					tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
+				}
 			}
 		}
 	}

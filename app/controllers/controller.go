@@ -19,6 +19,18 @@ type BaseController struct {
 	State  nnsdk.PlayerState
 }
 
+func (c *BaseController) InitController(controller string, player nnsdk.Player) (err error) {
+	// TODO: portare qui i controlli iniziali
+
+	// Se il player è morto lo mando a riposare
+	if *player.Stats.Dead && controller != "route.ship.rests" {
+		restsController := new(ShipRestsController)
+		restsController.Handle(c.Player, c.Update)
+	}
+
+	return
+}
+
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing() (err error) {
 	// Verifico se lo stato è completato chiudo

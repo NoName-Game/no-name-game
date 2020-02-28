@@ -616,7 +616,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
+						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
 					),
 				),
 			)
@@ -629,11 +629,6 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 				return err
 			}
 
-			// Il player è morto non mi r
-			c.State.Completed = helpers.SetTrue()
-
-			// Invoco player Death
-			// new(DeathController).Handle(c.Update)
 			return
 		}
 
@@ -680,6 +675,11 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 
 		editMessage.ParseMode = "HTML"
 		editMessage.ReplyMarkup = &mapKeyboard
+	case "player-die":
+		// Il player è morto
+		c.State.Completed = helpers.SetTrue()
+
+		return
 	case "no-action":
 		//
 	}

@@ -761,13 +761,13 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+		// validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		// 	tgbotapi.NewKeyboardButtonRow(
+		// 		tgbotapi.NewKeyboardButton(
+		// 			helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+		// 		),
+		// 	),
+		// )
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -866,13 +866,15 @@ func (c *ShipRestsController) Stage() (err error) {
 			keyboardRow = append(keyboardRow, newKeyboardRow)
 		}
 
-		// Clear and exit
-		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
-		))
+		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
+		if *c.Player.Stats.Dead == false {
+			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			))
+		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, restsRecap)
+		msg := services.NewMessage(c.Player.ChatID, restsRecap)
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,

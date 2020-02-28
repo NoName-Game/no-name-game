@@ -35,11 +35,14 @@ var (
 // Handle
 // ====================================
 func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+
 	// Inizializzo variabili del controler
 	var err error
 	c.Controller = "route.mission"
 	c.Player = player
 	c.Update = update
+
+	_ = c.InitController("route.mission", player)
 
 	// Registro tipi di missione
 	// c.MissionTypes = make([]string, 3)
