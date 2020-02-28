@@ -124,7 +124,7 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
 		for _, ability := range AbilityLists {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))) == c.Update.Message.Text {
-				if c.Player.Stats.AbilityPoint <= 0 {
+				if *c.Player.Stats.AbilityPoint <= 0 {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ability.no_point_left")
 					return true, err
 				}
@@ -161,7 +161,7 @@ func (c *AbilityController) Stage() (err error) {
 		}
 
 		// Mostro quanti punti ha a disposizione il player
-		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", c.Player.Stats.AbilityPoint)
+		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", *c.Player.Stats.AbilityPoint)
 
 		// Creo tastierino con i soli componienti abilitati dal client
 		var keyboardRow [][]tgbotapi.KeyboardButton
@@ -204,7 +204,7 @@ func (c *AbilityController) Stage() (err error) {
 				f := reflect.ValueOf(&c.Player.Stats).Elem().FieldByName(ability)
 				f.SetUint(uint64(f.Interface().(uint) + 1))
 
-				c.Player.Stats.AbilityPoint--
+				*c.Player.Stats.AbilityPoint--
 			}
 		}
 
