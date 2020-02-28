@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -723,7 +724,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 type ShipRestsController struct {
 	BaseController
 	Payload struct {
-		RestsTime int
+		StartDateTime time.Time
 	}
 }
 
@@ -819,16 +820,12 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 
 		return false, err
 	case 2:
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"ship.rests.wait",
-			c.State.FinishAt.Format("15:04:05 01/02"),
-		)
-
-		// Verifico se ha finito il crafting
-		if time.Now().After(c.State.FinishAt) {
-			return false, err
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup")
+			return true, err
 		}
+
+		return false, err
 	}
 
 	return true, err
@@ -871,12 +868,12 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Clear and exit
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 		))
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, restsRecap)
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
@@ -887,13 +884,19 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.Payload.RestsTime = restsInfo.RestsTime
 		c.State.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
+		// Recupero informazioni per il recupero totale delle energie
+		var restsInfo nnsdk.PlayerRestInfoResponse
+		restsInfo, err = providers.GetRestsInfo(c.Player.ID)
+		if err != nil {
+			return err
+		}
+
 		// Setto timer recuperato dalla chiamata delle info
-		c.State.FinishAt = helpers.GetEndTime(0, int(c.Payload.RestsTime), 0)
+		c.State.FinishAt = helpers.GetEndTime(0, int(restsInfo.RestsTime), 0)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
@@ -903,7 +906,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup")),
 			),
 		)
 
@@ -913,13 +916,20 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.ToNotify = helpers.SetTrue()
+		c.Payload.StartDateTime = time.Now()
 		c.State.Stage = 2
 	case 2:
-		//TODO: Recupero minuti di riposo e fare chiamata al WS
+		// Calcolo differenza tra inizio e fine
+		var endDate time.Time
+		endDate = time.Now()
+
+		diffDate := endDate.Sub(c.Payload.StartDateTime)
+		diffMinutes := math.RoundToEven(diffDate.Minutes())
 
 		// Fine riparazione
-		err = providers.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{RestsTime: 10})
+		err = providers.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{
+			RestsTime: uint(diffMinutes),
+		})
 		if err != nil {
 			return err
 		}

@@ -292,9 +292,11 @@ ship.better.info: "Info better"
 
 # SHIP - RESTS
 
-ship.rests.info: "Quando se all'estremo delle tue forze mettersi a domire è il miglior modo per recuperare energie:\n"
-ship.rests.time: "⏱ Tempo necessario al recupero totale delle forze: %v"
+ship.rests.info: "Quando se all'estremo delle tue forze mettersi a domire è il miglior modo per recuperare energie:\n\n"
+ship.rests.time: "⏱ Necessari *%v* minuti al recupero totale delle forze."
 ship.rests.start: "Mettiti a dormire"
+ship.rests.wakeup: "Risvegliati"
 ship.rests.dont_need: "Sei pieno di energie, ci provi ma proprio non riesci ad addormentarti"
 ship.rests.reparing: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
 ship.rests.reparing.finish: "Ti risvegli sentendoti meglio!"
+ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
