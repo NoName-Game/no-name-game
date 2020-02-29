@@ -21,22 +21,7 @@ func (rp *ResourceProvider) GetResourceByID(id uint) (response nnsdk.Resource, e
 	return
 }
 
-func (rp *ResourceProvider) DropResource(typeExploration string, qtyExploration int, playerID uint, planetID uint) (response nnsdk.DropItem, err error) {
-	// TODO spostare in reuqest
-	type dropRequest struct {
-		TypeExploration string
-		QtyExploration  int
-		PlayerID        uint
-		PlanetID        uint
-	}
-
-	request := dropRequest{
-		TypeExploration: typeExploration,
-		QtyExploration:  qtyExploration,
-		PlayerID:        playerID,
-		PlanetID:        planetID,
-	}
-
+func (rp *ResourceProvider) DropResource(request nnsdk.ResourceDropRequest) (response nnsdk.DropItem, err error) {
 	rp.SDKResp, err = services.NnSDK.MakeRequest("resources/drop", request).Post()
 	if err != nil {
 		return response, err

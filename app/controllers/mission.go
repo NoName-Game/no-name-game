@@ -43,14 +43,6 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Player = player
 	c.Update = update
 
-	_ = c.InitController("route.mission", player)
-
-	// Registro tipi di missione
-	// c.MissionTypes = make([]string, 3)
-	// c.MissionTypes[0] = helpers.Trans(c.Player.Language.Slug, "mission.underground")
-	// c.MissionTypes[1] = helpers.Trans(c.Player.Language.Slug, "mission.surface")
-	// c.MissionTypes[2] = helpers.Trans(c.Player.Language.Slug, "mission.atmosphere")
-
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
@@ -299,12 +291,13 @@ func (c *MissionController) Stage() (err error) {
 
 		// Recupero drop
 		var drop nnsdk.DropItem
-		drop, err = resourceProvider.DropResource(
-			c.Payload.ExplorationType,
-			c.Payload.Times,
-			c.Player.ID,
-			planet.ID,
-		)
+		drop, err = resourceProvider.DropResource(nnsdk.ResourceDropRequest{
+			TypeExploration: c.Payload.ExplorationType,
+			QtyExploration:  c.Payload.Times,
+			PlayerID:        c.Player.ID,
+			PlanetID:        planet.ID,
+		})
+
 		if err != nil {
 			return err
 		}
