@@ -55,8 +55,8 @@ func bootstrap() (err error) {
 	// *************
 	// Cron
 	// *************
-	// TODO: modificare
-	go commands.Cron()
+	var cron commands.Cron
+	go cron.Notify()
 
 	return err
 }

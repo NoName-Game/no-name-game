@@ -251,7 +251,7 @@ route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, 
 
 # CRON
 cron.route.testing.time_alert: "End Test time"
-cron.route.mission_alert: "Esplorazione finita!"
+cron.route.mission_alert: "Missione finita!"
 cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
