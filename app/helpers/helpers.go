@@ -4,9 +4,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // InArray - check if val exist in array
@@ -59,52 +56,6 @@ func StringInSlice(v string, a []string) bool {
 func Slugger(text string) string {
 	//FIXME: replace me with reaplace all in Go 1.12
 	return strings.Replace(strings.ToLower(text), " ", "_", -1)
-}
-
-// GetAllCategories - return all categories of all types
-func GetAllCategories() (categories []string) {
-	armorCategories, err := providers.GetAllArmorCategory()
-	if err != nil {
-		services.ErrorHandler("Cant get armor categories", err)
-	}
-
-	for _, armor := range armorCategories {
-		categories = append(categories, armor.Name)
-	}
-
-	weaponCategories, err := providers.GetAllWeaponCategory()
-	if err != nil {
-		services.ErrorHandler("Cant get armor categories", err)
-	}
-
-	for _, weapon := range weaponCategories {
-		categories = append(categories, weapon.Name)
-	}
-
-	return
-}
-
-// GetAllCategories - return all categories of all types
-func GetAllSlugCategories() (categories []string) {
-	armorCategories, err := providers.GetAllArmorCategory()
-	if err != nil {
-		services.ErrorHandler("Cant get armor categories", err)
-	}
-
-	for _, armor := range armorCategories {
-		categories = append(categories, armor.Slug)
-	}
-
-	weaponCategories, err := providers.GetAllWeaponCategory()
-	if err != nil {
-		services.ErrorHandler("Cant get armor categories", err)
-	}
-
-	for _, weapon := range weaponCategories {
-		categories = append(categories, weapon.Slug)
-	}
-
-	return
 }
 
 // GetEndTime - Aggiunge un tempo di durata T.

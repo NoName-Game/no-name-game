@@ -31,6 +31,8 @@ type InventoryItemController struct {
 func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
+
 	c.Controller = "route.inventory.items"
 	c.Player = player
 	c.Update = update
@@ -81,7 +83,7 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
@@ -100,6 +102,7 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 // ====================================
 func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	var playerProvider providers.PlayerProvider
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -110,7 +113,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	// l'item indicato
 	case 1:
 		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = providers.GetPlayerItems(c.Player.ID)
+		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
 		if err != nil {
 			panic(err)
 		}
@@ -144,13 +147,16 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *InventoryItemController) Stage() (err error) {
+	var itemProvider providers.ItemProvider
+	var playerProvider providers.PlayerProvider
+
 	switch c.State.Stage {
 
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
 		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = providers.GetPlayerItems(c.Player.ID)
+		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
 		if err != nil {
 			panic(err)
 		}
@@ -228,7 +234,7 @@ func (c *InventoryItemController) Stage() (err error) {
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
 		// Richiamo il ws per usare l'item selezionato
-		err = providers.UseItem(nnsdk.UseItemRequest{
+		err = itemProvider.UseItem(nnsdk.UseItemRequest{
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
 		})

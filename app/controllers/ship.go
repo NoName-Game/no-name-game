@@ -24,6 +24,7 @@ type ShipController BaseController
 func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerProvider providers.PlayerProvider
 
 	c.Controller = "route.ship"
 	c.Player = player
@@ -31,7 +32,7 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 
 	// Recupero nave attiva de player
 	var eqippedShips nnsdk.Ships
-	eqippedShips, err = providers.GetPlayerShips(c.Player, true)
+	eqippedShips, err = playerProvider.GetPlayerShips(c.Player, true)
 	if err != nil {
 		panic(err)
 	}

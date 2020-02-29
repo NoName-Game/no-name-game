@@ -1,77 +1,49 @@
 package providers
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/url"
-	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetArmorByID(id uint) (nnsdk.Armor, error) {
-	var armor nnsdk.Armor
-	resp, err := services.NnSDK.MakeRequest("armors/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return armor, err
-	}
-
-	err = json.Unmarshal(resp.Data, &armor)
-	if err != nil {
-		return armor, err
-	}
-
-	return armor, nil
+type ArmorProvider struct {
+	BaseProvider
 }
 
-func FindArmorByName(name string) (nnsdk.Armor, error) {
-	var armor nnsdk.Armor
+func (ap *ArmorProvider) GetArmorByID(id uint) (response nnsdk.Armor, err error) {
+	ap.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("armors/%v", id), nil).Get()
+	if err != nil {
+		return response, err
+	}
 
+	err = ap.Response(&response)
+	return
+}
+
+func (ap *ArmorProvider) FindArmorByName(name string) (response nnsdk.Armor, err error) {
 	// Encode paramiters
 	params := url.Values{}
 	params.Add("name", name)
 
-	resp, err := services.NnSDK.MakeRequest("search/armor?"+params.Encode(), nil).Get()
+	ap.SDKResp, err = services.NnSDK.MakeRequest("search/armor?"+params.Encode(), nil).Get()
 	if err != nil {
-		return armor, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &armor)
-	if err != nil {
-		return armor, err
-	}
-
-	return armor, nil
+	err = ap.Response(&response)
+	return
 }
 
-func UpdateArmor(request nnsdk.Armor) (nnsdk.Armor, error) {
-	var armor nnsdk.Armor
-	resp, err := services.NnSDK.MakeRequest("armors/"+strconv.FormatUint(uint64(request.ID), 10), request).Patch()
+func (ap *ArmorProvider) UpdateArmor(request nnsdk.Armor) (response nnsdk.Armor, err error) {
+	ap.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("armors/%v", request.ID), request).Patch()
 	if err != nil {
-		return armor, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &armor)
-	if err != nil {
-		return armor, err
-	}
-
-	return armor, nil
-}
-
-func DeleteArmor(request nnsdk.Armor) (nnsdk.Armor, error) {
-	var armor nnsdk.Armor
-	resp, err := services.NnSDK.MakeRequest("armors/"+strconv.FormatUint(uint64(request.ID), 10), request).Delete()
-	if err != nil {
-		return armor, err
-	}
-
-	err = json.Unmarshal(resp.Data, &armor)
-	if err != nil {
-		return armor, err
-	}
-
-	return armor, nil
+	err = ap.Response(&response)
+	return
 }
 
 // TODO: Da verificare

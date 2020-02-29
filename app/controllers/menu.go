@@ -18,9 +18,10 @@ type MenuController BaseController
 // ====================================
 func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
+	var playerProvider providers.PlayerProvider
 
 	// Il menù del player refresha sempre lo status del player
-	player, err = providers.FindPlayerByUsername(player.Username)
+	player, err = playerProvider.FindPlayerByUsername(player.Username)
 	if err != nil {
 		panic(err)
 	}
@@ -66,18 +67,20 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 // ⏱ Task in corso:
 // - LIST
 func (c *MenuController) GetRecap() (message string, err error) {
+	var playerProvider providers.PlayerProvider
+	var planetProvider providers.PlanetProvider
 
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 	var lastPosition nnsdk.PlayerPosition
-	lastPosition, err = providers.GetPlayerLastPosition(c.Player)
+	lastPosition, err = playerProvider.GetPlayerLastPosition(c.Player)
 	if err != nil {
 		return message, err
 	}
 
 	// Dalla ultima posizione recupero il pianeta corrente
 	var planet nnsdk.Planet
-	planet, err = providers.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
 	if err != nil {
 		return message, err
 	}
@@ -109,12 +112,14 @@ func (c *MenuController) GetRecap() (message string, err error) {
 
 // GetPlayerTask
 func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
+	var playerProvider providers.PlayerProvider
+
 	// Calcolo monete del player
 	var money nnsdk.MoneyResponse
-	money, _ = providers.GetPlayerEconomy(c.Player.ID, "money")
+	money, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "money")
 
 	var diamond nnsdk.MoneyResponse
-	diamond, _ = providers.GetPlayerEconomy(c.Player.ID, "diamond")
+	diamond, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "diamond")
 
 	economy = fmt.Sprintf("💰 %v 💎 %v", money.Value, diamond.Value)
 

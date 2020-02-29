@@ -33,6 +33,7 @@ type CraftingController struct {
 func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
 
 	c.Controller = "route.crafting"
 	c.Player = player
@@ -84,7 +85,7 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
@@ -103,6 +104,8 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 // ====================================
 func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	var itemProvider providers.ItemProvider
+	var playerProvider providers.PlayerProvider
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -126,7 +129,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
 		var items nnsdk.Items
-		items, err = providers.GetAllItems()
+		items, err = itemProvider.GetAllItems()
 		if err != nil {
 			return true, err
 		}
@@ -155,7 +158,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
 			var playerInventory nnsdk.PlayerInventories
-			playerInventory, _ = providers.GetPlayerResources(c.Player.ID)
+			playerInventory, _ = playerProvider.GetPlayerResources(c.Player.ID)
 
 			// Ciclo gli elementi di cui devo verificare la presenza
 			for resourceID, quantity := range c.Payload.Resources {
@@ -207,12 +210,17 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
 func (c *CraftingController) Stage() (err error) {
+	var itemCategoryProvider providers.ItemCategoryProvider
+	var itemProvider providers.ItemProvider
+	var playerProvider providers.PlayerProvider
+	var playerInventoryProvider providers.PlayerProvider
+
 	switch c.State.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
 		var itemCategories nnsdk.ItemCategories
-		itemCategories, err = providers.GetAllItemCategories()
+		itemCategories, err = itemCategoryProvider.GetAllItemCategories()
 		if err != nil {
 			return err
 		}
@@ -255,7 +263,7 @@ func (c *CraftingController) Stage() (err error) {
 	case 1:
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
 		var itemCategories nnsdk.ItemCategories
-		itemCategories, err = providers.GetAllItemCategories()
+		itemCategories, err = itemCategoryProvider.GetAllItemCategories()
 		if err != nil {
 			return err
 		}
@@ -269,14 +277,14 @@ func (c *CraftingController) Stage() (err error) {
 
 		// Lista oggetti craftabili
 		var craftableItems nnsdk.Items
-		craftableItems, err = providers.GetItemByCategoryID(chosenCategory.ID)
+		craftableItems, err = itemProvider.GetItemByCategoryID(chosenCategory.ID)
 		if err != nil {
 			return err
 		}
 
 		// Recupero tutti gli items del player
 		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = providers.GetPlayerItems(c.Player.ID)
+		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
 		if err != nil {
 			panic(err)
 		}
@@ -374,12 +382,11 @@ func (c *CraftingController) Stage() (err error) {
 	case 3:
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			err = providers.ManagePlayerInventory(
-				c.Player.ID,
-				resourceID,
-				"resources",
-				-quantity,
-			)
+			err = playerInventoryProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+				ItemID:   resourceID,
+				ItemType: "resources",
+				Quantity: -quantity,
+			})
 			if err != nil {
 				return err
 			}
@@ -413,12 +420,11 @@ func (c *CraftingController) Stage() (err error) {
 	// proseguo con l'assegnarli l'item e concludo
 	case 4:
 		// Aggiungo item all'inventario
-		err = providers.ManagePlayerInventory(
-			c.Player.ID,
-			c.Payload.Item.ID,
-			"items",
-			1,
-		)
+		err = playerInventoryProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+			ItemID:   c.Payload.Item.ID,
+			ItemType: "items",
+			Quantity: 1,
+		})
 		if err != nil {
 			return err
 		}

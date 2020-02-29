@@ -35,9 +35,10 @@ var (
 // Handle
 // ====================================
 func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
-
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
+
 	c.Controller = "route.mission"
 	c.Player = player
 	c.Update = update
@@ -100,28 +101,14 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
 
-	// Verifico se lo stato è completato chiudo
-	if *c.State.Completed == true {
-		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
-		if c.State.Father <= 0 {
-			_, err = providers.DeletePlayerState(c.State) // Delete
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		err = helpers.DelRedisState(player)
-		if err != nil {
-			panic(err)
-		}
-
-		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update)
+	err = c.Completing()
+	if err != nil {
+		panic(err)
 	}
 
 	return
@@ -203,6 +190,10 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *MissionController) Stage() (err error) {
+	var playerProvider providers.PlayerProvider
+	var planetProvider providers.PlanetProvider
+	var resourceProvider providers.ResourceProvider
+
 	switch c.State.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
@@ -294,21 +285,21 @@ func (c *MissionController) Stage() (err error) {
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		var lastPosition nnsdk.PlayerPosition
-		lastPosition, err = providers.GetPlayerLastPosition(c.Player)
+		lastPosition, err = playerProvider.GetPlayerLastPosition(c.Player)
 		if err != nil {
 			return err
 		}
 
 		// Dalla ultima posizione recupero il pianeta corrente
 		var planet nnsdk.Planet
-		planet, err = providers.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+		planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
 		if err != nil {
 			return err
 		}
 
 		// Recupero drop
 		var drop nnsdk.DropItem
-		drop, err = providers.DropResource(
+		drop, err = resourceProvider.DropResource(
 			c.Payload.ExplorationType,
 			c.Payload.Times,
 			c.Player.ID,
@@ -408,12 +399,11 @@ func (c *MissionController) Stage() (err error) {
 
 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		for _, drop := range c.Payload.Dropped {
-			err = providers.ManagePlayerInventory(
-				c.Player.ID,
-				drop.Resource.ID,
-				"resources",
-				drop.Quantity,
-			)
+			err = playerProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+				ItemID:   drop.Resource.ID,
+				ItemType: "resources",
+				Quantity: drop.Quantity,
+			})
 
 			if err != nil {
 				return err

@@ -39,7 +39,8 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 	}
 
 	// Verifico se esiste già un player registrato
-	player, err = providers.FindPlayerByUsername(user.UserName)
+	var playerProvider providers.PlayerProvider
+	player, err = playerProvider.FindPlayerByUsername(user.UserName)
 	if err != nil {
 		return player, err
 	}
@@ -48,13 +49,14 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 	if player.ID <= 0 {
 		// Recupero lingua di default
 		var language nnsdk.Language
-		language, err = providers.FindLanguageBySlug("it")
+		var languageProvider providers.LanguageProvider
+		language, err = languageProvider.FindLanguageBySlug("it")
 		if err != nil {
 			return player, err
 		}
 
 		// Registro player
-		player, err = providers.SignIn(nnsdk.Player{
+		player, err = playerProvider.SignIn(nnsdk.Player{
 			Username:   user.UserName,
 			ChatID:     int64(user.ID),
 			LanguageID: language.ID,

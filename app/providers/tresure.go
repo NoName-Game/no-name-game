@@ -1,28 +1,20 @@
 package providers
 
 import (
-	"encoding/json"
-
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func DropTresure(playerID uint, tresureID uint) (nnsdk.DropResponse, error) {
-	request := nnsdk.TresureDropRequest{
-		PlayerID:  playerID,
-		TresureID: tresureID,
-	}
+type TresureProvider struct {
+	BaseProvider
+}
 
-	var drop nnsdk.DropResponse
-	resp, err := services.NnSDK.MakeRequest("tresures/drop", request).Post()
+func (tp *TresureProvider) DropTresure(request nnsdk.TresureDropRequest) (response nnsdk.DropResponse, err error) {
+	tp.SDKResp, err = services.NnSDK.MakeRequest("tresures/drop", request).Post()
 	if err != nil {
-		return drop, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &drop)
-	if err != nil {
-		return drop, err
-	}
-
-	return drop, nil
+	err = tp.Response(&response)
+	return
 }

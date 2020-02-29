@@ -28,6 +28,7 @@ type ShipRestsController struct {
 func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
 
 	c.Controller = "route.ship.rests"
 	c.Player = player
@@ -80,7 +81,7 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
@@ -129,13 +130,15 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipRestsController) Stage() (err error) {
+	var playerProvider providers.PlayerProvider
+
 	switch c.State.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
 		// Recupero informazioni per il recupero totale delle energie
 		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = providers.GetRestsInfo(c.Player.ID)
+		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
 		if err != nil {
 			return err
 		}
@@ -186,7 +189,7 @@ func (c *ShipRestsController) Stage() (err error) {
 	case 1:
 		// Recupero informazioni per il recupero totale delle energie
 		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = providers.GetRestsInfo(c.Player.ID)
+		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
 		if err != nil {
 			return err
 		}
@@ -223,7 +226,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 
 		// Fine riparazione
-		err = providers.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{
+		err = playerProvider.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{
 			RestsTime: uint(diffMinutes),
 		})
 		if err != nil {

@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -9,76 +8,34 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetItemByID(id uint) (nnsdk.Item, error) {
-	var item nnsdk.Item
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("items/%v", id), nil).Get()
-	if err != nil {
-		return item, err
-	}
-
-	err = json.Unmarshal(resp.Data, &item)
-	if err != nil {
-		return item, err
-	}
-
-	return item, nil
+type ItemProvider struct {
+	BaseProvider
 }
 
-func GetAllItems() (nnsdk.Items, error) {
-	var items nnsdk.Items
-	resp, err := services.NnSDK.MakeRequest("items", nil).Get()
+func (ip *ItemProvider) GetAllItems() (response nnsdk.Items, err error) {
+	ip.SDKResp, err = services.NnSDK.MakeRequest("items", nil).Get()
 	if err != nil {
-		return items, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &items)
-	if err != nil {
-		return items, err
-	}
-
-	return items, nil
+	err = ip.Response(&response)
+	return
 }
 
-func GetItemByName(name string) (nnsdk.Item, error) {
-	var item nnsdk.Item
-	params := url.Values{}
-	params.Add("name", name)
-
-	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
-
-	if err != nil {
-		return item, err
-	}
-
-	err = json.Unmarshal(resp.Data, &item)
-
-	if err != nil {
-		return item, err
-	}
-	return item, nil
-
-}
-
-func GetItemByCategoryID(categoryID uint) (nnsdk.Items, error) {
-	var items nnsdk.Items
+func (ip *ItemProvider) GetItemByCategoryID(categoryID uint) (response nnsdk.Items, err error) {
 	params := url.Values{}
 	params.Add("category_id", fmt.Sprintf("%v", categoryID))
 
-	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
-
+	ip.SDKResp, err = services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
 	if err != nil {
-		return items, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &items)
-
-	if err != nil {
-		return items, err
-	}
-	return items, nil
+	err = ip.Response(&response)
+	return
 }
 
-func UseItem(request nnsdk.UseItemRequest) (err error) {
+func (ip *ItemProvider) UseItem(request nnsdk.UseItemRequest) (err error) {
 	_, err = services.NnSDK.MakeRequest("items/use", request).Post()
 	if err != nil {
 		return err

@@ -31,6 +31,7 @@ type ShipRepairsController struct {
 func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
 
 	c.Controller = "route.ship.repairs"
 	c.Player = player
@@ -77,7 +78,7 @@ func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Upda
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
@@ -145,13 +146,17 @@ func (c *ShipRepairsController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipRepairsController) Stage() (err error) {
+	var playerProvider providers.PlayerProvider
+	var shipProvider providers.ShipProvider
+	var resourceProvider providers.ResourceProvider
+
 	switch c.State.Stage {
 
 	// In questo riporto al player le risorse e tempistiche necessarie alla riparazione della nave
 	case 0:
 		// Recupero nave player equipaggiata
 		var playerShips nnsdk.Ships
-		playerShips, err = providers.GetPlayerShips(c.Player, true)
+		playerShips, err = playerProvider.GetPlayerShips(c.Player, true)
 		if err != nil {
 			return err
 		}
@@ -163,7 +168,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 
 		// Recupero informazioni nave da riparare
 		var repairInfo nnsdk.ShipRepairInfoResponse
-		repairInfo, err = providers.GetShipRepairInfo(playerShip)
+		repairInfo, err = shipProvider.GetShipRepairInfo(playerShip)
 		if err != nil {
 			return err
 		}
@@ -219,7 +224,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 	case 1:
 		// Avvio riparazione nave
 		var resourcesUsed []nnsdk.ShipRepairStartResponse
-		resourcesUsed, err = providers.StartShipRepair(c.Payload.Ship)
+		resourcesUsed, err = shipProvider.StartShipRepair(c.Payload.Ship)
 		if err != nil && err.Error() == "not enough resource quantities" {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := services.NewMessage(c.Update.Message.Chat.ID,
@@ -238,7 +243,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		recapResourceUsed = helpers.Trans(c.Player.Language.Slug, "ship.repairs.used_resources")
 		for _, resourceUsed := range resourcesUsed {
 			var resource nnsdk.Resource
-			resource, err = providers.GetResourceByID(resourceUsed.ResourceID)
+			resource, err = resourceProvider.GetResourceByID(resourceUsed.ResourceID)
 			if err != nil {
 				return err
 			}
@@ -275,7 +280,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		c.State.Stage = 2
 	case 2:
 		// Fine riparazione
-		err = providers.EndShipRepair(c.Payload.Ship)
+		err = shipProvider.EndShipRepair(c.Payload.Ship)
 		if err != nil {
 			return err
 		}

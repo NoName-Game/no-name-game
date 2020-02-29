@@ -40,7 +40,8 @@ func DeleteRedisAndDbState(player nnsdk.Player) (err error) {
 			return err
 		}
 
-		_, err = providers.DeletePlayerState(playerState) // Delete
+		var playerStateProvider providers.PlayerStateProvider
+		_, err = playerStateProvider.DeletePlayerState(playerState) // Delete
 		if err != nil {
 			return err
 		}
@@ -107,7 +108,8 @@ func CheckState(player nnsdk.Player, controller string, payload interface{}, fat
 		jsonPayload, _ := json.Marshal(payload)
 
 		// Creo il nuovo stato
-		playerState, err = providers.CreatePlayerState(nnsdk.PlayerState{
+		var playerStateProvider providers.PlayerStateProvider
+		playerState, err = playerStateProvider.CreatePlayerState(nnsdk.PlayerState{
 			Controller: controller,
 			PlayerID:   player.ID,
 			Payload:    string(jsonPayload),

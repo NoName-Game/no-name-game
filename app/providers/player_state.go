@@ -1,86 +1,62 @@
 package providers
 
 import (
-	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetPlayerStateByID(id uint) (nnsdk.PlayerState, error) {
-	var playerState nnsdk.PlayerState
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", id), nil).Get()
-	if err != nil {
-		return playerState, err
-	}
-
-	err = json.Unmarshal(resp.Data, &playerState)
-	if err != nil {
-		return playerState, err
-	}
-
-	return playerState, nil
+type PlayerStateProvider struct {
+	BaseProvider
 }
 
-func GetPlayerStateToNotify() (nnsdk.PlayerStates, error) {
-	var playerStates nnsdk.PlayerStates
-
-	resp, err := services.NnSDK.MakeRequest("player-states/to-notify", nil).Get()
+func (pp *PlayerStateProvider) GetPlayerStateByID(id uint) (response nnsdk.PlayerState, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", id), nil).Get()
 	if err != nil {
-		return playerStates, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerStates)
-	if err != nil {
-		return playerStates, err
-	}
-
-	return playerStates, nil
+	err = pp.Response(&response)
+	return
 }
 
-func CreatePlayerState(request nnsdk.PlayerState) (nnsdk.PlayerState, error) {
-	var playerState nnsdk.PlayerState
-	resp, err := services.NnSDK.MakeRequest("player-states", request).Post()
+func (pp *PlayerStateProvider) GetPlayerStateToNotify() (response nnsdk.PlayerStates, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest("player-states/to-notify", nil).Get()
 	if err != nil {
-		return playerState, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerState)
-	if err != nil {
-		return playerState, err
-	}
-
-	return playerState, nil
+	err = pp.Response(&response)
+	return
 }
 
-func UpdatePlayerState(request nnsdk.PlayerState) (nnsdk.PlayerState, error) {
-	var playerState nnsdk.PlayerState
-	resp, err := services.NnSDK.MakeRequest("player-states/"+strconv.FormatUint(uint64(request.ID), 10), request).Patch()
+func (pp *PlayerStateProvider) CreatePlayerState(request nnsdk.PlayerState) (response nnsdk.PlayerState, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest("player-states", request).Post()
 	if err != nil {
-		return playerState, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerState)
-	if err != nil {
-		return playerState, err
-	}
-
-	return playerState, nil
+	err = pp.Response(&response)
+	return
 }
 
-func DeletePlayerState(request nnsdk.PlayerState) (nnsdk.PlayerState, error) {
-	var playerState nnsdk.PlayerState
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", request.ID), request).Delete()
+func (pp *PlayerStateProvider) UpdatePlayerState(request nnsdk.PlayerState) (response nnsdk.PlayerState, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", request.ID), request).Patch()
 	if err != nil {
-		return playerState, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerState)
+	err = pp.Response(&response)
+	return
+}
+
+func (pp *PlayerStateProvider) DeletePlayerState(request nnsdk.PlayerState) (response nnsdk.PlayerState, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("player-states/%v", request.ID), request).Delete()
 	if err != nil {
-		return playerState, err
+		return response, err
 	}
 
-	return playerState, nil
+	err = pp.Response(&response)
+	return
 }

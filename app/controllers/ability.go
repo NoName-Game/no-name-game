@@ -39,6 +39,7 @@ var (
 func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
+	var playerStateProvider providers.PlayerStateProvider
 
 	c.Controller = "route.ability"
 	c.Player = player
@@ -90,7 +91,7 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = providers.UpdatePlayerState(c.State)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
 	if err != nil {
 		panic(err)
 	}
@@ -144,6 +145,8 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *AbilityController) Stage() (err error) {
+	var playerStatsProvider providers.PlayerStatsProvider
+
 	switch c.State.Stage {
 	// Invio messaggio con recap stats
 	case 0:
@@ -209,7 +212,7 @@ func (c *AbilityController) Stage() (err error) {
 		}
 
 		// Aggiorno statistiche player
-		_, err = providers.UpdatePlayerStats(c.Player.Stats)
+		_, err = playerStatsProvider.UpdatePlayerStats(c.Player.Stats)
 		if err != nil {
 			return err
 		}

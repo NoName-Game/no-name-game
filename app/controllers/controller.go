@@ -34,11 +34,13 @@ func (c *BaseController) InitController(controller string, player nnsdk.Player) 
 
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing() (err error) {
+	var playerStateProvider providers.PlayerStateProvider
+
 	// Verifico se lo stato è completato chiudo
 	if *c.State.Completed == true {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
 		if c.State.Father <= 0 {
-			_, err = providers.DeletePlayerState(c.State) // Delete
+			_, err = playerStateProvider.DeletePlayerState(c.State) // Delete
 			if err != nil {
 				return err
 			}

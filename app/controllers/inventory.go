@@ -56,15 +56,17 @@ type InventoryRecapController BaseController
 // ====================================
 func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
-	c.Update = update
-
 	var finalRecap string
+	var playerProvider providers.PlayerProvider
+
+	c.Update = update
 
 	// *******************
 	// Recupero risorse inventario
 	// *******************
+
 	var playerInventoryResources nnsdk.PlayerInventories
-	playerInventoryResources, err = providers.GetPlayerResources(player.ID)
+	playerInventoryResources, err = playerProvider.GetPlayerResources(player.ID)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +81,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Recupero item inventario
 	// *******************
 	var playerInventoryItems nnsdk.PlayerInventories
-	playerInventoryItems, err = providers.GetPlayerItems(player.ID)
+	playerInventoryItems, err = playerProvider.GetPlayerItems(player.ID)
 	if err != nil {
 		panic(err)
 	}
@@ -94,7 +96,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Weapons
 	// *******************
 	var playerWeapons nnsdk.Weapons
-	playerWeapons, err = providers.GetPlayerWeapons(player, "false")
+	playerWeapons, err = playerProvider.GetPlayerWeapons(player, "false")
 	if err != nil {
 		panic(err)
 	}
@@ -109,7 +111,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Summary Armors
 	// *******************
 	var playerArmors nnsdk.Armors
-	playerArmors, err = providers.GetPlayerArmors(player, "false")
+	playerArmors, err = playerProvider.GetPlayerArmors(player, "false")
 	if err != nil {
 		panic(err)
 	}

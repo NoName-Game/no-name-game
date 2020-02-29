@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
@@ -28,18 +29,22 @@ func (c *Cron) Notify() {
 	envCronMinutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
 	sleepTime := time.Duration(envCronMinutes) * time.Minute
 
+	var playerStateProvicer providers.PlayerStateProvider
+	var playerProvider providers.PlayerProvider
+
 	for {
 		// Sleep for minute
 		time.Sleep(sleepTime)
 
 		// Recupero tutto gli stati da notificare
-		states, err := providers.GetPlayerStateToNotify()
+
+		states, err := playerStateProvicer.GetPlayerStateToNotify()
 		if err != nil {
 			panic(err)
 		}
 
 		for _, state := range states {
-			player, err := providers.GetPlayerByID(state.PlayerID)
+			player, err := playerProvider.GetPlayerByID(state.PlayerID)
 			if err != nil {
 				panic(err)
 			}
@@ -59,7 +64,7 @@ func (c *Cron) Notify() {
 
 			// Aggiorno lo stato levando la notifica
 			*state.ToNotify = false
-			state, err = providers.UpdatePlayerState(state)
+			state, err = playerStateProvicer.UpdatePlayerState(state)
 			if err != nil {
 				panic(err)
 			}
