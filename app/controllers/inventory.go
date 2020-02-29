@@ -34,7 +34,6 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.clears")),
 		),
 	)
 

@@ -12,8 +12,9 @@ type BaseController struct {
 	Controller string
 	Father     uint
 	Validation struct {
-		HasErrors bool
-		Message   string
+		HasErrors     bool
+		Message       string
+		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
 	Player nnsdk.Player
 	State  nnsdk.PlayerState
