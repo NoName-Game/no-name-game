@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -225,7 +226,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		// Avvio riparazione nave
 		var resourcesUsed []nnsdk.ShipRepairStartResponse
 		resourcesUsed, err = shipProvider.StartShipRepair(c.Payload.Ship)
-		if err != nil && err.Error() == "not enough resource quantities" {
+		if err != nil && strings.Contains(err.Error(), "not enough resource quantities") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := services.NewMessage(c.Update.Message.Chat.ID,
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.not_enough_resource"),
