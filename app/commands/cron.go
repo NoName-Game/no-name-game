@@ -5,48 +5,69 @@ import (
 	"strconv"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
-// Cron - Call every minute the function
-func Cron() {
+// Cron
+type Cron struct{}
+
+// Notify - Metodo che si occupa di verificare e inviare le notifiche
+func (c *Cron) Notify() {
+	// Differisco controllo panic/recover
+	defer func() {
+		// Nel caso in cui panicasse
+		if err := recover(); err != nil {
+			// Registro errore
+			services.ErrorHandler("cron recovered", err.(error))
+		}
+	}()
+
+	// Recupero informazioni del cron
 	envCronMinutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
 	sleepTime := time.Duration(envCronMinutes) * time.Minute
 
+	var playerStateProvicer providers.PlayerStateProvider
+	var playerProvider providers.PlayerProvider
+
 	for {
-		//Sleep for minute
+		// Sleep for minute
 		time.Sleep(sleepTime)
 
-		//After sleep call function.
-		CheckFinishTime()
-	}
-}
+		// Recupero tutto gli stati da notificare
 
-// CheckFinishTime - Check the ending and handle the functions.
-func CheckFinishTime() {
-	states, _ := providers.GetPlayerStateToNotify()
+		states, err := playerStateProvicer.GetPlayerStateToNotify()
+		if err != nil {
+			panic(err)
+		}
 
-	for _, state := range states {
-		player, _ := providers.GetPlayerByID(state.PlayerID)
-		text, _ := services.GetTranslation("cron."+state.Function+"_alert", player.Language.Slug, nil)
+		for _, state := range states {
+			player, err := playerProvider.GetPlayerByID(state.PlayerID)
+			if err != nil {
+				panic(err)
+			}
 
-		// Send notification
-		msg := services.NewMessage(player.ChatID, text)
-		continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
-		// I need this continue button to recall the function.
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
-		services.SendMessage(msg)
+			// Recupero testo da notificare, ogni controller ha la propria notifica
+			text, _ := services.GetTranslation("cron."+state.Controller+"_alert", player.Language.Slug, nil)
 
-		// Update status
-		// Stupid poninter stupid json pff
-		f := new(bool)
-		*f = false
+			// Invio notifica
+			msg := services.NewMessage(player.ChatID, text)
+			// Al momento non associo nessun bottone potrebbe andare in conflitto con la mappa
+			// continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
+			// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
+			_, err = services.SendMessage(msg)
+			if err != nil {
+				panic(err)
+			}
 
-		state.ToNotify = f
-		state, _ = providers.UpdatePlayerState(state)
+			// Aggiorno lo stato levando la notifica
+			*state.ToNotify = false
+			state, err = playerStateProvicer.UpdatePlayerState(state)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 }

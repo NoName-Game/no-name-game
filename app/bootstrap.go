@@ -6,30 +6,57 @@ import (
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
-func bootstrap() {
-	//*************
-	// Logging
-	//*************
-	services.LoggingUp()
+// bootstrap - Carico servizi terzi
+func bootstrap() (err error) {
+	// *************
+	// Logging - Servizi di logging errori
+	// *************
+	err = services.LoggingUp()
+	if err != nil {
+		return err
+	}
 
-	//*************
-	// i18n
-	//*************
-	services.LanguageUp()
+	// *************
+	// NoName WS - NoName Main server!
+	// *************
+	err = services.NnSDKUp()
+	if err != nil {
+		services.ErrorHandler("error connecting to NoName server", err)
+		return err
+	}
 
-	//*************
-	// NoName WS
-	//*************
-	services.NnSDKUp()
-	services.RedisUp()
+	// *************
+	// Redis DB
+	// *************
+	err = services.RedisUp()
+	if err != nil {
+		services.ErrorHandler("error connecting to Redis", err)
+		return err
+	}
 
-	//*************
+	// *************
+	// i18n - Servizio di gestione multilingua
+	// *************
+	err = services.LanguageUp()
+	if err != nil {
+		services.ErrorHandler("error initialising localization", err)
+		return err
+	}
+
+	// *************
 	// Bot
-	//*************
-	services.BotUp()
+	// *************
+	err = services.BotUp()
+	if err != nil {
+		services.ErrorHandler("error booting bot", err)
+		return err
+	}
 
-	//*************
+	// *************
 	// Cron
-	//*************
-	go commands.Cron()
+	// *************
+	var cron commands.Cron
+	go cron.Notify()
+
+	return err
 }

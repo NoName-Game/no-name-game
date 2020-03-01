@@ -1,22 +1,14 @@
 package helpers
 
 import (
-	"log"
 	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // Trans - late shortCut
-func Trans(key string, args ...interface{}) (message string) {
-	// Getting default or player language
-	locale := "en"
+func Trans(locale string, key string, args ...interface{}) (message string) {
 	var err error
-	if Player.Language.Slug != "" {
-		locale = Player.Language.Slug
-	}
-
-	// Check if the args are 0 or Null
 	if len(args) <= 0 {
 		message, err = services.GetTranslation(key, locale, nil)
 	} else {
@@ -24,31 +16,35 @@ func Trans(key string, args ...interface{}) (message string) {
 	}
 
 	if err != nil {
-		log.Println("WARNING TRANSLATION: No match found for key: ", key)
-		// If an error has been generated, it returns an empty string
-		message = ""
+		panic(err)
 	}
 
 	return
 }
 
 // GetAllTranslatedSlugCategories - return weapon and armor slug category translated
-func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
-	categories := GetAllSlugCategories()
-	for _, category := range categories {
-		results = append(results, Trans(category))
-	}
+// func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
+// 	categories := GetAllSlugCategories()
+// 	for _, category := range categories {
+// 		results = append(results, Trans(category))
+// 	}
+//
+// 	return
+// }
+//
 
-	return
-}
-
-// GenerateTextArray - generate text's array from a common word in key.
-func GenerateTextArray(common string) (texts []string) {
+// GenerateTextArray - Recupero un serie di testi definiti dalla stessa chiave e numerati
+func GenerateTextArray(locale string, common string) (texts []string) {
 	var counter int
+
 	for {
 		keyText := common + "_" + strconv.Itoa(counter)
-		if text := Trans(keyText); text != "" {
-			texts = append(texts, text)
+
+		var translatedText string
+		translatedText, _ = services.GetTranslation(keyText, locale, nil)
+
+		if translatedText != "" {
+			texts = append(texts, translatedText)
 			counter++
 		} else {
 			break

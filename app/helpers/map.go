@@ -3,68 +3,123 @@ package helpers
 import (
 	"encoding/json"
 
-	"bitbucket.org/no-name-game/nn-telegram/services"
-
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 )
 
-func TextDisplay(m nnsdk.Map) string {
-	result := "<code>+---------------------+\n"
-	var cellMap [66][66]bool
-	err := json.Unmarshal([]byte(m.Cell), &cellMap)
+// DecodeMapToDisplay - Converte la logica della mappa in qualcosa di visibilie
+// per il client mostrando con diversi caratteri le superfici, mob e player
+func DecodeMapToDisplay(maps nnsdk.Map, playerPositionX int, playerPositionY int) (result string, err error) {
+	// Setto cornice di apertura
+	result = "<code>+---------------------+\n"
+
+	// Recupero mappa
+	var cellGrid [][]bool
+	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
 	if err != nil {
-		services.ErrorHandler("UnMarshal Error", err)
+		return result, err
 	}
-	//log.Println("Player X: ", m.PlayerX, " Y: ", m.PlayerY)
-	for x := m.PlayerX - 5; x < m.PlayerX+5; x++ { //11
+
+	// Ciclo tutta la griglia andando a sostituire tutte le occorrenze
+	for x := playerPositionX - 5; x < playerPositionX+5; x++ { // 11
+		// Inserisco cornice della riga
 		result += "|"
-		for y := m.PlayerY - 10; y < m.PlayerY+11; y++ { // 21
-			if (x >= 0 && x < 66) && (y >= 0 && y < 66) { // In bounds
-				if cellMap[x][y] {
+		// Conto quanto è lunga la mappa
+		mapWith := len(cellGrid[0])
+		for y := playerPositionY - 10; y < playerPositionY+11; y++ { // 21
+			// Conto quanto è alta la mappa
+			mapHeight := len(cellGrid[0])
+			// Verifico che siamo all'interno dei limiti
+			if (x >= 0 && x < mapWith) && (y >= 0 && y < mapHeight) { // In bounds
+				// Se è true come da regola vuol dire che NON è calpestabile
+				if cellGrid[x][y] {
+					// Lo gestisco come terreno NON calpestabile
 					result += "#"
 				} else {
-					if x == m.PlayerX && y == m.PlayerY {
-						result += "@"
+					// Se corrisponde alla posizione del Player lo mostro
+					if x == playerPositionX && y == playerPositionY {
+						result += "P"
 						continue
-					} else if checkForMob(m, x, y) {
-						result += "*"
-					} else {
-						result += " "
 					}
+
+					// +---------------------+
+
+					// Renderizzo mob sulla mppa
+					_, isMob := CheckForMob(maps, x, y)
+					if isMob {
+						result += "M"
+						continue
+					}
+
+					// Renderizzo mob sulla mppa
+					_, isTresure := CheckForTresure(maps, x, y)
+					if isTresure {
+						result += "T"
+						continue
+					}
+
+					result += " "
 				}
 			} else {
-				result += "#"
+				result += "." // Delimito i bordi
 			}
-
 		}
 		result += "|"
 		result += "\n"
 	}
+
+	// Cornice di chiusra
 	result += "+---------------------+</code>"
-	return result
+
+	return
 }
 
-func checkForMob(m nnsdk.Map, x, y int) bool {
-	for i := 0; i < len(m.Enemies); i++ {
-		if x == m.Enemies[i].MapPositionX && y == m.Enemies[i].MapPositionY {
-			return true
+// CheckForMob - Verifica posizione dei mob
+func CheckForMob(maps nnsdk.Map, x int, y int) (enemy nnsdk.Enemy, result bool) {
+	for i := 0; i < len(maps.Enemies); i++ {
+		if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
+			return maps.Enemies[i], true
 		}
 	}
-	return false
+
+	return
 }
 
-func ChooseMob(m nnsdk.Map) int {
-	for x := m.PlayerX - 5; x < m.PlayerX+5; x++ {
-		for y := m.PlayerY - 10; y < m.PlayerY+11; y++ {
-			if (x >= 0 && x < 66) && (y >= 0 && y < 66) { // In bounds
-				for i := 0; i < len(m.Enemies); i++ {
-					if x == m.Enemies[i].MapPositionX && y == m.Enemies[i].MapPositionY {
-						return i
+// CheckForTresure - Verifica posizione dei tesori
+func CheckForTresure(maps nnsdk.Map, x int, y int) (tresure nnsdk.Tresure, result bool) {
+	for i := 0; i < len(maps.Tresures); i++ {
+		if x == maps.Tresures[i].PositionX && y == maps.Tresures[i].PositionY {
+			return maps.Tresures[i], true
+		}
+	}
+
+	return
+}
+
+// ChooseMob - viene richiamato principalmente dalla mappa, la sua funzione è
+// quella di ritornare un mob dalla mappa tra quelli vicini al player
+func ChooseEnemyInMap(maps nnsdk.Map, playerPositionX int, playerPositionY int) (enemyID int, err error) {
+	// Recupero mappa
+	var cellGrid [][]bool
+	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
+	if err != nil {
+		return enemyID, err
+	}
+
+	for x := playerPositionX - 5; x < playerPositionX+5; x++ {
+		// Conto quanto è lunga la mappa
+		mapWith := len(cellGrid[0])
+		for y := playerPositionY - 10; y < playerPositionY+11; y++ {
+			// Conto quanto è alta la mappa
+			mapHeight := len(cellGrid[0])
+			if (x >= 0 && x < mapWith) && (y >= 0 && y < mapHeight) { // In bounds
+				for i := 0; i < len(maps.Enemies); i++ {
+					if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
+						return i, nil
 					}
 				}
 
 			}
 		}
 	}
-	return -1
+	return -1, err
 }

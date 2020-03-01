@@ -1,67 +1,45 @@
 package providers
 
 import (
+	"fmt"
+	"net/url"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
-	"encoding/json"
-	"net/url"
-	"strconv"
 )
 
-// Writer: reloonfire
-// Starting on: 20/01/2020
-// Project: no-name-game
-
-func GetItemByID(id uint) (nnsdk.Item, error) {
-	var resource nnsdk.Item
-	resp, err := services.NnSDK.MakeRequest("items/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return resource, err
-	}
-
-	err = json.Unmarshal(resp.Data, &resource)
-	if err != nil {
-		return resource, err
-	}
-
-	return resource, nil
+type ItemProvider struct {
+	BaseProvider
 }
 
-func GetAllItems() (nnsdk.Items, error) {
-	var crafts nnsdk.Items
-	resp, err := services.NnSDK.MakeRequest("items", nil).Get()
-
+func (ip *ItemProvider) GetAllItems() (response nnsdk.Items, err error) {
+	ip.SDKResp, err = services.NnSDK.MakeRequest("items", nil).Get()
 	if err != nil {
-		return crafts, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &crafts)
-
-	if err != nil {
-		return crafts, err
-	}
-
-	return crafts, nil
+	err = ip.Response(&response)
+	return
 }
 
-func GetItemByName(name string) (nnsdk.Item, error) {
-
-	var craft nnsdk.Item
-
+func (ip *ItemProvider) GetItemByCategoryID(categoryID uint) (response nnsdk.Items, err error) {
 	params := url.Values{}
-	params.Add("name", name)
+	params.Add("category_id", fmt.Sprintf("%v", categoryID))
 
-	resp, err := services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
-
+	ip.SDKResp, err = services.NnSDK.MakeRequest("search/item?"+params.Encode(), nil).Get()
 	if err != nil {
-		return craft, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &craft)
+	err = ip.Response(&response)
+	return
+}
 
+func (ip *ItemProvider) UseItem(request nnsdk.UseItemRequest) (err error) {
+	_, err = services.NnSDK.MakeRequest("items/use", request).Post()
 	if err != nil {
-		return craft, err
+		return err
 	}
-	return craft, nil
 
+	return nil
 }

@@ -1,249 +1,192 @@
 package providers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetPlayerByID(id uint) (nnsdk.Player, error) {
-	var player nnsdk.Player
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return player, err
-	}
-
-	err = json.Unmarshal(resp.Data, &player)
-	if err != nil {
-		return player, err
-	}
-
-	return player, nil
+type PlayerProvider struct {
+	BaseProvider
 }
 
-func FindPlayerByUsername(username string) (nnsdk.Player, error) {
-	var player nnsdk.Player
+func (pp *PlayerProvider) GetPlayerByID(id uint) (response nnsdk.Player, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v", id), nil).Get()
+	if err != nil {
+		return response, err
+	}
 
-	// Encode paramiters
+	err = pp.Response(&response)
+	return
+}
+
+func (pp *PlayerProvider) FindPlayerByUsername(username string) (response nnsdk.Player, err error) {
 	params := url.Values{}
 	params.Add("username", username)
 
-	resp, err := services.NnSDK.MakeRequest("search/player?"+params.Encode(), nil).Get()
+	pp.SDKResp, err = services.NnSDK.MakeRequest("search/player?"+params.Encode(), nil).Get()
 	if err != nil {
-		return player, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &player)
-	if err != nil {
-		return player, err
-	}
-
-	return player, nil
+	err = pp.Response(&response)
+	return
 }
 
-func CreatePlayer(request nnsdk.Player) (nnsdk.Player, error) {
-	var player nnsdk.Player
-	resp, err := services.NnSDK.MakeRequest("players", request).Post()
+func (pp *PlayerProvider) CreatePlayer(request nnsdk.Player) (response nnsdk.Player, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest("players", request).Post()
 	if err != nil {
-		return player, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &player)
-	if err != nil {
-		return player, err
-	}
-
-	return player, nil
+	err = pp.Response(&response)
+	return
 }
 
-func UpdatePlayer(request nnsdk.Player) (nnsdk.Player, error) {
-	var player nnsdk.Player
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(request.ID), 10), request).Patch()
+func (pp *PlayerProvider) UpdatePlayer(request nnsdk.Player) (response nnsdk.Player, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v", request.ID), request).Patch()
 	if err != nil {
-		return player, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &player)
-	if err != nil {
-		return player, err
-	}
-
-	return player, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerStates(player nnsdk.Player) (nnsdk.PlayerStates, error) {
-	var playerStates nnsdk.PlayerStates
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/states", nil).Get()
+func (pp *PlayerProvider) GetPlayerStates(player nnsdk.Player) (response nnsdk.PlayerStates, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/states", player.ID), nil).Get()
 	if err != nil {
-		return playerStates, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerStates)
-	if err != nil {
-		return playerStates, err
-	}
-
-	return playerStates, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerStats(player nnsdk.Player) (nnsdk.PlayerStats, error) {
-	var playerStats nnsdk.PlayerStats
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/stats", nil).Get()
+func (pp *PlayerProvider) GetPlayerStats(player nnsdk.Player) (response nnsdk.PlayerStats, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/stats", player.ID), nil).Get()
 	if err != nil {
-		return playerStats, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &playerStats)
-	if err != nil {
-		return playerStats, err
-	}
-
-	return playerStats, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerArmors(player nnsdk.Player, equipped string) (nnsdk.Armors, error) {
-	var armors nnsdk.Armors
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/armors?equipped="+equipped, nil).Get()
+func (pp *PlayerProvider) GetPlayerArmors(player nnsdk.Player, equipped string) (response nnsdk.Armors, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/armors?equipped=%v", player.ID, equipped), nil).Get()
 	if err != nil {
-		return armors, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &armors)
-	if err != nil {
-		return armors, err
-	}
-
-	return armors, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerWeapons(player nnsdk.Player, equipped string) (nnsdk.Weapons, error) {
-	var weapons nnsdk.Weapons
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/weapons?equipped="+equipped, nil).Get()
+func (pp *PlayerProvider) GetPlayerWeapons(player nnsdk.Player, equipped string) (response nnsdk.Weapons, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/weapons?equipped=%v", player.ID, equipped), nil).Get()
 	if err != nil {
-		return weapons, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &weapons)
-	if err != nil {
-		return weapons, err
-	}
-
-	return weapons, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerShips(player nnsdk.Player, equipped bool) (nnsdk.Ships, error) {
-	var ships nnsdk.Ships
-
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/ships?equipped=%v", player.ID, equipped), nil).Get()
+func (pp *PlayerProvider) GetPlayerShips(player nnsdk.Player, equipped bool) (response nnsdk.Ships, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/ships?equipped=%v", player.ID, equipped), nil).Get()
 	if err != nil {
-		return ships, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &ships)
-	if err != nil {
-		return ships, err
-	}
-
-	return ships, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerLastPosition(player nnsdk.Player) (nnsdk.PlayerPosition, error) {
-	var position nnsdk.PlayerPosition
-
-	resp, err := services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/positions/last", player.ID), nil).Get()
+// GetPlayerLastPosition - Recupera ultima posizione del player
+func (pp *PlayerProvider) GetPlayerLastPosition(player nnsdk.Player) (response nnsdk.PlayerPosition, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/positions/last", player.ID), nil).Get()
 	if err != nil {
-		return position, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &position)
-	if err != nil {
-		return position, err
-	}
-
-	return position, nil
+	err = pp.Response(&response)
+	return
 }
 
-func GetPlayerInventory(player nnsdk.Player) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory", nil).Get()
+func (pp *PlayerProvider) GetPlayerInventory(player nnsdk.Player) (response nnsdk.PlayerInventories, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory", player.ID), nil).Get()
 	if err != nil {
-		return inventory, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &inventory)
-	if err != nil {
-		return inventory, err
-	}
-
-	return inventory, nil
+	err = pp.Response(&response)
+	return
 }
 
-func AddResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/add", request).Post()
+func (pp *PlayerProvider) SignIn(request nnsdk.Player) (response nnsdk.Player, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest("players/signin", request).Post()
 	if err != nil {
-		return inventory, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &inventory)
-	if err != nil {
-		return inventory, err
-	}
-
-	return inventory, nil
+	err = pp.Response(&response)
+	return
 }
 
-func RemoveResourceToPlayerInventory(player nnsdk.Player, request nnsdk.AddResourceRequest) (nnsdk.Inventory, error) {
-	var inventory nnsdk.Inventory
-
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(player.ID), 10)+"/inventory/resource/remove", request).Post()
+func (pp *PlayerProvider) ManagePlayerInventory(playerID uint, request nnsdk.ManageInventoryRequest) (err error) {
+	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/manage", playerID), request).Post()
 	if err != nil {
-		return inventory, err
+		return err
 	}
 
-	err = json.Unmarshal(resp.Data, &inventory)
-	if err != nil {
-		return inventory, err
-	}
-
-	return inventory, nil
+	return nil
 }
 
-func PlayerDamage(id uint) (float64, error) {
-	var damage float64
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10)+"/damage", nil).Get()
+func (pp *PlayerProvider) GetPlayerResources(playerID uint) (response nnsdk.PlayerInventories, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/resources", playerID), nil).Get()
 	if err != nil {
-		return 0, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &damage)
-	if err != nil {
-		return 0, err
-	}
-	return damage, nil
+	err = pp.Response(&response)
+	return
 }
 
-func PlayerPrecision(id uint, selection uint) (float64, error) {
-	var damage float64
-	resp, err := services.NnSDK.MakeRequest("players/"+strconv.FormatUint(uint64(id), 10)+"/precision/"+strconv.FormatUint(uint64(id), 10), nil).Get()
+func (pp *PlayerProvider) GetPlayerItems(playerID uint) (response nnsdk.PlayerInventories, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/inventory/items", playerID), nil).Get()
 	if err != nil {
-		return 0, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &damage)
+	err = pp.Response(&response)
+	return
+}
+
+func (pp *PlayerProvider) GetPlayerEconomy(playerID uint, economyType string) (response nnsdk.MoneyResponse, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/%s", playerID, economyType), nil).Get()
 	if err != nil {
-		return 0, err
+		return response, err
 	}
-	return damage, nil
+
+	err = pp.Response(&response)
+	return
+}
+
+func (pp *PlayerProvider) GetRestsInfo(playerID uint) (response nnsdk.PlayerRestInfoResponse, err error) {
+	pp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/rests/info", playerID), nil).Get()
+	if err != nil {
+		return response, err
+	}
+
+	err = pp.Response(&response)
+	return
+}
+
+func (pp *PlayerProvider) EndPlayerRest(playerID uint, request nnsdk.PlayerRestEndRequest) (err error) {
+	_, err = services.NnSDK.MakeRequest(fmt.Sprintf("players/%v/rests/end", playerID), request).Post()
+
+	return
 }

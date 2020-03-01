@@ -1,60 +1,32 @@
 package providers
 
 import (
-	"encoding/json"
-	"net/url"
-	"strconv"
+	"fmt"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetResourceByID(id uint) (nnsdk.Resource, error) {
-	var resource nnsdk.Resource
-	resp, err := services.NnSDK.MakeRequest("resources/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return resource, err
-	}
-
-	err = json.Unmarshal(resp.Data, &resource)
-	if err != nil {
-		return resource, err
-	}
-
-	return resource, nil
+type ResourceProvider struct {
+	BaseProvider
 }
 
-func GetRandomResource(categoryID uint) (nnsdk.Resource, error) {
-	var resource nnsdk.Resource
-	resp, err := services.NnSDK.MakeRequest("resources/drop/"+strconv.FormatUint(uint64(categoryID), 10), nil).Get()
+func (rp *ResourceProvider) GetResourceByID(id uint) (response nnsdk.Resource, err error) {
+	rp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("resources/%v", id), nil).Get()
 	if err != nil {
-		return resource, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &resource)
-	if err != nil {
-		return resource, err
-	}
-
-	return resource, nil
+	err = rp.Response(&response)
+	return
 }
 
-func FindResourceByName(name string) (nnsdk.Resource, error) {
-	var resource nnsdk.Resource
-
-	// Encode paramiters
-	params := url.Values{}
-	params.Add("name", name)
-
-	resp, err := services.NnSDK.MakeRequest("search/resource?"+params.Encode(), nil).Get()
+func (rp *ResourceProvider) DropResource(request nnsdk.ResourceDropRequest) (response nnsdk.DropItem, err error) {
+	rp.SDKResp, err = services.NnSDK.MakeRequest("resources/drop", request).Post()
 	if err != nil {
-		return resource, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &resource)
-	if err != nil {
-		return resource, err
-	}
-
-	return resource, nil
+	err = rp.Response(&response)
+	return
 }

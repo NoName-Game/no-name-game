@@ -1,84 +1,32 @@
 package providers
 
 import (
-	"encoding/json"
-	"strconv"
+	"fmt"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func GetEnemyByID(id uint) (nnsdk.Enemy, error) {
-	var enemy nnsdk.Enemy
-	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(id), 10), nil).Get()
-	if err != nil {
-		return enemy, err
-	}
-
-	err = json.Unmarshal(resp.Data, &enemy)
-	if err != nil {
-		return enemy, err
-	}
-
-	return enemy, nil
+type EnemyProvider struct {
+	BaseProvider
 }
 
-func UpdateEnemy(request nnsdk.Enemy) (nnsdk.Enemy, error) {
-	var enemy nnsdk.Enemy
-
-	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(request.ID), 10), request).Patch()
+func (ep *EnemyProvider) GetEnemyByID(id uint) (response nnsdk.Enemy, err error) {
+	ep.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("enemies/%v", id), nil).Get()
 	if err != nil {
-		return enemy, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &enemy)
-	if err != nil {
-		return enemy, err
-	}
-
-	return enemy, nil
+	err = ep.Response(&response)
+	return
 }
 
-func DeleteEnemy(id uint) (nnsdk.Enemy, error) {
-	var enemy nnsdk.Enemy
-	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(id), 10), nil).Delete()
+func (ep *EnemyProvider) HitEnemy(enemy nnsdk.Enemy, request nnsdk.HitEnemyRequest) (response nnsdk.HitEnemyResponse, err error) {
+	ep.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("enemies/%v/hit", enemy.ID), request).Post()
 	if err != nil {
-		return enemy, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &enemy)
-	if err != nil {
-		return enemy, err
-	}
-
-	return enemy, nil
-}
-
-func Spawn(request nnsdk.Enemy) (nnsdk.Enemy, error) {
-	var enemy nnsdk.Enemy
-	resp, err := services.NnSDK.MakeRequest("enemies/spawn", request).Post()
-	if err != nil {
-		return enemy, err
-	}
-
-	err = json.Unmarshal(resp.Data, &enemy)
-	if err != nil {
-		return enemy, err
-	}
-
-	return enemy, nil
-}
-
-func EnemyDamage(id uint) (float64, error) {
-	var damage float64
-	resp, err := services.NnSDK.MakeRequest("enemies/"+strconv.FormatUint(uint64(id), 10)+"/damage", nil).Get()
-	if err != nil {
-		return 0, err
-	}
-
-	err = json.Unmarshal(resp.Data, &damage)
-	if err != nil {
-		return 0, err
-	}
-	return damage, nil
+	err = ep.Response(&response)
+	return
 }

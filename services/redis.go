@@ -1,7 +1,10 @@
 package services
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/go-redis/redis"
 	_ "github.com/joho/godotenv/autoload" // Autoload .env
@@ -12,15 +15,35 @@ var (
 	Redis *redis.Client
 )
 
-//RedisUp - RedisUp
-func RedisUp() {
+// RedisUp - Inizializzo comunicazioe a RedisDB
+func RedisUp() (err error) {
+	// Recupero Host
+	var host string
+	host = os.Getenv("REDIS_HOST")
+	if host == "" {
+		err = errors.New("missing ENV REDIS_HOST")
+		return err
+	}
+
+	// Recupero porta
+	var port string
+	port = os.Getenv("REDIS_PORT")
+	if port == "" {
+		err = errors.New("missing ENV REDIS_PORT")
+		return err
+	}
+
+	// Inizializzo connessione a redis
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0, // use default DB
 	})
 
+	// Riporto a video stato servizio
 	log.Println("************************************************")
 	log.Println("Redis connection: OK!")
 	log.Println("************************************************")
+
+	return
 }

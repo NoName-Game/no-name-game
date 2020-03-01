@@ -1,13 +1,17 @@
 package helpers
 
-func GetMissionCategoryID(eType string) uint {
+// GetMissionCategory - Recupera il nome originale del tipo di missione
+func GetMissionCategory(locale string, eType string) string {
+
+	//TODO: da rivedere
 	switch eType {
-	case Trans("mission.underground"):
-		return 2
-	case Trans("mission.surface"):
-		return 1
-	case Trans("mission.atmosphere"):
-		return 3
+	case Trans(locale, "mission.underground"):
+		return "underground"
+	case Trans(locale, "mission.surface"):
+		return "surface"
+	case Trans(locale, "mission.atmosphere"):
+		return "atmosphere"
 	}
-	return 0
+
+	return ""
 }

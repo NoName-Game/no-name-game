@@ -10,81 +10,75 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var (
-	//===================================
-	// Public
-	Player nnsdk.Player
-	//=====================================
-)
-
-// HandleUser - Check if user exist in DB, if not exist create!
-func HandleUser(update tgbotapi.Update) bool {
-	// ************************
-	// Switch by message type
-	// ************************
+// HandleUser - Eseguo varie verifiche per controllare il player
+func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
+	// Recupero utente filtrandolo per tipologia di messaggio
 	var user *tgbotapi.User
 	if update.Message != nil {
+		// Se è un messaggio normale
 		user = update.Message.From
 	} else if update.CallbackQuery != nil {
+		// Se è una callback di un messaggio con action inline
 		user = update.CallbackQuery.From
 	} else {
-		return false
+		err = errors.New("unsupported type of message")
+		return player, err
 	}
 
-	// ************************
-	// Check if have username
-	// ************************
+	// Controllo se il player non ha un username
 	if user.UserName == "" {
-		msg := services.NewMessage(update.Message.Chat.ID, Trans("miss_username"))
-		services.SendMessage(msg)
-		return false
+		// Mando un messaggio dicendogli di inserire un username
+		msg := services.NewMessage(update.Message.Chat.ID, Trans("en", "miss_username"))
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return player, err
+		}
+
+		err = errors.New("missing username")
+		return player, err
 	}
 
-	// ************************
-	// Check if player exists
-	// ************************
-	Player, _ = providers.FindPlayerByUsername(user.UserName)
+	// Verifico se esiste già un player registrato
+	var playerProvider providers.PlayerProvider
+	player, err = playerProvider.FindPlayerByUsername(user.UserName)
+	if err != nil {
+		return player, err
+	}
 
-	// If Player does not exists, create!
-	if Player.ID < 1 {
-		language, _ := providers.FindLanguageBySlug("it")
+	// Se il player non esiste allora lo registro
+	if player.ID <= 0 {
+		// Recupero lingua di default
+		var language nnsdk.Language
+		var languageProvider providers.LanguageProvider
+		language, err = languageProvider.FindLanguageBySlug("it")
+		if err != nil {
+			return player, err
+		}
 
-		Player, _ = providers.CreatePlayer(nnsdk.Player{
-			Username: user.UserName,
-			ChatID:   int64(user.ID),
-			Language: language,
-			Inventory: nnsdk.Inventory{
-				Items: "{}",
-			},
-			Stats: nnsdk.PlayerStats{
-				AbilityPoint: 1,
-			},
+		// Registro player
+		player, err = playerProvider.SignIn(nnsdk.Player{
+			Username:   user.UserName,
+			ChatID:     int64(user.ID),
+			LanguageID: language.ID,
 		})
 
-		return true
+		return player, err
 	}
 
-	// ************************
-	// Check if player is die
-	// ************************
-	if _, err := GetPlayerStateByFunction(Player, "route.death"); err == nil {
-		// controllers.PlayerDeath(update) TODO: FIXME
-		return false
-	}
-
-	return true
+	return
 }
 
 // GetPlayerStateByFunction - Check if function exist in player states
-func GetPlayerStateByFunction(player nnsdk.Player, function string) (playerState nnsdk.PlayerState, err error) {
-	for i, state := range player.States {
-		if state.Function == function {
-			playerState = player.States[i]
+func GetPlayerStateByFunction(states nnsdk.PlayerStates, controller string) (playerState nnsdk.PlayerState, err error) {
+	for i, state := range states {
+		if state.Controller == controller {
+			playerState = states[i]
 			return playerState, nil
 		}
 	}
 
-	return playerState, errors.New("State not found!")
+	err = errors.New("state not found")
+	return playerState, err
 }
 
 // CheckPlayerHaveOneEquippedWeapon

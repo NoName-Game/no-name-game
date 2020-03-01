@@ -1,73 +1,40 @@
 package providers
 
 import (
-	"encoding/json"
-	"strconv"
-
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func FindLanguageBySlug(slug string) (nnsdk.Language, error) {
-	var language nnsdk.Language
-
-	resp, err := services.NnSDK.MakeRequest("search/language?slug="+slug, nil).Get()
-	if err != nil {
-		return language, err
-	}
-
-	err = json.Unmarshal(resp.Data, &language)
-	if err != nil {
-		return language, err
-	}
-
-	return language, nil
+type LanguageProvider struct {
+	BaseProvider
 }
 
-func FindLanguageBy(value string, query string) (nnsdk.Language, error) {
-	var language nnsdk.Language
-
-	resp, err := services.NnSDK.MakeRequest("search/language?"+query+"="+value, nil).Get()
+func (lp *LanguageProvider) FindLanguageBySlug(slug string) (response nnsdk.Language, err error) {
+	lp.SDKResp, err = services.NnSDK.MakeRequest("search/language?slug="+slug, nil).Get()
 	if err != nil {
-		return language, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &language)
-	if err != nil {
-		return language, err
-	}
-
-	return language, nil
+	err = lp.Response(&response)
+	return
 }
 
-func GetLanguageByID(id uint) (nnsdk.Language, error) {
-	var language nnsdk.Language
-
-	resp, err := services.NnSDK.MakeRequest("languages/"+strconv.FormatUint(uint64(id), 10), nil).Get()
+func (lp *LanguageProvider) FindLanguageBy(value string, query string) (response nnsdk.Language, err error) {
+	lp.SDKResp, err = services.NnSDK.MakeRequest("search/language?"+query+"="+value, nil).Get()
 	if err != nil {
-		return language, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &language)
-	if err != nil {
-		return language, err
-	}
-
-	return language, nil
+	err = lp.Response(&response)
+	return
 }
 
-func GetLanguages() ([]nnsdk.Language, error) {
-	var languages []nnsdk.Language
-
-	resp, err := services.NnSDK.MakeRequest("languages", nil).Get()
+func (lp *LanguageProvider) GetLanguages() (response nnsdk.Languages, err error) {
+	lp.SDKResp, err = services.NnSDK.MakeRequest("languages", nil).Get()
 	if err != nil {
-		return languages, err
+		return response, err
 	}
 
-	err = json.Unmarshal(resp.Data, &languages)
-	if err != nil {
-		return languages, err
-	}
-
-	return languages, nil
+	err = lp.Response(&response)
+	return
 }

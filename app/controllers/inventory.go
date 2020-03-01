@@ -1,98 +1,143 @@
 package controllers
 
 import (
-	"strconv"
+	"fmt"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-//====================================
+// ====================================
 // Inventory
-//====================================
+// ====================================
 type InventoryController BaseController
 
-//====================================
+// ====================================
 // Handle
-//====================================
-func (c *InventoryController) Handle(update tgbotapi.Update) {
-	c.Message = update.Message
+// ====================================
+func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	var err error
+	c.Update = update
 
-	msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.intro"))
+	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.recap")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.recap")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.equip")),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.inventory.destroy")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.items")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.equip")),
+			// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.destroy")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
 		),
 	)
 
-	services.SendMessage(msg)
+	_, err = services.SendMessage(msg)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
 
-//====================================
+// ====================================
 // Inventory Recap
-//====================================
+// ====================================
 
 type InventoryRecapController BaseController
 
-//====================================
+// ====================================
 // Handle
-//====================================
-func (c *InventoryRecapController) Handle(update tgbotapi.Update) {
-	c.Message = update.Message
+// ====================================
+func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	var err error
+	var finalRecap string
+	var playerProvider providers.PlayerProvider
 
-	var recap string
+	c.Update = update
 
-	// Summary Resources
-	playerInventory, err := providers.GetPlayerInventory(helpers.Player)
+	// *******************
+	// Recupero risorse inventario
+	// *******************
+
+	var playerInventoryResources nnsdk.PlayerInventories
+	playerInventoryResources, err = playerProvider.GetPlayerResources(player.ID)
 	if err != nil {
-		services.ErrorHandler("Can't get player inventory", err)
+		panic(err)
 	}
 
-	recap += "\n" + helpers.Trans("resources") + ":\n"
-	playerResources := helpers.InventoryToMap(playerInventory)
-	for r, q := range playerResources {
-		item, errResouce := providers.GetItemByID(r)
-		if errResouce != nil {
-			services.ErrorHandler("Error in InventoryToString", err)
-		}
-
-		recap += "- " + item.Name + " (" + (strconv.Itoa(q)) + ")\n"
+	var recapResources string
+	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
+	for _, resource := range playerInventoryResources {
+		recapResources += fmt.Sprintf("- %s x %v \n", resource.Resource.Name, *resource.Quantity)
 	}
 
-	// Summary Weapons
-	playerWeapons, errWeapons := providers.GetPlayerWeapons(helpers.Player, "false")
-	if errWeapons != nil {
-		services.ErrorHandler("Can't get player weapons", err)
+	// *******************
+	// Recupero item inventario
+	// *******************
+	var playerInventoryItems nnsdk.PlayerInventories
+	playerInventoryItems, err = playerProvider.GetPlayerItems(player.ID)
+	if err != nil {
+		panic(err)
 	}
-	recap += "\n" + helpers.Trans("weapons") + ":\n"
+
+	var recapItems string
+	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
+	for _, resource := range playerInventoryItems {
+		recapItems += fmt.Sprintf("- %s x %v \n", helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug), *resource.Quantity)
+	}
+
+	// *******************
+	// Weapons
+	// *******************
+	var playerWeapons nnsdk.Weapons
+	playerWeapons, err = playerProvider.GetPlayerWeapons(player, "false")
+	if err != nil {
+		panic(err)
+	}
+
+	var recapWeapons string
+	recapWeapons = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "weapons"))
 	for _, weapon := range playerWeapons {
-		recap += "- " + weapon.Name + "\n"
+		recapWeapons += fmt.Sprintf("- %s \n", weapon.Name)
 	}
 
+	// *******************
 	// Summary Armors
-	playerArmors, errArmors := providers.GetPlayerArmors(helpers.Player, "false")
-	if errArmors != nil {
-		services.ErrorHandler("Can't get player armors", err)
+	// *******************
+	var playerArmors nnsdk.Armors
+	playerArmors, err = playerProvider.GetPlayerArmors(player, "false")
+	if err != nil {
+		panic(err)
 	}
 
-	recap += "\n" + helpers.Trans("armors") + ":\n"
+	var recapArmors string
+	recapArmors = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "armors"))
 	for _, armor := range playerArmors {
-		recap += "- " + armor.Name + "\n"
+		recapArmors += fmt.Sprintf("- %s \n", armor.Name)
 	}
 
-	msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.recap")+recap)
-	services.SendMessage(msg)
+	// Riassumo il tutto
+	finalRecap = fmt.Sprintf("%s \n %s \n %s \n %s \n %s",
+		helpers.Trans(player.Language.Slug, "inventory.recap"), // Ecco il tuo inventario
+		recapResources,
+		recapItems,
+		recapWeapons,
+		recapArmors,
+	)
+
+	msg := services.NewMessage(c.Update.Message.Chat.ID, finalRecap)
+	msg.ParseMode = "markdown"
+
+	_, err = services.SendMessage(msg)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }

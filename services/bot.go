@@ -14,29 +14,35 @@ var (
 	botAPI *tgbotapi.BotAPI
 )
 
-//BotUp - BotUp
-func BotUp() {
+// BotUp - Metodo per la connessione ai server telegram
+func BotUp() (err error) {
+	// Recupero da env chiave telegram
 	telegramAPIKey := os.Getenv("TELEGRAM_APIKEY")
 	if telegramAPIKey == "" {
-		ErrorHandler("$TELEGRAM_APIKEY must be set", errors.New("TelegramApiKey Missing"))
+		err = errors.New("telegram ApiKey missing")
+		return err
 	}
 
-	var err error
+	// Istanzio comunicazione con il servizio dedicato
 	botAPI, err = tgbotapi.NewBotAPI(telegramAPIKey)
+	if err != nil {
+		return err
+	}
+
+	// Nel caso in cui fosse in ambiente di sviluppo abilito il debug
 	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
 		botAPI.Debug = true
 	}
 
-	if err != nil {
-		ErrorHandler("tgbotapi.NewBotAPI(telegramAPIKey) return Error!", err)
-	}
-
+	// Riporto a video lo stato di connessione
 	log.Println("************************************************")
 	log.Println("Bot connected: " + botAPI.Self.UserName)
 	log.Println("************************************************")
+
+	return
 }
 
-// GetUpdates - return new updates
+// GetUpdates - Ritorna nuovi messagi da lavorare da telegram
 func GetUpdates() (tgbotapi.UpdatesChannel, error) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -58,7 +64,17 @@ func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
 	}
 }
 
-// EditMessage - edit message
+// DeleteMessage - Cancella un messaggio
+func DeleteMessage(chatID int64, messageID int) (err error) {
+	_, err = botAPI.DeleteMessage(tgbotapi.DeleteMessageConfig{
+		ChatID:    chatID,
+		MessageID: messageID,
+	})
+
+	return
+}
+
+// EditMessage - Modifica messaggio
 func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessageTextConfig {
 	return tgbotapi.EditMessageTextConfig{
 		BaseEdit: tgbotapi.BaseEdit{
@@ -69,14 +85,14 @@ func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessa
 	}
 }
 
-// SendMessage - send message
-func SendMessage(chattable tgbotapi.Chattable) tgbotapi.Message {
-	message, err := botAPI.Send(chattable)
+// SendMessage - Invia messaggio
+func SendMessage(chattable tgbotapi.Chattable) (message tgbotapi.Message, err error) {
+	message, err = botAPI.Send(chattable)
 	if err != nil {
-		ErrorHandler("Can't send message.", err)
+		return message, err
 	}
 
-	return message
+	return
 }
 
 func NewAnswer(callbackQueryID string, text string, alert bool) tgbotapi.CallbackConfig {
@@ -87,9 +103,11 @@ func NewAnswer(callbackQueryID string, text string, alert bool) tgbotapi.Callbac
 	}
 }
 
-func AnswerCallbackQuery(config tgbotapi.CallbackConfig) {
-	_, err := botAPI.AnswerCallbackQuery(config)
+func AnswerCallbackQuery(config tgbotapi.CallbackConfig) (err error) {
+	_, err = botAPI.AnswerCallbackQuery(config)
 	if err != nil {
-		log.Println("Cant send answer.")
+		return err
 	}
+
+	return
 }

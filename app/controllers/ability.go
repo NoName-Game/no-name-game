@@ -1,145 +1,235 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"strings"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-//====================================
+// ====================================
 // AbilityController
-//====================================
+// ====================================
 type AbilityController struct {
 	BaseController
-	Payload struct {}
+	Payload struct{}
 }
 
-//====================================
-// Handle
-//====================================
-func (c *AbilityController) Handle(update tgbotapi.Update) {
-	// Current Controller instance
-	var err error
-	var isNewState bool
-	c.RouteName, c.Update, c.Message = "route.abilityTree", update, update.Message
+var (
+	AbilityLists = []string{
+		"Strength",
+		// "dexterity",
+		// "constitution",
+		"Intelligence",
+		// "wisdom",
+		// "charisma",
+	}
+)
 
-	// Check current state for this routes
-	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+// ====================================
+// Handle
+// ====================================
+func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+	var playerStateProvider providers.PlayerStateProvider
+
+	c.Controller = "route.ability"
+	c.Player = player
+	c.Update = update
+
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
 
 	// Set and load payload
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
-	// It's first message
-	if isNewState {
-		c.Stage()
-		return
+	// Validate
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
 	}
 
-	// Go to validator
-	if !c.Validator() {
-		c.State, err = providers.UpdatePlayerState(c.State)
+	// Se ritornano degli errori
+	if hasError == true {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				),
+			),
+		)
+
+		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
-			services.ErrorHandler("Cant update player", err)
+			panic(err)
 		}
 
-		// Ok! Run!
-		c.Stage()
 		return
 	}
 
-	// Validator goes errors
-	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-	services.SendMessage(validatorMsg)
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+	if err != nil {
+		panic(err)
+	}
+
+	// Verifico completamento
+	err = c.Completing()
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
 
-//====================================
+// ====================================
 // Validator
-//====================================
-func (c *AbilityController) Validator() (hasErrors bool) {
-	c.Validation.Message = helpers.Trans("validationMessage")
+// ====================================
+func (c *AbilityController) Validator() (hasErrors bool, err error) {
+	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 
 	switch c.State.Stage {
+	// È il primo stato non c'è nessun controllo
 	case 0:
-		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
-		if helpers.InStatsStruct(c.Message.Text) && helpers.Player.Stats.AbilityPoint > 0 {
-			c.State.Stage = 1
-			return false
-		} else if helpers.Player.Stats.AbilityPoint == 0 {
-			c.State.Stage = 2
-			return false
-		}
+		return false, err
+
 	case 1:
-		if c.Message.Text == helpers.Trans("ability.back") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ability.back") {
 			c.State.Stage = 0
-			return false
-		} else if c.Message.Text == helpers.Trans("exit") {
-			c.State.Stage = 2
-			return false
+			return false, err
 		}
+
+		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
+		for _, ability := range AbilityLists {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))) == c.Update.Message.Text {
+				if *c.Player.Stats.AbilityPoint <= 0 {
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ability.no_point_left")
+					return true, err
+				}
+
+				return false, err
+			}
+		}
+
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+		return true, err
 	}
 
-	return true
+	return true, err
 }
 
-//====================================
+// ====================================
 // Stage
-//====================================
-func (c *AbilityController) Stage() {
-	var err error
+// ====================================
+func (c *AbilityController) Stage() (err error) {
+	var playerStatsProvider providers.PlayerStatsProvider
 
 	switch c.State.Stage {
+	// Invio messaggio con recap stats
 	case 0:
-		// Invio messaggio con recao stats
-		messageSummaryPlayerStats := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&helpers.Player.Stats))
-		messagePlayerTotalPoint := helpers.Trans("ability.stats.total_point", helpers.Player.Stats.AbilityPoint)
+		var recapStats string
+		recapStats = helpers.Trans(c.Player.Language.Slug, "ability.stats.type")
 
-		msg := services.NewMessage(helpers.Player.ChatID, messageSummaryPlayerStats+messagePlayerTotalPoint)
-		msg.ReplyMarkup = helpers.StatsKeyboard()
-		msg.ParseMode = "HTML"
-		services.SendMessage(msg)
-	case 1:
-		// Invio Messaggio di incremento abilità
-		text := helpers.Trans("ability.stats.completed", c.Message.Text)
-		msg := services.NewMessage(helpers.Player.ChatID, text)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("ability.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("exit")),
+		// Recupero dinamicamente i valory delle statistiche per poi ciclarli con quelli consentiti
+		rv := reflect.ValueOf(&c.Player.Stats)
+		rv = rv.Elem()
+
+		for _, ability := range AbilityLists {
+			playerStat := rv.FieldByName(ability)
+			fieldName := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability)))
+			recapStats += fmt.Sprintf("<code>%-15v:%v</code>\n", fieldName, playerStat)
+		}
+
+		// Mostro quanti punti ha a disposizione il player
+		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", *c.Player.Stats.AbilityPoint)
+
+		// Creo tastierino con i soli componienti abilitati dal client
+		var keyboardRow [][]tgbotapi.KeyboardButton
+		for _, ability := range AbilityLists {
+			row := tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))),
+				),
+			)
+			keyboardRow = append(keyboardRow, row)
+		}
+
+		// Aggiungo bottone cancella
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
 			),
-		)
-		services.SendMessage(msg)
+		))
 
-		// Incremento statistiche e aggiorno
-		helpers.PlayerStatsIncrement(&helpers.Player.Stats, c.Message.Text)
-		_, err = providers.UpdatePlayerStats(helpers.Player.Stats)
+		msg := services.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s", messagePlayerTotalPoint, recapStats))
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			Keyboard:       keyboardRow,
+			ResizeKeyboard: true,
+		}
+		msg.ParseMode = "HTML"
+		_, err = services.SendMessage(msg)
 		if err != nil {
-			services.ErrorHandler("Cant update player stats", err)
-		}
-	case 2:
-		// Recap statistiche player
-		text := helpers.Trans("ability.stats.type", helpers.PlayerStatsToString(&helpers.Player.Stats))
-		if helpers.Player.Stats.AbilityPoint == 0 {
-			text += "\n" + helpers.Trans("ability.no_point_left")
-		} else {
-			text += helpers.Trans("ability.stats.total_point", helpers.Player.Stats.AbilityPoint)
+			return err
 		}
 
-		// Invio messaggio
-		msg := services.NewMessage(helpers.Player.ChatID, text)
-		msg.ParseMode = "HTML"
+		// Avanzo di stage
+		c.State.Stage = 1
+
+	case 1:
+		// Incremento statistiche e aggiorno
+		for _, ability := range AbilityLists {
+			abilityName := helpers.Trans(c.Player.Language.Slug, "ability."+strings.ToLower(ability))
+
+			if abilityName == c.Update.Message.Text {
+				f := reflect.ValueOf(&c.Player.Stats).Elem().FieldByName(ability)
+				f.SetUint(uint64(f.Interface().(uint) + 1))
+
+				*c.Player.Stats.AbilityPoint--
+			}
+		}
+
+		// Aggiorno statistiche player
+		_, err = playerStatsProvider.UpdatePlayerStats(c.Player.Stats)
+		if err != nil {
+			return err
+		}
+
+		// Invio Messaggio di incremento abilità
+		text := helpers.Trans(c.Player.Language.Slug, "ability.stats.completed", c.Update.Message.Text)
+		msg := services.NewMessage(c.Player.ChatID, text)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ability.back")),
 			),
 		)
-		services.SendMessage(msg)
-
-		// ====================================
-		// COMPLETE!
-		// ====================================
-		helpers.FinishAndCompleteState(c.State, helpers.Player)
-		// ====================================
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 	}
+
+	return
 }

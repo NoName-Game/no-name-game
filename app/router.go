@@ -5,16 +5,16 @@ import (
 	"reflect"
 	"strings"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 )
 
-// Routing - Check message type and call if exist the correct function
-func routing(update tgbotapi.Update) {
-	// ************************
-	// Switch by message type
-	// ************************
+// Routing - Effetua check sul tipo di messagio ed esegue un routing
+func routing(player nnsdk.Player, update tgbotapi.Update) {
+	// Verifica il tipo di messaggio
 	var callingRoute string
 	if update.Message != nil {
 		callingRoute = parseMessage(update.Message)
@@ -22,40 +22,38 @@ func routing(update tgbotapi.Update) {
 		callingRoute = parseCallback(update.CallbackQuery)
 	}
 
-	// ******************************************
-	// Check if callingRoute it's breaker routes
-	// ******************************************
-	isBreakerRoute, route := inRoutes(callingRoute, BreakerRoutes)
+	// Verifico se è una rotta di chiusura
+	// Questa tipologia di rotta implica un blocco immediato dell'azione in corso
+	isBreakerRoute, route := inRoutes(player.Language.Slug, callingRoute, BreakerRoutes)
 	if isBreakerRoute {
-		Invoke(BreakerRoutes[route], "Handle", update)
+		invoke(BreakerRoutes[route], "Handle", player, update)
 		return
 	}
 
-	// ******************************************
-	// Check if player have route in cache
-	// ******************************************
-	isCachedRoute := helpers.GetRedisState(helpers.Player)
+	// Verifico se in memorià è presente già una rotta
+	// userò quella come main per gestire ulteriori sottostati
+	isCachedRoute, _ := helpers.GetRedisState(player)
 	if isCachedRoute != "" {
-		Invoke(Routes[isCachedRoute], "Handle", update)
+		invoke(Routes[isCachedRoute], "Handle", player, update)
 		return
 	}
 
-	// ******************************************
-	// Check if it's normal route
-	// ******************************************
-	isRoute, route := inRoutes(callingRoute, Routes)
+	// Dirigo ad una rotta normale
+	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
-		Invoke(Routes[route], "Handle", update)
+		invoke(Routes[route], "Handle", player, update)
 		return
 	}
 
 	return
 }
 
-// inRoutes - Check if message is translated command
-func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
+// inRoutes - Verifica se esiste la rotta
+func inRoutes(lang string, messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
+	// Ciclo lista di rotte
 	for route := range routeList {
-		if strings.ToLower(helpers.Trans(route)) == messageRoute {
+		// Traduco le rotte in base alla lingua del player per trovare corrispondenza
+		if strings.ToLower(helpers.Trans(lang, route)) == messageRoute {
 			return true, route
 		}
 	}
@@ -63,8 +61,9 @@ func inRoutes(messageRoute string, routeList map[string]interface{}) (isRoute bo
 	return false, ""
 }
 
-// Invoke - Dinamicaly call method interface
-func Invoke(any interface{}, name string, args ...interface{}) {
+// invoke - Invoco dinamicamente un metodo di un controller
+func invoke(any interface{}, name string, args ...interface{}) {
+	// Recupero possibili input e li trasformo come argomenti da passare al metodo
 	inputs := make([]reflect.Value, len(args))
 	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
@@ -73,11 +72,11 @@ func Invoke(any interface{}, name string, args ...interface{}) {
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
 
-// Call - Method to call another func and check needed parameters
-func Call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
+// call - Metodo dedicato al richiamare dinamicamente una specifca funzione
+func call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(m[name])
 	if len(params) != f.Type().NumIn() {
-		err = errors.New("The number of params is not adapted")
+		err = errors.New("the number of params is not adapted")
 		return
 	}
 
@@ -90,18 +89,24 @@ func Call(m map[string]interface{}, name string, params ...interface{}) (result 
 	return
 }
 
-// Parse message text, if command it's like telegram format the message will be parsed and return simple text without "/" char
+// Metodo per il parsing del messaggio
 func parseMessage(message *tgbotapi.Message) (parsed string) {
 	parsed = message.Text
 	if message.IsCommand() {
 		parsed = message.Command()
+		// Se è un comando ed è start lo parso come tutorial
+		if parsed == "start" {
+			parsed = "📖 Tutorial"
+		}
 	}
 
 	return strings.ToLower(parsed)
 }
 
+// Metodo per il parsing della callback
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
-	parsed = callback.Data
-	parsed = strings.Split(parsed, ".")[0]
+	// Prendo la prima parte del callback che contiene la rotta
+	parsed = strings.Split(callback.Data, ".")[0]
+
 	return strings.ToLower(parsed)
 }

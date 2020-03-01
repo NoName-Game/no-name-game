@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -12,9 +13,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-//====================================
+// ====================================
 // InventoryEquipController
-//====================================
+// ====================================
 type InventoryEquipController struct {
 	BaseController
 	Payload struct {
@@ -23,252 +24,387 @@ type InventoryEquipController struct {
 	}
 }
 
-//====================================
+// ====================================
 // Handle
-//====================================
-func (c *InventoryEquipController) Handle(update tgbotapi.Update) {
-	// Current Controller instance
+// ====================================
+func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
 	var err error
-	var isNewState bool
-	c.RouteName, c.Update, c.Message = "route.inventory.equip", update, update.Message
+	var playerStateProvider providers.PlayerStateProvider
 
-	// Check current state for this routes
-	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+	c.Controller = "route.inventory.equip"
+	c.Player = player
+	c.Update = update
+
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
+	}
 
 	// Set and load payload
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
-	// It's first message
-	if isNewState {
-		c.Stage()
-		return
+	// Validate
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
 	}
 
-	// Go to validator
-	if !c.Validator() {
-		c.State, err = providers.UpdatePlayerState(c.State)
+	// Se ritornano degli errori
+	if hasError == true {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				),
+			),
+		)
+
+		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
-			services.ErrorHandler("Cant update player", err)
+			panic(err)
 		}
 
-		// Ok! Run!
-		c.Stage()
 		return
 	}
 
-	// Validator goes errors
-	validatorMsg := services.NewMessage(c.Message.Chat.ID, c.Validation.Message)
-	services.SendMessage(validatorMsg)
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.State.Payload = string(payloadUpdated)
+	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+	if err != nil {
+		panic(err)
+	}
+
+	// Verifico completamento
+	err = c.Completing()
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
 
-//====================================
+// ====================================
 // Validator
-//====================================
-func (c *InventoryEquipController) Validator() (hasErrors bool) {
-	c.Validation.Message = helpers.Trans("validationMessage")
+// ====================================
+func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
+	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 
 	switch c.State.Stage {
+	// È il primo stato non c'è nessun controllo
 	case 0:
-		if helpers.InArray(c.Message.Text, []string{
-			helpers.Trans("armors"),
-			helpers.Trans("weapons"),
-		}) {
-			c.State.Stage = 1
-			return false
-		}
+		return false, err
+
+	// Verifico che la tipologia di equip che vuole il player esista
 	case 1:
-		if strings.Contains(c.Message.Text, helpers.Trans("equip")) {
-			c.State.Stage = 2
-			return false
+		if helpers.InArray(c.Update.Message.Text, []string{
+			helpers.Trans(c.Player.Language.Slug, "armors"),
+			helpers.Trans(c.Player.Language.Slug, "weapons"),
+		}) {
+			return false, err
 		}
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+
+		return true, err
+
+	// Verifico che il player voglia continuare con l'equip
 	case 2:
-		if c.Message.Text == helpers.Trans("confirm") {
-			c.State.Stage = 3
-			return false
+		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")) {
+			return false, err
 		}
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+
+		return true, err
+
+	// Verifico la conferma dell'equip
+	case 3:
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return false, err
+		}
+
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+
+		return true, err
 	}
 
-	return true
+	return true, err
 }
 
-//====================================
+// ====================================
 // Stage
-//====================================
-func (c *InventoryEquipController) Stage() {
-	var err error
+// ====================================
+func (c *InventoryEquipController) Stage() (err error) {
+	var playerProvider providers.PlayerProvider
+	var armorProvider providers.ArmorProvider
+	var weaponProvider providers.WeaponProvider
 
 	switch c.State.Stage {
+	// In questo stage faccio un micro recap al player del suo equipaggiamento
+	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
 	case 0:
-		//====================================
-		// TODO: RISCRIVIMI!
-		//====================================
-		currentPlayerEquipment := helpers.Trans("inventory.equip.equipped")
+		// ******************
+		// Recupero armatura equipaggiata
+		// ******************
+		var currentArmorsEquipment string
+		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		//////////////////////////////////
-		currentPlayerEquipment += "\n" + helpers.Trans("armors") + ":\n"
-		eqippedArmors, err := providers.GetPlayerArmors(helpers.Player, "true")
+		var armors nnsdk.Armors
+		armors, err = playerProvider.GetPlayerArmors(c.Player, "true")
 		if err != nil {
-			services.ErrorHandler("Cant get equpped player armors", err)
+			return err
 		}
 
-		for _, armor := range eqippedArmors {
-			currentPlayerEquipment += "- " + armor.Name
+		if len(armors) > 0 {
+			for _, armor := range armors {
+				currentArmorsEquipment += fmt.Sprintf("- %s \n", armor.Name)
+			}
+		} else {
+			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
 		}
-		//////////////////////////////////
-		currentPlayerEquipment += "\n\n" + helpers.Trans("weapons") + ":\n"
-		eqippedWeapons, err := providers.GetPlayerWeapons(helpers.Player, "true")
+
+		// ******************
+		// Recupero armi equipaggiate
+		// ******************
+		var currentWeaponsEquipment string
+		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
+
+		var weapons nnsdk.Weapons
+		weapons, err := playerProvider.GetPlayerWeapons(c.Player, "true")
 		if err != nil {
-			services.ErrorHandler("Cant get equpped player weapons", err)
+			return err
 		}
 
-		for _, weapon := range eqippedWeapons {
-			currentPlayerEquipment += "- " + weapon.Name
+		if len(weapons) > 0 {
+			for _, weapon := range weapons {
+				currentWeaponsEquipment += fmt.Sprintf("- %s \n", weapon.Name)
+			}
+		} else {
+			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
-		//////////////////////////////////
 
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.type")+currentPlayerEquipment)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("armors")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("weapons")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+		// Invio messagio con recap e con selettore categoria
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			fmt.Sprintf(
+				"%s \n\n %s",
+				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
+				fmt.Sprintf(
+					"%s\n%s\n\n%s",
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
+					currentArmorsEquipment,
+					currentWeaponsEquipment,
+				),
 			),
 		)
-		services.SendMessage(msg)
+		msg.ParseMode = "markdown"
+
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Avanzo di stage
+		c.State.Stage = 1
+
+	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
+		var mainMessage string
 		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
+		c.Payload.Type = c.Update.Message.Text
+
 		switch c.Payload.Type {
-		case helpers.Trans("armors"):
-			// Each player armors
-			for _, armor := range helpers.Player.Armors {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + armor.Name))
+		case helpers.Trans(c.Player.Language.Slug, "armors"):
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
+
+			// Recupero nuovamente armature player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			var armors nnsdk.Armors
+			armors, err = playerProvider.GetPlayerArmors(c.Player, "false")
+			if err != nil {
+				return err
+			}
+
+			// Ciclo armature del player
+			for _, armor := range armors {
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						fmt.Sprintf(
+							"%s %s",
+							helpers.Trans(c.Player.Language.Slug, "equip"),
+							armor.Name,
+						),
+					),
+				)
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
-		case helpers.Trans("weapons"):
+
+		case helpers.Trans(c.Player.Language.Slug, "weapons"):
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
+
+			// Recupero nuovamente armi player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			var weapons nnsdk.Weapons
+			weapons, err := playerProvider.GetPlayerWeapons(c.Player, "false")
+			if err != nil {
+				return err
+			}
+
 			// Ciclo armi player
-			for _, weapon := range helpers.Player.Weapons {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans("equip") + " " + weapon.Name))
+			for _, weapon := range weapons {
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						fmt.Sprintf(
+							"%s %s",
+							helpers.Trans(c.Player.Language.Slug, "equip"),
+							weapon.Name,
+						),
+					),
+				)
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
 
 		// Aggiungo tasti back and clears
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-			tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 		))
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.what"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID, mainMessage)
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
 		}
-		services.SendMessage(msg)
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorno stato
-		c.Payload.Type = c.Message.Text
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, err = providers.UpdatePlayerState(c.State)
-		if err != nil {
-			services.ErrorHandler("Cant update player", err)
-		}
+		c.State.Stage = 2
+
+	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
+	// equipaggiare e me lo metto nel payload in attesa di conferma
 	case 2:
 		var equipmentName string
-
-		// Ripulisco messaggio
-		equipmentName = strings.Split(c.Message.Text, helpers.Trans("equip")+" ")[1]
-
 		var equipmentID uint
+
+		// Ripulisco messaggio per recupermi solo il nome
+		equipmentName = strings.Split(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")+" ")[1]
+
 		switch c.Payload.Type {
-		case helpers.Trans("armors"):
+		case helpers.Trans(c.Player.Language.Slug, "armors"):
 			var armor nnsdk.Armor
-			armor, err := providers.FindArmorByName(equipmentName)
+			armor, err := armorProvider.FindArmorByName(equipmentName)
 			if err != nil {
-				services.ErrorHandler("Cant find equip armor name", err)
+				return err
 			}
 
 			equipmentID = armor.ID
-		case helpers.Trans("weapons"):
+		case helpers.Trans(c.Player.Language.Slug, "weapons"):
 			var weapon nnsdk.Weapon
-			weapon, err := providers.FindWeaponByName(equipmentName)
+			weapon, err := weaponProvider.FindWeaponByName(equipmentName)
 			if err != nil {
-				services.ErrorHandler("Cant find equip weapon name", err)
+				return err
 			}
 
 			equipmentID = weapon.ID
 		}
 
 		// Invio messaggio per conferma equipaggiamento
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.equip.confirm")+"\n\n "+equipmentName)
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", equipmentName),
+		)
+		msg.ParseMode = "markdown"
+
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("confirm")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
-		services.SendMessage(msg)
+
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
-		c.State, err = providers.UpdatePlayerState(c.State)
-		if err != nil {
-			services.ErrorHandler("Cant update player", err)
-		}
+		c.State.Stage = 3
+
+	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
+	// TODO: bisogna verifica che ci sia solo 1 arma o armatura equipaggiata
 	case 3:
 		switch c.Payload.Type {
-		case helpers.Trans("armors"):
-			equipment, err := providers.GetArmorByID(c.Payload.EquipID)
+		case helpers.Trans(c.Player.Language.Slug, "armors"):
+			equipment, err := armorProvider.GetArmorByID(c.Payload.EquipID)
 			if err != nil {
-				services.ErrorHandler("Cant find armor by ID", err)
+				return err
 			}
 
 			// Aggiorno equipped
 			equipment.Equipped = helpers.SetTrue()
-			_, err = providers.UpdateArmor(equipment)
+			_, err = armorProvider.UpdateArmor(equipment)
 			if err != nil {
-				services.ErrorHandler("Cant update armor", err)
+				return err
 			}
-		case helpers.Trans("weapons"):
-			equipment, err := providers.GetWeaponByID(c.Payload.EquipID)
+
+		case helpers.Trans(c.Player.Language.Slug, "weapons"):
+			equipment, err := weaponProvider.GetWeaponByID(c.Payload.EquipID)
 			if err != nil {
-				services.ErrorHandler("Cant find weapon by ID", err)
+				return err
 			}
 
 			// Aggiorno equipped
 			equipment.Equipped = helpers.SetTrue()
-			_, err = providers.UpdateWeapon(equipment)
+			_, err = weaponProvider.UpdateWeapon(equipment)
 			if err != nil {
-				services.ErrorHandler("Cant update weapon", err)
+				return err
 			}
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.equip.completed"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans("route.breaker.back")),
-			),
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"),
 		)
-		services.SendMessage(msg)
+		msg.ParseMode = "markdown"
 
-		//====================================
-		// COMPLETE!
-		//====================================
-		helpers.FinishAndCompleteState(c.State, helpers.Player)
-		//====================================
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Completo lo stato
+		c.State.Completed = helpers.SetTrue()
 	}
+
+	return
 }
