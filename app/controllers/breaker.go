@@ -62,7 +62,7 @@ func (c *ClearsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
 
 	// Inizializzo
-	c.Controller = "route.breaker.back"
+	c.Controller = "route.breaker.clears"
 	c.Update = update
 	c.Player = player
 
