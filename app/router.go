@@ -49,7 +49,7 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 }
 
 // inRoutes - Verifica se esiste la rotta
-func inRoutes(lang string, messageRoute string, routeList map[string]reflect.Type) (isRoute bool, route string) {
+func inRoutes(lang string, messageRoute string, routeList map[string]interface{}) (isRoute bool, route string) {
 	// Ciclo lista di rotte
 	for route := range routeList {
 		// Traduco le rotte in base alla lingua del player per trovare corrispondenza
@@ -62,14 +62,14 @@ func inRoutes(lang string, messageRoute string, routeList map[string]reflect.Typ
 }
 
 // invoke - Invoco dinamicamente un metodo di un controller
-func invoke(any reflect.Type, name string, args ...interface{}) {
+func invoke(any interface{}, name string, args ...interface{}) {
 	// Recupero possibili input e li trasformo come argomenti da passare al metodo
 	inputs := make([]reflect.Value, len(args))
 	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
 	}
-	v := reflect.New(any)
-	v.MethodByName(name).Call(inputs)
+
+	reflect.ValueOf(any).MethodByName(name).Call(inputs)
 }
 
 // call - Metodo dedicato al richiamare dinamicamente una specifca funzione
