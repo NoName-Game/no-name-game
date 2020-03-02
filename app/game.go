@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"reflect"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
@@ -13,33 +14,33 @@ var (
 	// ===================================
 	// Routes
 	//
-	Routes = map[string]interface{}{
-		"route.menu":     new(controllers.MenuController),
-		"route.tutorial": new(controllers.TutorialController),
+	Routes = map[string]reflect.Type{
+		"route.menu":     reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
+		"route.tutorial": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
-		"route.mission":  new(controllers.MissionController),
-		"route.crafting": new(controllers.CraftingController),
-		"route.ability":  new(controllers.AbilityController),
+		"route.mission":  reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
+		"route.crafting": reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
+		"route.ability":  reflect.TypeOf((*controllers.AbilityController)(nil)).Elem(),
 
-		"route.hunting": new(controllers.HuntingController),
+		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 
-		"route.inventory":       new(controllers.InventoryController),
-		"route.inventory.recap": new(controllers.InventoryRecapController),
-		"route.inventory.equip": new(controllers.InventoryEquipController),
-		// "route.inventory.destroy": new(controllers.InventoryDestroyController),
-		"route.inventory.items": new(controllers.InventoryItemController),
+		"route.inventory":       reflect.TypeOf((*controllers.InventoryController)(nil)).Elem(),
+		"route.inventory.recap": reflect.TypeOf((*controllers.InventoryRecapController)(nil)).Elem(),
+		"route.inventory.equip": reflect.TypeOf((*controllers.InventoryEquipController)(nil)).Elem(),
+		// "route.inventory.destroy": reflect.TypeOf((*controllers.InventoryDestroyController)(nil)).Elem(),
+		"route.inventory.items": reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
 
-		"route.ship":             new(controllers.ShipController),
-		"route.ship.exploration": new(controllers.ShipExplorationController),
-		"route.ship.repairs":     new(controllers.ShipRepairsController),
-		"route.ship.rests":       new(controllers.ShipRestsController),
+		"route.ship":             reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
+		"route.ship.exploration": reflect.TypeOf((*controllers.ShipExplorationController)(nil)).Elem(),
+		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
+		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 
-		// "route.testing.multiStage": new(controllers.TestingController),
+		// "route.testing.multiStage": reflect.TypeOf((*controllers.TestingController)(nil)).Elem(),
 	}
 
-	BreakerRoutes = map[string]interface{}{
-		"route.breaker.back":   new(controllers.BackController),   // breaker.go      - MAIN (breaker)
-		"route.breaker.clears": new(controllers.ClearsController), // breaker.go    - MAIN (breaker)
+	BreakerRoutes = map[string]reflect.Type{
+		"route.breaker.back":   reflect.TypeOf((*controllers.BackController)(nil)).Elem(),   // breaker.go      - MAIN (breaker(nil)).Elem()
+		"route.breaker.clears": reflect.TypeOf((*controllers.ClearsController)(nil)).Elem(), // breaker.go    - MAIN (breaker(nil)).Elem()
 	}
 	//
 	// End routes
