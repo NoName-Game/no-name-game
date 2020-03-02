@@ -215,6 +215,12 @@ func (c *HuntingController) Hunting() (err error) {
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
 	if c.Payload.MapID <= 0 || c.Update.Message != nil {
+		// Se è qualsiasi messaggio diverso da hunting non lo calcolo
+		// in quanto adnrebbe a generare più volte il messaggio con la stessa mappa
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") {
+			return
+		}
+
 		// Questo messaggio è necessario per immettere il tasto di abbandona caccia
 		initHunting := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "hunting.init"))
 		initHunting.ReplyMarkup = tgbotapi.NewReplyKeyboard(
