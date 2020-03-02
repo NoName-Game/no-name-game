@@ -343,59 +343,38 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 		return err
 	}
 
-	// Do scontato che sia una quadrato
-	dimension := len(cellGrid)
-
 	// Eseguo azione
 	switch action {
 	case "up":
-		// Verifico limiti mappa
-		if c.PlayerPositionX-1 < 0 {
-			c.PlayerPositionX++
-			break
-		}
-
+		// Se non è un muro posso proseguire
 		if !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
 			c.PlayerPositionX--
-		} else {
-			c.PlayerPositionX++
-		}
-	case "down":
-		// Verifico limiti mappa
-		if c.PlayerPositionX+1 >= dimension {
-			c.PlayerPositionX--
 			break
 		}
 
+		return
+	case "down":
+		// Se non è un muro posso proseguire
 		if !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
 			c.PlayerPositionX++
-		} else {
-			c.PlayerPositionX--
-		}
-	case "left":
-		// Verifico limiti mappa
-		if c.PlayerPositionY-1 < 0 {
-			c.PlayerPositionY++
 			break
 		}
 
+		return
+	case "left":
 		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
 			c.PlayerPositionY--
-		} else {
-			c.PlayerPositionY++
-		}
-	case "right":
-		// Verifico limiti mappa
-		if c.PlayerPositionY+1 >= dimension {
-			c.PlayerPositionY--
 			break
 		}
 
+		return
+	case "right":
 		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
 			c.PlayerPositionY++
-		} else {
-			c.PlayerPositionY--
+			break
 		}
+
+		return
 	case "action":
 		// Verifico se si trova sopra un tesoro se così fosse lancio
 		// chiamata per verificare il drop
