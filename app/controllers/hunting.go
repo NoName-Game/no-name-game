@@ -220,6 +220,12 @@ func (c *HuntingController) Hunting() (err error) {
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
 	if c.Payload.MapID <= 0 || c.Update.Message != nil {
+		// Se è qualsiasi messaggio diverso da hunting non lo calcolo
+		// in quanto adnrebbe a generare più volte il messaggio con la stessa mappa
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") {
+			return
+		}
+
 		// Questo messaggio è necessario per immettere il tasto di abbandona caccia
 		initHunting := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "hunting.init"))
 		initHunting.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -342,59 +348,38 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 		return err
 	}
 
-	// Do scontato che sia una quadrato
-	dimension := len(cellGrid)
-
 	// Eseguo azione
 	switch action {
 	case "up":
-		// Verifico limiti mappa
-		if c.PlayerPositionX-1 < 0 {
-			c.PlayerPositionX++
-			break
-		}
-
+		// Se non è un muro posso proseguire
 		if !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
 			c.PlayerPositionX--
-		} else {
-			c.PlayerPositionX++
-		}
-	case "down":
-		// Verifico limiti mappa
-		if c.PlayerPositionX+1 >= dimension {
-			c.PlayerPositionX--
 			break
 		}
 
+		return
+	case "down":
+		// Se non è un muro posso proseguire
 		if !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
 			c.PlayerPositionX++
-		} else {
-			c.PlayerPositionX--
-		}
-	case "left":
-		// Verifico limiti mappa
-		if c.PlayerPositionY-1 < 0 {
-			c.PlayerPositionY++
 			break
 		}
 
+		return
+	case "left":
 		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
 			c.PlayerPositionY--
-		} else {
-			c.PlayerPositionY++
-		}
-	case "right":
-		// Verifico limiti mappa
-		if c.PlayerPositionY+1 >= dimension {
-			c.PlayerPositionY--
 			break
 		}
 
+		return
+	case "right":
 		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
 			c.PlayerPositionY++
-		} else {
-			c.PlayerPositionY--
+			break
 		}
+
+		return
 	case "action":
 		// Verifico se si trova sopra un tesoro se così fosse lancio
 		// chiamata per verificare il drop

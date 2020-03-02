@@ -11,6 +11,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+var (
+	// Lista delle rotte che non devono subire
+	// gli effetti di abbandona anche se forzati a mano
+	UnClearables = []string{"route.hunting"}
+)
+
 type BaseController struct {
 	Update     tgbotapi.Update
 	Controller string
@@ -72,4 +78,20 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	}
 
 	return false
+}
+
+// Clearable
+func (c *BaseController) Clearable() (clearable bool) {
+	// Certi controller non devono subire la cancellazione degli stati
+	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
+	for _, state := range c.Player.States {
+		for _, unclearable := range UnClearables {
+			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
+				return false
+
+			}
+		}
+	}
+
+	return true
 }

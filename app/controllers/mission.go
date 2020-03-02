@@ -44,7 +44,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Update = update
 
 	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting"}); blocked == true {
+	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked == true {
 		return
 	}
 
