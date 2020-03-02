@@ -34,13 +34,11 @@ route.breaker.clears: "Abbandona"
 # ROUTES (CALLBACK)
 callback.map: "map"
 
-# ROUTES (TESTING)
-route.testing.multiStage: "multi-stage"
-
 # VALIDATOR
 validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
 validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
 validator.not_valid: "Il parametro inserito non è valido"
+valodator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi"
 
 # GENERAL
 complete: "Fatto!"

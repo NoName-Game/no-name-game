@@ -34,6 +34,11 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	c.Player = player
 	c.Update = update
 
+	// Verifico se il player si trova in determinati stati non consentiti
+	if blocked := c.InStatesBlocker([]string{"hunting", "mission"}); blocked == true {
+		return
+	}
+
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
