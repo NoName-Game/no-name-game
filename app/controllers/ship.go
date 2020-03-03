@@ -44,7 +44,7 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 			ship.Name, ship.Rarity.Slug,
 			ship.ShipCategory.Name,
 			ship.ShipStats.Integrity, helpers.Trans(c.Player.Language.Slug, "integrity"),
-			ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
+			*ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
 		)
 	}
 
