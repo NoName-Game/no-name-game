@@ -65,7 +65,7 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Player.States {
 		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
-		if state.Father != c.State.Father && *state.Completed != true {
+		if *state.Completed == false && (state.Father <= 0 || state.Father != c.State.Father) {
 			for _, blockState := range blockStates {
 				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
 					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
