@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -74,7 +75,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	var recapResources string
 	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
 	for _, resource := range playerInventoryResources {
-		recapResources += fmt.Sprintf("- %s x %v \n", resource.Resource.Name, *resource.Quantity)
+		recapResources += fmt.Sprintf("- %s x %v (*%s*)\n", resource.Resource.Name, *resource.Quantity, strings.ToUpper(resource.Resource.Rarity.Slug))
 	}
 
 	// *******************
@@ -89,7 +90,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	var recapItems string
 	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
 	for _, resource := range playerInventoryItems {
-		recapItems += fmt.Sprintf("- %s x %v \n", helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug), *resource.Quantity)
+		recapItems += fmt.Sprintf("- %s x %v (*%s*)\n", helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug), *resource.Quantity, strings.ToUpper(resource.Item.Rarity.Slug))
 	}
 
 	// *******************
@@ -104,7 +105,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	var recapWeapons string
 	recapWeapons = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "weapons"))
 	for _, weapon := range playerWeapons {
-		recapWeapons += fmt.Sprintf("- %s \n", weapon.Name)
+		recapWeapons += fmt.Sprintf("- %s (*%s*)\n", weapon.Name, strings.ToUpper(weapon.Rarity.Slug))
 	}
 
 	// *******************
@@ -119,7 +120,7 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	var recapArmors string
 	recapArmors = fmt.Sprintf("*%s:*\n", helpers.Trans(player.Language.Slug, "armors"))
 	for _, armor := range playerArmors {
-		recapArmors += fmt.Sprintf("- %s \n", armor.Name)
+		recapArmors += fmt.Sprintf("- %s (*%s*)\n", armor.Name, strings.ToUpper(armor.Rarity.Slug))
 	}
 
 	// Riassumo il tutto
