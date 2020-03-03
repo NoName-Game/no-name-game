@@ -124,7 +124,7 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 				),
 			),
 		)
@@ -178,7 +178,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
-
+		c.State.Completed = helpers.SetTrue()
 		return true, err
 	}
 
