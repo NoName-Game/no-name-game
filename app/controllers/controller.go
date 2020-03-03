@@ -1,6 +1,10 @@
 package controllers
 
 import (
+	"fmt"
+
+	"bitbucket.org/no-name-game/nn-telegram/services"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
@@ -53,6 +57,29 @@ func (c *BaseController) Completing() (err error) {
 	return
 }
 
+// InStatesBlocker
+// Certi controller non possono essere eseguiti se il player si trova in determinati stati.
+// Ogni controller ha la possibilità nell'handle di passare la lista di rotte bloccanti per esso.
+func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
+	// Certi controller non devono subire la cancellazione degli stati
+	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
+	for _, state := range c.Player.States {
+		for _, blockState := range blockStates {
+			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
+				msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+				_, err := services.SendMessage(msg)
+				if err != nil {
+					panic(err)
+				}
+
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // Clearable
 func (c *BaseController) Clearable() (clearable bool) {
 	// Certi controller non devono subire la cancellazione degli stati
@@ -61,6 +88,7 @@ func (c *BaseController) Clearable() (clearable bool) {
 		for _, unclearable := range UnClearables {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
 				return false
+
 			}
 		}
 	}
