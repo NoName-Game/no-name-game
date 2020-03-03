@@ -64,15 +64,18 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Player.States {
-		for _, blockState := range blockStates {
-			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-				msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
-				_, err := services.SendMessage(msg)
-				if err != nil {
-					panic(err)
-				}
+		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
+		if state.Father != c.State.Father && *state.Completed != true {
+			for _, blockState := range blockStates {
+				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
+					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+					_, err := services.SendMessage(msg)
+					if err != nil {
+						panic(err)
+					}
 
-				return true
+					return true
+				}
 			}
 		}
 	}
