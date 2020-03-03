@@ -143,17 +143,16 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 3:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var stateNotFoundErr error
-		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = playerStateProvider.GetPlayerStateByID(c.Payload.UseItemID)
+		var itemState nnsdk.PlayerState
+		itemState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.UseItemID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if stateNotFoundErr != nil {
+		if itemState.ID <= 0 {
 			c.State.Stage = 2
 			return false, err
 		}
 
-		if *missionState.Completed != true {
+		if *itemState.Completed != true {
 			return true, err
 		}
 
@@ -163,12 +162,11 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 5:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var stateNotFoundErr error
 		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = playerStateProvider.GetPlayerStateByID(c.Payload.MissionID)
+		missionState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.MissionID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if stateNotFoundErr != nil {
+		if missionState.ID <= 0 {
 			c.State.Stage = 3
 			return false, err
 		}
@@ -199,17 +197,16 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 6:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var stateNotFoundErr error
-		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = playerStateProvider.GetPlayerStateByID(c.Payload.InventoryEquipID)
+		var inventoryState nnsdk.PlayerState
+		inventoryState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.InventoryEquipID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if stateNotFoundErr != nil {
+		if inventoryState.ID <= 0 {
 			c.State.Stage = 5
 			return false, err
 		}
 
-		if *missionState.Completed != true {
+		if *inventoryState.Completed != true {
 			return true, err
 		}
 
@@ -217,17 +214,16 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var stateNotFoundErr error
-		var missionState nnsdk.PlayerState
-		missionState, stateNotFoundErr = playerStateProvider.GetPlayerStateByID(c.Payload.HuntingID)
+		var huntingState nnsdk.PlayerState
+		huntingState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.HuntingID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if stateNotFoundErr != nil {
+		if huntingState.ID <= 0 {
 			c.State.Stage = 6
 			return false, err
 		}
 
-		if *missionState.Completed != true {
+		if *huntingState.Completed != true {
 			return true, err
 		}
 
