@@ -613,6 +613,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Addesso posso cancellare tutti gli stati associati
+		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.UseItemID})
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.HuntingID})
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.InventoryEquipID})
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.CraftingID})
