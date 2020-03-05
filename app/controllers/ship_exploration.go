@@ -333,6 +333,20 @@ func (c *ShipExplorationController) Stage() (err error) {
 			return err
 		}
 
+		// Verifico se la nave del player ha abbastanza carburante per raggiungere la stella
+		if c.Payload.StarNearestMapInfo[chosenStarID].Fuel > *c.Payload.Ship.ShipStats.Tank {
+			msg := services.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "ship.exploration.not_enough_fuel"),
+			)
+
+			_, err = services.SendMessage(msg)
+			if err != nil {
+				return err
+			}
+
+			return
+		}
+
 		// Setto timer di ritorno
 		c.State.FinishAt = helpers.GetEndTime(0, int(c.Payload.StarNearestMapInfo[chosenStarID].Time), 0)
 
