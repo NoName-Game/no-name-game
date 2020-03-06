@@ -42,8 +42,6 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -139,6 +137,4 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }

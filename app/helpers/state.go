@@ -104,7 +104,7 @@ func CheckState(player nnsdk.Player, controller string, payload interface{}, fat
 	playerState, _ = GetPlayerStateByFunction(player.States, controller)
 
 	// Non ho trovato nessuna corrispondenza creo una nuova
-	if playerState.ID <= 0 {
+	if playerState.ID == 0 {
 		jsonPayload, _ := json.Marshal(payload)
 
 		// Creo il nuovo stato

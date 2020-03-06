@@ -145,7 +145,7 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
 		for _, state := range c.Player.States {
-			if *state.Completed != true {
+			if !*state.Completed {
 				// Se sono da notificare formatto con la data
 				if *state.ToNotify {
 					tasks += fmt.Sprintf("- %s (%s)\n",
@@ -203,7 +203,7 @@ func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
 func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.Player.States {
-		if *state.Completed != true {
+		if !*state.Completed {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
 			)

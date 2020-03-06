@@ -58,3 +58,5 @@ linters:
   enable:
     - golint
     - maligned
+  disable:
+    - unused

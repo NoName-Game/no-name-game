@@ -61,7 +61,7 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -99,8 +99,6 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -119,7 +117,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		_, err := languageProvider.FindLanguageBy(c.Update.Message.Text, "name")
+		_, err = languageProvider.FindLanguageBy(c.Update.Message.Text, "name")
 
 		// Verifico se la lingua esiste, se così non fosse ritorno errore
 		if err != nil {
@@ -147,12 +145,12 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		itemState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.UseItemID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if itemState.ID <= 0 {
+		if itemState.ID == 0 {
 			c.State.Stage = 2
 			return false, err
 		}
 
-		if *itemState.Completed != true {
+		if !*itemState.Completed {
 			return true, err
 		}
 
@@ -166,12 +164,12 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		missionState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.MissionID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if missionState.ID <= 0 {
+		if missionState.ID == 0 {
 			c.State.Stage = 3
 			return false, err
 		}
 
-		if *missionState.Completed != true {
+		if !*missionState.Completed {
 			return true, err
 		}
 
@@ -201,12 +199,12 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		inventoryState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.InventoryEquipID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if inventoryState.ID <= 0 {
+		if inventoryState.ID == 0 {
 			c.State.Stage = 5
 			return false, err
 		}
 
-		if *inventoryState.Completed != true {
+		if !*inventoryState.Completed {
 			return true, err
 		}
 
@@ -218,12 +216,12 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		huntingState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.HuntingID)
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if huntingState.ID <= 0 {
+		if huntingState.ID == 0 {
 			c.State.Stage = 6
 			return false, err
 		}
 
-		if *huntingState.Completed != true {
+		if !*huntingState.Completed {
 			return true, err
 		}
 
@@ -248,7 +246,8 @@ func (c *TutorialController) Stage() (err error) {
 	// e potrà selezionare la sua lingua tramite tastierino
 	case 0:
 		// Recupero lingue disponibili
-		languages, err := languageProvider.GetLanguages()
+		var languages nnsdk.Languages
+		languages, err = languageProvider.GetLanguages()
 		if err != nil {
 			return err
 		}
@@ -306,7 +305,7 @@ func (c *TutorialController) Stage() (err error) {
 			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
 			edited.ParseMode = "markdown"
 
-			_, err := services.SendMessage(edited)
+			_, err = services.SendMessage(edited)
 			if err != nil {
 				return err
 			}
@@ -421,7 +420,7 @@ func (c *TutorialController) Stage() (err error) {
 			)
 
 			edited.ParseMode = "markdown"
-			_, err := services.SendMessage(edited)
+			_, err = services.SendMessage(edited)
 			if err != nil {
 				return err
 			}
@@ -614,9 +613,25 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Addesso posso cancellare tutti gli stati associati
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.UseItemID})
+		if err != nil {
+			return err
+		}
+
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.HuntingID})
+		if err != nil {
+			return err
+		}
+
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.InventoryEquipID})
+		if err != nil {
+			return err
+		}
+
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.CraftingID})
+		if err != nil {
+			return err
+		}
+
 		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.MissionID})
 		if err != nil {
 			return err

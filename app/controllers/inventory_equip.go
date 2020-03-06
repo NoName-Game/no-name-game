@@ -54,7 +54,7 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -92,8 +92,6 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -181,7 +179,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var weapons nnsdk.Weapons
-		weapons, err := playerProvider.GetPlayerWeapons(c.Player, "true")
+		weapons, err = playerProvider.GetPlayerWeapons(c.Player, "true")
 		if err != nil {
 			return err
 		}
@@ -268,7 +266,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
 			var weapons nnsdk.Weapons
-			weapons, err := playerProvider.GetPlayerWeapons(c.Player, "false")
+			weapons, err = playerProvider.GetPlayerWeapons(c.Player, "false")
 			if err != nil {
 				return err
 			}
@@ -320,7 +318,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
 			var armor nnsdk.Armor
-			armor, err := armorProvider.FindArmorByName(equipmentName)
+			armor, err = armorProvider.FindArmorByName(equipmentName)
 			if err != nil {
 				return err
 			}
@@ -328,7 +326,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 			equipmentID = armor.ID
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
 			var weapon nnsdk.Weapon
-			weapon, err := weaponProvider.FindWeaponByName(equipmentName)
+			weapon, err = weaponProvider.FindWeaponByName(equipmentName)
 			if err != nil {
 				return err
 			}
@@ -365,7 +363,8 @@ func (c *InventoryEquipController) Stage() (err error) {
 	case 3:
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			equipment, err := armorProvider.GetArmorByID(c.Payload.EquipID)
+			var equipment nnsdk.Armor
+			equipment, err = armorProvider.GetArmorByID(c.Payload.EquipID)
 			if err != nil {
 				return err
 			}
@@ -378,7 +377,8 @@ func (c *InventoryEquipController) Stage() (err error) {
 			}
 
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			equipment, err := weaponProvider.GetWeaponByID(c.Payload.EquipID)
+			var equipment nnsdk.Weapon
+			equipment, err = weaponProvider.GetWeaponByID(c.Payload.EquipID)
 			if err != nil {
 				return err
 			}

@@ -18,16 +18,14 @@ var (
 // RedisUp - Inizializzo comunicazioe a RedisDB
 func RedisUp() (err error) {
 	// Recupero Host
-	var host string
-	host = os.Getenv("REDIS_HOST")
+	var host = os.Getenv("REDIS_HOST")
 	if host == "" {
 		err = errors.New("missing ENV REDIS_HOST")
 		return err
 	}
 
 	// Recupero porta
-	var port string
-	port = os.Getenv("REDIS_PORT")
+	var port = os.Getenv("REDIS_PORT")
 	if port == "" {
 		err = errors.New("missing ENV REDIS_PORT")
 		return err
