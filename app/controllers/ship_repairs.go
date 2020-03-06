@@ -56,7 +56,7 @@ func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Upda
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
@@ -89,8 +89,6 @@ func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Upda
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

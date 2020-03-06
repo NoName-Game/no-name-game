@@ -14,6 +14,7 @@ import (
 var (
 	// Lista delle rotte che non devono subire
 	// gli effetti di abbandona anche se forzati a mano
+
 	UnClearables = []string{"route.hunting"}
 )
 
@@ -35,9 +36,9 @@ func (c *BaseController) Completing() (err error) {
 	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se lo stato è completato chiudo
-	if *c.State.Completed == true {
+	if *c.State.Completed {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
-		if c.State.Father <= 0 {
+		if c.State.Father == 0 {
 			_, err = playerStateProvider.DeletePlayerState(c.State) // Delete
 			if err != nil {
 				return err
@@ -65,7 +66,7 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Player.States {
 		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
-		if *state.Completed == false && (state.Father <= 0 || state.Father != c.State.Father) {
+		if !*state.Completed && (state.Father == 0 || state.Father != c.State.Father) {
 			for _, blockState := range blockStates {
 				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
 					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))

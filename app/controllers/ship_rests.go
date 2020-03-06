@@ -35,7 +35,7 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	c.Update = update
 
 	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "mission"}); blocked == true {
+	if blocked := c.InStatesBlocker([]string{"hunting", "mission"}); blocked {
 		return
 	}
 
@@ -57,7 +57,7 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
@@ -96,8 +96,6 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -169,7 +167,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if *c.Player.Stats.Dead == false {
+		if !*c.Player.Stats.Dead {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			))

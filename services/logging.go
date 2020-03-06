@@ -42,8 +42,7 @@ func LoggingUp() (err error) {
 // Motodo di bot del servizio sentry
 func bootSentry() (err error) {
 	// Recupero sentry dsn
-	var dsn string
-	dsn = os.Getenv("SENTRY_DSN")
+	var dsn = os.Getenv("SENTRY_DSN")
 	if dsn == "" {
 		err = errors.New("missing ENV sentryDSN")
 		return err

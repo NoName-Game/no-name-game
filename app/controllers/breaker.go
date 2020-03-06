@@ -66,7 +66,7 @@ func (c *ClearsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	c.Update = update
 	c.Player = player
 
-	if *c.Player.Stats.Dead == false && c.Clearable() == true {
+	if !*c.Player.Stats.Dead && c.Clearable() {
 		// In questo caso non verifico l'errore potrebbe non essere necessario
 		// verificarne l'esistenza
 		err = helpers.DeleteRedisAndDbState(player)

@@ -13,7 +13,7 @@ import (
 var (
 	bundle *i18n.Bundle
 
-	// Lingue attualmente disponibili per questo client
+	// Langs - Lingue attualmente disponibili per questo client
 	Langs = map[string]string{
 		"en": "English",
 		"it": "Italian",

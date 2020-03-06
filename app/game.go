@@ -1,19 +1,17 @@
 package app
 
 import (
+	"reflect"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"reflect"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 var (
-	// ===================================
-	// Routes
-	//
 	Routes = map[string]reflect.Type{
 		"route.menu":     reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
 		"route.tutorial": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
@@ -34,24 +32,18 @@ var (
 		"route.ship.exploration": reflect.TypeOf((*controllers.ShipExplorationController)(nil)).Elem(),
 		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
 		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
-
-		// "route.testing.multiStage": reflect.TypeOf((*controllers.TestingController)(nil)).Elem(),
 	}
 
 	BreakerRoutes = map[string]reflect.Type{
-		"route.breaker.back":   reflect.TypeOf((*controllers.BackController)(nil)).Elem(),   // breaker.go      - MAIN (breaker(nil)).Elem()
-		"route.breaker.clears": reflect.TypeOf((*controllers.ClearsController)(nil)).Elem(), // breaker.go    - MAIN (breaker(nil)).Elem()
+		"route.breaker.back":   reflect.TypeOf((*controllers.BackController)(nil)).Elem(),
+		"route.breaker.clears": reflect.TypeOf((*controllers.ClearsController)(nil)).Elem(),
 	}
-	//
-	// End routes
-	// =====================================
 )
 
 // Init
 func init() {
 	// Inizializzo servizi bot
-	var err error
-	err = bootstrap()
+	var err = bootstrap()
 	if err != nil {
 		// Nel caso in cui uno dei servizi principale
 		// dovesse entrare in errore in questo caso è meglio panicare

@@ -18,8 +18,8 @@ import (
 // AbilityController
 // ====================================
 type AbilityController struct {
-	BaseController
 	Payload struct{}
+	BaseController
 }
 
 var (
@@ -63,7 +63,7 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -101,8 +101,6 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -125,7 +123,7 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
 		for _, ability := range AbilityLists {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))) == c.Update.Message.Text {
-				if *c.Player.Stats.AbilityPoint <= 0 {
+				if *c.Player.Stats.AbilityPoint == 0 {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ability.no_point_left")
 					return true, err
 				}

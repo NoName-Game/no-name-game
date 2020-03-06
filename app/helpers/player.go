@@ -46,7 +46,7 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 	}
 
 	// Se il player non esiste allora lo registro
-	if player.ID <= 0 {
+	if player.ID == 0 {
 		// Recupero lingua di default
 		var language nnsdk.Language
 		var languageProvider providers.LanguageProvider
@@ -85,7 +85,7 @@ func GetPlayerStateByFunction(states nnsdk.PlayerStates, controller string) (pla
 // Verifica se il player ha almeno un'arma equipaggiata
 func CheckPlayerHaveOneEquippedWeapon(player nnsdk.Player) bool {
 	for _, weapon := range player.Weapons {
-		if *weapon.Equipped == true {
+		if *weapon.Equipped {
 			return true
 		}
 	}

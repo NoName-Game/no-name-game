@@ -57,7 +57,7 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -95,8 +95,6 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

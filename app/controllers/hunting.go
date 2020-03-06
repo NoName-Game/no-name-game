@@ -37,9 +37,6 @@ type HuntingController struct {
 
 // Settings generali
 var (
-	// Antiflood
-	antiFloodSeconds float64 = 1.0
-
 	// Parti di corpo disponibili per l'attacco
 	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
 
@@ -96,7 +93,7 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Update = update
 
 	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"mission"}); blocked == true {
+	if blocked := c.InStatesBlocker([]string{"mission"}); blocked {
 		return
 	}
 
@@ -118,7 +115,7 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -152,7 +149,7 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if *c.State.Completed == true {
+	if *c.State.Completed {
 		// Cancello messaggio contentente la mappa
 		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
 		if err != nil {
@@ -164,8 +161,6 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -219,7 +214,7 @@ func (c *HuntingController) Hunting() (err error) {
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
-	if c.Payload.MapID <= 0 || c.Update.Message != nil {
+	if c.Payload.MapID == 0 || c.Update.Message != nil {
 		// Se è qualsiasi messaggio diverso da hunting non lo calcolo
 		// in quanto adnrebbe a generare più volte il messaggio con la stessa mappa
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") &&
@@ -266,7 +261,15 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Registro mappa e posizione iniziale del player
 		err = helpers.SetRedisMapHunting(maps)
+		if err != nil {
+			return err
+		}
+
 		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", maps.StartPositionX)
+		if err != nil {
+			return err
+		}
+
 		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", maps.StartPositionY)
 		if err != nil {
 			return err
@@ -309,7 +312,14 @@ func (c *HuntingController) Hunting() (err error) {
 		// Recupero posizione player
 		// var playerPositionX, playerPositionY int
 		c.PlayerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
+		if err != nil {
+			return err
+		}
+
 		c.PlayerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
+		if err != nil {
+			return err
+		}
 
 		// Controllo tipo di callback data - move / fight
 		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
@@ -387,7 +397,7 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 		var nearTresure bool
 		var tresure nnsdk.Tresure
 		tresure, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
-		if nearTresure == true {
+		if nearTresure {
 			// Chiamo WS e recupero tesoro
 			var drop nnsdk.DropResponse
 			drop, err = tresureProvider.DropTresure(nnsdk.TresureDropRequest{
@@ -461,6 +471,10 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 
 	// Aggiorno nuova posizione del player
 	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", c.PlayerPositionX)
+	if err != nil {
+		return
+	}
+
 	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", c.PlayerPositionY)
 	if err != nil {
 		return
@@ -555,18 +569,18 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 		}
 
 		// Verifico se il MOB è morto
-		if hitResponse.EnemyDie == true {
+		if hitResponse.EnemyDie {
 			// Costruisco messaggio di recap del drop
 			var dropRecap string
 			if hitResponse.EnemyDrop.Resource.ID > 0 {
-				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.resource", hitResponse.EnemyDrop.Resource.Name))
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", hitResponse.EnemyDrop.Resource.Name)
 			} else if hitResponse.EnemyDrop.Item.ID > 0 {
 				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", hitResponse.EnemyDrop.Item.Slug))
-				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound))
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
 			} else if hitResponse.EnemyDrop.Transaction.ID > 0 {
-				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", hitResponse.EnemyDrop.Transaction.Value))
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", hitResponse.EnemyDrop.Transaction.Value)
 			} else {
-				dropRecap += fmt.Sprintf("%s", helpers.Trans(c.Player.Language.Slug, "combat.found.nothing"))
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
 			}
 			// Aggiungo anche esperinza recuperata
 			dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", hitResponse.PlayerExperience))
@@ -578,8 +592,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", enemy.Name, dropRecap),
 			)
 
-			var ok tgbotapi.InlineKeyboardMarkup
-			ok = tgbotapi.NewInlineKeyboardMarkup(
+			var ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
 						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
@@ -609,7 +622,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 		}
 
 		// Verifico se il PLAYER è morto
-		if hitResponse.PlayerDie == true {
+		if hitResponse.PlayerDie {
 			// Aggiorno messaggio notificando al player che è morto
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
@@ -617,8 +630,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 				helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
 			)
 
-			var ok tgbotapi.InlineKeyboardMarkup
-			ok = tgbotapi.NewInlineKeyboardMarkup(
+			var ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
 						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
@@ -639,7 +651,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 
 		// Se ne il player e ne il mob è morto, continua lo scontro
 		// Messagio di notifica per vedere risultato attacco
-		if hitResponse.DodgeAttack == true {
+		if hitResponse.DodgeAttack {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,

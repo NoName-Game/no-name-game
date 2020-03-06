@@ -44,7 +44,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Update = update
 
 	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked == true {
+	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked {
 		return
 	}
 
@@ -66,7 +66,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
@@ -107,8 +107,6 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -168,8 +166,6 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 			c.State.Stage = 4
 
 			return false, err
-		} else {
-
 		}
 
 		return true, err

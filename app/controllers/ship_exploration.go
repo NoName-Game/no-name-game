@@ -56,7 +56,7 @@ func (c *ShipExplorationController) Handle(player nnsdk.Player, update tgbotapi.
 	}
 
 	// Se ritornano degli errori
-	if hasError == true {
+	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
@@ -89,8 +89,6 @@ func (c *ShipExplorationController) Handle(player nnsdk.Player, update tgbotapi.
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -201,9 +199,10 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// una nuova esplorazione
 	case 0:
 		// Recupero posizione corrente player
-		position, err := playerProvider.GetPlayerLastPosition(c.Player)
+		var position nnsdk.PlayerPosition
+		position, err = playerProvider.GetPlayerLastPosition(c.Player)
 		if err != nil {
-			err = errors.New(fmt.Sprintf("%s %s", "cant get player last position", err))
+			err = fmt.Errorf("%s %s", "cant get player last position", err)
 			return err
 		}
 
@@ -245,16 +244,18 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
 		// Recupero nave player equipaggiata
-		eqippedShips, err := playerProvider.GetPlayerShips(c.Player, true)
+		var eqippedShips nnsdk.Ships
+		eqippedShips, err = playerProvider.GetPlayerShips(c.Player, true)
 		if err != nil {
-			err = errors.New(fmt.Sprintf("%s %s", "cant get equipped player ship", err))
+			err = fmt.Errorf("%s %s", "cant get equipped player ship", err)
 			return err
 		}
 
 		// Recupero informazioni di esplorazione
-		explorationInfos, err := shipProvider.GetShipExplorationInfo(eqippedShips[0])
+		var explorationInfos []nnsdk.ExplorationInfoResponse
+		explorationInfos, err = shipProvider.GetShipExplorationInfo(eqippedShips[0])
 		if err != nil {
-			err = errors.New(fmt.Sprintf("%s %s", "cant get player last position", err))
+			err = fmt.Errorf("%s %s", "cant get player last position", err)
 			return err
 		}
 
@@ -386,7 +387,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		_, err := shipProvider.EndShipExploration(c.Payload.Ship, request)
 		if err != nil {
-			err = errors.New(fmt.Sprintf("%s %s", "cant end exploration", err))
+			err = fmt.Errorf("%s %s", "cant end exploration", err)
 			return err
 		}
 
