@@ -270,6 +270,7 @@ ship.exploration.exploring: "🚀 Motori accesi, buon viaggio! Il tuo arrivo è 
 ship.exploration.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli dell'esplorazione."
 ship.exploration.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna più tardi."
 route.exploration.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."
+ship.exploration.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
 
 # SHIP - Warehouse
 ship.warehouse.info: "Info warehouse"
