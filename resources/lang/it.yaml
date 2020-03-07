@@ -111,7 +111,7 @@ combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
 combat.experience: "Ottenendo anche *%v* di esperienza nel combattimento!"
 
 # MISSION
-mission.exploration: "Seleziona campo di ricerca!"
+mission.exploration: "Seleziona campo di ricerca:"
 mission.underground: "Sottosuolo"
 mission.surface: "Superfice"
 mission.atmosphere: "Atmosfera"
@@ -182,8 +182,7 @@ inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 inventory.items.what: "Quale item vorresti usare?"
 inventory.items.use: "Usa:"
 inventory.items.confirm: "*Confermi di voler usare %v?*"
-inventory.items.completed: "Scegli di usare *%s* e di beneficiare delle sue caratteristiche."
-
+inventory.items.completed: "Hai usato *%s* e di beneficiare delle sue caratteristiche."
 
 # ABILITY TREE
 ability.no_point_left: "Punti abilità non sufficienti"
@@ -249,7 +248,7 @@ route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, 
 
 # CRON
 cron.route.testing.time_alert: "End Test time"
-cron.route.mission_alert: "Missione finita!"
+cron.route.mission_alert: "Sei rientrato dalla missione, scopri quali risorse hai trovato."
 cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
@@ -292,8 +291,8 @@ ship.better.info: "Info better"
 
 # SHIP - RESTS
 
-ship.rests.info: "Quando se all'estremo delle tue forze mettersi a domire è il miglior modo per recuperare energie:\n\n"
-ship.rests.time: "⏱ Necessari *%v* minuti al recupero totale delle forze."
+ship.rests.info: "💭: Il miglior modo per recuperare vita è mettersi a dormire.\n\n"
+ship.rests.time: "⏱: Necessari *%v* minuti al recupero *totale* delle forze."
 ship.rests.start: "Mettiti a dormire"
 ship.rests.wakeup: "Risvegliati"
 ship.rests.dont_need: "Sei pieno di energie, ci provi ma proprio non riesci ad addormentarti"

@@ -398,11 +398,6 @@ func (c *CraftingController) Stage() (err error) {
 		msg = services.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "crafting.wait", endTime.Format("15:04:05")),
 		)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			),
-		)
 
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -413,6 +408,7 @@ func (c *CraftingController) Stage() (err error) {
 		c.State.FinishAt = endTime
 		c.State.ToNotify = helpers.SetTrue()
 		c.State.Stage = 4
+		c.ToMenu = true
 
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo

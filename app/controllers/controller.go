@@ -29,6 +29,7 @@ type BaseController struct {
 	}
 	Player nnsdk.Player
 	State  nnsdk.PlayerState
+	ToMenu bool
 }
 
 // Completing - Metodo per settare il completamento di uno stato
@@ -45,6 +46,20 @@ func (c *BaseController) Completing() (err error) {
 			}
 		}
 
+		// Cancello stato da redis
+		err = helpers.DelRedisState(c.Player)
+		if err != nil {
+			panic(err)
+		}
+
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
+
+		return
+	}
+
+	// Verifico se si vuole forzare il menu
+	if c.ToMenu {
 		// Cancello stato da redis
 		err = helpers.DelRedisState(c.Player)
 		if err != nil {
