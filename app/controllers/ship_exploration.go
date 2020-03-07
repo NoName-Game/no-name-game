@@ -357,12 +357,6 @@ func (c *ShipExplorationController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
@@ -372,6 +366,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		c.State.ToNotify = helpers.SetTrue()
 		c.State.Stage = 3
 		c.Payload.StarIDChosen = chosenStarID
+		c.ToMenu = true
 
 	// Fine esplorazione
 	case 3:

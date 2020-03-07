@@ -60,6 +60,12 @@ func (c *BaseController) Completing() (err error) {
 
 	// Verifico se si vuole forzare il menu
 	if c.ToMenu {
+		// Cancello stato da redis
+		err = helpers.DelRedisState(c.Player)
+		if err != nil {
+			panic(err)
+		}
+
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update)
 	}

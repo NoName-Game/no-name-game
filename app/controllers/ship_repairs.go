@@ -261,13 +261,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 				recapResourceUsed,
 			),
 		)
-
 		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			),
-		)
 
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -277,6 +271,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		// Aggiorno stato
 		c.State.ToNotify = helpers.SetTrue()
 		c.State.Stage = 2
+		c.ToMenu = true
 	case 2:
 		// Fine riparazione
 		err = shipProvider.EndShipRepair(c.Payload.Ship)
@@ -288,14 +283,6 @@ func (c *ShipRepairsController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing.finish"),
 		)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
