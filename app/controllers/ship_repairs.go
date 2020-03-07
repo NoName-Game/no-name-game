@@ -269,7 +269,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.ToNotify = helpers.SetTrue()
+		*c.State.ToNotify = true
 		c.State.Stage = 2
 		c.ToMenu = true
 	case 2:
@@ -289,7 +289,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return
