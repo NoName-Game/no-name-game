@@ -246,14 +246,6 @@ func (c *MissionController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return
@@ -271,6 +263,7 @@ func (c *MissionController) Stage() (err error) {
 		c.State.Stage = 2
 		c.State.ToNotify = helpers.SetTrue()
 		c.State.FinishAt = endTime
+		c.ToMenu = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
@@ -347,14 +340,6 @@ func (c *MissionController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
@@ -362,6 +347,7 @@ func (c *MissionController) Stage() (err error) {
 
 		// Aggiorno lo stato
 		c.State.Stage = 2
+		c.ToMenu = true
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
@@ -405,7 +391,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return

@@ -29,6 +29,7 @@ type BaseController struct {
 	}
 	Player nnsdk.Player
 	State  nnsdk.PlayerState
+	ToMenu bool
 }
 
 // Completing - Metodo per settare il completamento di uno stato
@@ -51,6 +52,14 @@ func (c *BaseController) Completing() (err error) {
 			panic(err)
 		}
 
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
+
+		return
+	}
+
+	// Verifico se si vuole forzare il menu
+	if c.ToMenu {
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update)
 	}
