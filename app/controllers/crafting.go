@@ -406,7 +406,7 @@ func (c *CraftingController) Stage() (err error) {
 
 		// Aggiorna stato
 		c.State.FinishAt = endTime
-		c.State.ToNotify = helpers.SetTrue()
+		*c.State.ToNotify = true
 		c.State.Stage = 4
 		c.ToMenu = true
 
@@ -443,7 +443,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return

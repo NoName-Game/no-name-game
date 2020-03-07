@@ -173,7 +173,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 		return true, err
 	}
 
@@ -190,7 +190,7 @@ func (c *HuntingController) Stage() (err error) {
 		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
-				c.State.Completed = helpers.SetTrue()
+				*c.State.Completed = true
 				return err
 			}
 		}
@@ -694,7 +694,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 		editMessage.ReplyMarkup = &mapKeyboard
 	case "player-die":
 		// Il player è morto
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 
 		return
 	case "no-action":

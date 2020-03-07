@@ -156,7 +156,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
 			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
-			c.State.ToNotify = helpers.SetTrue()
+			*c.State.ToNotify = true
 
 			return false, err
 
@@ -261,7 +261,7 @@ func (c *MissionController) Stage() (err error) {
 
 		// Avanzo di stato
 		c.State.Stage = 2
-		c.State.ToNotify = helpers.SetTrue()
+		*c.State.ToNotify = true
 		c.State.FinishAt = endTime
 		c.ToMenu = true
 

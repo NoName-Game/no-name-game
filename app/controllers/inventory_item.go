@@ -254,7 +254,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return

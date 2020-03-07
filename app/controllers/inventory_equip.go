@@ -370,7 +370,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 			}
 
 			// Aggiorno equipped
-			equipment.Equipped = helpers.SetTrue()
+			*equipment.Equipped = true
 			_, err = armorProvider.UpdateArmor(equipment)
 			if err != nil {
 				return err
@@ -384,7 +384,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 			}
 
 			// Aggiorno equipped
-			equipment.Equipped = helpers.SetTrue()
+			*equipment.Equipped = true
 			_, err = weaponProvider.UpdateWeapon(equipment)
 			if err != nil {
 				return err
@@ -403,7 +403,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return

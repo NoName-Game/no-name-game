@@ -363,7 +363,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.ToNotify = helpers.SetTrue()
+		*c.State.ToNotify = true
 		c.State.Stage = 3
 		c.Payload.StarIDChosen = chosenStarID
 		c.ToMenu = true
@@ -400,7 +400,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = helpers.SetTrue()
+		*c.State.Completed = true
 	}
 
 	return
