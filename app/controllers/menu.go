@@ -16,7 +16,7 @@ type MenuController BaseController
 // ====================================
 // Handle
 // ====================================
-func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	var playerProvider providers.PlayerProvider
 
@@ -53,8 +53,16 @@ func (c *MenuController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
 	if *c.Player.Stats.Dead {
 		restsController := new(ShipRestsController)
-		restsController.Handle(c.Player, c.Update)
+		restsController.Handle(c.Player, c.Update, true)
 	}
+}
+
+func (c *MenuController) Validator() {
+	//
+}
+
+func (c *MenuController) Stage() {
+	//
 }
 
 // GetRecap

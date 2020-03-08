@@ -18,6 +18,13 @@ var (
 	UnClearables = []string{"route.hunting"}
 )
 
+// Controller - Intereffaccia base di tutti i controller
+type Controller interface {
+	Handle(nnsdk.Player, tgbotapi.Update, bool)
+	Validator()
+	Stage()
+}
+
 type BaseController struct {
 	Update     tgbotapi.Update
 	Controller string
@@ -32,45 +39,72 @@ type BaseController struct {
 	Breaker struct {
 		ToMenu bool
 	}
+	ProxyStatment bool
 }
 
-// Breaking - Metodo che permette di verificare se si vogliono fare
-// delle azioni che permetteranno di concludere
-func (c *BaseController) BackTo(canBackFrom int) (backTo bool) {
-	var playerStateProvider providers.PlayerStateProvider
+func (c *BaseController) InitController(controller string, payload interface{}, blockers []string, player nnsdk.Player, update tgbotapi.Update) (initialized bool) {
+	var err error
+	initialized = true
 
-	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
-		if c.Controller != "" {
-			if c.State.Stage <= canBackFrom {
-				// Cancello stato da redis
-				_ = helpers.DelRedisState(c.Player)
+	// Inizializzo variabili del controller
+	c.Controller, c.Player, c.Update = controller, player, update
 
-				// Cancello record a db
-				_, _ = playerStateProvider.DeletePlayerState(c.State)
+	// Verifico se il player si trova in determinati stati non consentiti
+	// e che quindi non permettano l'init del controller richiamato
+	var inStateBlocked = c.InStatesBlocker(blockers)
+	if inStateBlocked {
+		initialized = false
+		return
+	}
 
-				backTo = true
-				return
-			}
+	// Verifico lo stato della player
+	c.State, _, err = helpers.CheckState(player, c.Controller, payload, c.Father)
 
-			c.State.Stage = 0
-			return
-		}
-
-		// Cancello stato da redis
-		_ = helpers.DelRedisState(c.Player)
-
-		// Cancello record a db
-		_, _ = playerStateProvider.DeletePlayerState(c.State)
-
-		backTo = true
+	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
+	if err != nil {
+		panic(err)
 	}
 
 	return
 }
 
-// Completing - Metodo per settare il completamento di uno stato
-func (c *BaseController) Clear() (cleared bool) {
+// Breaking - Metodo che permette di verificare se si vogliono fare
+// delle azioni che permetteranno di concludere
+func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed bool) {
 	var playerStateProvider providers.PlayerStateProvider
+
+	if !c.Breaker.Backing {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
+			if c.Controller != "" {
+				if c.State.Stage <= canBackFrom {
+					// Cancello stato da redis
+					_ = helpers.DelRedisState(c.Player)
+
+					// Cancello record a db
+					_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+					c.Breaker.Backing = true
+					controller.Handle(c.Player, c.Update, true)
+					backed = true
+					return
+				}
+
+				c.State.Stage = 0
+				return
+			}
+
+			// Cancello stato da redis
+			_ = helpers.DelRedisState(c.Player)
+
+			// Cancello record a db
+			_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+			c.Breaker.Backing = true
+			controller.Handle(c.Player, c.Update, true)
+			backed = true
+			return
+		}
+	}
 
 	// Abbandona - chiude definitivamente cancellando anche lo stato
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
@@ -83,9 +117,9 @@ func (c *BaseController) Clear() (cleared bool) {
 			_, _ = playerStateProvider.DeletePlayerState(c.State)
 
 			// Call menu controller
-			new(MenuController).Handle(c.Player, c.Update)
+			new(MenuController).Handle(c.Player, c.Update, true)
 
-			cleared = true
+			backed = true
 			return
 		}
 	}
@@ -97,9 +131,9 @@ func (c *BaseController) Clear() (cleared bool) {
 		_ = helpers.DelRedisState(c.Player)
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update)
+		new(MenuController).Handle(c.Player, c.Update, true)
 
-		cleared = true
+		backed = true
 		return
 	}
 
@@ -143,7 +177,7 @@ func (c *BaseController) Completing() (err error) {
 		}
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update)
+		new(MenuController).Handle(c.Player, c.Update, true)
 
 		return
 	}
@@ -157,7 +191,7 @@ func (c *BaseController) Completing() (err error) {
 		}
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update)
+		new(MenuController).Handle(c.Player, c.Update, true)
 	}
 
 	return

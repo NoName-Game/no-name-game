@@ -21,7 +21,7 @@ type InventoryController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	c.Player = player
 	c.Update = update
@@ -30,8 +30,11 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 	// Se tutto ok imposto e setto il nuovo stato su redis
 	_ = helpers.SetRedisState(c.Player, c.Controller)
 
-	if c.Clear() {
-		return
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(0, &MenuController{}) {
+			return
+		}
 	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
@@ -53,6 +56,14 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *InventoryController) Validator() {
+	//
+}
+
+func (c *InventoryController) Stage() {
+	//
 }
 
 // ====================================

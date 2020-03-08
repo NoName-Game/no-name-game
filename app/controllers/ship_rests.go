@@ -25,35 +25,27 @@ type ShipRestsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.ship.rests"
-	c.Player = player
-	c.Update = update
-
-	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "mission"}); blocked {
-		return
-	}
-
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
-	}
-
-	if c.Clear() {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.ship.rests",
+		c.Payload,
+		[]string{"hunting", "mission"},
+		player,
+		update,
+	) {
 		return
 	}
 
 	// Verifico se vuole tornare indietro di stato
-	if c.BackTo(1) {
-		new(ShipController).Handle(c.Player, c.Update)
-		return
+	if !proxy {
+		if c.BackTo(1, &ShipController{}) {
+			return
+		}
 	}
 
 	// Set and load payload

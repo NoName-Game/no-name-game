@@ -483,7 +483,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo missione come sottoprocesso di questo controller
 		useItemController := new(InventoryItemController)
 		useItemController.Father = c.State.ID
-		useItemController.Handle(c.Player, c.Update)
+		useItemController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.UseItemID = useItemController.State.ID
@@ -513,7 +513,7 @@ func (c *TutorialController) Stage() (err error) {
 		missionController := new(MissionController)
 		missionController.Father = c.State.ID
 		missionController.Payload.ForcedTime = 1
-		missionController.Handle(c.Player, c.Update)
+		missionController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.MissionID = missionController.State.ID
@@ -567,7 +567,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo crafting come sottoprocesso di questo controller
 		inventoryController := new(InventoryEquipController)
 		inventoryController.Father = c.State.ID
-		inventoryController.Handle(c.Player, c.Update)
+		inventoryController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.InventoryEquipID = inventoryController.State.ID
@@ -595,7 +595,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo crafting come sottoprocesso di questo controller
 		huntingController := new(HuntingController)
 		huntingController.Father = c.State.ID
-		huntingController.Handle(c.Player, c.Update)
+		huntingController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.HuntingID = huntingController.State.ID

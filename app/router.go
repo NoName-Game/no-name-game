@@ -24,7 +24,7 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 	// Dirigo ad una rotta normale
 	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
-		invoke(Routes[route], "Handle", player, update)
+		invoke(Routes[route], "Handle", player, update, false)
 		return
 	}
 
@@ -32,7 +32,7 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 	// userò quella come main per gestire ulteriori sottostati
 	isCachedRoute, _ := helpers.GetRedisState(player)
 	if isCachedRoute != "" {
-		invoke(Routes[isCachedRoute], "Handle", player, update)
+		invoke(Routes[isCachedRoute], "Handle", player, update, false)
 		return
 	}
 

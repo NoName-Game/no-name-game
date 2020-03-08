@@ -34,35 +34,27 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.mission"
-	c.Player = player
-	c.Update = update
-
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
-	}
-
-	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.mission",
+		c.Payload,
+		[]string{"hunting", "ship"},
+		player,
+		update,
+	) {
 		return
 	}
 
-	if c.Clear() {
-		return
-	}
-
-	// Verifico se vuole tornare indietro di stato
-	if c.BackTo(1) {
-		new(MenuController).Handle(c.Player, c.Update)
-		return
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(1, &MenuController{}) {
+			return
+		}
 	}
 
 	// Stato recuperto correttamente

@@ -23,7 +23,7 @@ type ShipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerProvider providers.PlayerProvider
@@ -35,8 +35,11 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	// Se tutto ok imposto e setto il nuovo stato su redis
 	_ = helpers.SetRedisState(c.Player, c.Controller)
 
-	if c.Clear() {
-		return
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(0, &MenuController{}) {
+			return
+		}
 	}
 
 	// Recupero nave attiva de player
@@ -83,4 +86,12 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *ShipController) Validator() {
+	//
+}
+
+func (c *ShipController) Stage() {
+	//
 }

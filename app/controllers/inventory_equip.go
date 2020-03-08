@@ -27,30 +27,27 @@ type InventoryEquipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.inventory.equip"
-	c.Player = player
-	c.Update = update
-
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
-	}
-
-	if c.Clear() {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.inventory.equip",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
 		return
 	}
 
-	// Verifico se vuole tornare indietro di stato
-	if c.BackTo(1) {
-		new(InventoryController).Handle(c.Player, c.Update)
-		return
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(1, &InventoryController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
