@@ -158,7 +158,7 @@ items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serb
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
-inventory.recap: "Ecco il tuo inventario:"
+inventory.recap: "Ecco il riepilogo del tuo inventario:"
 # inventory.summary: "Riassunto inventario"
 # inventory.equip: "Equipaggia Oggetto"
 # inventory.destroy: "Distruggi Oggetto"
