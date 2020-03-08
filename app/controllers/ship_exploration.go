@@ -45,6 +45,16 @@ func (c *ShipExplorationController) Handle(player nnsdk.Player, update tgbotapi.
 		panic(err)
 	}
 
+	if c.Clear() {
+		return
+	}
+
+	// Verifico se vuole tornare indietro di stato
+	if c.BackTo(1) {
+		new(ShipController).Handle(c.Player, c.Update)
+		return
+	}
+
 	// Set and load payload
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
@@ -96,6 +106,13 @@ func (c *ShipExplorationController) Handle(player nnsdk.Player, update tgbotapi.
 // ====================================
 func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -130,7 +147,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 					),
 				),
 			)
@@ -148,7 +165,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 					),
 				),
 			)
@@ -167,10 +184,14 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 			c.State.FinishAt.Format("15:04:05 01/02"),
 		)
 
+		// Aggiungo anche abbandona
 		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+				),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
 				),
 			),
 		)
@@ -229,7 +250,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.exploration.start")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 
@@ -287,7 +308,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		keyboardRowStars = append(keyboardRowStars,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 
@@ -366,7 +387,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		*c.State.ToNotify = true
 		c.State.Stage = 3
 		c.Payload.StarIDChosen = chosenStarID
-		c.ToMenu = true
+		c.Breaker.ToMenu = true
 
 	// Fine esplorazione
 	case 3:
@@ -390,7 +411,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.exploration.end"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			),
 		)
 

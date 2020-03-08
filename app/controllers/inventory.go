@@ -14,14 +14,25 @@ import (
 // ====================================
 // Inventory
 // ====================================
-type InventoryController BaseController
+type InventoryController struct {
+	BaseController
+}
 
 // ====================================
 // Handle
 // ====================================
 func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	var err error
+	c.Player = player
 	c.Update = update
+	c.Controller = "route.inventory"
+
+	// Se tutto ok imposto e setto il nuovo stato su redis
+	_ = helpers.SetRedisState(c.Player, c.Controller)
+
+	if c.Clear() {
+		return
+	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -34,7 +45,7 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 			// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.destroy")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 

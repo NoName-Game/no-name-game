@@ -33,11 +33,6 @@ var (
 		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
 		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 	}
-
-	BreakerRoutes = map[string]reflect.Type{
-		"route.breaker.back":   reflect.TypeOf((*controllers.BackController)(nil)).Elem(),
-		"route.breaker.clears": reflect.TypeOf((*controllers.ClearsController)(nil)).Elem(),
-	}
 )
 
 // Init
@@ -64,21 +59,21 @@ func Run() {
 	// Gestisco update ricevuti
 	for update := range updates {
 		// Gestisco singolo update in worker dedicato
-		go handleUpdate(update)
-		// handleUpdate(update)
+		// go handleUpdate(update)
+		handleUpdate(update)
 	}
 }
 
 // handleUpdate - Gestisco singolo update
 func handleUpdate(update tgbotapi.Update) {
 	// Differisco controllo panic/recover
-	defer func() {
-		// Nel caso in cui panicasse
-		if err := recover(); err != nil {
-			// Registro errore
-			services.ErrorHandler("recover handle update", err.(error))
-		}
-	}()
+	// defer func() {
+	// 	// Nel caso in cui panicasse
+	// 	if err := recover(); err != nil {
+	// 		// Registro errore
+	// 		services.ErrorHandler("recover handle update", err.(error))
+	// 	}
+	// }()
 
 	var err error
 	// Gestisco utente

@@ -27,9 +27,99 @@ type BaseController struct {
 		Message       string
 		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
-	Player nnsdk.Player
-	State  nnsdk.PlayerState
-	ToMenu bool
+	Player  nnsdk.Player
+	State   nnsdk.PlayerState
+	Breaker struct {
+		ToMenu bool
+	}
+}
+
+// Breaking - Metodo che permette di verificare se si vogliono fare
+// delle azioni che permetteranno di concludere
+func (c *BaseController) BackTo(canBackFrom int) (backTo bool) {
+	var playerStateProvider providers.PlayerStateProvider
+
+	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
+		if c.Controller != "" {
+			if c.State.Stage <= canBackFrom {
+				// Cancello stato da redis
+				_ = helpers.DelRedisState(c.Player)
+
+				// Cancello record a db
+				_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+				backTo = true
+				return
+			}
+
+			c.State.Stage = 0
+			return
+		}
+
+		// Cancello stato da redis
+		_ = helpers.DelRedisState(c.Player)
+
+		// Cancello record a db
+		_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+		backTo = true
+	}
+
+	return
+}
+
+// Completing - Metodo per settare il completamento di uno stato
+func (c *BaseController) Clear() (cleared bool) {
+	var playerStateProvider providers.PlayerStateProvider
+
+	// Abbandona - chiude definitivamente cancellando anche lo stato
+	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
+		c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
+		if !*c.Player.Stats.Dead && c.Clearable() {
+			// Cancello stato da redis
+			_ = helpers.DelRedisState(c.Player)
+
+			// Cancello record a db
+			_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+			// Call menu controller
+			new(MenuController).Handle(c.Player, c.Update)
+
+			cleared = true
+			return
+		}
+	}
+
+	// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
+	// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
+	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
+		// Cancello stato da redis
+		_ = helpers.DelRedisState(c.Player)
+
+		// Call menu controller
+		new(MenuController).Handle(c.Player, c.Update)
+
+		cleared = true
+		return
+	}
+
+	return
+}
+
+// Clearable
+func (c *BaseController) Clearable() (clearable bool) {
+	// Certi controller non devono subire la cancellazione degli stati
+	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
+	for _, state := range c.Player.States {
+		for _, unclearable := range UnClearables {
+			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
+				return false
+
+			}
+		}
+	}
+
+	return true
 }
 
 // Completing - Metodo per settare il completamento di uno stato
@@ -59,7 +149,7 @@ func (c *BaseController) Completing() (err error) {
 	}
 
 	// Verifico se si vuole forzare il menu
-	if c.ToMenu {
+	if c.Breaker.ToMenu {
 		// Cancello stato da redis
 		err = helpers.DelRedisState(c.Player)
 		if err != nil {
@@ -97,20 +187,4 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	}
 
 	return false
-}
-
-// Clearable
-func (c *BaseController) Clearable() (clearable bool) {
-	// Certi controller non devono subire la cancellazione degli stati
-	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.Player.States {
-		for _, unclearable := range UnClearables {
-			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
-				return false
-
-			}
-		}
-	}
-
-	return true
 }

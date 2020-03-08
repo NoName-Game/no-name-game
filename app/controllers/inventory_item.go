@@ -44,6 +44,16 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 		panic(err)
 	}
 
+	if c.Clear() {
+		return
+	}
+
+	// Verifico se vuole tornare indietro di stato
+	if c.BackTo(1) {
+		new(InventoryController).Handle(c.Player, c.Update)
+		return
+	}
+
 	// Set and load payload
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
@@ -61,7 +71,7 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 				),
 			),
 		)
@@ -100,6 +110,14 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 // ====================================
 func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
+
 	var playerProvider providers.PlayerProvider
 
 	switch c.State.Stage {
@@ -176,7 +194,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		keyboardRowItems = append(keyboardRowItems, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Invio messagio con recap e con selettore categoria
@@ -217,7 +235,7 @@ func (c *InventoryItemController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 

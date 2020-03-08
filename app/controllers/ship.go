@@ -16,7 +16,9 @@ import (
 // Ogni player ha la possibilità di spostarsi nei diversi pianeti
 // del sistema di NoName
 // ====================================
-type ShipController BaseController
+type ShipController struct {
+	BaseController
+}
 
 // ====================================
 // Handle
@@ -29,6 +31,13 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 	c.Controller = "route.ship"
 	c.Player = player
 	c.Update = update
+
+	// Se tutto ok imposto e setto il nuovo stato su redis
+	_ = helpers.SetRedisState(c.Player, c.Controller)
+
+	if c.Clear() {
+		return
+	}
 
 	// Recupero nave attiva de player
 	var eqippedShips nnsdk.Ships
@@ -66,7 +75,7 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.repairs")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		),
 	)
 

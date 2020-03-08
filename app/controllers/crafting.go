@@ -49,6 +49,16 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	// Set and load payload
 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
 
+	if c.Clear() {
+		return
+	}
+
+	// Verifico se vuole tornare indietro di stato
+	if c.BackTo(1) {
+		new(MenuController).Handle(c.Player, c.Update)
+		return
+	}
+
 	// Validate
 	var hasError bool
 	hasError, err = c.Validator()
@@ -60,13 +70,7 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -102,6 +106,14 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update)
 // ====================================
 func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
+
 	var itemProvider providers.ItemProvider
 	var playerProvider providers.PlayerProvider
 
@@ -193,6 +205,18 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 			c.State.FinishAt.Format("15:04:05"),
 		)
 
+		// Aggiungo anche abbandona
+		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+				),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				),
+			),
+		)
+
 		// Verifico se ha finito il crafting
 		if time.Now().After(c.State.FinishAt) {
 			return false, err
@@ -239,7 +263,7 @@ func (c *CraftingController) Stage() (err error) {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 			),
 		))
 
@@ -315,7 +339,7 @@ func (c *CraftingController) Stage() (err error) {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 			),
 		))
 
@@ -362,7 +386,7 @@ func (c *CraftingController) Stage() (err error) {
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 				),
 			),
 		)
@@ -408,7 +432,7 @@ func (c *CraftingController) Stage() (err error) {
 		c.State.FinishAt = endTime
 		*c.State.ToNotify = true
 		c.State.Stage = 4
-		c.ToMenu = true
+		c.Breaker.ToMenu = true
 
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo
@@ -434,7 +458,7 @@ func (c *CraftingController) Stage() (err error) {
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			),
 		)
 		_, err = services.SendMessage(msg)

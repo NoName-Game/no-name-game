@@ -43,16 +43,26 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	c.Player = player
 	c.Update = update
 
-	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked {
-		return
-	}
-
 	// Verifico lo stato della player
 	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
 	if err != nil {
 		panic(err)
+	}
+
+	// Verifico se il player si trova in determinati stati non consentiti
+	if blocked := c.InStatesBlocker([]string{"hunting", "ship"}); blocked {
+		return
+	}
+
+	if c.Clear() {
+		return
+	}
+
+	// Verifico se vuole tornare indietro di stato
+	if c.BackTo(1) {
+		new(MenuController).Handle(c.Player, c.Update)
+		return
 	}
 
 	// Stato recuperto correttamente
@@ -70,16 +80,7 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -114,6 +115,13 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 // ====================================
 func (c *MissionController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -148,6 +156,18 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 			return false, err
 		}
+
+		// Aggiungo anche abbandona
+		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+				),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				),
+			),
+		)
 
 		return true, err
 
@@ -204,7 +224,7 @@ func (c *MissionController) Stage() (err error) {
 		// Aggiungo anche abbandona
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 			),
 		))
 
@@ -263,7 +283,7 @@ func (c *MissionController) Stage() (err error) {
 		c.State.Stage = 2
 		*c.State.ToNotify = true
 		c.State.FinishAt = endTime
-		c.ToMenu = true
+		c.Breaker.ToMenu = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
@@ -347,7 +367,7 @@ func (c *MissionController) Stage() (err error) {
 
 		// Aggiorno lo stato
 		c.State.Stage = 2
-		c.ToMenu = true
+		c.Breaker.ToMenu = true
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:

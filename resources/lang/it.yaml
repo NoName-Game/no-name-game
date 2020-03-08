@@ -28,8 +28,10 @@ route.menu: "BoardSystem"
 route.force.die: "Delete"
 
 # ROUTES (BREAKER)
-route.breaker.back: "Fai altro"
-route.breaker.clears: "Abbandona"
+route.breaker.continue: "Continua"
+route.breaker.back: "⬅️ Indietro"
+route.breaker.more: "⬅️ Torna al menu"
+route.breaker.clears: "❌ Abbandona"
 
 # ROUTES (CALLBACK)
 callback.map: "map"
