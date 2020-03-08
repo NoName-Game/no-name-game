@@ -28,8 +28,10 @@ route.menu: "BoardSystem"
 route.force.die: "Delete"
 
 # ROUTES (BREAKER)
-route.breaker.back: "Fai altro"
-route.breaker.clears: "Abbandona"
+route.breaker.continue: "Continua"
+route.breaker.back: "⬅️ Indietro"
+route.breaker.more: "⬅️ Torna al menu"
+route.breaker.clears: "❌ Abbandona"
 
 validator.not_valid: "Il parametro inserito non è valido"
 validator.general: "Una tempesta solare ha corrotto i dati, riprova!"

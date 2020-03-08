@@ -39,15 +39,15 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update,
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.tutorial"
-	c.Player = player
-	c.Update = update
-
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.tutorial",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
 	}
 
 	// Stato recuperto correttamente
@@ -64,13 +64,6 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update,
 	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
