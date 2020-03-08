@@ -73,37 +73,33 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed bool) {
 	var playerStateProvider providers.PlayerStateProvider
 
-	if !c.Breaker.Backing {
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
-			if c.Controller != "" {
-				if c.State.Stage <= canBackFrom {
-					// Cancello stato da redis
-					_ = helpers.DelRedisState(c.Player)
+	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
+		if c.Controller != "" {
+			if c.State.Stage <= canBackFrom {
+				// Cancello stato da redis
+				_ = helpers.DelRedisState(c.Player)
 
-					// Cancello record a db
-					_, _ = playerStateProvider.DeletePlayerState(c.State)
+				// Cancello record a db
+				_, _ = playerStateProvider.DeletePlayerState(c.State)
 
-					c.Breaker.Backing = true
-					controller.Handle(c.Player, c.Update, true)
-					backed = true
-					return
-				}
-
-				c.State.Stage = 0
+				controller.Handle(c.Player, c.Update, true)
+				backed = true
 				return
 			}
 
-			// Cancello stato da redis
-			_ = helpers.DelRedisState(c.Player)
-
-			// Cancello record a db
-			_, _ = playerStateProvider.DeletePlayerState(c.State)
-
-			c.Breaker.Backing = true
-			controller.Handle(c.Player, c.Update, true)
-			backed = true
+			c.State.Stage = 0
 			return
 		}
+
+		// Cancello stato da redis
+		_ = helpers.DelRedisState(c.Player)
+
+		// Cancello record a db
+		_, _ = playerStateProvider.DeletePlayerState(c.State)
+
+		controller.Handle(c.Player, c.Update, true)
+		backed = true
+		return
 	}
 
 	// Abbandona - chiude definitivamente cancellando anche lo stato
