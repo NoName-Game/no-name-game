@@ -34,7 +34,7 @@ type TutorialController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
