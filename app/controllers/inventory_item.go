@@ -200,16 +200,29 @@ func (c *InventoryItemController) Stage() (err error) {
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
-		// Invio messaggio per conferma
-		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			fmt.Sprintf(
-				"%s\n\n%s", // Domanda e descrizione
-				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
-					helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+		var msg tgbotapi.MessageConfig
+		if *c.Player.Stats.LifePoint + uint(c.Payload.Item.Value) > 100 {
+			msg = services.NewMessage(c.Update.Message.Chat.ID,
+				fmt.Sprintf(
+					"%s\n\n%s", // Domanda e descrizione
+					helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",
+						helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+					),
+					helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
 				),
-				helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
-			),
-		)
+			)
+		} else {
+			msg = services.NewMessage(c.Update.Message.Chat.ID,
+				fmt.Sprintf(
+					"%s\n\n%s", // Domanda e descrizione
+					helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
+						helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+					),
+					helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
+				),
+			)
+		}
+
 		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(

@@ -182,6 +182,7 @@ inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
 inventory.items.what: "Quale item vorresti usare?"
 inventory.items.use: "Usa:"
 inventory.items.confirm: "*Confermi di voler usare %v?*"
+inventory.items.confirm_warning: "*Confermi di voler usare %v?*\nAttezione, l'eccedenza verrà automaticamente scartata."
 inventory.items.completed: "Hai usato *%s* e di beneficiare delle sue caratteristiche."
 
 # ABILITY TREE
