@@ -75,7 +75,7 @@ type InventoryRecapController BaseController
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	var finalRecap string
 	var playerProvider providers.PlayerProvider
