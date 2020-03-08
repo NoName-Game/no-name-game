@@ -28,20 +28,27 @@ type InventoryItemController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.inventory.items"
-	c.Player = player
-	c.Update = update
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.inventory.items",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
 
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(1, &InventoryController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
@@ -61,7 +68,7 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 				),
 			),
 		)
@@ -100,6 +107,14 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 // ====================================
 func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
+
 	var playerProvider providers.PlayerProvider
 
 	switch c.State.Stage {
@@ -176,7 +191,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		keyboardRowItems = append(keyboardRowItems, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Invio messagio con recap e con selettore categoria
@@ -228,7 +243,7 @@ func (c *InventoryItemController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 

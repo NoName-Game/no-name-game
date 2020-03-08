@@ -83,25 +83,20 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.hunting"
-	c.Player = player
-	c.Update = update
-
-	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"mission"}); blocked {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.hunting",
+		c.Payload,
+		[]string{"mission"},
+		player,
+		update,
+	) {
 		return
-	}
-
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
 	}
 
 	// Set and load payload

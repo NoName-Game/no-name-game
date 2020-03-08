@@ -29,20 +29,27 @@ type ShipRepairsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.ship.repairs"
-	c.Player = player
-	c.Update = update
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.ship.repairs",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
 
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se vuole tornare indietro di stato
+	if !proxy {
+		if c.BackTo(1, &ShipController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
@@ -96,6 +103,13 @@ func (c *ShipRepairsController) Handle(player nnsdk.Player, update tgbotapi.Upda
 // ====================================
 func (c *ShipRepairsController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -108,7 +122,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool, err error) {
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 					),
 				),
 			)
@@ -124,10 +138,14 @@ func (c *ShipRepairsController) Validator() (hasErrors bool, err error) {
 			c.State.FinishAt.Format("15:04:05 01/02"),
 		)
 
+		// Aggiungo anche abbandona
 		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+				),
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
 				),
 			),
 		)
@@ -198,7 +216,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 
 		// Clear and exit
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Invio messaggio
@@ -271,7 +289,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		// Aggiorno stato
 		*c.State.ToNotify = true
 		c.State.Stage = 2
-		c.ToMenu = true
+		c.Breaker.ToMenu = true
 	case 2:
 		// Fine riparazione
 		err = shipProvider.EndShipRepair(c.Payload.Ship)

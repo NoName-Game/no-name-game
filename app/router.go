@@ -21,28 +21,21 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 		callingRoute = parseCallback(update.CallbackQuery)
 	}
 
-	// Verifico se è una rotta di chiusura
-	// Questa tipologia di rotta implica un blocco immediato dell'azione in corso
-	isBreakerRoute, route := inRoutes(player.Language.Slug, callingRoute, BreakerRoutes)
-	if isBreakerRoute {
-		invoke(BreakerRoutes[route], "Handle", player, update)
-		return
-	}
-
-	// Verifico se in memorià è presente già una rotta
-	// userò quella come main per gestire ulteriori sottostati
-	isCachedRoute, _ := helpers.GetRedisState(player)
-	if isCachedRoute != "" {
-		invoke(Routes[isCachedRoute], "Handle", player, update)
-		return
-	}
-
 	// Dirigo ad una rotta normale
 	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
-		invoke(Routes[route], "Handle", player, update)
+		invoke(Routes[route], "Handle", player, update, false)
 		return
 	}
+
+	// Verifico se in memorià è presente già una rotta e se quella richiamata non sia menu
+	// userò quella come main per gestire ulteriori sottostati
+	isCachedRoute, _ := helpers.GetRedisState(player)
+	if isCachedRoute != "" {
+		invoke(Routes[isCachedRoute], "Handle", player, update, false)
+		return
+	}
+
 }
 
 // inRoutes - Verifica se esiste la rotta

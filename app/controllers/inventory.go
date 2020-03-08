@@ -14,14 +14,28 @@ import (
 // ====================================
 // Inventory
 // ====================================
-type InventoryController BaseController
+type InventoryController struct {
+	BaseController
+}
 
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	var err error
+	c.Player = player
 	c.Update = update
+	c.Controller = "route.inventory"
+
+	// Se tutto ok imposto e setto il nuovo stato su redis
+	_ = helpers.SetRedisState(c.Player, c.Controller)
+
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(0, &MenuController{}) {
+			return
+		}
+	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -34,7 +48,7 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 			// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.destroy")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 
@@ -42,6 +56,14 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (c *InventoryController) Validator() {
+	//
+}
+
+func (c *InventoryController) Stage() {
+	//
 }
 
 // ====================================
@@ -53,7 +75,7 @@ type InventoryRecapController BaseController
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	var finalRecap string
 	var playerProvider providers.PlayerProvider

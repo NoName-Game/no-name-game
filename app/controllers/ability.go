@@ -36,20 +36,27 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.ability"
-	c.Player = player
-	c.Update = update
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.ability",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
 
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(0, &MenuController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
@@ -66,13 +73,7 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+		// validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -108,6 +109,13 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update) 
 // ====================================
 func (c *AbilityController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -178,7 +186,7 @@ func (c *AbilityController) Stage() (err error) {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 			),
 		))
 
@@ -195,7 +203,6 @@ func (c *AbilityController) Stage() (err error) {
 
 		// Avanzo di stage
 		c.State.Stage = 1
-
 	case 1:
 		// Incremento statistiche e aggiorno
 		for _, ability := range AbilityLists {
@@ -220,7 +227,7 @@ func (c *AbilityController) Stage() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, text)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ability.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 		_, err = services.SendMessage(msg)

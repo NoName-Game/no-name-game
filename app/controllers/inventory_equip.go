@@ -27,20 +27,27 @@ type InventoryEquipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.inventory.equip"
-	c.Player = player
-	c.Update = update
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.inventory.equip",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
 
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(1, &InventoryController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
@@ -99,6 +106,13 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 // ====================================
 func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -215,7 +229,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 
@@ -288,7 +302,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		// Aggiungo tasti back and clears
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Invio messaggio
@@ -345,7 +359,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
 

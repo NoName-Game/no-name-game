@@ -25,25 +25,27 @@ type ShipRestsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update) {
+func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
 
-	c.Controller = "route.ship.rests"
-	c.Player = player
-	c.Update = update
-
-	// Verifico se il player si trova in determinati stati non consentiti
-	if blocked := c.InStatesBlocker([]string{"hunting", "mission"}); blocked {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.ship.rests",
+		c.Payload,
+		[]string{"hunting", "mission"},
+		player,
+		update,
+	) {
 		return
 	}
 
-	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, c.Payload, c.Father)
-	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
-	if err != nil {
-		panic(err)
+	// Verifico se vuole tornare indietro di stato
+	if !proxy {
+		if c.BackTo(1, &ShipController{}) {
+			return
+		}
 	}
 
 	// Set and load payload
@@ -61,13 +63,7 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 		validatorMsg.ParseMode = "markdown"
-		// validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-		// 	tgbotapi.NewKeyboardButtonRow(
-		// 		tgbotapi.NewKeyboardButton(
-		// 			helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-		// 		),
-		// 	),
-		// )
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -103,6 +99,13 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -169,7 +172,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
 		if !*c.Player.Stats.Dead {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			))
 		}
 
@@ -243,7 +246,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 				),
 			),
 		)
