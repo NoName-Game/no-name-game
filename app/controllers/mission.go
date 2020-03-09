@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
@@ -10,6 +11,10 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+var (
+	MissionTypes = []string{"underground", "surface", "atmosphere"}
 )
 
 // ====================================
@@ -23,13 +28,7 @@ type MissionController struct {
 		Dropped         []nnsdk.DropItem
 		ForcedTime      int // Questo valore serve per forzare le tempistiche
 	}
-	// Additional Data
-	// MissionTypes []string
 }
-
-var (
-	MissionTypes = []string{"underground", "surface", "atmosphere"}
-)
 
 // ====================================
 // Handle
@@ -317,7 +316,8 @@ func (c *MissionController) Stage() (err error) {
 				c.Player.Language.Slug,
 				"mission.extraction_recap",
 				drop.Resource.Name,
-				drop.Resource.Rarity.Slug,
+				drop.Resource.Rarity.Name,
+				strings.ToUpper(drop.Resource.Rarity.Slug),
 				drop.Quantity,
 			),
 		)
@@ -370,7 +370,7 @@ func (c *MissionController) Stage() (err error) {
 				"- %v x *%s* (%s)\n",
 				drop.Quantity,
 				drop.Resource.Name,
-				drop.Resource.Rarity.Slug,
+				strings.ToUpper(drop.Resource.Rarity.Slug),
 			)
 		}
 
