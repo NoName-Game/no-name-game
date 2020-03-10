@@ -127,7 +127,7 @@ mission.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto 
 mission.continue: "Continua missione"
 
 # CRAFTING
-crafting.categories.medical: "💊 Medicine"
+crafting.categories.medical: "💊 Curative"
 crafting.categories.ship_support: "⚙️ Supporto nave"
 crafting.craft: "Crafting:"
 crafting.craft_different_item: "Crea altro!"
