@@ -64,13 +64,7 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
@@ -133,7 +127,7 @@ func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 
 	// Verifico che il player voglia continuare con l'equip
 	case 2:
-		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")) {
+		if strings.Contains(c.Update.Message.Text, "🩸") || strings.Contains(c.Update.Message.Text, "🛡") {
 			return false, err
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -180,7 +174,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		if len(armors) > 0 {
 			for _, armor := range armors {
-				currentArmorsEquipment += fmt.Sprintf("- %s \n", armor.Name)
+				currentArmorsEquipment += fmt.Sprintf("- %s 🛡\n", armor.Name)
 			}
 		} else {
 			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
@@ -200,7 +194,12 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		if len(weapons) > 0 {
 			for _, weapon := range weapons {
-				currentWeaponsEquipment += fmt.Sprintf("- %s \n", weapon.Name)
+				currentWeaponsEquipment += fmt.Sprintf(
+					"- %s (*%s*) %v🩸 \n",
+					weapon.Name,
+					strings.ToUpper(weapon.Rarity.Slug),
+					weapon.RawDamage,
+				)
 			}
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
@@ -250,7 +249,7 @@ func (c *InventoryEquipController) Stage() (err error) {
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
 			// Recupero nuovamente armature player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
@@ -260,22 +259,27 @@ func (c *InventoryEquipController) Stage() (err error) {
 				return err
 			}
 
-			// Ciclo armature del player
-			for _, armor := range armors {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						fmt.Sprintf(
-							"%s %s",
-							helpers.Trans(c.Player.Language.Slug, "equip"),
-							armor.Name,
+			if len(armors) > 0 {
+				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
+
+				// Ciclo armature del player
+				for _, armor := range armors {
+					keyboardRow := tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(
+							fmt.Sprintf(
+								"%s (%s) 🛡",
+								// helpers.Trans(c.Player.Language.Slug, "equip"),
+								armor.Name,
+								strings.ToUpper(armor.Rarity.Slug),
+							),
 						),
-					),
-				)
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+					)
+					keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+				}
 			}
 
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
@@ -285,18 +289,24 @@ func (c *InventoryEquipController) Stage() (err error) {
 				return err
 			}
 
-			// Ciclo armi player
-			for _, weapon := range weapons {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						fmt.Sprintf(
-							"%s %s",
-							helpers.Trans(c.Player.Language.Slug, "equip"),
-							weapon.Name,
+			if len(weapons) > 0 {
+				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
+
+				// Ciclo armi player
+				for _, weapon := range weapons {
+					keyboardRow := tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(
+							fmt.Sprintf(
+								"%s (%s) %v🩸",
+								// helpers.Trans(c.Player.Language.Slug, "equip"),
+								weapon.Name,
+								strings.ToUpper(weapon.Rarity.Slug),
+								weapon.RawDamage,
+							),
 						),
-					),
-				)
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+					)
+					keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+				}
 			}
 		}
 
@@ -325,9 +335,10 @@ func (c *InventoryEquipController) Stage() (err error) {
 	case 2:
 		var equipmentName string
 		var equipmentID uint
+		var equipmentError bool
 
 		// Ripulisco messaggio per recupermi solo il nome
-		equipmentName = strings.Split(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "equip")+" ")[1]
+		equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
@@ -335,6 +346,11 @@ func (c *InventoryEquipController) Stage() (err error) {
 			armor, err = armorProvider.FindArmorByName(equipmentName)
 			if err != nil {
 				return err
+			}
+
+			// Verifico se appartiene correttamente al player
+			if armor.PlayerID != c.Player.ID {
+				equipmentError = true
 			}
 
 			equipmentID = armor.ID
@@ -345,7 +361,33 @@ func (c *InventoryEquipController) Stage() (err error) {
 				return err
 			}
 
+			// Verifico se appartiene correttamente al player
+			if weapon.PlayerID != c.Player.ID {
+				equipmentError = true
+			}
+
 			equipmentID = weapon.ID
+		}
+
+		if equipmentError {
+			// Invio messaggio error
+			msg := services.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"),
+			)
+			msg.ParseMode = "markdown"
+
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				),
+			)
+
+			_, err = services.SendMessage(msg)
+			if err != nil {
+				return err
+			}
+
+			return
 		}
 
 		// Invio messaggio per conferma equipaggiamento
