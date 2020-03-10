@@ -163,14 +163,17 @@ inventory.recap: "Ecco il tuo inventario:"
 # inventory.equip: "Equipaggia Oggetto"
 # inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
+inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare"
 inventory.armors.what: "Quale tra le tue *armature* vorresti equipaggiare?"
 inventory.armors.zero_equipment: "❌ Nessuna"
+inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
 inventory.weapons.what: "Quale tra le tue *armi* vorresti equipaggiare?"
 inventory.weapons.zero_equipment: "❌ Nessuna"
 
 
 # Inventario - equipaggia
 inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
+inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
 inventory.equip.confirm: "*Confermi di voler equipaggiare %v?*"
 inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
 
