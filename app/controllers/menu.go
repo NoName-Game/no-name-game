@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"math"
+	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/providers"
@@ -155,13 +157,17 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		for _, state := range c.Player.States {
 			if !*state.Completed {
 				// Se sono da notificare formatto con la data
-				if *state.ToNotify {
-					tasks += fmt.Sprintf("- %s (%s)\n",
+				if *state.ToNotify && time.Since(state.FinishAt).Minutes() < 0 {
+					finishTime := math.Abs(math.RoundToEven(time.Since(state.FinishAt).Minutes()))
+					tasks += fmt.Sprintf("- %s %v\n",
 						helpers.Trans(c.Player.Language.Slug, state.Controller),
-						state.FinishAt.Format("15:04:05 01/02"),
+						helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
 					)
 				} else {
-					tasks += fmt.Sprintf("- %s\n", helpers.Trans(c.Player.Language.Slug, state.Controller))
+					tasks += fmt.Sprintf("- %s %s\n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+						helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
+					)
 				}
 			}
 		}

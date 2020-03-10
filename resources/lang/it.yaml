@@ -68,6 +68,8 @@ hours: "Ore"
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
 menu.tasks: "⏱ *Attività in corso:*\n"
+menu.tasks.minutes_left: "*%v* minuti al termine"
+menu.tasks.completed: "*completata!*"
 
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"
