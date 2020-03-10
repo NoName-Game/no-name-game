@@ -164,10 +164,17 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 						helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
 					)
 				} else {
-					tasks += fmt.Sprintf("- %s %s\n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-						helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
-					)
+					if state.Controller == "route.tutorial" {
+						tasks += fmt.Sprintf("- %s \n",
+							helpers.Trans(c.Player.Language.Slug, state.Controller),
+						)
+					} else {
+						tasks += fmt.Sprintf("- %s %s\n",
+							helpers.Trans(c.Player.Language.Slug, state.Controller),
+							helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
+						)
+					}
+
 				}
 			}
 		}
