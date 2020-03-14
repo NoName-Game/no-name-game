@@ -124,17 +124,16 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup")
 			return true, err
-		} else {
-			// Si vuole svegliare, ma non è passato ancora un minuto
-			var endDate time.Time
-			endDate = time.Now()
+		}
 
-			diffDate := endDate.Sub(c.Payload.StartDateTime)
-			diffMinutes := math.RoundToEven(diffDate.Minutes())
-			if diffMinutes <= 1 {
-				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
-				return true, err
-			}
+		// Si vuole svegliare, ma non è passato ancora un minuto
+		var endDate = time.Now()
+
+		diffDate := endDate.Sub(c.Payload.StartDateTime)
+		diffMinutes := math.RoundToEven(diffDate.Minutes())
+		if diffMinutes <= 1 {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
+			return true, err
 		}
 
 		return false, err
