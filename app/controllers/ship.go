@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 
@@ -53,7 +54,7 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update, pro
 	for _, ship := range eqippedShips {
 		currentShipRecap = fmt.Sprintf(
 			"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
-			ship.Name, ship.Rarity.Slug,
+			ship.Name, strings.ToUpper(ship.Rarity.Slug),
 			ship.ShipCategory.Name,
 			ship.ShipStats.Integrity, helpers.Trans(c.Player.Language.Slug, "integrity"),
 			*ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
