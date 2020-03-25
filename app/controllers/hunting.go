@@ -703,7 +703,7 @@ func (c *HuntingController) Fight(action string, maps nnsdk.Map) (err error) {
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "combat.card",
-				enemy.Name, enemy.Rarity.Slug,
+				enemy.Name, strings.ToUpper(enemy.Rarity.Slug),
 				*enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
