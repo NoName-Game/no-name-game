@@ -393,6 +393,7 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 		var tresure nnsdk.Tresure
 		tresure, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
 		if nearTresure {
+			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
 			var drop nnsdk.DropResponse
 			drop, err = tresureProvider.DropTresure(nnsdk.TresureDropRequest{
@@ -424,6 +425,39 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
 					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", drop.Transaction.Value),
+				)
+			} else if drop.Trap.ID > 0 {
+				if drop.Trap.PlayerDie {
+					// Aggiorno messaggio notificando al player che è morto
+					editMessage = services.NewEditMessage(
+						c.Player.ChatID,
+						c.Update.CallbackQuery.Message.MessageID,
+						helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+					)
+
+					var ok = tgbotapi.NewInlineKeyboardMarkup(
+						tgbotapi.NewInlineKeyboardRow(
+							tgbotapi.NewInlineKeyboardButtonData(
+								helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
+							),
+						),
+					)
+
+					editMessage.ReplyMarkup = &ok
+
+					// Invio messaggio
+					_, err = services.SendMessage(editMessage)
+					if err != nil {
+						return err
+					}
+
+					return
+				}
+				// Player sopravvive...
+				editMessage = services.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", drop.Trap.Damage),
 				)
 			} else {
 				// Non hai trovato nulla

@@ -99,6 +99,7 @@ tresure.found.resource: "Hai trovato 💠*%s*"
 tresure.found.item: "Hai trovato 🔩*%s*"
 tresure.found.transaction: "Hai trovato *%v*💰"
 tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
+tresure.found.trap: "AH! Sei inciampato in una trappola e hai perso *%v*HP!"
 
 # COMBAT SYSTEM
 combat.attack: "Attacca"
