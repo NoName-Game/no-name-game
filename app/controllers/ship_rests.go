@@ -251,8 +251,9 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing.finish"),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing.finish", diffMinutes),
 		)
+		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
