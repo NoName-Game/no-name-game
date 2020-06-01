@@ -33,6 +33,7 @@ type HuntingController struct {
 	}
 	PlayerPositionX int
 	PlayerPositionY int
+	NeedUpdateState bool
 }
 
 // Settings generali
@@ -129,18 +130,27 @@ func (c *HuntingController) Handle(player nnsdk.Player, update tgbotapi.Update, 
 		return
 	}
 
+	// Forzo il controllo dell'update, questo set servirà
+	// al controllo poco più sotto
+	c.NeedUpdateState = true
+
 	// Ok! Run!
 	err = c.Stage()
 	if err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
-	if err != nil {
-		panic(err)
+	// Verifico se c'è realmente bisogno di aggiornare lo stato,
+	// effettuo questo controllo per evitare di fare un upadate inutile quando
+	// mi muovo e basta
+	if c.NeedUpdateState {
+		// Aggiorno stato finale
+		payloadUpdated, _ := json.Marshal(c.Payload)
+		c.State.Payload = string(payloadUpdated)
+		c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
@@ -536,6 +546,9 @@ func (c *HuntingController) Move(action string, maps nnsdk.Map) (err error) {
 	if err != nil {
 		return err
 	}
+
+	// Visto che si è trattato solo di un movimento non è necessario aggiornare lo stato
+	c.NeedUpdateState = false
 
 	return
 }
