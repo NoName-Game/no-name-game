@@ -320,11 +320,16 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	for _, npc := range npcs {
 		row := tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				npc.Name,
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.safeplanet.%s", npc.Slug)),
 			),
 		)
 		keyboardRow = append(keyboardRow, row)
 	}
+
+	// Solo per debug da rimuovere
+	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.mission")),
+	))
 
 	return keyboardRow
 }
