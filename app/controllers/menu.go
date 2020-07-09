@@ -231,16 +231,14 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 
 	// Se il player non ha nessun stato attivo ma si trova in un pianeta sicuro mostro
 	// allora mostro la keyboard dedicata al pianeta sicuro
-	if c.SafePlanet {
-		return c.SafePlanetKeyboard()
-	}
 
 	return c.MainKeyboard()
 }
 
 // MainMenu
-func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
-	return [][]tgbotapi.KeyboardButton{
+func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
+
+	keyboard = [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.mission")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
@@ -256,6 +254,14 @@ func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ability")),
 		},
 	}
+
+	if c.SafePlanet {
+		keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu.npc")),
+		))
+	}
+
+	return
 }
 
 // TutorialMenu
@@ -306,7 +312,7 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 	}
 }
 
-// MainMenu
+/*// MainMenu
 func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	var npcProvider providers.NpcProvider
 
@@ -326,10 +332,6 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 		keyboardRow = append(keyboardRow, row)
 	}
 
-	// Solo per debug da rimuovere
-	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.mission")),
-	))
 
 	return keyboardRow
-}
+}*/

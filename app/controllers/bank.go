@@ -139,7 +139,7 @@ func (c *BankController) Stage() (err error) {
 		var infoBank string
 		infoBank = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.info")
 
-		msg := services.NewMessage(c.Player.ChatID, fmt.Sprintf("%s", infoBank))
+		msg := services.NewMessage(c.Player.ChatID, infoBank)
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit")),
@@ -156,6 +156,15 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
+		var playerProvider providers.PlayerProvider
+		money, _ := playerProvider.GetPlayerEconomy(c.Player.ID, "bank")
+
+		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", money.Value))
+		msg.ParseMode = "Markdown"
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
 		// Avanzo di stage
 		c.State.Stage = 1
 	case 1:
@@ -165,7 +174,7 @@ func (c *BankController) Stage() (err error) {
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
-			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
+			mainMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit_message")
 
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws_message")
@@ -199,8 +208,8 @@ func (c *BankController) Stage() (err error) {
 		// Aggiorno stato
 		c.State.Stage = 2
 	case 2:
-		var transactionProvider providers.TransactionProvider
-
+		//var transactionProvider providers.TransactionProvider
+		var npcProvider providers.NpcProvider
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
 		// in base alla tipologia scelta
@@ -211,26 +220,30 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		var transactionCategory int
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
-			transactionCategory = 4
+			_, err = npcProvider.Deposit(c.Player.ID, int32(value))
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
-			transactionCategory = 5
+			_, err = npcProvider.Withdraw(c.Player.ID, int32(value))
 		}
 
 		// Registro transazione
-		_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
-			Value:                 value,
+		/*_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
+			Value:                 int32(value),
 			TransactionTypeID:     1,
-			TransactionCategoryID: transactionCategory,
+			TransactionCategoryID: uint(transactionCategory),
 			PlayerID:              c.Player.ID,
-		})
+		})*/
+		var text string
+		if err != nil {
+			// Errore nella transazione
+			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
+		} else {
+			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
+		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done"),
-		)
+		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
 		msg.ParseMode = "markdown"
 
 		_, err = services.SendMessage(msg)

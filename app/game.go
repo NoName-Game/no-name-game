@@ -35,6 +35,7 @@ var (
 
 		// Safe Planet
 		"route.safeplanet.bank": reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
+		"route.menu.npc":        reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(),
 	}
 )
 

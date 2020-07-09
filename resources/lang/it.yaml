@@ -25,6 +25,7 @@ route.ship.repairs: "🔧 Ripara"
 route.ship.rests: "💤 Riposa"
 route.ship.better: "Migliora"
 route.menu: "BoardSystem"
+route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
 
 # ROUTES - Safe planet
@@ -315,12 +316,16 @@ ship.rests.need_to_rest: "Non hai ancora recuperato abbastanza energie, torna a 
 ship.rests.reparing.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
 ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
 
+# SAFE PLANET
+safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
+
 # SAFE PLANET - BANK
-safeplanet.bank.info: "Benvenuto alla succursale della banca xxx"
-safeplanet.bank.account_details: "Qui di seguito potrai trovare i dattigli del tuo conto:"
+safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co"
+safeplanet.bank.account_details: "Qui di seguito potrai trovare i dettagli del tuo conto:\nHai a disposizione: *%v* 💰"
 safeplanet.bank.deposit: "Deposito"
-safeplanet.bank.deposit_message: "Qaunato desidrei depositare?"
+safeplanet.bank.deposit_message: "Quanto desideri depositare?"
 
 safeplanet.bank.withdraws: "Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
+safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
