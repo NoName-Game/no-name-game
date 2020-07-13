@@ -219,13 +219,19 @@ func (c *BankController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
-
+		var operationType uint
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
-			_, err = npcProvider.Deposit(c.Player.ID, int32(value))
+			operationType = 0
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
-			_, err = npcProvider.Withdraw(c.Player.ID, int32(value))
+			operationType = 1
 		}
+		request := nnsdk.BankActionRequest{
+			OperationType: operationType,
+			PlayerID:      c.Player.ID,
+			Amount:        int32(value),
+		}
+		_, err = npcProvider.Bank(request)
 
 		// Registro transazione
 		/*_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
