@@ -13,7 +13,15 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type MenuController BaseController
+// ====================================
+// MenuController
+// Modulo dedicato alla gestine e visualizazione della keyboard di telegram
+// in base a dove si trova il player verranno mostrati tasti e action differenti.
+// ====================================
+type MenuController struct {
+	BaseController
+	SafePlanet bool // Flag per verificare se il player si trova su un pianeta sicuro
+}
 
 // ====================================
 // Handle
@@ -77,20 +85,9 @@ func (c *MenuController) Stage() {
 // ⏱ Task in corso:
 // - LIST
 func (c *MenuController) GetRecap() (message string, err error) {
-	var playerProvider providers.PlayerProvider
-	var planetProvider providers.PlanetProvider
-
-	// Recupero ultima posizione del player, dando per scontato che sia
-	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-	var lastPosition nnsdk.PlayerPosition
-	lastPosition, err = playerProvider.GetPlayerLastPosition(c.Player)
-	if err != nil {
-		return message, err
-	}
-
-	// Dalla ultima posizione recupero il pianeta corrente
-	var planet nnsdk.Planet
-	planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	// Recupero posizione player
+	var planet string
+	planet, err = c.GetPlayerPosition()
 	if err != nil {
 		return message, err
 	}
@@ -110,7 +107,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 	}
 
 	message = helpers.Trans(c.Player.Language.Slug, "menu",
-		planet.Name,
+		planet,
 		c.Player.Username,
 		life,
 		economy,
@@ -120,7 +117,40 @@ func (c *MenuController) GetRecap() (message string, err error) {
 	return
 }
 
+// GetPlayerPosition
+// Metodo didicato allo visualizione del nome del pianeta
+func (c *MenuController) GetPlayerPosition() (result string, err error) {
+	var playerProvider providers.PlayerProvider
+	var planetProvider providers.PlanetProvider
+
+	// Recupero ultima posizione del player, dando per scontato che sia
+	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
+	var lastPosition nnsdk.PlayerPosition
+	lastPosition, err = playerProvider.GetPlayerLastPosition(c.Player)
+	if err != nil {
+		return result, err
+	}
+
+	// Dalla ultima posizione recupero il pianeta corrente
+	var planet nnsdk.Planet
+	planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	if err != nil {
+		return result, err
+	}
+
+	// Verifico se il player si trova su un pianeta sicuro
+	c.SafePlanet = planet.Safe
+
+	// Se è un pianeta sicuro modifico il messaggio
+	if c.SafePlanet {
+		return fmt.Sprintf("%s 🏟", planet.Name), err
+	}
+
+	return planet.Name, err
+}
+
 // GetPlayerTask
+// Metodo didicato alla reppresenteazione del risorse econimiche del player
 func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
 	var playerProvider providers.PlayerProvider
 
@@ -137,6 +167,7 @@ func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
 }
 
 // GetPlayerLife
+// Metodo dedicato alla rappresentazione dello stato vitale del player
 func (c *MenuController) GetPlayerLife() (life string, err error) {
 	// Calcolo stato vitale del player
 	status := "♥️"
@@ -150,6 +181,7 @@ func (c *MenuController) GetPlayerLife() (life string, err error) {
 }
 
 // GetPlayerTask
+// Metodo dedicato alla rappresentazione dei task attivi del player
 func (c *MenuController) GetPlayerTasks() (tasks string) {
 	if len(c.Player.States) > 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
@@ -197,12 +229,16 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 		}
 	}
 
+	// Se il player non ha nessun stato attivo ma si trova in un pianeta sicuro mostro
+	// allora mostro la keyboard dedicata al pianeta sicuro
+
 	return c.MainKeyboard()
 }
 
 // MainMenu
-func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
-	return [][]tgbotapi.KeyboardButton{
+func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
+
+	keyboard = [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.mission")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
@@ -218,6 +254,14 @@ func (c *MenuController) MainKeyboard() [][]tgbotapi.KeyboardButton {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ability")),
 		},
 	}
+
+	if c.SafePlanet {
+		keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu.npc")),
+		))
+	}
+
+	return
 }
 
 // TutorialMenu
@@ -267,3 +311,27 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 		},
 	}
 }
+
+/*// MainMenu
+func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
+	var npcProvider providers.NpcProvider
+
+	// Recupero gli npc attivi in questo momento
+	npcs, err := npcProvider.GetAll()
+	if err != nil {
+		panic(err)
+	}
+
+	var keyboardRow [][]tgbotapi.KeyboardButton
+	for _, npc := range npcs {
+		row := tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.safeplanet.%s", npc.Slug)),
+			),
+		)
+		keyboardRow = append(keyboardRow, row)
+	}
+
+
+	return keyboardRow
+}*/
