@@ -21,6 +21,16 @@ func (rp *ResourceProvider) GetResourceByID(id uint) (response nnsdk.Resource, e
 	return
 }
 
+func (rp *ResourceProvider) GetResourceByName(name string) (response nnsdk.Resource, err error) {
+	rp.SDKResp, err = services.NnSDK.MakeRequest(fmt.Sprintf("resources/name/%s", name), nil).Get()
+	if err != nil {
+		return response, err
+	}
+
+	err = rp.Response(&response)
+	return
+}
+
 func (rp *ResourceProvider) DropResource(request nnsdk.ResourceDropRequest) (response nnsdk.DropItem, err error) {
 	rp.SDKResp, err = services.NnSDK.MakeRequest("resources/drop", request).Post()
 	if err != nil {
