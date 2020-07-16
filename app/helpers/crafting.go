@@ -24,16 +24,25 @@ func ListRecipe(needed map[uint]int) (result string, err error) {
 	return result, err
 }
 
-func GetAllTranslatedSlugCategoriesByLocale(locale string) (result []string) {
+func CheckAndReturnCategorySlug(locale string, text string) (result string) {
+	for _, slug := range GetAllSlugCategories() {
+		if text == Trans(locale, slug) {
+			return slug
+		}
+	}
+	return ""
+}
+
+func GetAllSlugCategories() (result []string) {
 	var armorCategoriesProvider providers.ArmorCategoryProvider
 	var weaponCategoriesProvider providers.WeaponCateogoryProvider
 	aCategories, _ := armorCategoriesProvider.GetAllArmorCategory()
 	wCategories, _ := weaponCategoriesProvider.GetAllWeaponCategory()
 	for i := 0; i < len(aCategories); i++ {
-		result = append(result, Trans(locale, aCategories[i].Slug))
+		result = append(result, aCategories[i].Slug)
 	}
 	for i := 0; i < len(wCategories); i++ {
-		result = append(result, Trans(locale, wCategories[i].Slug))
+		result = append(result, wCategories[i].Slug)
 	}
 	return
 }

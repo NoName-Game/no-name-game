@@ -4,10 +4,9 @@ import "bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 
 func InventoryResourcesToMap(inventory nnsdk.PlayerInventories) map[uint]int {
 	inventoryMap := make(map[uint]int)
-	var item nnsdk.PlayerInventory
-	for item = range inventory {
-		if item.ItemType == "resources" {
-			inventoryMap[item.ItemID] = *item.Quantity
+	for i := 0; i < len(inventory); i++ {
+		if inventory[i].ItemType == "resources" {
+			inventoryMap[inventory[i].ItemID] = *inventory[i].Quantity
 		}
 	}
 	return inventoryMap

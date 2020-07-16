@@ -28,3 +28,13 @@ func (npc *NpcProvider) Bank(request nnsdk.BankActionRequest) (response nnsdk.Mo
 	err = npc.Response(&response)
 	return
 }
+
+func (npc *NpcProvider) Craft(request nnsdk.CraftActionRequest) (response nnsdk.CraftResponse, err error) {
+	npc.SDKResp, err = services.NnSDK.MakeRequest("npcs/craft", request).Post()
+	if err != nil {
+		return response, err
+	}
+
+	err = npc.Response(&response)
+	return
+}

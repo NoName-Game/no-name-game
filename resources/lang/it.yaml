@@ -30,7 +30,7 @@ route.force.die: "Delete"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
-route.safeplanet.crafter: "⚒️ Crafter"
+route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.research: "🔍️ Ricerca"
 
@@ -138,6 +138,7 @@ mission.continue: "Continua missione"
 crafting.categories.medical: "💊 Curative"
 crafting.categories.ship_support: "⚙️ Supporto nave"
 crafting.craft: "Crafting:"
+crafting.start: "Inizia!"
 crafting.craft_different_item: "Crea altro!"
 crafting.what: "Cosa vuoi realizzare?"
 crafting.type: "Quale categoria di craft ti interessa realizzare?"
@@ -150,6 +151,8 @@ crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per cr
 crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la ricetta!"
 crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
 crafting.item_does_not_exist: "L'item scelto non esiste!"
+crafting.no_resources: "Non hai abbastanza risorse!"
+crafting.no_resource: "Non hai questa risorsa!"
 
 # ITEMS
 items.revitalizing_small: "Rivitalizzante piccolo"
@@ -270,6 +273,7 @@ cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
 cron.route.ship.exploration_alert: "Nuovo pianeta raggiunto!"
 cron.route.death: "Hai recuperato le energie!"
+cron.route.safeplanet.crafter: "L'armaiolo ha terminato il prodotto!"
 
 # SHIP
 ship.report: "Rapporto Nave"
