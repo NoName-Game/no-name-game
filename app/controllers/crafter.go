@@ -188,7 +188,6 @@ func (c *CrafterController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
@@ -302,7 +301,6 @@ func (c *CrafterController) Stage() (err error) {
 					helpers.Trans(c.Player.Language.Slug, "crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(q - c.Payload.Resources[r])) + ")",
 				))
 				keyboardRowResources = append(keyboardRowResources, keyboardRow)
-				c.Payload.AddFlag = true
 			}
 		}
 

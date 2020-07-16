@@ -273,7 +273,7 @@ cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
 cron.route.ship.exploration_alert: "Nuovo pianeta raggiunto!"
 cron.route.death: "Hai recuperato le energie!"
-cron.route.safeplanet.crafter: "L'armaiolo ha terminato il prodotto!"
+cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il prodotto!"
 
 # SHIP
 ship.report: "Rapporto Nave"
