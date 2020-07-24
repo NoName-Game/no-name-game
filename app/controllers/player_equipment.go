@@ -14,9 +14,9 @@ import (
 )
 
 // ====================================
-// InventoryEquipController
+// PlayerEquipmentController
 // ====================================
-type InventoryEquipController struct {
+type PlayerEquipmentController struct {
 	BaseController
 	Payload struct {
 		Type    string
@@ -27,7 +27,7 @@ type InventoryEquipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlayerEquipmentController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 	var playerStateProvider providers.PlayerStateProvider
@@ -45,7 +45,7 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(1, &InventoryController{}) {
+		if c.BackTo(1, &PlayerController{}) {
 			return
 		}
 	}
@@ -98,7 +98,7 @@ func (c *InventoryEquipController) Handle(player nnsdk.Player, update tgbotapi.U
 // ====================================
 // Validator
 // ====================================
-func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
+func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -151,7 +151,7 @@ func (c *InventoryEquipController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *InventoryEquipController) Stage() (err error) {
+func (c *PlayerEquipmentController) Stage() (err error) {
 	var playerProvider providers.PlayerProvider
 	var armorProvider providers.ArmorProvider
 	var weaponProvider providers.WeaponProvider

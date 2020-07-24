@@ -31,7 +31,7 @@ var (
 		"route.ability":         reflect.TypeOf((*controllers.AbilityController)(nil)).Elem(),
 		"route.inventory":       reflect.TypeOf((*controllers.InventoryController)(nil)).Elem(),
 		"route.inventory.recap": reflect.TypeOf((*controllers.InventoryRecapController)(nil)).Elem(),
-		"route.inventory.equip": reflect.TypeOf((*controllers.InventoryEquipController)(nil)).Elem(),
+		"route.inventory.equip": reflect.TypeOf((*controllers.PlayerEquipmentController)(nil)).Elem(),
 		// "route.inventory.destroy": reflect.TypeOf((*controllers.InventoryDestroyController)(nil)).Elem(),
 		"route.inventory.items": reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
 		"route.banned":          reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),

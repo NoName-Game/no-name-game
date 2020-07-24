@@ -558,7 +558,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Richiamo crafting come sottoprocesso di questo controller
-		inventoryController := new(InventoryEquipController)
+		inventoryController := new(PlayerEquipmentController)
 		inventoryController.Father = c.State.ID
 		inventoryController.Handle(c.Player, c.Update, true)
 

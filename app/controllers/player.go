@@ -40,6 +40,9 @@ func (c *PlayerController) Handle(player nnsdk.Player, update tgbotapi.Update, p
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.ability")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.equip")),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
