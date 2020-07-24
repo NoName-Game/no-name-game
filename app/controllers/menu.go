@@ -229,9 +229,13 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 		}
 	}
 
-	// Se il player non ha nessun stato attivo ma si trova in un pianeta sicuro mostro
+	// Se il player non ha nessun stato attivo ma si trova in un pianeta sicuro
 	// allora mostro la keyboard dedicata al pianeta sicuro
+	if c.SafePlanet {
+		return c.SafePlanetKeyboard()
+	}
 
+	// Si trova su un pianeta normale
 	return c.MainKeyboard()
 }
 
@@ -312,7 +316,7 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 	}
 }
 
-/*// MainMenu
+// MainMenu
 func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	var npcProvider providers.NpcProvider
 
@@ -332,6 +336,9 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 		keyboardRow = append(keyboardRow, row)
 	}
 
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+	})
 
 	return keyboardRow
-}*/
+}

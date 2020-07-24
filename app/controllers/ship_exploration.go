@@ -285,11 +285,17 @@ func (c *ShipExplorationController) Stage() (err error) {
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
 		for _, explorationInfo := range explorationInfos {
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\n⏱ %v (%s)\nX: %v \nY: %v \nZ: %v",
-				explorationInfo.Planet.Name,
+			// Se il pianeta è sicuro allora appendo al nome l'icona di riferimento
+			planetName := explorationInfo.Planet.Name
+			if explorationInfo.Planet.Safe {
+				planetName = fmt.Sprintf("%s 🏟", explorationInfo.Planet.Name)
+			}
+
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\n⏱ %v (%s)",
+				planetName,
 				explorationInfo.Fuel,
 				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
-				explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z,
+				// explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z,
 			)
 
 			// Aggiungo per la validazione

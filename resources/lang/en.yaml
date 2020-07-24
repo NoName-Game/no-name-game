@@ -1,10 +1,10 @@
 #key: Text
 #You can use printf's placeholders!
-sample_text: "Sample Text"
-text_with_placeholders: "Hello, %s"
-complete: "Done!"
-validationMessage: "Wrong input, please repeat or exit."
-miss_username: "Enter a username to play."
+todo_text: "In construzione"
+sample_text: "Testo di prova"
+start_game: "Inizia a giocare!"
+text_with_placeholders: "Ciao, %s"
+timed-quest: "Timed Quest Terminata!"
 
 # ROUTES
 route.tutorial: "📖 Tutorial"
@@ -25,7 +25,14 @@ route.ship.repairs: "🔧 Ripara"
 route.ship.rests: "💤 Riposa"
 route.ship.better: "Migliora"
 route.menu: "BoardSystem"
+route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
+
+# ROUTES - Safe planet
+route.safeplanet.bank: "🏦 Banca"
+route.safeplanet.crafter: "⚒️ Armaiolo"
+route.safeplanet.dealer: "⚖️ Mercante"
+route.safeplanet.research: "🔍️ Ricerca"
 
 # ROUTES (BREAKER)
 route.breaker.continue: "Continua"
@@ -33,6 +40,296 @@ route.breaker.back: "⬅️ Indietro"
 route.breaker.more: "⬅️ Torna al menu"
 route.breaker.clears: "❌ Abbandona"
 
-validator.not_valid: "Il parametro inserito non è valido"
+# ROUTES (CALLBACK)
+callback.map: "map"
+
+# VALIDATOR
 validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
 validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
+validator.not_valid: "Il parametro inserito non è valido"
+valodator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi"
+
+# GENERAL
+complete: "Fatto!"
+continue: "Continua"
+exit: "Esci"
+wait: "Sei in attesa fino alle %s"
+minutes: "Minuti"
+add: "Aggiungi"
+yep: "Si!"
+nope: "No!"
+confirm: "Confermo!"
+resources: "💠 Risorse"
+items: "🔩 Oggetti"
+equip: "Equipaggia"
+destroy: "Distruggi"
+playerDie: "<b>Sei morto...</b>\nRecupererai le forze alle %s."
+name: "Nome"
+category: "Categoria"
+rarity: "Rarità"
+integrity: "Integrità"
+use: "Usa"
+fuel: "Carburante"
+hours: "Ore"
+
+# MENU
+menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
+menu.tasks: "⏱ *Attività in corso:*\n"
+menu.tasks.minutes_left: "*%v* minuti al termine"
+menu.tasks.completed: "*completata!*"
+
+# ARMORS/WEAPONS
+armor: "🛡 Armatura"
+armors: "🛡 Armature"
+helmet: "Elmo"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
+
+head: "Testa"
+
+weapon: "🗡 Arma"
+weapons: "🗡 Armi"
+knife: "Coltello"
+auto_rifle: "Fucile Automatico"
+sniper_rifle: "Fucile da cecchino"
+shotgun: "Fucile a pompa"
+
+# HUNTING
+hunting.init: "Decidi di esplorare l'area circostante... fa' attenzione!"
+hunting.error.no_weapon_equipped: "Devi equipaggiare un arma per andare a caccia!"
+hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
+hunting.completed: "Caccia completata, torni alla base col bottino."
+hunting.leave: "Abbandona caccia"
+
+tresure.found.resource: "Hai trovato 💠*%s*"
+tresure.found.item: "Hai trovato 🔩*%s*"
+tresure.found.transaction: "Hai trovato *%v*💰"
+tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
+tresure.found.trap: "AH! Sei inciampato in una trappola e hai perso *%v*HP!"
+
+# COMBAT SYSTEM
+combat.attack: "Attacca"
+combat.attack_with: "Attacca con %s"
+combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
+combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
+combat.mob_killed: "Sei riuscito a sconfiggere *%s*! %s"
+combat.player_killed: "Sei stato ucciso! Torni alla base in fin di vita, ci vorrà un po' per recuperare le energie."
+combat.miss: "Hai mancato il mostro, ma hai subito %d danni."
+combat.found.resource: "\nTrovando: 💠*%s*"
+combat.found.item: "\nTrovando: 🔩*%s*"
+combat.found.transaction: "\nTrovando: *%v*💰"
+combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
+combat.experience: "Ottenendo anche *%v* di esperienza nel combattimento!"
+
+# MISSION
+mission.exploration: "Seleziona campo di ricerca:"
+mission.underground: "Sottosuolo"
+mission.surface: "Superfice"
+mission.atmosphere: "Atmosfera"
+mission.extraction_recap: "Hai estratto 💠 *%s* di rarità *%s (%s)* per una quantità pari a *%d* unità, vuoi continuare la missione?"
+mission.extraction_ended: "Sei rientrato dalla missione con le tue nuove risorse!\n\n💠 *Rapporto Missione:*\n"
+mission.comeback: "Rientra dalla missione"
+mission.validator.wait: "Se già in missione, il prossimo rapporto è previsto alle *%s*"
+mission.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*"
+mission.continue: "Continua missione"
+
+# CRAFTING
+crafting.categories.medical: "💊 Curative"
+crafting.categories.ship_support: "⚙️ Supporto nave"
+crafting.craft: "Crafting:"
+crafting.start: "Inizia!"
+crafting.craft_different_item: "Crea altro!"
+crafting.what: "Cosa vuoi realizzare?"
+crafting.type: "Quale categoria di craft ti interessa realizzare?"
+crafting.add: "Aggiungi"
+crafting.choose_resources: "Quali risorse vuoi usare?"
+crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
+crafting.craft_completed: "Il tuo item è stato craftato correttamente. Hai ottenuto: %s!"
+crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
+crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per craftare"
+crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la ricetta!"
+crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
+crafting.item_does_not_exist: "L'item scelto non esiste!"
+crafting.no_resources: "Non hai abbastanza risorse!"
+crafting.no_resource: "Non hai questa risorsa!"
+
+# ITEMS
+items.revitalizing_small: "Rivitalizzante piccolo"
+items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
+items.revitalizing_medium: "Rivitalizzante medio"
+items.description.revitalizing_medium: "Permette di recuperare *%vHP*."
+items.revitalizing_max: "Rivitalizzante grande"
+items.description.revitalizing_max: "Permette di recuperare *%vHP*."
+
+items.raw_fuel: "Carburante grezzo"
+items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.refined_fuel: "Carburante raffinato"
+items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.final_fuel: "Carburante finale"
+items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+
+# INVENTORY
+inventory.intro: "Cosa vuoi gestire?"
+inventory.recap: "Ecco il riepilogo del tuo inventario:"
+# inventory.summary: "Riassunto inventario"
+# inventory.equip: "Equipaggia Oggetto"
+# inventory.destroy: "Distruggi Oggetto"
+inventory.type: "Quale tipologia vorresti equipaggiare?"
+inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare"
+inventory.armors.what: "Quale tra le tue *armature* vorresti equipaggiare?"
+inventory.armors.zero_equipment: "❌ Nessuna"
+inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
+inventory.weapons.what: "Quale tra le tue *armi* vorresti equipaggiare?"
+inventory.weapons.zero_equipment: "❌ Nessuna"
+
+
+# Inventario - equipaggia
+inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
+inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
+inventory.equip.confirm: "*Confermi di voler equipaggiare %v?*"
+inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
+
+# Inventario - distruggi
+inventory.destroy.type: "Quale tipologia vorresti distruggere?"
+inventory.destroy.what: "Cosa vorresti distruggere?"
+inventory.destroy.confirm: "Confermi di voler distruggere?"
+inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
+
+# Inventario - oggetti
+inventory.items.what: "Quale item vorresti usare?"
+inventory.items.use: "Usa:"
+inventory.items.confirm: "*Confermi di voler usare %v?*"
+inventory.items.confirm_warning: "*Confermi di voler usare %v?*\nAttezione, l'eccedenza verrà automaticamente scartata."
+inventory.items.completed: "Hai usato *%s* e di beneficiare delle sue caratteristiche."
+
+# ABILITY TREE
+ability.no_point_left: "Punti abilità non sufficienti"
+ability.back: "Torna all'albero"
+ability.stats.type: "Quale abilità vuoi incrementare?\n"
+ability.stats.total_point: "Hai a disposizione 🧬 %v punti abilità!"
+ability.stats.completed: "Hai incrementato con successo %s!"
+ability.experience: "Esperienza"
+ability.level: "Livello"
+ability.strength: "Forza"
+ability.dexterity: "Destrezza"
+ability.constitution: "Costituzione"
+ability.intelligence: "Intelligenza"
+ability.wisdom: "Saggezza"
+ability.charisma: "Carisma"
+
+# TUTORIAL
+# Multiple Messages: keyword_number: "TEXT"
+route.tutorial_0: "⚡*VERIFICA SISTEMA*"
+route.tutorial_1: "⚡*VERIFICA SISTEMA*\n[■■■ 25%%]"
+route.tutorial_2: "⚡*VERIFICA SISTEMA*\n[■■■■■■ 45%%]"
+route.tutorial_3: "⚡*VERIFICA SISTEMA*\n[■■■■■■■■ 60%%]"
+route.tutorial_4: "⚡*VERIFICA SISTEMA*\n[■■■■■■■■■ 73%%]"
+route.tutorial_5: "⚡*VERIFICA SISTEMA*\n[■■■■■■■■■■■  90%%]"
+route.tutorial_6: "⚡*VERIFICA SISTEMA*\n*Sistema:* ✅ ripristinato, IA operativa \n"
+route.tutorial_7: "⚡*VERIFICA SISTEMA*\n*Sistema:* ✅ ripristinato, IA operativa \n*BoardSystem:* ✅ Attivato"
+
+route.tutorial_8: "👨🏼‍🚀 *VERIFICA PILOTA* "
+route.tutorial_9: "\n*Controllo vitale:* "
+route.tutorial_10: "✅ On-Line"
+route.tutorial_11: "\n*Stato Pilota:* "
+route.tutorial_12: "❌ Incosciente"
+
+route.tutorial_13: "🚀 ‍*VERIFICA NAVE*"
+route.tutorial_14: "\n*Autopilota:* "
+route.tutorial_15: "✅ Attivato"
+route.tutorial_16: "\n*Radar:* "
+route.tutorial_17: "✅ On-Line"
+route.tutorial_18: "\n*Rotta navigazione:* "
+route.tutorial_19: "❌ Errata"
+
+route.tutorial_20: "⚠️ *ATTENZIONE!* ⚠️ \nIMPOSSIBILE MODIFICARE LA ROTTA.\nCOLLISIONE CON PIANETA SCONOSCIUTO IMMINENTE.\nIMPATTO TRA:"
+
+route.tutorial_21: "*6!*"
+route.tutorial_22: "*5!*"
+route.tutorial_23: "*4!*"
+route.tutorial_24: "*3!*"
+route.tutorial_25: "*2!*"
+route.tutorial_26: "*1!*"
+route.tutorial_27: "..."
+
+#SO BIG #route.explosion: "<code>\t\t\t\t\t\t\t\t\t____/\t(\t\t(\t\t\t\t)\t\t\t)\t\\\\___\n\t\t\t\t\t\t\t\t/(\t(\t\t(\t\t)\t\t\t_\t\t\t\t))\t\t)\t\t\t)\\\n\t\t\t\t\t\t((\t\t\t\t\t(\t\t\t)(\t\t\t\t)\t\t)\t\t\t(\t\t\t)\t\t)\n\t\t\t\t((/\t\t(\t_(\t\t\t)\t\t\t(\t\t\t_)\t)\t(\t\t()\t)\t\t)\n\t\t\t(\t(\t\t(\t(_)\t\t\t((\t\t\t\t(\t\t\t)\t\t.((_\t)\t.\t\t)_\n\t\t(\t(\t\t)\t\t\t\t(\t\t\t\t\t\t(\t\t)\t\t\t\t)\t\t\t)\t.\t)\t(\t\t\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t)\t(\t\t_\t\t(\t_)\t).\t\t)\t.\t)\t)\t(\t)\n\t(\t(\t\t(\t\t\t)\t(\t\t)\t\t\t(\t\t))\t\t\t\t\t)\t_)(\t\t\t)\t\t)\t\t)\n(\t(\t\t(\\\\\t)\t(\t\t\t\t(_\t\t(\t)\t(\t)\t\t)\t\t\t)\t)\t\t))\t(\t)\n\t(\t\t(\t\t\t(\t\t(\t\t\t(_\t(\t)\t(\t_\t\t\t\t)\t\t)\t(\t\t)\t\t)\t\t\t)\n(\t(\t\t(\t(\t\t(\t\t)\t\t\t\t\t(_\t\t)\t\t)\t)\t\t_)\t\t\t)\t_(\t(\t)\n\t((\t\t(\t\t\t)(\t\t\t\t(\t\t\t\t\t_\t\t\t\t)\t\t\t_)\t_(_\t(\t\t(_\t)\n\t\t\t(_((__(_(__((\t(\t(\t|\t\t)\t)\t)\t)_))__))_)___)\n\t\t((__)\t\t\t\t\t\t\t\\\\\\||lll|l||///\t\t\t\t\t\t\t\t\t\\\\_))\n\t\t\t\t\t\t\t\t\t\t\t(\t\t\t/(/\t(\t\t)\t\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t(\t(\t(\t|\t|\t)\t)\t)\\\t\t\t)\n\t\t\t\t\t\t\t\t\t\t(\t\t\t/(|\t/\t(\t))\t)\t)\t))\t)\n\t\t\t\t\t\t\t\t(\t\t\t\t\t(\t((((_(|)_)))))\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t\t||\\(|(|)|/||\t\t\t\t\t)\n\t\t\t\t\t\t\t(\t\t\t\t\t\t\t\t|(||(||)||||\t\t\t\t\t\t\t\t)\n\t\t\t\t\t\t\t\t\t(\t\t\t\t\t//|/l|||)|\\\\\\\\\t\t\t\t\t)\n\t\t\t\t\t\t\t(/\t/\t//\t\t/|//||||\\\\\t\\\\\\\\\t\\\\\t_)\n</code>"
+route.tutorial.explosion: "<code>\t\t\t\t\t\t\t\t--_--\n\t\t\t\t\t(\t\t-_\t\t\t\t_).\n\t\t\t(\t~\t\t\t\t\t\t\t)\t\t\t)\n\t((\t)\t\t(\t\t\t\t)\t\t()\t\t)\n\t\t(.\t\t\t))\t(\t\t\t\t\t\t\t)\n\t\t\t\t``..\t\t\t\t\t..``\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t\t\t(=|\t|=)\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t(../(\t)\\.))\n</code>"
+route.tutorial.open_eye: "Apri gli occhi..."
+route.tutorial.first_use_item: "💭: Ti ritrovi su un pianeta sconosciuto, piuttosto malconcio.\nVerifichi immediatamente se nel tuo *inventario* sia presente qualcosa per recuperare un po' di energie...\n\n📖 *Oggetti:*\nAccedendo al tuo inventario avrai la possibilità di usare gli item da te craftati o trovati. Questi oggetti si dividono in diverse catergorie, sta a solo a te decidere di cosa beneficiare."
+route.tutorial.first_mission: "💭: Sei riuscito a recuperare un po' di forze per continuare...\nTi rialzi in piedi e guardando verso la nave (non del tutto integra) decidi di tentare una missione di ricerca nella zona.\n\n📖 *Missione:*\nÈ una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
+route.tutorial.first_crafting: "💭: Recuperate le risorse pensi a un modo per poter ripistinare parte dell'integrità della nave.\n\n📖 *Crafting:*\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza aprono molte strade. (SKIPPABILE)"
+route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante. Decidi quindi di equipaggiarla.\n\n📖 *Equipaggiamento:*\nArmi e armature, migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
+route.tutorial.first_hunting: "💭: Equipaggi l'arma e ti fai coraggio, decidi quindi di esplorare l'area intorno a te.\n\n📖 *Caccia:*\nÈ una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e monete!\nOvviamente se muori...beh muori.. fai attenzione!."
+
+route.tutorial.error.function_not_completed: "Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
+route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirari a trovare delle risposte."
+
+# CRON
+cron.route.testing.time_alert: "End Test time"
+cron.route.mission_alert: "Sei rientrato dalla missione, scopri quali risorse hai trovato."
+cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.hunting_alert: "Informazioni ritornate con successo!"
+cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
+cron.route.ship.exploration_alert: "Nuovo pianeta raggiunto!"
+cron.route.death: "Hai recuperato le energie!"
+cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il prodotto!"
+
+# SHIP
+ship.report: "Rapporto Nave"
+
+# SHIP - Exploration
+ship.exploration.info: "Vuoi avviare una nuova esplorazione?"
+ship.exploration.start: "📡 Ricerca"
+ship.exploration.current_position: "🗺 Ecco la tua posizione attuale:"
+ship.exploration.research: "In base alla tua posizione sono stati rilevati i seguenti pianeti. Quale vuoi raggiungere?"
+ship.exploration.fuel_needed: "Carburante necessario"
+ship.exploration.time_needed: "Tempo necessario"
+ship.exploration.exploring: "🚀 Motori accesi, buon viaggio! Il tuo arrivo è previsto per le *%s*"
+ship.exploration.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli dell'esplorazione."
+ship.exploration.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna più tardi."
+route.exploration.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."
+ship.exploration.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
+
+# SHIP - Warehouse
+ship.warehouse.info: "Info warehouse"
+
+# SHIP - Repairs
+ship.repairs.info: "Dettagli di riparazione!\n\n"
+ship.repairs.time: "⏱ Tempo necessario: %v (minuti)"
+ship.repairs.quantity_resources: "💠 Risorse necessarie: %v (%s)"
+ship.repairs.used_resources: "💠 Risorse impiegate per la riparazione:\n"
+ship.repairs.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave.\nDevi recuperare più risorse della stessa rarità della tua nave."
+ship.repairs.dont_need: "La tua nave non necessita di riparazioni."
+ship.repairs.start: "Avvia riparazione"
+ship.repairs.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
+ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
+ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrità."
+
+# SHIP - Better
+ship.better.info: "Info better"
+
+# SHIP - RESTS
+ship.rests.info: "💭: Il miglior modo per recuperare vita è mettersi a dormire.\nRiposando recupererai ogni minuto *1HP*!\n"
+ship.rests.time: "⏱: Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests.start: "Mettiti a dormire"
+ship.rests.wakeup: "Risvegliati"
+ship.rests.dont_need: "Sei pieno di energie, ci provi ma proprio non riesci ad addormentarti"
+ship.rests.reparing: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
+ship.rests.need_to_rest: "Non hai ancora recuperato abbastanza energie, torna a dormire!"
+ship.rests.reparing.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
+ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
+
+# SAFE PLANET
+safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
+
+# SAFE PLANET - BANK
+safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co"
+safeplanet.bank.account_details: "Qui di seguito potrai trovare i dettagli del tuo conto:\nHai a disposizione: *%v* 💰"
+safeplanet.bank.deposit: "Deposito"
+safeplanet.bank.deposit_message: "Quanto desideri depositare?"
+
+safeplanet.bank.withdraws: "Prelievo"
+safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
+safeplanet.bank.operation_done: "Operazione effettuata con successo"
+safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
