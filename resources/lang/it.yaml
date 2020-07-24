@@ -28,6 +28,7 @@ route.ship.better: "Migliora"
 route.menu: "BoardSystem"
 route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
+route.banned: "Banned"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
@@ -78,6 +79,9 @@ menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
+
+# BANNED
+banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
 
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"

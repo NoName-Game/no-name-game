@@ -34,6 +34,7 @@ var (
 		"route.inventory.equip": reflect.TypeOf((*controllers.InventoryEquipController)(nil)).Elem(),
 		// "route.inventory.destroy": reflect.TypeOf((*controllers.InventoryDestroyController)(nil)).Elem(),
 		"route.inventory.items": reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
+		"route.banned":          reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
 
 		// Safe Planet
 		"route.safeplanet.bank":    reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
