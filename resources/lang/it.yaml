@@ -16,6 +16,7 @@ route.inventory.recap: "🏷 Riepilogo Inventario"
 route.inventory.items: "🔩 Oggetti"
 route.inventory.equip: "🛡 Equipaggiamento"
 #route.inventory.destroy: "Distruggi Oggetto"
+route.player: "👨🏼‍🚀 Player"
 route.ability: "🧬 Abilità"
 route.hunting: "⚔️ Caccia"
 route.ship: "🚀 Nave"
@@ -168,6 +169,9 @@ items.refined_fuel: "Carburante raffinato"
 items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
 items.final_fuel: "Carburante finale"
 items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+
+# PLAYER
+player.intro: "Stato Player"
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"

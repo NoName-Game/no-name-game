@@ -51,7 +51,7 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update,
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(1, &MenuController{}) {
+		if c.BackTo(1, &ShipController{}) {
 			return
 		}
 	}
@@ -260,7 +260,7 @@ func (c *CraftingController) Stage() (err error) {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 			),
 		))
 

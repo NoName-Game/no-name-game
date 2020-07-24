@@ -18,20 +18,22 @@ var (
 
 		"route.mission":  reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
 		"route.crafting": reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
-		"route.ability":  reflect.TypeOf((*controllers.AbilityController)(nil)).Elem(),
 
 		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
-
-		"route.inventory":       reflect.TypeOf((*controllers.InventoryController)(nil)).Elem(),
-		"route.inventory.recap": reflect.TypeOf((*controllers.InventoryRecapController)(nil)).Elem(),
-		"route.inventory.equip": reflect.TypeOf((*controllers.InventoryEquipController)(nil)).Elem(),
-		// "route.inventory.destroy": reflect.TypeOf((*controllers.InventoryDestroyController)(nil)).Elem(),
-		"route.inventory.items": reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
 
 		"route.ship":             reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
 		"route.ship.exploration": reflect.TypeOf((*controllers.ShipExplorationController)(nil)).Elem(),
 		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
 		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+
+		// Player
+		"route.player":          reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
+		"route.ability":         reflect.TypeOf((*controllers.AbilityController)(nil)).Elem(),
+		"route.inventory":       reflect.TypeOf((*controllers.InventoryController)(nil)).Elem(),
+		"route.inventory.recap": reflect.TypeOf((*controllers.InventoryRecapController)(nil)).Elem(),
+		"route.inventory.equip": reflect.TypeOf((*controllers.InventoryEquipController)(nil)).Elem(),
+		// "route.inventory.destroy": reflect.TypeOf((*controllers.InventoryDestroyController)(nil)).Elem(),
+		"route.inventory.items": reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
 
 		// Safe Planet
 		"route.safeplanet.bank":    reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
