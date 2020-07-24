@@ -28,7 +28,7 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
+		if c.BackTo(0, &PlayerController{}) {
 			return
 		}
 	}
@@ -44,7 +44,7 @@ func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update
 			// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.destroy")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
 		),
 	)
 
