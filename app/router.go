@@ -13,6 +13,13 @@ import (
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing
 func routing(player nnsdk.Player, update tgbotapi.Update) {
+	// A prescindere da tutto verifico se il player è stato bannato
+	// Se così fosse non gestisco nemmeno l'update.
+	if *player.Banned {
+		invoke(Routes["route.banned"], "Handle", player, update, false)
+		return
+	}
+
 	// Verifica il tipo di messaggio
 	var callingRoute string
 	if update.Message != nil {
