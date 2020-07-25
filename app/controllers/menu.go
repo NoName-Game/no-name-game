@@ -248,6 +248,9 @@ func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
 		},
 		{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
+		},
+		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 		},
 		{

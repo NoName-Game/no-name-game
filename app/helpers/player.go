@@ -92,3 +92,26 @@ func CheckPlayerHaveOneEquippedWeapon(player nnsdk.Player) bool {
 
 	return false
 }
+
+// GetPlayerCurrentPlanet
+// Recupera il pianeta corrente del player
+func GetPlayerCurrentPlanet(player nnsdk.Player) (planet nnsdk.Planet, err error) {
+	var playerProvider providers.PlayerProvider
+	var planetProvider providers.PlanetProvider
+
+	// Recupero ultima posizione del player, dando per scontato che sia
+	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
+	var lastPosition nnsdk.PlayerPosition
+	lastPosition, err = playerProvider.GetPlayerLastPosition(player)
+	if err != nil {
+		return planet, err
+	}
+
+	// Dalla ultima posizione recupero il pianeta corrente
+	planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	if err != nil {
+		return planet, err
+	}
+
+	return planet, nil
+}

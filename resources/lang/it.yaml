@@ -29,6 +29,7 @@ route.menu: "BoardSystem"
 route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
 route.banned: "Banned"
+route.planet: "🌍 Pianeta"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
@@ -341,3 +342,13 @@ safeplanet.bank.withdraws: "Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
+
+# PLANET
+planet.intro: "Dettagli posizione attuale:"
+planet.details.system: "*Sistema:*\n 💫 %s"
+planet.details.name: "*Pianeta:*\n🌍 %s"
+planet.details.coordinate.x: "🆇 %v"
+planet.details.coordinate.y: "🆈 %v"
+planet.details.coordinate.z: "🆉 %v"
+planet.details.biome: "Bioma: %s"
+planet.details.atmosphere: "Atmosfera: %s"
