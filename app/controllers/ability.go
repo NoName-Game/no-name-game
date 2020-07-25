@@ -27,7 +27,7 @@ var (
 		"Strength",
 		// "dexterity",
 		// "constitution",
-		"Intelligence",
+		"Intellect",
 		// "wisdom",
 		// "charisma",
 	}
