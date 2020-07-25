@@ -28,6 +28,8 @@ route.ship.better: "Migliora"
 route.menu: "BoardSystem"
 route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
+route.banned: "Banned"
+route.planet: "🌍 Pianeta"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
@@ -78,6 +80,9 @@ menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
+
+# BANNED
+banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
 
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"
@@ -337,3 +342,13 @@ safeplanet.bank.withdraws: "Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
+
+# PLANET
+planet.intro: "Dettagli posizione attuale:"
+planet.details.system: "*Sistema:*\n 💫 %s"
+planet.details.name: "*Pianeta:*\n🌍 %s"
+planet.details.coordinate.x: "🆇 %v"
+planet.details.coordinate.y: "🆈 %v"
+planet.details.coordinate.z: "🆉 %v"
+planet.details.biome: "Bioma: %s"
+planet.details.atmosphere: "Atmosfera: %s"
