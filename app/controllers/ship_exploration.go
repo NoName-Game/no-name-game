@@ -291,9 +291,10 @@ func (c *ShipExplorationController) Stage() (err error) {
 				planetName = fmt.Sprintf("%s 🏟", explorationInfo.Planet.Name)
 			}
 
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\n⏱ %v (%s)",
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\nInt️ -%v%%\n⏱ %v (%s)",
 				planetName,
 				explorationInfo.Fuel,
+				explorationInfo.Integrity,
 				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
 				// explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z,
 			)
@@ -403,6 +404,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 			c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Z,
 		}
 		request.Tank = c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel
+		request.Integrity = c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity
 
 		_, err := shipProvider.EndShipExploration(c.Payload.Ship, request)
 		if err != nil {
