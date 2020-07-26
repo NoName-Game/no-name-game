@@ -172,10 +172,28 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			return err
 		}
 
+		// armatura base player
 		if len(armors) > 0 {
+			var helmet, gauntlets, chest, leg string
 			for _, armor := range armors {
-				currentArmorsEquipment += fmt.Sprintf("- %s 🛡\n", armor.Name)
+				switch armor.ArmorCategory.Slug {
+				case "helmet":
+					helmet = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
+				case "gauntlets":
+					gauntlets = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
+				case "chest":
+					chest = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
+				case "leg":
+					leg = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
+				}
 			}
+
+			currentArmorsEquipment += fmt.Sprintf("%s \n\n%s \n\n%s \n\n%s",
+				helmet,
+				gauntlets,
+				chest,
+				leg,
+			)
 		} else {
 			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
 		}

@@ -92,13 +92,6 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		return message, err
 	}
 
-	// Calcolo lato economico del player
-	var economy string
-	economy, err = c.GetPlayerEconomy()
-	if err != nil {
-		return message, err
-	}
-
 	// Recupero status vitale del player
 	var life string
 	life, err = c.GetPlayerLife()
@@ -108,9 +101,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 
 	message = helpers.Trans(c.Player.Language.Slug, "menu",
 		planet,
-		c.Player.Username,
 		life,
-		economy,
 		c.GetPlayerTasks(),
 	)
 
@@ -147,23 +138,6 @@ func (c *MenuController) GetPlayerPosition() (result string, err error) {
 	}
 
 	return planet.Name, err
-}
-
-// GetPlayerTask
-// Metodo didicato alla reppresenteazione del risorse econimiche del player
-func (c *MenuController) GetPlayerEconomy() (economy string, err error) {
-	var playerProvider providers.PlayerProvider
-
-	// Calcolo monete del player
-	var money nnsdk.MoneyResponse
-	money, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "money")
-
-	var diamond nnsdk.MoneyResponse
-	diamond, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "diamond")
-
-	economy = fmt.Sprintf("💰 %v 💎 %v", money.Value, diamond.Value)
-
-	return
 }
 
 // GetPlayerLife
