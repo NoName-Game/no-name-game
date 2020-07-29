@@ -3,12 +3,12 @@ package app
 import (
 	"reflect"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
+	"bitbucket.org/no-name-game/nn-telegram/app/controllers"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 var (
@@ -88,7 +88,7 @@ func handleUpdate(update tgbotapi.Update) {
 
 	var err error
 	// Gestisco utente
-	var player nnsdk.Player
+	var player *pb.Player
 	player, err = helpers.HandleUser(update)
 	if err != nil {
 		panic(err)

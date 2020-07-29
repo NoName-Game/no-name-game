@@ -33,7 +33,7 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 }
 
 // KeyInMap - Check if ID is in map
-func KeyInMap(a uint, list map[uint]int) bool {
+func KeyInMap(a uint32, list map[uint32]int32) bool {
 	for k := range list {
 		if k == a {
 			return true

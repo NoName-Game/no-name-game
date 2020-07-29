@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
@@ -20,17 +22,16 @@ type PlayerEquipmentController struct {
 	BaseController
 	Payload struct {
 		Type    string
-		EquipID uint
+		EquipID uint32
 	}
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerEquipmentController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -83,10 +84,16 @@ func (c *PlayerEquipmentController) Handle(player nnsdk.Player, update tgbotapi.
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -152,10 +159,6 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *PlayerEquipmentController) Stage() (err error) {
-	var playerProvider providers.PlayerProvider
-	var armorProvider providers.ArmorProvider
-	var weaponProvider providers.WeaponProvider
-
 	switch c.State.Stage {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
@@ -166,11 +169,18 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		var armors nnsdk.Armors
-		armors, err = playerProvider.GetPlayerArmors(c.Player, "true")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		response, err := services.NnSDK.GetPlayerArmors(ctx, &pb.GetPlayerArmorsRequest{
+			PlayerID: c.Player.GetID(),
+			Equipped: true,
+		})
 		if err != nil {
 			return err
 		}
+
+		var armors []*pb.Armor
+		armors = response.GetArmors()
 
 		// armatura base player
 		if len(armors) > 0 {
@@ -204,11 +214,16 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentWeaponsEquipment string
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
-		var weapons nnsdk.Weapons
-		weapons, err = playerProvider.GetPlayerWeapons(c.Player, "true")
+		responseWeapon, err := services.NnSDK.GetPlayerWeapons(ctx, &pb.GetPlayerWeaponsRequest{
+			PlayerID: c.Player.GetID(),
+			Equipped: true,
+		})
 		if err != nil {
 			return err
 		}
+
+		var weapons []*pb.Weapon
+		weapons = responseWeapon.GetWeapons()
 
 		if len(weapons) > 0 {
 			for _, weapon := range weapons {
@@ -269,13 +284,20 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
-			// Recupero nuovamente armature player, richiamando la rotta dedicata
-			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			var armors nnsdk.Armors
-			armors, err = playerProvider.GetPlayerArmors(c.Player, "false")
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			response, err := services.NnSDK.GetPlayerArmors(ctx, &pb.GetPlayerArmorsRequest{
+				PlayerID: c.Player.GetID(),
+				Equipped: false,
+			})
 			if err != nil {
 				return err
 			}
+
+			// Recupero nuovamente armature player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			var armors []*pb.Armor
+			armors = response.GetArmors()
 
 			if len(armors) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
@@ -299,13 +321,20 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
-			// Recupero nuovamente armi player, richiamando la rotta dedicata
-			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			var weapons nnsdk.Weapons
-			weapons, err = playerProvider.GetPlayerWeapons(c.Player, "false")
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			response, err := services.NnSDK.GetPlayerWeapons(ctx, &pb.GetPlayerWeaponsRequest{
+				PlayerID: c.Player.GetID(),
+				Equipped: false,
+			})
 			if err != nil {
 				return err
 			}
+
+			// Recupero nuovamente armi player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			var weapons []*pb.Weapon
+			weapons = response.GetWeapons()
 
 			if len(weapons) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
@@ -352,7 +381,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 	// equipaggiare e me lo metto nel payload in attesa di conferma
 	case 2:
 		var equipmentName string
-		var equipmentID uint
+		var equipmentID uint32
 		var equipmentError bool
 
 		// Ripulisco messaggio per recupermi solo il nome
@@ -360,24 +389,38 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			var armor nnsdk.Armor
-			armor, err = armorProvider.FindArmorByName(equipmentName)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			response, err := services.NnSDK.FindArmorByName(ctx, &pb.FindArmorByNameRequest{
+				Name: equipmentName,
+			})
 			if err != nil {
 				return err
 			}
+
+			var armor *pb.Armor
+			armor = response.GetArmor()
 
 			// Verifico se appartiene correttamente al player
 			if armor.PlayerID != c.Player.ID {
 				equipmentError = true
 			}
 
-			equipmentID = armor.ID
+			equipmentID = armor.GetID()
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			var weapon nnsdk.Weapon
-			weapon, err = weaponProvider.FindWeaponByName(equipmentName)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			response, err := services.NnSDK.FindWeaponByName(ctx, &pb.FindWeaponByNameRequest{
+				Name: equipmentName,
+			})
 			if err != nil {
 				return err
 			}
+
+			var weapon *pb.Weapon
+			weapon = response.GetWeapon()
 
 			// Verifico se appartiene correttamente al player
 			if weapon.PlayerID != c.Player.ID {
@@ -437,29 +480,37 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 	case 3:
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			var equipment nnsdk.Armor
-			equipment, err = armorProvider.GetArmorByID(c.Payload.EquipID)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_, err := services.NnSDK.GetArmorByID(ctx, &pb.GetArmorByIDRequest{
+				ID: int32(c.Payload.EquipID),
+			})
 			if err != nil {
-				return err
+				log.Fatalf("could not greet: %v", err)
 			}
 
 			// Aggiorno equipped
-			*equipment.Equipped = true
-			_, err = armorProvider.UpdateArmor(equipment)
+			_, err = services.NnSDK.UpdateArmor(ctx, &pb.UpdateArmorRequest{
+				Armor: &pb.Armor{Equipped: true},
+			})
 			if err != nil {
 				return err
 			}
-
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			var equipment nnsdk.Weapon
-			equipment, err = weaponProvider.GetWeaponByID(c.Payload.EquipID)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_, err := services.NnSDK.GetWeaponByID(ctx, &pb.GetWeaponByIDRequest{
+				ID: int32(c.Payload.EquipID),
+			})
 			if err != nil {
 				return err
 			}
 
 			// Aggiorno equipped
-			*equipment.Equipped = true
-			_, err = weaponProvider.UpdateWeapon(equipment)
+			_, err = services.NnSDK.UpdateWeapon(ctx, &pb.UpdateWeaponRequest{
+				Weapon: &pb.Weapon{Equipped: true},
+			})
 			if err != nil {
 				return err
 			}
@@ -477,7 +528,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.State.Completed = true
 	}
 
 	return

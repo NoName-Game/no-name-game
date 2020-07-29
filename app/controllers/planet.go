@@ -3,7 +3,8 @@ package controllers
 import (
 	"fmt"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -19,14 +20,14 @@ type PlanetController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlanetController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	c.Player = player
 	c.Update = update
 	c.Controller = "route.planet"
 
 	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(c.Player, c.Controller)
+	_ = helpers.SetRedisState(*c.Player, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -42,7 +43,8 @@ func (c *PlanetController) Handle(player nnsdk.Player, update tgbotapi.Update, p
 
 	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n%s \n%s \n%s \n\n%s \n%s \n%s",
 		helpers.Trans(player.Language.Slug, "planet.intro"),
-		helpers.Trans(player.Language.Slug, "planet.details.system", planet.PlanetSystem.Name),
+		// helpers.Trans(player.Language.Slug, "planet.details.system", planet.PlanetSystem.Name),
+		helpers.Trans(player.Language.Slug, "planet.details.name", planet.Name),
 		helpers.Trans(player.Language.Slug, "planet.details.name", planet.Name),
 		helpers.Trans(player.Language.Slug, "planet.details.biome", planet.Biome.Name),
 		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", planet.Atmosphere.Name),

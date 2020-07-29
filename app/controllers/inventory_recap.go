@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -20,10 +22,9 @@ type InventoryRecapController BaseController
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	var finalRecap string
-	var playerProvider providers.PlayerProvider
 
 	c.Update = update
 
@@ -31,18 +32,24 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// Recupero risorse inventario
 	// *******************
 
-	var playerInventoryResources nnsdk.PlayerInventories
-	playerInventoryResources, err = playerProvider.GetPlayerResources(player.ID)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.GetPlayerResources(ctx, &pb.GetPlayerResourcesRequest{
+		PlayerID: c.Player.GetID(),
+	})
 	if err != nil {
 		panic(err)
 	}
+
+	var playerInventoryResources []*pb.PlayerInventory
+	playerInventoryResources = response.GetPlayerInventory()
 
 	var recapResources string
 	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
 	for _, resource := range playerInventoryResources {
 		recapResources += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
-			*resource.Quantity,
+			resource.Quantity,
 			resource.Resource.Name,
 			strings.ToUpper(resource.Resource.Rarity.Slug),
 		)
@@ -51,18 +58,22 @@ func (c *InventoryRecapController) Handle(player nnsdk.Player, update tgbotapi.U
 	// *******************
 	// Recupero item inventario
 	// *******************
-	var playerInventoryItems nnsdk.PlayerInventories
-	playerInventoryItems, err = playerProvider.GetPlayerItems(player.ID)
+	responseItems, err := services.NnSDK.GetPlayerItems(ctx, &pb.GetPlayerItemsRequest{
+		PlayerID: c.Player.GetID(),
+	})
 	if err != nil {
 		panic(err)
 	}
+
+	var playerInventoryItems []*pb.PlayerInventory
+	playerInventoryItems = responseItems.GetPlayerInventory()
 
 	var recapItems string
 	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
 	for _, resource := range playerInventoryItems {
 		recapItems += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
-			*resource.Quantity,
+			resource.Quantity,
 			helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug),
 			strings.ToUpper(resource.Item.Rarity.Slug),
 		)

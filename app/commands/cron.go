@@ -1,11 +1,12 @@
 package commands
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
@@ -29,31 +30,35 @@ func (c *Cron) Notify() {
 	envCronMinutes, _ := strconv.ParseInt(os.Getenv("CRON_MINUTES"), 36, 64)
 	sleepTime := time.Duration(envCronMinutes) * time.Minute
 
-	var playerStateProvicer providers.PlayerStateProvider
-	var playerProvider providers.PlayerProvider
-
 	for {
 		// Sleep for minute
 		time.Sleep(sleepTime)
 
 		// Recupero tutto gli stati da notificare
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 
-		states, err := playerStateProvicer.GetPlayerStateToNotify()
+		states, err := services.NnSDK.GetPlayerStateToNotify(ctx, &pb.GetPlayerStateToNotifyRequest{})
 		if err != nil {
 			panic(err)
 		}
 
-		for _, state := range states {
-			player, err := playerProvider.GetPlayerByID(state.PlayerID)
+		for _, state := range states.GetPlayerState() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+
+			player, err := services.NnSDK.GetPlayerByID(ctx, &pb.GetPlayerByIDRequest{
+				ID: state.PlayerID,
+			})
 			if err != nil {
 				panic(err)
 			}
 
 			// Recupero testo da notificare, ogni controller ha la propria notifica
-			text, _ := services.GetTranslation("cron."+state.Controller+"_alert", player.Language.Slug, nil)
+			text, _ := services.GetTranslation("cron."+state.Controller+"_alert", player.GetPlayer().GetLanguage().GetSlug(), nil)
 
 			// Invio notifica
-			msg := services.NewMessage(player.ChatID, text)
+			msg := services.NewMessage(player.Player.ChatID, text)
 			// Al momento non associo nessun bottone potrebbe andare in conflitto con la mappa
 			// continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
 			// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
@@ -63,8 +68,12 @@ func (c *Cron) Notify() {
 			}
 
 			// Aggiorno lo stato levando la notifica
-			*state.ToNotify = false
-			state, err = playerStateProvicer.UpdatePlayerState(state)
+			state.ToNotify = false
+
+			_, err = services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+				PlayerState: state,
+			})
+			// state, err = playerStateProvicer.UpdatePlayerState(state)
 			if err != nil {
 				panic(err)
 			}

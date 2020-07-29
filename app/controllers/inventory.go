@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -17,14 +17,14 @@ type InventoryController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	c.Player = player
 	c.Update = update
 	c.Controller = "route.inventory"
 
 	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(c.Player, c.Controller)
+	_ = helpers.SetRedisState(*c.Player, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {

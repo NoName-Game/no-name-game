@@ -1,13 +1,15 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
+	"time"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -20,7 +22,7 @@ var (
 
 // Controller - Intereffaccia base di tutti i controller
 type Controller interface {
-	Handle(nnsdk.Player, tgbotapi.Update, bool)
+	Handle(*pb.Player, tgbotapi.Update, bool)
 	Validator()
 	Stage()
 }
@@ -28,21 +30,21 @@ type Controller interface {
 type BaseController struct {
 	Update     tgbotapi.Update
 	Controller string
-	Father     uint
+	Father     uint32
 	Validation struct {
 		HasErrors     bool
 		Message       string
 		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
-	Player  nnsdk.Player
-	State   nnsdk.PlayerState
+	Player  *pb.Player
+	State   *pb.PlayerState
 	Breaker struct {
 		ToMenu bool
 	}
 	ProxyStatment bool
 }
 
-func (c *BaseController) InitController(controller string, payload interface{}, blockers []string, player nnsdk.Player, update tgbotapi.Update) (initialized bool) {
+func (c *BaseController) InitController(controller string, payload interface{}, blockers []string, player *pb.Player, update tgbotapi.Update) (initialized bool) {
 	var err error
 	initialized = true
 
@@ -58,7 +60,7 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 	}
 
 	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(player, c.Controller, payload, c.Father)
+	c.State, _, err = helpers.CheckState(*player, c.Controller, payload, c.Father)
 
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
 	if err != nil {
@@ -70,17 +72,22 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 
 // Breaking - Metodo che permette di verificare se si vogliono fare
 // delle azioni che permetteranno di concludere
-func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed bool) {
-	var playerStateProvider providers.PlayerStateProvider
-
+func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backed bool) {
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 		if c.Controller != "" {
-			if c.State.Stage <= canBackFrom {
+			if c.State.GetStage() <= canBackFrom {
 				// Cancello stato da redis
-				_ = helpers.DelRedisState(c.Player)
+				_ = helpers.DelRedisState(*c.Player)
 
 				// Cancello record a db
-				_, _ = playerStateProvider.DeletePlayerState(c.State)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+					PlayerState: c.State,
+				})
+				if err != nil {
+					panic(err)
+				}
 
 				controller.Handle(c.Player, c.Update, true)
 				backed = true
@@ -92,10 +99,17 @@ func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed 
 		}
 
 		// Cancello stato da redis
-		_ = helpers.DelRedisState(c.Player)
+		_ = helpers.DelRedisState(*c.Player)
 
 		// Cancello record a db
-		_, _ = playerStateProvider.DeletePlayerState(c.State)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+			PlayerState: c.State,
+		})
+		if err != nil {
+			panic(err)
+		}
 
 		controller.Handle(c.Player, c.Update, true)
 		backed = true
@@ -105,12 +119,19 @@ func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed 
 	// Abbandona - chiude definitivamente cancellando anche lo stato
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
 		c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
-		if !*c.Player.Stats.Dead && c.Clearable() {
+		if !c.Player.GetStats().GetDead() && c.Clearable() {
 			// Cancello stato da redis
-			_ = helpers.DelRedisState(c.Player)
+			_ = helpers.DelRedisState(*c.Player)
 
 			// Cancello record a db
-			_, _ = playerStateProvider.DeletePlayerState(c.State)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+				PlayerState: c.State,
+			})
+			if err != nil {
+				panic(err)
+			}
 
 			// Call menu controller
 			new(MenuController).Handle(c.Player, c.Update, true)
@@ -124,7 +145,7 @@ func (c *BaseController) BackTo(canBackFrom int, controller Controller) (backed 
 	// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
 		// Cancello stato da redis
-		_ = helpers.DelRedisState(c.Player)
+		_ = helpers.DelRedisState(*c.Player)
 
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update, true)
@@ -154,20 +175,22 @@ func (c *BaseController) Clearable() (clearable bool) {
 
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing() (err error) {
-	var playerStateProvider providers.PlayerStateProvider
-
 	// Verifico se lo stato è completato chiudo
-	if *c.State.Completed {
+	if c.State.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
 		if c.State.Father == 0 {
-			_, err = playerStateProvider.DeletePlayerState(c.State) // Delete
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+				PlayerState: c.State,
+			})
 			if err != nil {
 				return err
 			}
 		}
 
 		// Cancello stato da redis
-		err = helpers.DelRedisState(c.Player)
+		err = helpers.DelRedisState(*c.Player)
 		if err != nil {
 			panic(err)
 		}
@@ -181,7 +204,7 @@ func (c *BaseController) Completing() (err error) {
 	// Verifico se si vuole forzare il menu
 	if c.Breaker.ToMenu {
 		// Cancello stato da redis
-		err = helpers.DelRedisState(c.Player)
+		err = helpers.DelRedisState(*c.Player)
 		if err != nil {
 			panic(err)
 		}
@@ -199,9 +222,9 @@ func (c *BaseController) Completing() (err error) {
 func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.Player.States {
+	for _, state := range c.Player.GetStates() {
 		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
-		if !*state.Completed && (state.Father == 0 || state.Father != c.State.Father) {
+		if !state.GetCompleted() && (state.Father == 0 || state.Father != c.State.Father) {
 			for _, blockState := range blockStates {
 				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
 					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))

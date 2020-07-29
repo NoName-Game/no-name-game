@@ -1,13 +1,16 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"math"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"github.com/golang/protobuf/ptypes"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -25,10 +28,9 @@ type ShipRestsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -82,10 +84,16 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -146,24 +154,26 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipRestsController) Stage() (err error) {
-	var playerProvider providers.PlayerProvider
-
 	switch c.State.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
+
 		// Recupero informazioni per il recupero totale delle energie
-		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		restsInfo, err := services.NnSDK.GetRestsInfo(ctx, &pb.GetRestsInfoRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Costruisco info per riposo
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 		if restsInfo.NeedRests {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.RestsTime)
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.GetRestsTime())
 		} else {
 			restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.dont_need")
 		}
@@ -180,7 +190,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !*c.Player.Stats.Dead {
+		if !c.Player.GetStats().GetDead() {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			))
@@ -204,18 +214,22 @@ func (c *ShipRestsController) Stage() (err error) {
 	// In questo stage avvio effettivamente il riposo
 	case 1:
 		// Recupero informazioni per il recupero totale delle energie
-		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		restsInfo, err := services.NnSDK.GetRestsInfo(ctx, &pb.GetRestsInfoRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Setto timer recuperato dalla chiamata delle info
-		c.State.FinishAt = helpers.GetEndTime(0, int(restsInfo.RestsTime), 0)
+		finishTime := helpers.GetEndTime(0, int(restsInfo.GetRestsTime()), 0)
+		c.State.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing", c.State.FinishAt.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing", finishTime.Format("15:04:05")),
 		)
 
 		msg.ParseMode = "markdown"
@@ -242,11 +256,14 @@ func (c *ShipRestsController) Stage() (err error) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 
 		// Fine riparazione
-		err = playerProvider.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{
-			RestsTime: uint(diffMinutes),
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		_, err := services.NnSDK.EndPlayerRest(ctx, &pb.EndPlayerRestRequest{
+			PlayerID:  c.Player.GetID(),
+			RestsTime: uint32(diffMinutes),
 		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Invio messaggio
@@ -268,7 +285,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.State.Completed = true
 	}
 
 	return

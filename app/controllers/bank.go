@@ -1,14 +1,15 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -26,10 +27,9 @@ type BankController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *BankController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -82,10 +82,16 @@ func (c *BankController) Handle(player nnsdk.Player, update tgbotapi.Update, pro
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -156,8 +162,15 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		var playerProvider providers.PlayerProvider
-		money, _ := playerProvider.GetPlayerEconomy(c.Player.ID, "bank")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		money, err := services.NnSDK.GetPlayerEconomy(ctx, &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.GetID(),
+			EconomyType: "bank",
+		})
+		if err != nil {
+			return err
+		}
 
 		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", money.Value))
 		msg.ParseMode = "Markdown"
@@ -208,8 +221,6 @@ func (c *BankController) Stage() (err error) {
 		// Aggiorno stato
 		c.State.Stage = 2
 	case 2:
-		//var transactionProvider providers.TransactionProvider
-		var npcProvider providers.NpcProvider
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
 		// in base alla tipologia scelta
@@ -219,19 +230,24 @@ func (c *BankController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
-		var operationType uint
+		var operationType uint32
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
 			operationType = 0
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
 			operationType = 1
 		}
-		request := nnsdk.BankActionRequest{
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		_, err = services.NnSDK.Bank(ctx, &pb.BankRequest{
 			OperationType: operationType,
 			PlayerID:      c.Player.ID,
 			Amount:        int32(value),
+		})
+		if err != nil {
+			return err
 		}
-		_, err = npcProvider.Bank(request)
 
 		// Registro transazione
 		/*_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
@@ -258,7 +274,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.State.Completed = true
 	}
 
 	return

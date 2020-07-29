@@ -1,14 +1,17 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"github.com/golang/protobuf/ptypes"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -22,18 +25,17 @@ import (
 type CraftingController struct {
 	BaseController
 	Payload struct {
-		Item      nnsdk.Item   // Item da craftare
-		Resources map[uint]int // Materiali necessari
+		Item      *pb.Item         // Item da craftare
+		Resources map[uint32]int32 // Materiali necessari
 	}
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -86,10 +88,16 @@ func (c *CraftingController) Handle(player nnsdk.Player, update tgbotapi.Update,
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -110,9 +118,6 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 			),
 		),
 	)
-
-	var itemProvider providers.ItemProvider
-	var playerProvider providers.PlayerProvider
 
 	switch c.State.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -135,11 +140,15 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
-		var items nnsdk.Items
-		items, err = itemProvider.GetAllItems()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		response, err := services.NnSDK.GetAllItems(ctx, &pb.GetAllItemsRequest{})
 		if err != nil {
 			return true, err
 		}
+
+		var items []*pb.Item
+		items = response.GetItem()
 
 		// Recupero nome item che il player vuole craftare
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
@@ -164,8 +173,17 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
-			var playerInventory nnsdk.PlayerInventories
-			playerInventory, _ = playerProvider.GetPlayerResources(c.Player.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			response, err := services.NnSDK.GetPlayerResources(ctx, &pb.GetPlayerResourcesRequest{
+				PlayerID: c.Player.GetID(),
+			})
+			if err != nil {
+				return false, err
+			}
+
+			var playerInventory []*pb.PlayerInventory
+			playerInventory = response.GetPlayerInventory()
 
 			// Ciclo gli elementi di cui devo verificare la presenza
 			for resourceID, quantity := range c.Payload.Resources {
@@ -173,7 +191,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 
 				// Ciclo inventario del player
 				for _, inventory := range playerInventory {
-					if inventory.Resource.ID == resourceID && *inventory.Quantity >= quantity {
+					if inventory.Resource.ID == resourceID && inventory.Quantity >= quantity {
 						haveResource = true
 					}
 				}
@@ -196,10 +214,15 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
 	case 4:
+		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		if err != nil {
+			panic(err)
+		}
+
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
 			"crafting.wait",
-			c.State.FinishAt.Format("15:04:05"),
+			finishAt.Format("15:04:05"),
 		)
 
 		// Aggiungo anche abbandona
@@ -215,7 +238,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		)
 
 		// Verifico se ha finito il crafting
-		if time.Now().After(c.State.FinishAt) {
+		if time.Now().After(finishAt) {
 			return false, err
 		}
 
@@ -229,20 +252,19 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
 func (c *CraftingController) Stage() (err error) {
-	var itemCategoryProvider providers.ItemCategoryProvider
-	var itemProvider providers.ItemProvider
-	var playerProvider providers.PlayerProvider
-	var playerInventoryProvider providers.PlayerProvider
-
 	switch c.State.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
-		var itemCategories nnsdk.ItemCategories
-		itemCategories, err = itemCategoryProvider.GetAllItemCategories()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		response, err := services.NnSDK.GetAllItemCategories(ctx, &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
+
+		var itemCategories []*pb.ItemCategory
+		itemCategories = response.GetItemCategory()
 
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
@@ -281,13 +303,17 @@ func (c *CraftingController) Stage() (err error) {
 	// che possono essere anche craftati dal player
 	case 1:
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
-		var itemCategories nnsdk.ItemCategories
-		itemCategories, err = itemCategoryProvider.GetAllItemCategories()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		response, err := services.NnSDK.GetAllItemCategories(ctx, &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
 
-		var chosenCategory nnsdk.ItemCategory
+		var itemCategories []*pb.ItemCategory
+		itemCategories = response.GetItemCategory()
+
+		var chosenCategory *pb.ItemCategory
 		for _, category := range itemCategories {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)) {
 				chosenCategory = category
@@ -295,18 +321,30 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Lista oggetti craftabili
-		var craftableItems nnsdk.Items
-		craftableItems, err = itemProvider.GetItemByCategoryID(chosenCategory.ID)
+		ctxItems, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		responseItems, err := services.NnSDK.GetItemByCategoryID(ctxItems, &pb.GetItemByCategoryIDRequest{
+			CategoryID: chosenCategory.ID,
+		})
 		if err != nil {
 			return err
 		}
 
+		var craftableItems []*pb.Item
+		craftableItems = responseItems.GetItem()
+
 		// Recupero tutti gli items del player
-		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
+		ctxInventory, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		responseInvetory, err := services.NnSDK.GetPlayerItems(ctxInventory, &pb.GetPlayerItemsRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			panic(err)
+			return err
 		}
+
+		var playerInventoryItems []*pb.PlayerInventory
+		playerInventoryItems = responseInvetory.GetPlayerInventory()
 
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
@@ -314,10 +352,10 @@ func (c *CraftingController) Stage() (err error) {
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, item := range craftableItems {
 			// Recupero quantità del player per quest'item
-			var playerQuantity int
+			var playerQuantity int32
 			for _, playerItem := range playerInventoryItems {
 				if playerItem.Item.ID == item.ID {
-					playerQuantity = *playerItem.Quantity
+					playerQuantity = playerItem.Quantity
 				}
 			}
 
@@ -356,15 +394,16 @@ func (c *CraftingController) Stage() (err error) {
 	// In questo stage riepilogo le risorse necessarie e
 	// chiedo al conferma al player se continuare il crafting dell'item
 	case 2:
+		// TODO: da completare recipe
 		// Inserisco nel payload la recipelist per avere accesso più facile ad essa
-		helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
+		// helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
 
 		// ListRecipe() genera una string contenente gli oggetti necessari al crafting
 		var itemsRecipeList string
-		itemsRecipeList, err = helpers.ListRecipe(c.Payload.Resources)
-		if err != nil {
-			return err
-		}
+		// itemsRecipeList, err = helpers.ListRecipe(c.Payload.Resources)
+		// if err != nil {
+		// 	return err
+		// }
 
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
@@ -401,7 +440,11 @@ func (c *CraftingController) Stage() (err error) {
 	case 3:
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			err = playerInventoryProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+
+			_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",
 				Quantity: -quantity,
@@ -426,8 +469,8 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Aggiorna stato
-		c.State.FinishAt = endTime
-		*c.State.ToNotify = true
+		// c.State.FinishAt = endTime
+		c.State.ToNotify = true
 		c.State.Stage = 4
 		c.Breaker.ToMenu = true
 
@@ -435,7 +478,11 @@ func (c *CraftingController) Stage() (err error) {
 	// proseguo con l'assegnarli l'item e concludo
 	case 4:
 		// Aggiungo item all'inventario
-		err = playerInventoryProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+			PlayerID: c.Player.GetID(),
 			ItemID:   c.Payload.Item.ID,
 			ItemType: "items",
 			Quantity: 1,
@@ -464,7 +511,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.State.Completed = true
 	}
 
 	return

@@ -1,14 +1,17 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"github.com/golang/protobuf/ptypes"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -25,7 +28,7 @@ type MissionController struct {
 	Payload struct {
 		ExplorationType string // Indica il tipo di esplorazione scelta
 		Times           int    // Indica quante volte ha ripetuto
-		Dropped         []nnsdk.DropItem
+		Dropped         []*pb.DropResourceResponse
 		ForcedTime      int // Questo valore serve per forzare le tempistiche
 	}
 }
@@ -33,10 +36,9 @@ type MissionController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -90,10 +92,16 @@ func (c *MissionController) Handle(player nnsdk.Player, update tgbotapi.Update, 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -133,16 +141,21 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
+		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		if err != nil {
+			panic(err)
+		}
+
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
 			"mission.validator.wait",
-			c.State.FinishAt.Format("15:04:05"),
+			finishAt.Format("15:04:05"),
 		)
 
 		// Verifico che l'utente stia accedendo a questa funzionalità solo dopo
 		// che abbia finito lo stato attuale e che non abbia raggiunto il limite
 		// di volte per il quale è possibile ripetere la stessa azione
-		if time.Now().After(c.State.FinishAt) && c.Payload.Times < 10 {
+		if time.Now().After(finishAt) && c.Payload.Times < 10 {
 			c.Payload.Times++
 
 			return false, err
@@ -166,8 +179,8 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
-			c.State.FinishAt = helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0)
-			*c.State.ToNotify = true
+			c.State.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
+			c.State.ToNotify = true
 
 			return false, err
 
@@ -194,10 +207,6 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *MissionController) Stage() (err error) {
-	var playerProvider providers.PlayerProvider
-	var planetProvider providers.PlanetProvider
-	var resourceProvider providers.ResourceProvider
-
 	switch c.State.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
@@ -272,53 +281,63 @@ func (c *MissionController) Stage() (err error) {
 
 		// Avanzo di stato
 		c.State.Stage = 2
-		*c.State.ToNotify = true
-		c.State.FinishAt = endTime
+		c.State.ToNotify = true
+		c.State.FinishAt, _ = ptypes.TimestampProto(endTime)
 		c.Breaker.ToMenu = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
 	case 2:
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		responsePlayer, err := services.NnSDK.GetPlayerLastPosition(ctx, &pb.GetPlayerLastPositionRequest{
+			PlayerID: c.Player.GetID(),
+		})
+		if err != nil {
+			return err
+		}
+
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		var lastPosition nnsdk.PlayerPosition
-		lastPosition, err = playerProvider.GetPlayerLastPosition(c.Player)
-		if err != nil {
-			return err
-		}
+		var lastPosition *pb.PlayerPosition
+		lastPosition = responsePlayer.GetPlayerPosition()
 
-		// Dalla ultima posizione recupero il pianeta corrente
-		var planet nnsdk.Planet
-		planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+		responsePlanet, err := services.NnSDK.GetPlanetByCoordinate(ctx, &pb.GetPlanetByCoordinateRequest{
+			X: lastPosition.GetX(),
+			Y: lastPosition.GetY(),
+			Z: lastPosition.GetZ(),
+		})
 		if err != nil {
 			return err
 		}
+		// Dalla ultima posizione recupero il pianeta corrente
+		var planet *pb.Planet
+		planet = responsePlanet.GetPlanet()
 
 		// Recupero drop
-		var drop nnsdk.DropItem
-		drop, err = resourceProvider.DropResource(nnsdk.ResourceDropRequest{
+		responseDrop, err := services.NnSDK.DropResource(ctx, &pb.DropResourceRequest{
 			TypeExploration: c.Payload.ExplorationType,
-			QtyExploration:  c.Payload.Times,
+			QtyExploration:  int32(c.Payload.Times),
 			PlayerID:        c.Player.ID,
 			PlanetID:        planet.ID,
 		})
-
 		if err != nil {
 			return err
 		}
 
 		// Se ho recuperato il drop lo inserisco nella lista degli elementi droppati
-		c.Payload.Dropped = append(c.Payload.Dropped, drop)
+		c.Payload.Dropped = append(c.Payload.Dropped, responseDrop)
 
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"mission.extraction_recap",
-				drop.Resource.Name,
-				drop.Resource.Rarity.Name,
-				strings.ToUpper(drop.Resource.Rarity.Slug),
-				drop.Quantity,
+				responseDrop.GetResource().GetName(),
+				responseDrop.GetResource().GetRarity().GetName(),
+				strings.ToUpper(responseDrop.GetResource().GetRarity().GetSlug()),
+				responseDrop.GetQuantity(),
 			),
 		)
 		msg.ParseMode = "markdown"
@@ -342,12 +361,17 @@ func (c *MissionController) Stage() (err error) {
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
+		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		if err != nil {
+			panic(err)
+		}
+
 		// Il player ha scelto di continuare la ricerca
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"mission.wait",
-				c.State.FinishAt.Format("15:04:05"),
+				finishAt.Format("15:04:05"),
 			),
 		)
 		msg.ParseMode = "markdown"
@@ -391,19 +415,21 @@ func (c *MissionController) Stage() (err error) {
 
 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		for _, drop := range c.Payload.Dropped {
-			err = playerProvider.ManagePlayerInventory(c.Player.ID, nnsdk.ManageInventoryRequest{
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+				PlayerID: c.Player.GetID(),
 				ItemID:   drop.Resource.ID,
 				ItemType: "resources",
 				Quantity: drop.Quantity,
 			})
-
 			if err != nil {
 				return err
 			}
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.State.Completed = true
 	}
 
 	return

@@ -1,24 +1,32 @@
 package helpers
 
 import (
+	"context"
 	"strconv"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // ListRecipe - Metodo che aiuta a recuperare la lista di risore necessarie
 // al crafting di un determianto item
-func ListRecipe(needed map[uint]int) (result string, err error) {
-	var resourceProvider providers.ResourceProvider
+func ListRecipe(needed map[uint32]int32) (result string, err error) {
 	for resourceID, value := range needed {
-		var resource nnsdk.Resource
-		resource, err = resourceProvider.GetResourceByID(resourceID)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		response, err := services.NnSDK.GetResourceByID(ctx, &pb.GetResourceByIDRequest{
+			ID: resourceID,
+		})
 		if err != nil {
 			return result, err
 		}
 
-		result += resource.Name + " x" + strconv.Itoa(value) + "\n"
+		var resource *pb.Resource
+		resource = response.GetResource()
+
+		result += resource.Name + " x" + strconv.Itoa(int(value)) + "\n"
 	}
 
 	return result, err
@@ -34,10 +42,22 @@ func CheckAndReturnCategorySlug(locale string, text string) (result string) {
 }
 
 func GetAllSlugCategories() (result []string) {
-	var armorCategoriesProvider providers.ArmorCategoryProvider
-	var weaponCategoriesProvider providers.WeaponCateogoryProvider
-	aCategories, _ := armorCategoriesProvider.GetAllArmorCategory()
-	wCategories, _ := weaponCategoriesProvider.GetAllWeaponCategory()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	responseArmor, err := services.NnSDK.GetAllArmorCategory(ctx, &pb.GetAllArmorCategoryRequest{})
+	if err != nil {
+		panic(err)
+	}
+	aCategories := responseArmor.GetArmorCategory()
+
+	responseWeapon, err := services.NnSDK.GetAllWeaponCategory(ctx, &pb.GetAllWeaponCategoryRequest{})
+	if err != nil {
+		panic(err)
+	}
+
+	wCategories := responseWeapon.GetWeaponCategories()
+
 	for i := 0; i < len(aCategories); i++ {
 		result = append(result, aCategories[i].Slug)
 	}

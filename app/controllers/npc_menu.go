@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
-	"bitbucket.org/no-name-game/nn-telegram/services"
+	"context"
 	"fmt"
+	"time"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -21,15 +23,20 @@ type NpcMenuController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *NpcMenuController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
-	var playerProvider providers.PlayerProvider
 
-	// Il menù del player refresha sempre lo status del player
-	player, err = playerProvider.FindPlayerByUsername(player.Username)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.FindPlayerByUsername(ctx, &pb.FindPlayerByUsernameRequest{
+		Username: player.GetUsername(),
+	})
 	if err != nil {
 		panic(err)
 	}
+
+	// Il menù del player refresha sempre lo status del player
+	player = response.GetPlayer()
 
 	// Init funzionalità
 	c.Controller = "route.menu.npc"
@@ -49,20 +56,22 @@ func (c *NpcMenuController) Handle(player nnsdk.Player, update tgbotapi.Update, 
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
-	if *c.Player.Stats.Dead {
+	if c.Player.GetStats().GetDead() {
 		restsController := new(ShipRestsController)
 		restsController.Handle(c.Player, c.Update, true)
 	}
 }
 
 func (c *NpcMenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
-	var npcProvider providers.NpcProvider
 
-	// Recupero gli npc attivi in questo momento
-	npcs, err := npcProvider.GetAll()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.GetAll(ctx, &pb.GetAllRequest{})
 	if err != nil {
 		panic(err)
 	}
+	// Recupero gli npc attivi in questo momento
+	npcs := response.GetNPCs()
 
 	var keyboardRow [][]tgbotapi.KeyboardButton
 	for _, npc := range npcs {

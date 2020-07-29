@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -24,17 +25,16 @@ type ShipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerProvider providers.PlayerProvider
 
 	c.Controller = "route.ship"
 	c.Player = player
 	c.Update = update
 
 	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(c.Player, c.Controller)
+	_ = helpers.SetRedisState(*c.Player, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -44,11 +44,17 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update, pro
 	}
 
 	// Recupero nave attiva de player
-	var eqippedShips nnsdk.Ships
-	eqippedShips, err = playerProvider.GetPlayerShips(c.Player, true)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.GetPlayerShips(ctx, &pb.GetPlayerShipsRequest{
+		PlayerID: c.Player.GetID(),
+		Equipped: true,
+	})
 	if err != nil {
 		panic(err)
 	}
+	var eqippedShips []*pb.Ship
+	eqippedShips = response.GetShips()
 
 	var currentShipRecap string
 	for _, ship := range eqippedShips {
@@ -57,7 +63,7 @@ func (c *ShipController) Handle(player nnsdk.Player, update tgbotapi.Update, pro
 			ship.Name, strings.ToUpper(ship.Rarity.Slug),
 			ship.ShipCategory.Name,
 			ship.ShipStats.Integrity, helpers.Trans(c.Player.Language.Slug, "integrity"),
-			*ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
+			ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
 		)
 	}
 

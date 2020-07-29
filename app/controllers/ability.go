@@ -1,15 +1,16 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -36,10 +37,9 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *AbilityController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -92,10 +92,16 @@ func (c *AbilityController) Handle(player nnsdk.Player, update tgbotapi.Update, 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		PlayerState: c.State,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.State = response.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -131,7 +137,7 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
 		for _, ability := range AbilityLists {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))) == c.Update.Message.Text {
-				if *c.Player.Stats.AbilityPoint == 0 {
+				if c.Player.GetStats().GetAbilityPoint() == 0 {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ability.no_point_left")
 					return true, err
 				}
@@ -151,8 +157,6 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *AbilityController) Stage() (err error) {
-	var playerStatsProvider providers.PlayerStatsProvider
-
 	switch c.State.Stage {
 	// Invio messaggio con recap stats
 	case 0:
@@ -170,7 +174,7 @@ func (c *AbilityController) Stage() (err error) {
 		}
 
 		// Mostro quanti punti ha a disposizione il player
-		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", *c.Player.Stats.AbilityPoint)
+		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", c.Player.GetStats().GetAbilityPoint())
 
 		// Creo tastierino con i soli componienti abilitati dal client
 		var keyboardRow [][]tgbotapi.KeyboardButton
@@ -212,15 +216,16 @@ func (c *AbilityController) Stage() (err error) {
 				f := reflect.ValueOf(&c.Player.Stats).Elem().FieldByName(ability)
 				f.SetUint(uint64(f.Interface().(uint) + 1))
 
-				*c.Player.Stats.AbilityPoint--
+				c.Player.Stats.AbilityPoint--
 			}
 		}
 
+		// TODO: Da rivedere in quanto bisognerebbe spostare la logica qui sopra
 		// Aggiorno statistiche player
-		_, err = playerStatsProvider.UpdatePlayerStats(c.Player.Stats)
-		if err != nil {
-			return err
-		}
+		// _, err = playerStatsProvider.UpdatePlayerStats(c.Player.Stats)
+		// if err != nil {
+		// 	return err
+		// }
 
 		// Invio Messaggio di incremento abilità
 		text := helpers.Trans(c.Player.Language.Slug, "ability.stats.completed", c.Update.Message.Text)
