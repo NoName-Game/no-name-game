@@ -484,7 +484,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			_, err := services.NnSDK.GetArmorByID(ctx, &pb.GetArmorByIDRequest{
-				ID: int32(c.Payload.EquipID),
+				ID: c.Payload.EquipID,
 			})
 			if err != nil {
 				log.Fatalf("could not greet: %v", err)
@@ -501,7 +501,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			_, err := services.NnSDK.GetWeaponByID(ctx, &pb.GetWeaponByIDRequest{
-				ID: int32(c.Payload.EquipID),
+				ID: c.Payload.EquipID,
 			})
 			if err != nil {
 				return err

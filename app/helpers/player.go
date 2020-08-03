@@ -69,7 +69,9 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 		language = response.GetLanguage()
 
 		// Registro player
-		responseSignIn, err := services.NnSDK.SignIn(ctx, &pb.SignInRequest{
+		ctxSignIn, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		responseSignIn, err := services.NnSDK.SignIn(ctxSignIn, &pb.SignInRequest{
 			Player: &pb.Player{
 				Username:   user.UserName,
 				ChatID:     int64(user.ID),

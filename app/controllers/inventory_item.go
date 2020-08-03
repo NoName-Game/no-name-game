@@ -229,7 +229,7 @@ func (c *InventoryItemController) Stage() (err error) {
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
 		var text string
-		if c.Player.GetStats().GetLifePoint()+uint32(c.Payload.Item.Value) > 100 {
+		if c.Player.GetStats().GetLifePoint()+c.Payload.Item.Value > 100 {
 			text = fmt.Sprintf(
 				"%s\n\n%s", // Domanda e descrizione
 				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",

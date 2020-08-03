@@ -180,33 +180,36 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
 		for _, state := range c.Player.GetStates() {
-			if !state.GetCompleted() {
-				finishAt, err := ptypes.Timestamp(c.State.FinishAt)
-				if err != nil {
-					panic(err)
-				}
-
-				// Se sono da notificare formatto con la data
-				if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
-					finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-					tasks += fmt.Sprintf("- %s %v\n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-						helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
-					)
-				} else {
-					if state.Controller == "route.tutorial" {
-						tasks += fmt.Sprintf("- %s \n",
-							helpers.Trans(c.Player.Language.Slug, state.Controller),
-						)
-					} else {
-						tasks += fmt.Sprintf("- %s %s\n",
-							helpers.Trans(c.Player.Language.Slug, state.Controller),
-							helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
-						)
+			if c.State != nil {
+				if !state.GetCompleted() {
+					finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+					if err != nil {
+						panic(err)
 					}
 
+					// Se sono da notificare formatto con la data
+					if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
+						finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
+						tasks += fmt.Sprintf("- %s %v\n",
+							helpers.Trans(c.Player.Language.Slug, state.Controller),
+							helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
+						)
+					} else {
+						if state.Controller == "route.tutorial" {
+							tasks += fmt.Sprintf("- %s \n",
+								helpers.Trans(c.Player.Language.Slug, state.Controller),
+							)
+						} else {
+							tasks += fmt.Sprintf("- %s %s\n",
+								helpers.Trans(c.Player.Language.Slug, state.Controller),
+								helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
+							)
+						}
+
+					}
 				}
 			}
+
 		}
 	}
 

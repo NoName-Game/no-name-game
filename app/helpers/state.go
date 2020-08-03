@@ -107,11 +107,11 @@ func CheckState(player pb.Player, controller string, payload interface{}, father
 	playerState, _ = GetPlayerStateByFunction(player.GetStates(), controller)
 
 	// Non ho trovato nessuna corrispondenza creo una nuova
-	if playerState.ID == 0 {
+	if playerState == nil {
 		jsonPayload, _ := json.Marshal(payload)
 
 		// Creo il nuovo stato
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 		response, err := services.NnSDK.CreatePlayerState(ctx, &pb.CreatePlayerStateRequest{
 			PlayerState: &pb.PlayerState{

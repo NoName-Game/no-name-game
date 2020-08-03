@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
@@ -223,19 +224,27 @@ func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Player.GetStates() {
-		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
-		if !state.GetCompleted() && (state.Father == 0 || state.Father != c.State.Father) {
-			for _, blockState := range blockStates {
-				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
-					_, err := services.SendMessage(msg)
-					if err != nil {
-						panic(err)
-					}
 
-					return true
+		log.Println(state)
+
+		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
+		if !state.Completed {
+			if c.State != nil {
+				if state.Father == 0 || state.Father != c.State.Father {
+					for _, blockState := range blockStates {
+						if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
+							msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+							_, err := services.SendMessage(msg)
+							if err != nil {
+								panic(err)
+							}
+
+							return true
+						}
+					}
 				}
 			}
+
 		}
 	}
 

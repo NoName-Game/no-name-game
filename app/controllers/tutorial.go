@@ -117,8 +117,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		_, err := services.NnSDK.FindLanguageBy(ctx, &pb.FindLanguageByRequest{
-			Value: "name",
+		_, err := services.NnSDK.FindLanguageByName(ctx, &pb.FindLanguageByNameRequest{
+			Name: c.Update.Message.Text,
 		})
 
 		// Verifico se la lingua esiste, se così non fosse ritorno errore
