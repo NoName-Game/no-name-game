@@ -47,26 +47,8 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 	var err error
 	initialized = true
 
-	// Inizializzo variabili del controller
-	c.Controller, c.Player, c.Update = controller, player, update
-
-	// Recupero stato utente
-	rGetActivePlayerStates, err := services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
-		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.ActiveStates = rGetActivePlayerStates.GetStates()
-
-	// Recupero stats utente per verificare se è morto
-	rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
-		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerStats = rGetPlayerStats.GetPlayerStats()
+	// Carico controller data
+	c.LoadControllerData(controller, player, update)
 
 	// Verifico se il player si trova in determinati stati non consentiti
 	// e che quindi non permettano l'init del controller richiamato
@@ -85,6 +67,30 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 	}
 
 	return
+}
+
+// Carico controller data
+func (c *BaseController) LoadControllerData(controller string, player *pb.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controller
+	c.Controller, c.Player, c.Update = controller, player, update
+
+	// Recupero stato utente
+	rGetActivePlayerStates, err := services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.ActiveStates = rGetActivePlayerStates.GetStates()
+
+	// Recupero stats utente
+	rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.PlayerStats = rGetPlayerStats.GetPlayerStats()
 }
 
 // Breaking - Metodo che permette di verificare se si vogliono fare

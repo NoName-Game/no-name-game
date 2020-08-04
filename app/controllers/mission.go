@@ -138,7 +138,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err := ptypes.Timestamp(c.CurrentState.GetFinishAt())
 		if err != nil {
 			panic(err)
 		}

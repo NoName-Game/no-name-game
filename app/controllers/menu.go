@@ -32,19 +32,8 @@ type MenuController struct {
 func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.menu",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
-		return
-	}
-
-	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	// Carico controller data
+	c.LoadControllerData("route.menu", player, update)
 
 	// Recupero messaggio principale
 	var recap string
@@ -168,33 +157,31 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
 		for _, state := range c.ActiveStates {
-			if c.CurrentState != nil {
-				if !state.GetCompleted() {
-					finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
-					if err != nil {
-						panic(err)
-					}
+			if !state.GetCompleted() {
+				finishAt, err := ptypes.Timestamp(state.FinishAt)
+				if err != nil {
+					panic(err)
+				}
 
-					// Se sono da notificare formatto con la data
-					if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
-						finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-						tasks += fmt.Sprintf("- %s %v\n",
+				// Se sono da notificare formatto con la data
+				if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
+					finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
+					tasks += fmt.Sprintf("- %s %v\n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+						helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
+					)
+				} else {
+					if state.Controller == "route.tutorial" {
+						tasks += fmt.Sprintf("- %s \n",
 							helpers.Trans(c.Player.Language.Slug, state.Controller),
-							helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
 						)
 					} else {
-						if state.Controller == "route.tutorial" {
-							tasks += fmt.Sprintf("- %s \n",
-								helpers.Trans(c.Player.Language.Slug, state.Controller),
-							)
-						} else {
-							tasks += fmt.Sprintf("- %s %s\n",
-								helpers.Trans(c.Player.Language.Slug, state.Controller),
-								helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
-							)
-						}
-
+						tasks += fmt.Sprintf("- %s %s\n",
+							helpers.Trans(c.Player.Language.Slug, state.Controller),
+							helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
+						)
 					}
+
 				}
 			}
 

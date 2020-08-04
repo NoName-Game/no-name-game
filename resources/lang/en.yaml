@@ -76,7 +76,7 @@ fuel: "Carburante"
 hours: "Ore"
 
 # MENU
-menu: "*BoardSystem v0.1*\n🌏 %s\n👨🏼‍🚀 %s\n%s\n%s\n\n%s"
+menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
@@ -177,6 +177,7 @@ items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serb
 
 # PLAYER
 player.intro: "Stato Player"
+#player.armors: "
 
 # INVENTORY
 inventory.intro: "Cosa vuoi gestire?"
