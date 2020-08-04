@@ -146,7 +146,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
 		var itemExists bool
-		for _, item := range rGetAllItems.GetItem() {
+		for _, item := range rGetAllItems.GetItems() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", item.Slug)) {
 				itemExists = true
 				c.Payload.Item = item
@@ -252,7 +252,7 @@ func (c *CraftingController) Stage() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		for _, category := range rGetAllItemCategories.GetItemCategory() {
+		for _, category := range rGetAllItemCategories.GetItemCategories() {
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)),
@@ -291,14 +291,14 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		var chosenCategory *pb.ItemCategory
-		for _, category := range rGetAllItemCategories.GetItemCategory() {
+		for _, category := range rGetAllItemCategories.GetItemCategories() {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)) {
 				chosenCategory = category
 			}
 		}
 
 		// Lista oggetti craftabili
-		rGetItemByCategoryID, err := services.NnSDK.GetItemByCategoryID(helpers.NewContext(1), &pb.GetItemByCategoryIDRequest{
+		rGetItemByCategoryID, err := services.NnSDK.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
 		})
 		if err != nil {
@@ -317,7 +317,7 @@ func (c *CraftingController) Stage() (err error) {
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		for _, item := range rGetItemByCategoryID.GetItem() {
+		for _, item := range rGetItemByCategoryID.GetItems() {
 			// Recupero quantità del player per quest'item
 			var playerQuantity int32
 			for _, playerItem := range rGetPlayerItems.GetPlayerInventory() {

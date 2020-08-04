@@ -44,8 +44,8 @@ func GetAllSlugCategories() (result []string) {
 		panic(err)
 	}
 
-	for i := 0; i < len(rGetAllArmorCategory.GetArmorCategory()); i++ {
-		result = append(result, rGetAllArmorCategory.GetArmorCategory()[i].Slug)
+	for i := 0; i < len(rGetAllArmorCategory.GetArmorCategories()); i++ {
+		result = append(result, rGetAllArmorCategory.GetArmorCategories()[i].Slug)
 	}
 
 	for i := 0; i < len(rGetAllWeaponCategory.GetWeaponCategories()); i++ {

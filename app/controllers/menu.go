@@ -304,7 +304,7 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 // MainMenu
 func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	// Recupero gli npc attivi in questo momento
-	rGetAll, err := services.NnSDK.GetAll(helpers.NewContext(1), &pb.GetAllRequest{})
+	rGetAll, err := services.NnSDK.GetAllNPC(helpers.NewContext(1), &pb.GetAllNPCRequest{})
 	if err != nil {
 		panic(err)
 	}

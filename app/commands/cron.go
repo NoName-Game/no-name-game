@@ -41,7 +41,7 @@ func (c *Cron) Notify() {
 			panic(err)
 		}
 
-		for _, state := range rGetPlayerStateToNotify.GetPlayerState() {
+		for _, state := range rGetPlayerStateToNotify.GetPlayerStates() {
 			rGetPlayerByID, err := services.NnSDK.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
 				ID: state.PlayerID,
 			})

@@ -221,7 +221,7 @@ func (c *CrafterController) Stage() (err error) {
 				return err
 			}
 
-			for _, category := range rGetAllArmorCategory.GetArmorCategory() {
+			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}

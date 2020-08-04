@@ -259,14 +259,14 @@ func (c *TutorialController) Stage() (err error) {
 	// e potrà selezionare la sua lingua tramite tastierino
 	case 0:
 		// Recupero lingue disponibili
-		rGetLanguages, err := services.NnSDK.GetLanguages(helpers.NewContext(1), &pb.GetLanguagesRequest{})
+		rGetLanguages, err := services.NnSDK.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{})
 		if err != nil {
 			return err
 		}
 
 		// Aggiungo lingue alla tastiera
-		keyboard := make([]tgbotapi.KeyboardButton, len(rGetLanguages.GetLanguage()))
-		for i, lang := range rGetLanguages.GetLanguage() {
+		keyboard := make([]tgbotapi.KeyboardButton, len(rGetLanguages.GetLanguages()))
+		for i, lang := range rGetLanguages.GetLanguages() {
 			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
 		}
 

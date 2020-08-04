@@ -58,7 +58,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 func (c *NpcMenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 	// Recupero gli npc attivi in questo momento
-	rGetAll, err := services.NnSDK.GetAll(helpers.NewContext(1), &pb.GetAllRequest{})
+	rGetAll, err := services.NnSDK.GetAllNPC(helpers.NewContext(1), &pb.GetAllNPCRequest{})
 	if err != nil {
 		panic(err)
 	}
