@@ -48,7 +48,7 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -79,15 +79,15 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -109,7 +109,7 @@ func (c *BankController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -135,7 +135,7 @@ func (c *BankController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *BankController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 		var infoBank string
@@ -172,8 +172,9 @@ func (c *BankController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 	case 1:
 		var mainMessage string
 		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
@@ -213,7 +214,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
@@ -266,7 +267,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

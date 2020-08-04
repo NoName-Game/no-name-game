@@ -100,7 +100,7 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -145,19 +145,19 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	if c.NeedUpdateState {
 		// Aggiorno stato finale
 		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.State.Payload = string(payloadUpdated)
+		c.CurrentState.Payload = string(payloadUpdated)
 
 		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.State,
+			PlayerState: c.CurrentState,
 		})
 		if err != nil {
 			panic(err)
 		}
-		c.State = rUpdatePlayerState.GetPlayerState()
+		c.CurrentState = rUpdatePlayerState.GetPlayerState()
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if c.State.GetCompleted() {
+	if c.CurrentState.GetCompleted() {
 		// Cancello messaggio contentente la mappa
 		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
 		if err != nil {
@@ -181,7 +181,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 		return true, err
 	}
 
@@ -192,13 +192,13 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 // Stage Map -> Drop -> Finish
 // ====================================
 func (c *HuntingController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
 		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
-				c.State.Completed = true
+				c.CurrentState.Completed = true
 				return err
 			}
 		}
@@ -742,7 +742,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		editMessage.ReplyMarkup = &mapKeyboard
 	case "player-die":
 		// Il player è morto
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 
 		return
 	case "no-action":
@@ -751,13 +751,6 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 	// Non sono state fatte modifiche al messaggio
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-		rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
-			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
@@ -766,8 +759,8 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
-				rGetPlayerStats.GetPlayerStats().GetLifePoint(),
-				100+rGetPlayerStats.GetPlayerStats().GetLevel()*10,
+				c.PlayerStats.GetLifePoint(),
+				100+c.PlayerStats.GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 			),
 		)

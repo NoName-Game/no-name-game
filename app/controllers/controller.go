@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -15,7 +14,6 @@ import (
 var (
 	// Lista delle rotte che non devono subire
 	// gli effetti di abbandona anche se forzati a mano
-
 	UnClearables = []string{"route.hunting"}
 )
 
@@ -35,9 +33,11 @@ type BaseController struct {
 		Message       string
 		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
-	Player  *pb.Player
-	State   *pb.PlayerState
-	Breaker struct {
+	Player       *pb.Player
+	PlayerStats  *pb.PlayerStats
+	CurrentState *pb.PlayerState
+	ActiveStates []*pb.PlayerState
+	Breaker      struct {
 		ToMenu bool
 	}
 	ProxyStatment bool
@@ -50,6 +50,24 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 	// Inizializzo variabili del controller
 	c.Controller, c.Player, c.Update = controller, player, update
 
+	// Recupero stato utente
+	rGetActivePlayerStates, err := services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.ActiveStates = rGetActivePlayerStates.GetStates()
+
+	// Recupero stats utente per verificare se è morto
+	rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.PlayerStats = rGetPlayerStats.GetPlayerStats()
+
 	// Verifico se il player si trova in determinati stati non consentiti
 	// e che quindi non permettano l'init del controller richiamato
 	var inStateBlocked = c.InStatesBlocker(blockers)
@@ -59,7 +77,7 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 	}
 
 	// Verifico lo stato della player
-	c.State, _, err = helpers.CheckState(*player, c.Controller, payload, c.Father)
+	c.CurrentState, _, err = helpers.CheckState(*player, c.ActiveStates, c.Controller, payload, c.Father)
 
 	// Se non sono riuscito a recuperare/creare lo stato esplodo male, qualcosa è andato storto.
 	if err != nil {
@@ -74,13 +92,13 @@ func (c *BaseController) InitController(controller string, payload interface{}, 
 func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backed bool) {
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 		if c.Controller != "" {
-			if c.State.GetStage() <= canBackFrom {
+			if c.CurrentState.GetStage() <= canBackFrom {
 				// Cancello stato da redis
 				_ = helpers.DelRedisState(*c.Player)
 
 				// Cancello record a db
 				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-					PlayerState: c.State,
+					PlayerState: c.CurrentState,
 				})
 				if err != nil {
 					panic(err)
@@ -91,7 +109,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				return
 			}
 
-			c.State.Stage = 0
+			c.CurrentState.Stage = 0
 			return
 		}
 
@@ -100,7 +118,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 
 		// Cancello record a db
 		_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: c.State,
+			PlayerState: c.CurrentState,
 		})
 		if err != nil {
 			panic(err)
@@ -114,13 +132,13 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 	// Abbandona - chiude definitivamente cancellando anche lo stato
 	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
 		c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
-		if !c.Player.GetStats().GetDead() && c.Clearable() {
+		if !c.PlayerStats.GetDead() && c.Clearable() {
 			// Cancello stato da redis
 			_ = helpers.DelRedisState(*c.Player)
 
 			// Cancello record a db
 			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerState: c.State,
+				PlayerState: c.CurrentState,
 			})
 			if err != nil {
 				panic(err)
@@ -154,7 +172,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 func (c *BaseController) Clearable() (clearable bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.Player.States {
+	for _, state := range c.ActiveStates {
 		for _, unclearable := range UnClearables {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
 				return false
@@ -169,11 +187,11 @@ func (c *BaseController) Clearable() (clearable bool) {
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing() (err error) {
 	// Verifico se lo stato è completato chiudo
-	if c.State.GetCompleted() {
+	if c.CurrentState.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
-		if c.State.Father == 0 {
+		if c.CurrentState.GetFather() == 0 {
 			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerState: c.State,
+				PlayerState: c.CurrentState,
 			})
 			if err != nil {
 				return err
@@ -213,14 +231,11 @@ func (c *BaseController) Completing() (err error) {
 func (c *BaseController) InStatesBlocker(blockStates []string) (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.Player.GetStates() {
-
-		log.Println(state)
-
+	for _, state := range c.ActiveStates {
 		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
 		if !state.Completed {
-			if c.State != nil {
-				if state.Father == 0 || state.Father != c.State.Father {
+			if c.CurrentState != nil {
+				if state.Father == 0 || state.Father != c.CurrentState.GetFather() {
 					for _, blockState := range blockStates {
 						if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
 							msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))

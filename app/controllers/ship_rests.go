@@ -50,7 +50,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -82,15 +82,15 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -112,7 +112,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -151,7 +151,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipRestsController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
@@ -184,7 +184,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !c.Player.GetStats().GetDead() {
+		if !c.PlayerStats.GetDead() {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			))
@@ -203,7 +203,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
@@ -217,7 +217,7 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Setto timer recuperato dalla chiamata delle info
 		finishTime := helpers.GetEndTime(0, int(restsInfo.GetRestsTime()), 0)
-		c.State.FinishAt, _ = ptypes.TimestampProto(finishTime)
+		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
@@ -238,7 +238,7 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.StartDateTime = time.Now()
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		// Calcolo differenza tra inizio e fine
 		var endDate time.Time
@@ -275,7 +275,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

@@ -23,6 +23,7 @@ import (
 type MenuController struct {
 	BaseController
 	SafePlanet bool // Flag per verificare se il player si trova su un pianeta sicuro
+	Payload    interface{}
 }
 
 // ====================================
@@ -31,17 +32,19 @@ type MenuController struct {
 func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 
-	// Il menù del player refresha sempre lo status del player
-	rGetPlayerByUsername, err := services.NnSDK.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
-		Username: player.GetUsername(),
-	})
-	if err != nil {
-		panic(err)
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.menu",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
 	}
 
-	// Init funzionalità
-	c.Controller = "route.menu"
-	c.Player = rGetPlayerByUsername.GetPlayer()
+	// Set and load payload
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Recupero messaggio principale
 	var recap string
@@ -64,7 +67,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
-	if c.Player.GetStats().GetDead() {
+	if c.PlayerStats.GetDead() {
 		restsController := new(ShipRestsController)
 		restsController.Handle(c.Player, c.Update, true)
 	}
@@ -149,11 +152,11 @@ func (c *MenuController) GetPlayerPosition() (result string, err error) {
 func (c *MenuController) GetPlayerLife() (life string, err error) {
 	// Calcolo stato vitale del player
 	status := "♥️"
-	if c.Player.GetStats().GetDead() {
+	if c.PlayerStats.GetDead() {
 		status = "☠️"
 	}
 
-	life = fmt.Sprintf("%s️ %v/%v HP", status, c.Player.GetStats().GetLifePoint(), 100)
+	life = fmt.Sprintf("%s️ %v/%v HP", status, c.PlayerStats.GetLifePoint(), 100)
 
 	return
 }
@@ -161,13 +164,13 @@ func (c *MenuController) GetPlayerLife() (life string, err error) {
 // GetPlayerTask
 // Metodo dedicato alla rappresentazione dei task attivi del player
 func (c *MenuController) GetPlayerTasks() (tasks string) {
-	if len(c.Player.States) > 0 {
+	if len(c.ActiveStates) > 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
-		for _, state := range c.Player.GetStates() {
-			if c.State != nil {
+		for _, state := range c.ActiveStates {
+			if c.CurrentState != nil {
 				if !state.GetCompleted() {
-					finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+					finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
 					if err != nil {
 						panic(err)
 					}
@@ -205,7 +208,7 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 	// Se il player sta finendo il tutorial mostro il menù con i task personalizzati
 	// var inTutorial bool
-	for _, state := range c.Player.States {
+	for _, state := range c.ActiveStates {
 		if state.Controller == "route.tutorial" {
 			return c.TutorialKeyboard()
 		} else if state.Controller == "route.ship.exploration" {
@@ -256,7 +259,7 @@ func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
 // TutorialMenu
 func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
-	for _, state := range c.Player.States {
+	for _, state := range c.ActiveStates {
 		if !state.GetCompleted() {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),

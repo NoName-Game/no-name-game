@@ -50,7 +50,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
-	if c.Player.GetStats().GetDead() {
+	if c.PlayerStats.GetDead() {
 		restsController := new(ShipRestsController)
 		restsController.Handle(c.Player, c.Update, true)
 	}

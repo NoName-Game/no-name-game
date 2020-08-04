@@ -14,6 +14,7 @@ import (
 // Player
 // ====================================
 type PlayerController struct {
+	Payload interface{}
 	BaseController
 }
 
@@ -22,12 +23,20 @@ type PlayerController struct {
 // ====================================
 func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
-	c.Player = player
-	c.Update = update
-	c.Controller = "route.player"
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.player",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -37,11 +46,12 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	}
 
 	// Recupero armature del player
-	rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
+	rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(100), &pb.GetPlayerArmorsRequest{
 		PlayerID: c.Player.GetID(),
 		Equipped: true,
 	})
 	if err != nil {
+		// log.Fatalln(err)
 		panic(err)
 	}
 
@@ -68,10 +78,10 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		"♥️ *%v*/100 HP\n"+
 		"🛡 Def: *%v* | Evs: *%v* | Hlv: *%v*\n"+
 		"%s",
-		c.Player.Username,
-		c.Player.Stats.Experience,
-		c.Player.Stats.Level,
-		c.Player.Stats.LifePoint,
+		c.Player.GetUsername(),
+		c.PlayerStats.GetExperience(),
+		c.PlayerStats.GetLevel(),
+		c.PlayerStats.GetLifePoint(),
 		defense, evasion, halving,
 		economy,
 	)

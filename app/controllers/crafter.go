@@ -53,7 +53,7 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -84,15 +84,15 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -114,7 +114,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	case 0:
 		return false, err
 		// nothinggg
@@ -136,7 +136,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		return true, err
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.add")) {
-			c.State.Stage = 2
+			c.CurrentState.Stage = 2
 			c.Payload.AddFlag = true
 			return false, err
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "crafting.start") {
@@ -149,7 +149,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 			return false, err
 		}
 	case 5:
-		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -173,7 +173,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		)
 
 		// Verifico se ha finito il crafting
-		finishAt, err = ptypes.Timestamp(c.State.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -190,7 +190,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *CrafterController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 
@@ -211,7 +211,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 	case 1:
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch c.Payload.Item {
@@ -253,7 +253,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		rGetPlayerResources, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 			PlayerID: c.Player.ID,
@@ -279,7 +279,7 @@ func (c *CrafterController) Stage() (err error) {
 				return err
 			}
 			// Completo lo stato
-			c.State.Completed = true
+			c.CurrentState.Completed = true
 		}
 
 		// Id Add new resource
@@ -387,7 +387,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.State.Stage = 3
+		c.CurrentState.Stage = 3
 	case 3:
 		// Add recipe message
 		var recipe string
@@ -419,7 +419,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.State.Stage = 4
+		c.CurrentState.Stage = 4
 	case 4:
 		// Il player ha avviato il crafting, stampa il tempo di attesa
 		// Aggiorna stato
@@ -439,9 +439,9 @@ func (c *CrafterController) Stage() (err error) {
 			panic(err)
 		}
 
-		c.State.FinishAt = endTimeProto
-		c.State.ToNotify = true
-		c.State.Stage = 5
+		c.CurrentState.FinishAt = endTimeProto
+		c.CurrentState.ToNotify = true
+		c.CurrentState.Stage = 5
 		c.Breaker.ToMenu = true
 	case 5:
 		// crafting completato
@@ -487,7 +487,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

@@ -100,9 +100,9 @@ func SetRedisMapHunting(maps *pb.Maps) (err error) {
 }
 
 // CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
-func CheckState(player pb.Player, controller string, payload interface{}, father uint32) (playerState *pb.PlayerState, isNewState bool, err error) {
+func CheckState(player pb.Player, activeStates []*pb.PlayerState, controller string, payload interface{}, father uint32) (playerState *pb.PlayerState, isNewState bool, err error) {
 	// Filtro gli stati del player recuperando lo stato appartente a questa specifica rotta
-	playerState, _ = GetPlayerStateByFunction(player.GetStates(), controller)
+	playerState, _ = GetPlayerStateByFunction(activeStates, controller)
 
 	// Non ho trovato nessuna corrispondenza creo una nuova
 	if playerState == nil {

@@ -50,7 +50,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -81,15 +81,15 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -111,7 +111,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -155,7 +155,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *PlayerEquipmentController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
 	case 0:
@@ -259,7 +259,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
@@ -353,7 +353,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
 	// equipaggiare e me lo metto nel payload in attesa di conferma
@@ -439,7 +439,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		c.State.Stage = 3
+		c.CurrentState.Stage = 3
 
 	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
 	// TODO: bisogna verifica che ci sia solo 1 arma o armatura equipaggiata
@@ -489,7 +489,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

@@ -58,7 +58,7 @@ func (c *AbilityController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -89,15 +89,15 @@ func (c *AbilityController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -119,21 +119,21 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
 
 	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ability.back") {
-			c.State.Stage = 0
+			c.CurrentState.Stage = 0
 			return false, err
 		}
 
 		// Verifico se l'abilità passata esiste nelle abilità censite e se il player ha punti disponibili
 		for _, ability := range AbilityLists {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ability.%s", strings.ToLower(ability))) == c.Update.Message.Text {
-				if c.Player.GetStats().GetAbilityPoint() == 0 {
+				if c.PlayerStats.GetAbilityPoint() == 0 {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ability.no_point_left")
 					return true, err
 				}
@@ -153,14 +153,14 @@ func (c *AbilityController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *AbilityController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 		var recapStats string
 		recapStats = helpers.Trans(c.Player.Language.Slug, "ability.stats.type")
 
 		// Recupero dinamicamente i valory delle statistiche per poi ciclarli con quelli consentiti
-		rv := reflect.ValueOf(&c.Player.Stats)
+		rv := reflect.ValueOf(&c.PlayerStats)
 		rv = rv.Elem()
 
 		for _, ability := range AbilityLists {
@@ -170,7 +170,7 @@ func (c *AbilityController) Stage() (err error) {
 		}
 
 		// Mostro quanti punti ha a disposizione il player
-		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", c.Player.GetStats().GetAbilityPoint())
+		messagePlayerTotalPoint := helpers.Trans(c.Player.Language.Slug, "ability.stats.total_point", c.PlayerStats.GetAbilityPoint())
 
 		// Creo tastierino con i soli componienti abilitati dal client
 		var keyboardRow [][]tgbotapi.KeyboardButton
@@ -202,17 +202,17 @@ func (c *AbilityController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 	case 1:
 		// Incremento statistiche e aggiorno
 		for _, ability := range AbilityLists {
 			abilityName := helpers.Trans(c.Player.Language.Slug, "ability."+strings.ToLower(ability))
 
 			if abilityName == c.Update.Message.Text {
-				f := reflect.ValueOf(&c.Player.Stats).Elem().FieldByName(ability)
+				f := reflect.ValueOf(&c.PlayerStats).Elem().FieldByName(ability)
 				f.SetUint(uint64(f.Interface().(uint) + 1))
 
-				c.Player.Stats.AbilityPoint--
+				c.PlayerStats.AbilityPoint--
 			}
 		}
 

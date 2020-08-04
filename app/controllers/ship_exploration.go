@@ -54,7 +54,7 @@ func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -86,15 +86,15 @@ func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -116,7 +116,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -126,7 +126,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	case 1:
 		// A prescindere verifico se il player ha una missione o una caccia attiva
 		// tutte le attività di che si svolgono sui pianeti devono essere portati a termine
-		for _, state := range c.Player.States {
+		for _, state := range c.ActiveStates {
 			if helpers.StringInSlice(state.Controller, []string{"route.mission", "route.hunting"}) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.exploration.error.function_not_completed")
 				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
@@ -180,7 +180,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al completamento del viaggio
 	case 3:
-		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -218,7 +218,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipExplorationController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
@@ -264,7 +264,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
@@ -347,7 +347,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		c.Payload.Ship = rGetPlayerShips.GetShips()[0]
 		c.Payload.StarNearestMapName = starNearestMapName
 		c.Payload.StarNearestMapInfo = starNearestMapInfo
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// Verifico quale stella ha scelto il player e mando messaggio indicando il tempo
 	// necessario al suo raggiungimento
@@ -383,7 +383,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		// Setto timer di ritorno
 		finishTime := helpers.GetEndTime(0, int(c.Payload.StarNearestMapInfo[chosenStarID].Time), 0)
-		c.State.FinishAt, _ = ptypes.TimestampProto(finishTime)
+		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
@@ -397,8 +397,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.ToNotify = true
-		c.State.Stage = 3
+		c.CurrentState.ToNotify = true
+		c.CurrentState.Stage = 3
 		c.Payload.StarIDChosen = chosenStarID
 		c.Breaker.ToMenu = true
 
@@ -437,7 +437,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

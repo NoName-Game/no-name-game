@@ -58,7 +58,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Stato recuperto correttamente
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -90,15 +90,15 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -138,7 +138,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
-		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -176,15 +176,15 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
-			c.State.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
-			c.State.ToNotify = true
+			c.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
+			c.CurrentState.ToNotify = true
 
 			return false, err
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
 			// Passo allo stadio conclusivo
-			c.State.Stage = 4
+			c.CurrentState.Stage = 4
 
 			return false, err
 		}
@@ -204,7 +204,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *MissionController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
 	case 0:
@@ -237,7 +237,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
@@ -277,9 +277,9 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
-		c.State.Stage = 2
-		c.State.ToNotify = true
-		c.State.FinishAt, _ = ptypes.TimestampProto(endTime)
+		c.CurrentState.Stage = 2
+		c.CurrentState.ToNotify = true
+		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
 		c.Breaker.ToMenu = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
@@ -344,13 +344,13 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.State.Stage = 3
+		c.CurrentState.Stage = 3
 
 	// In questo stage verifico cosa ha scelto di fare il player
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
-		finishAt, err := ptypes.Timestamp(c.State.FinishAt)
+		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -371,7 +371,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 		c.Breaker.ToMenu = true
 
 	// Ritorno il messaggio con gli elementi droppati
@@ -416,7 +416,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

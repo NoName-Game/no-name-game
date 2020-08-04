@@ -58,11 +58,9 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 
 		// Registro player
 		rSignIn, err := services.NnSDK.SignIn(NewContext(10), &pb.SignInRequest{
-			Player: &pb.Player{
-				Username:   user.UserName,
-				ChatID:     int64(user.ID),
-				LanguageID: rFindLanguageBySlug.GetLanguage().GetID(),
-			},
+			Username:   user.UserName,
+			ChatID:     int64(user.ID), // TODO: !? Non dovrebbe esser chatID !?
+			LanguageID: rFindLanguageBySlug.GetLanguage().GetID(),
 		})
 		if err != nil {
 			return player, err
@@ -92,7 +90,15 @@ func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (play
 // CheckPlayerHaveOneEquippedWeapon
 // Verifica se il player ha almeno un'arma equipaggiata
 func CheckPlayerHaveOneEquippedWeapon(player *pb.Player) bool {
-	for _, weapon := range player.GetWeapons() {
+	rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(NewContext(1), &pb.GetPlayerWeaponsRequest{
+		PlayerID: player.GetID(),
+		Equipped: true,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 		if weapon.GetEquipped() {
 			return true
 		}

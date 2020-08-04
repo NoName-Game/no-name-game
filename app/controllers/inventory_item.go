@@ -50,7 +50,7 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -87,15 +87,15 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
+	c.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.State,
+		PlayerState: c.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = rUpdatePlayerState.GetPlayerState()
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -117,7 +117,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -161,7 +161,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *InventoryItemController) Stage() (err error) {
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
@@ -210,12 +210,13 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
+
 		var text string
-		if c.Player.GetStats().GetLifePoint()+c.Payload.Item.Value > 100 {
+		if c.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
 			text = fmt.Sprintf(
 				"%s\n\n%s", // Domanda e descrizione
 				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",
@@ -252,7 +253,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
@@ -279,7 +280,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return
