@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -89,15 +88,13 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, p
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -140,21 +137,16 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetAllItems(ctx, &pb.GetAllItemsRequest{})
+		rGetAllItems, err := services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{})
 		if err != nil {
 			return true, err
 		}
-
-		var items []*pb.Item
-		items = response.GetItem()
 
 		// Recupero nome item che il player vuole craftare
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
 		var itemExists bool
-		for _, item := range items {
+		for _, item := range rGetAllItems.GetItem() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", item.Slug)) {
 				itemExists = true
 				c.Payload.Item = item
@@ -173,24 +165,19 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetPlayerResources(ctx, &pb.GetPlayerResourcesRequest{
+			rGetPlayerResources, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 				PlayerID: c.Player.GetID(),
 			})
 			if err != nil {
 				return false, err
 			}
 
-			var playerInventory []*pb.PlayerInventory
-			playerInventory = response.GetPlayerInventory()
-
 			// Ciclo gli elementi di cui devo verificare la presenza
 			for resourceID, quantity := range c.Payload.Resources {
 				var haveResource bool
 
 				// Ciclo inventario del player
-				for _, inventory := range playerInventory {
+				for _, inventory := range rGetPlayerResources.GetPlayerInventory() {
 					if inventory.Resource.ID == resourceID && inventory.Quantity >= quantity {
 						haveResource = true
 					}
@@ -256,21 +243,16 @@ func (c *CraftingController) Stage() (err error) {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetAllItemCategories(ctx, &pb.GetAllItemCategoriesRequest{})
+		rGetAllItemCategories, err := services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
-
-		var itemCategories []*pb.ItemCategory
-		itemCategories = response.GetItemCategory()
 
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		for _, category := range itemCategories {
+		for _, category := range rGetAllItemCategories.GetItemCategory() {
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)),
@@ -303,57 +285,42 @@ func (c *CraftingController) Stage() (err error) {
 	// che possono essere anche craftati dal player
 	case 1:
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetAllItemCategories(ctx, &pb.GetAllItemCategoriesRequest{})
+		rGetAllItemCategories, err := services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
 
-		var itemCategories []*pb.ItemCategory
-		itemCategories = response.GetItemCategory()
-
 		var chosenCategory *pb.ItemCategory
-		for _, category := range itemCategories {
+		for _, category := range rGetAllItemCategories.GetItemCategory() {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)) {
 				chosenCategory = category
 			}
 		}
 
 		// Lista oggetti craftabili
-		ctxItems, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		responseItems, err := services.NnSDK.GetItemByCategoryID(ctxItems, &pb.GetItemByCategoryIDRequest{
+		rGetItemByCategoryID, err := services.NnSDK.GetItemByCategoryID(helpers.NewContext(1), &pb.GetItemByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
 		})
 		if err != nil {
 			return err
 		}
 
-		var craftableItems []*pb.Item
-		craftableItems = responseItems.GetItem()
-
 		// Recupero tutti gli items del player
-		ctxInventory, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		responseInvetory, err := services.NnSDK.GetPlayerItems(ctxInventory, &pb.GetPlayerItemsRequest{
+		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		var playerInventoryItems []*pb.PlayerInventory
-		playerInventoryItems = responseInvetory.GetPlayerInventory()
-
 		// Creo messaggio
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		for _, item := range craftableItems {
+		for _, item := range rGetItemByCategoryID.GetItem() {
 			// Recupero quantità del player per quest'item
 			var playerQuantity int32
-			for _, playerItem := range playerInventoryItems {
+			for _, playerItem := range rGetPlayerItems.GetPlayerInventory() {
 				if playerItem.Item.ID == item.ID {
 					playerQuantity = playerItem.Quantity
 				}
@@ -440,10 +407,7 @@ func (c *CraftingController) Stage() (err error) {
 	case 3:
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",
@@ -478,10 +442,7 @@ func (c *CraftingController) Stage() (err error) {
 	// proseguo con l'assegnarli l'item e concludo
 	case 4:
 		// Aggiungo item all'inventario
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+		_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 			PlayerID: c.Player.GetID(),
 			ItemID:   c.Payload.Item.ID,
 			ItemType: "items",

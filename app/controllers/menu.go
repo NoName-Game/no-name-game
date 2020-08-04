@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 	"math"
 	"time"
@@ -33,20 +32,16 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	var err error
 
 	// Il menù del player refresha sempre lo status del player
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.FindPlayerByUsername(ctx, &pb.FindPlayerByUsernameRequest{
+	rGetPlayerByUsername, err := services.NnSDK.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
 		Username: player.GetUsername(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	player = response.GetPlayer()
-
 	// Init funzionalità
 	c.Controller = "route.menu"
-	c.Player = player
+	c.Player = rGetPlayerByUsername.GetPlayer()
 
 	// Recupero messaggio principale
 	var recap string
@@ -121,42 +116,32 @@ func (c *MenuController) GetRecap() (message string, err error) {
 func (c *MenuController) GetPlayerPosition() (result string, err error) {
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	responsePosition, err := services.NnSDK.GetPlayerLastPosition(ctx, &pb.GetPlayerLastPositionRequest{
+	rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 		PlayerID: c.Player.GetID(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	var lastPosition *pb.PlayerPosition
-	lastPosition = responsePosition.GetPlayerPosition()
-
 	// Dalla ultima posizione recupero il pianeta corrente
-	responsePlanet, err := services.NnSDK.GetPlanetByCoordinate(ctx, &pb.GetPlanetByCoordinateRequest{
-		X: lastPosition.GetX(),
-		Y: lastPosition.GetY(),
-		Z: lastPosition.GetZ(),
+	rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
+		X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
+		Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
+		Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	var planet *pb.Planet
-	planet = responsePlanet.GetPlanet()
-
 	// Verifico se il player si trova su un pianeta sicuro
-	c.SafePlanet = planet.Safe
+	c.SafePlanet = rGetPlanetByCoordinate.GetPlanet().GetSafe()
 
 	// Se è un pianeta sicuro modifico il messaggio
 	if c.SafePlanet {
-		return fmt.Sprintf("%s 🏟", planet.Name), err
+		return fmt.Sprintf("%s 🏟", rGetPlanetByCoordinate.GetPlanet().GetName()), err
 	}
 
-	return planet.Name, err
+	return rGetPlanetByCoordinate.GetPlanet().GetName(), err
 }
 
 // GetPlayerLife
@@ -318,19 +303,14 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 
 // MainMenu
 func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetAll(ctx, &pb.GetAllRequest{})
+	// Recupero gli npc attivi in questo momento
+	rGetAll, err := services.NnSDK.GetAll(helpers.NewContext(1), &pb.GetAllRequest{})
 	if err != nil {
 		panic(err)
 	}
 
-	// Recupero gli npc attivi in questo momento
-	npcs := response.GetNPCs()
-
 	var keyboardRow [][]tgbotapi.KeyboardButton
-	for _, npc := range npcs {
+	for _, npc := range rGetAll.GetNPCs() {
 		row := tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
 				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.safeplanet.%s", npc.Slug)),

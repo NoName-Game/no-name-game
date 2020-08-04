@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -81,9 +79,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				_ = helpers.DelRedisState(*c.Player)
 
 				// Cancello record a db
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
-				_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 					PlayerState: c.State,
 				})
 				if err != nil {
@@ -103,9 +99,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		_ = helpers.DelRedisState(*c.Player)
 
 		// Cancello record a db
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+		_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 			PlayerState: c.State,
 		})
 		if err != nil {
@@ -125,9 +119,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 			_ = helpers.DelRedisState(*c.Player)
 
 			// Cancello record a db
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 				PlayerState: c.State,
 			})
 			if err != nil {
@@ -180,9 +172,7 @@ func (c *BaseController) Completing() (err error) {
 	if c.State.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
 		if c.State.Father == 0 {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			_, err := services.NnSDK.DeletePlayerState(ctx, &pb.DeletePlayerStateRequest{
+			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 				PlayerState: c.State,
 			})
 			if err != nil {

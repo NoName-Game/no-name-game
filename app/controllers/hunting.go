@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -149,15 +147,13 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.State.Payload = string(payloadUpdated)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.State,
 		})
 		if err != nil {
 			panic(err)
 		}
-		c.State = response.GetPlayerState()
+		c.State = rUpdatePlayerState.GetPlayerState()
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
@@ -246,44 +242,34 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		ctxLastPosition, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		responseLastPosition, err := services.NnSDK.GetPlayerLastPosition(ctxLastPosition, &pb.GetPlayerLastPositionRequest{
+		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
-		var lastPosition *pb.PlayerPosition
-		lastPosition = responseLastPosition.GetPlayerPosition()
 
 		// Dalla ultima posizione recupero il pianeta corrente
-		ctxPlanet, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		responsePlanet, err := services.NnSDK.GetPlanetByCoordinate(ctxPlanet, &pb.GetPlanetByCoordinateRequest{
-			X: lastPosition.GetX(),
-			Y: lastPosition.GetY(),
-			Z: lastPosition.GetZ(),
+		rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
+			X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
+			Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
+			Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
 		})
 		if err != nil {
 			return err
 		}
-		var planet *pb.Planet
-		planet = responsePlanet.GetPlanet()
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
 		// al DB registro il tutto su redis
-		ctxMap, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		responseMap, err := services.NnSDK.GetMapByID(ctxMap, &pb.GetMapByIDRequest{
-			ID: planet.GetMapID(),
+		rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
+			ID: rGetPlanetByCoordinate.GetPlanet().GetMapID(),
 		})
 		if err != nil {
 			return err
 		}
 
 		var maps *pb.Maps
-		maps = responseMap.GetMaps()
+		maps = rGetMapByID.GetMaps()
 
 		// Registro mappa e posizione iniziale del player
 		err = helpers.SetRedisMapHunting(maps)
@@ -425,9 +411,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 		if nearTresure {
 			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			drop, err := services.NnSDK.DropTresure(ctx, &pb.DropTresureRequest{
+			rDropTresure, err := services.NnSDK.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
 				TresureID: tresure.ID,
 				PlayerID:  c.Player.ID,
 			})
@@ -437,27 +421,27 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 
 			// Verifico cosa è tornato e rispondo
 			var editMessage tgbotapi.EditMessageTextConfig
-			if drop.Resource.ID > 0 {
+			if rDropTresure.GetResource().GetID() > 0 {
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", drop.Resource.Name),
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", rDropTresure.GetResource().GetName()),
 				)
-			} else if drop.Item.ID > 0 {
-				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", drop.Item.Slug))
+			} else if rDropTresure.GetItem().GetID() > 0 {
+				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rDropTresure.GetItem().GetSlug()))
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
 					helpers.Trans(c.Player.Language.Slug, "tresure.found.item", itemFound),
 				)
-			} else if drop.Transaction.ID > 0 {
+			} else if rDropTresure.GetTransaction().GetID() > 0 {
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", drop.Transaction.Value),
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", rDropTresure.GetTransaction().GetValue()),
 				)
-			} else if drop.Trap.ID > 0 {
-				if drop.Trap.PlayerDie {
+			} else if rDropTresure.GetTrap().GetID() > 0 {
+				if rDropTresure.GetTrap().GetPlayerDie() {
 					// Aggiorno messaggio notificando al player che è morto
 					editMessage = services.NewEditMessage(
 						c.Player.ChatID,
@@ -487,7 +471,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 				editMessage = services.NewEditMessage(
 					c.Player.ChatID,
 					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", drop.Trap.Damage),
+					helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage()),
 				)
 			} else {
 				// Non hai trovato nulla
@@ -581,9 +565,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	if c.Payload.EnemyID > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetEnemyByID(ctx, &pb.GetEnemyByIDRequest{
+		rGetEnemyByID, err := services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 			ID: c.Payload.EnemyID,
 		})
 		if err != nil {
@@ -591,7 +573,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		}
 
 		// Se impostato recupero informazioni più aggiornate del mob
-		enemy = response.GetEnemy()
+		enemy = rGetEnemyByID.GetEnemy()
 	} else {
 		// Recupero il mob più vicino con il quale combattere e me lo setto nel payload
 		enemy, _ = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
@@ -622,9 +604,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		hitResponse, err := services.NnSDK.HitEnemy(ctx, &pb.HitEnemyRequest{
+		rHitEnemy, err := services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
 			PlayerID:        c.Player.ID,
 			PlayerPositionX: c.PlayerPositionX,
 			PlayerPositionY: c.PlayerPositionY,
@@ -635,7 +615,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		}
 
 		// Verifico se il MOB è morto
-		if hitResponse.EnemyDie {
+		if rHitEnemy.GetEnemyDie() {
 			// Costruisco messaggio di recap del drop
 			var dropRecap string
 
@@ -690,7 +670,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		}
 
 		// Verifico se il PLAYER è morto
-		if hitResponse.PlayerDie {
+		if rHitEnemy.GetPlayerDie() {
 			// Aggiorno messaggio notificando al player che è morto
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
@@ -719,17 +699,17 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 		// Se ne il player e ne il mob è morto, continua lo scontro
 		// Messagio di notifica per vedere risultato attacco
-		if hitResponse.DodgeAttack {
+		if rHitEnemy.GetDodgeAttack() {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.miss", hitResponse.EnemyDamage),
+				helpers.Trans(c.Player.Language.Slug, "combat.miss", rHitEnemy.GetEnemyDamage()),
 			)
 		} else {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.damage", hitResponse.PlayerDamage, hitResponse.EnemyDamage),
+				helpers.Trans(c.Player.Language.Slug, "combat.damage", rHitEnemy.GetPlayerDamage(), rHitEnemy.GetEnemyDamage()),
 			)
 		}
 
@@ -771,17 +751,12 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 	// Non sono state fatte modifiche al messaggio
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerStats(ctx, &pb.GetPlayerStatsRequest{
+		rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
-
-		stats := response.GetPlayerStats()
 
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
@@ -791,8 +766,8 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
-				stats.LifePoint,
-				100+stats.Level*10,
+				rGetPlayerStats.GetPlayerStats().GetLifePoint(),
+				100+rGetPlayerStats.GetPlayerStats().GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 			),
 		)
@@ -810,20 +785,15 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 // di sconfitta di mob o apertura di tesori.
 func (c *HuntingController) RefreshMap() (err error) {
 	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetMapByID(ctx, &pb.GetMapByIDRequest{
+	rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 		ID: c.Payload.MapID,
 	})
 	if err != nil {
 		return err
 	}
 
-	var maps *pb.Maps
-	maps = response.GetMaps()
-
 	// Registro mappa e posizione iniziale del player
-	err = helpers.SetRedisMapHunting(maps)
+	err = helpers.SetRedisMapHunting(rGetMapByID.GetMaps())
 	if err != nil {
 		return err
 	}

@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -26,21 +24,17 @@ type NpcMenuController struct {
 func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.FindPlayerByUsername(ctx, &pb.FindPlayerByUsernameRequest{
+	// Il menù del player refresha sempre lo status del player
+	rGetPlayerByUsername, err := services.NnSDK.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
 		Username: player.GetUsername(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Il menù del player refresha sempre lo status del player
-	player = response.GetPlayer()
-
 	// Init funzionalità
 	c.Controller = "route.menu.npc"
-	c.Player = player
+	c.Player = rGetPlayerByUsername.GetPlayer()
 
 	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.welcome"))
 	msg.ParseMode = "markdown"
@@ -63,18 +57,14 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 }
 
 func (c *NpcMenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetAll(ctx, &pb.GetAllRequest{})
+	// Recupero gli npc attivi in questo momento
+	rGetAll, err := services.NnSDK.GetAll(helpers.NewContext(1), &pb.GetAllRequest{})
 	if err != nil {
 		panic(err)
 	}
-	// Recupero gli npc attivi in questo momento
-	npcs := response.GetNPCs()
 
 	var keyboardRow [][]tgbotapi.KeyboardButton
-	for _, npc := range npcs {
+	for _, npc := range rGetAll.GetNPCs() {
 		row := tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
 				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.safeplanet.%s", npc.Slug)),

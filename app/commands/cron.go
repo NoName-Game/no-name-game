@@ -1,10 +1,11 @@
 package commands
 
 import (
-	"context"
 	"os"
 	"strconv"
 	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -35,19 +36,13 @@ func (c *Cron) Notify() {
 		time.Sleep(sleepTime)
 
 		// Recupero tutto gli stati da notificare
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		states, err := services.NnSDK.GetPlayerStateToNotify(ctx, &pb.GetPlayerStateToNotifyRequest{})
+		rGetPlayerStateToNotify, err := services.NnSDK.GetPlayerStateToNotify(helpers.NewContext(1), &pb.GetPlayerStateToNotifyRequest{})
 		if err != nil {
 			panic(err)
 		}
 
-		for _, state := range states.GetPlayerState() {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			player, err := services.NnSDK.GetPlayerByID(ctx, &pb.GetPlayerByIDRequest{
+		for _, state := range rGetPlayerStateToNotify.GetPlayerState() {
+			rGetPlayerByID, err := services.NnSDK.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
 				ID: state.PlayerID,
 			})
 			if err != nil {
@@ -55,10 +50,10 @@ func (c *Cron) Notify() {
 			}
 
 			// Recupero testo da notificare, ogni controller ha la propria notifica
-			text, _ := services.GetTranslation("cron."+state.Controller+"_alert", player.GetPlayer().GetLanguage().GetSlug(), nil)
+			text, _ := services.GetTranslation("cron."+state.Controller+"_alert", rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), nil)
 
 			// Invio notifica
-			msg := services.NewMessage(player.Player.ChatID, text)
+			msg := services.NewMessage(rGetPlayerByID.GetPlayer().GetChatID(), text)
 			// Al momento non associo nessun bottone potrebbe andare in conflitto con la mappa
 			// continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
 			// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
@@ -69,11 +64,10 @@ func (c *Cron) Notify() {
 
 			// Aggiorno lo stato levando la notifica
 			state.ToNotify = false
-
-			_, err = services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+			_, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 				PlayerState: state,
 			})
-			// state, err = playerStateProvicer.UpdatePlayerState(state)
+
 			if err != nil {
 				panic(err)
 			}

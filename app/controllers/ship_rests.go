@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"math"
 	"time"
@@ -85,15 +84,13 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -158,11 +155,8 @@ func (c *ShipRestsController) Stage() (err error) {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
-
 		// Recupero informazioni per il recupero totale delle energie
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		restsInfo, err := services.NnSDK.GetRestsInfo(ctx, &pb.GetRestsInfoRequest{
+		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -214,9 +208,7 @@ func (c *ShipRestsController) Stage() (err error) {
 	// In questo stage avvio effettivamente il riposo
 	case 1:
 		// Recupero informazioni per il recupero totale delle energie
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		restsInfo, err := services.NnSDK.GetRestsInfo(ctx, &pb.GetRestsInfoRequest{
+		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -256,9 +248,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 
 		// Fine riparazione
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		_, err := services.NnSDK.EndPlayerRest(ctx, &pb.EndPlayerRestRequest{
+		_, err := services.NnSDK.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
 			PlayerID:  c.Player.GetID(),
 			RestsTime: uint32(diffMinutes),
 		})

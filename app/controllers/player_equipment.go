@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -85,15 +83,13 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -169,9 +165,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerArmors(ctx, &pb.GetPlayerArmorsRequest{
+		rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 			PlayerID: c.Player.GetID(),
 			Equipped: true,
 		})
@@ -179,13 +173,10 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			return err
 		}
 
-		var armors []*pb.Armor
-		armors = response.GetArmors()
-
 		// armatura base player
-		if len(armors) > 0 {
+		if len(rGetPlayerArmors.GetArmors()) > 0 {
 			var helmet, gauntlets, chest, leg string
-			for _, armor := range armors {
+			for _, armor := range rGetPlayerArmors.GetArmors() {
 				switch armor.ArmorCategory.Slug {
 				case "helmet":
 					helmet = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
@@ -214,7 +205,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentWeaponsEquipment string
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
-		responseWeapon, err := services.NnSDK.GetPlayerWeapons(ctx, &pb.GetPlayerWeaponsRequest{
+		rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 			PlayerID: c.Player.GetID(),
 			Equipped: true,
 		})
@@ -222,11 +213,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			return err
 		}
 
-		var weapons []*pb.Weapon
-		weapons = responseWeapon.GetWeapons()
-
-		if len(weapons) > 0 {
-			for _, weapon := range weapons {
+		if len(rGetPlayerWeapons.GetWeapons()) > 0 {
+			for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 				currentWeaponsEquipment += fmt.Sprintf(
 					"- %s (*%s*) %v🩸 \n",
 					weapon.Name,
@@ -284,9 +272,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetPlayerArmors(ctx, &pb.GetPlayerArmorsRequest{
+			// Recupero nuovamente armature player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 				PlayerID: c.Player.GetID(),
 				Equipped: false,
 			})
@@ -294,16 +282,11 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				return err
 			}
 
-			// Recupero nuovamente armature player, richiamando la rotta dedicata
-			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			var armors []*pb.Armor
-			armors = response.GetArmors()
-
-			if len(armors) > 0 {
+			if len(rGetPlayerArmors.GetArmors()) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
 
 				// Ciclo armature del player
-				for _, armor := range armors {
+				for _, armor := range rGetPlayerArmors.GetArmors() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
@@ -321,9 +304,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetPlayerWeapons(ctx, &pb.GetPlayerWeaponsRequest{
+			// Recupero nuovamente armi player, richiamando la rotta dedicata
+			// in questa maniera posso filtrare per quelle che non sono equipaggiate
+			rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 				PlayerID: c.Player.GetID(),
 				Equipped: false,
 			})
@@ -331,16 +314,11 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				return err
 			}
 
-			// Recupero nuovamente armi player, richiamando la rotta dedicata
-			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			var weapons []*pb.Weapon
-			weapons = response.GetWeapons()
-
-			if len(weapons) > 0 {
+			if len(rGetPlayerWeapons.GetWeapons()) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
 
 				// Ciclo armi player
-				for _, weapon := range weapons {
+				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
@@ -389,45 +367,33 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.FindArmorByName(ctx, &pb.FindArmorByNameRequest{
+			rFindArmorByName, err := services.NnSDK.FindArmorByName(helpers.NewContext(1), &pb.FindArmorByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
 				return err
 			}
 
-			var armor *pb.Armor
-			armor = response.GetArmor()
-
 			// Verifico se appartiene correttamente al player
-			if armor.PlayerID != c.Player.ID {
+			if rFindArmorByName.GetArmor().GetPlayerID() != c.Player.ID {
 				equipmentError = true
 			}
 
-			equipmentID = armor.GetID()
+			equipmentID = rFindArmorByName.GetArmor().GetID()
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.FindWeaponByName(ctx, &pb.FindWeaponByNameRequest{
+			rFindWeaponByName, err := services.NnSDK.FindWeaponByName(helpers.NewContext(1), &pb.FindWeaponByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
 				return err
 			}
 
-			var weapon *pb.Weapon
-			weapon = response.GetWeapon()
-
 			// Verifico se appartiene correttamente al player
-			if weapon.PlayerID != c.Player.ID {
+			if rFindWeaponByName.GetWeapon().GetPlayerID() != c.Player.ID {
 				equipmentError = true
 			}
 
-			equipmentID = weapon.ID
+			equipmentID = rFindWeaponByName.GetWeapon().GetID()
 		}
 
 		if equipmentError {
@@ -480,10 +446,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 	case 3:
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			_, err := services.NnSDK.GetArmorByID(ctx, &pb.GetArmorByIDRequest{
+			_, err := services.NnSDK.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
 				ID: c.Payload.EquipID,
 			})
 			if err != nil {
@@ -491,16 +454,14 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			// Aggiorno equipped
-			_, err = services.NnSDK.UpdateArmor(ctx, &pb.UpdateArmorRequest{
+			_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
 				Armor: &pb.Armor{Equipped: true},
 			})
 			if err != nil {
 				return err
 			}
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			_, err := services.NnSDK.GetWeaponByID(ctx, &pb.GetWeaponByIDRequest{
+			_, err := services.NnSDK.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
 				ID: c.Payload.EquipID,
 			})
 			if err != nil {
@@ -508,7 +469,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			// Aggiorno equipped
-			_, err = services.NnSDK.UpdateWeapon(ctx, &pb.UpdateWeaponRequest{
+			_, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
 				Weapon: &pb.Weapon{Equipped: true},
 			})
 			if err != nil {

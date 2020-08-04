@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -83,15 +81,13 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -162,9 +158,7 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		money, err := services.NnSDK.GetPlayerEconomy(ctx, &pb.GetPlayerEconomyRequest{
+		rGetPlayerEconomy, err := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
 			EconomyType: "bank",
 		})
@@ -172,7 +166,7 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", money.Value))
+		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", rGetPlayerEconomy.GetValue()))
 		msg.ParseMode = "Markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -238,9 +232,7 @@ func (c *BankController) Stage() (err error) {
 			operationType = 1
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		_, err = services.NnSDK.Bank(ctx, &pb.BankRequest{
+		_, err = services.NnSDK.Bank(helpers.NewContext(1), &pb.BankRequest{
 			OperationType: operationType,
 			PlayerID:      c.Player.ID,
 			Amount:        int32(value),

@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -44,20 +42,16 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	}
 
 	// Recupero nave attiva de player
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetPlayerShips(ctx, &pb.GetPlayerShipsRequest{
+	rGetPlayerShips, err := services.NnSDK.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
 		PlayerID: c.Player.GetID(),
 		Equipped: true,
 	})
 	if err != nil {
 		panic(err)
 	}
-	var eqippedShips []*pb.Ship
-	eqippedShips = response.GetShips()
 
 	var currentShipRecap string
-	for _, ship := range eqippedShips {
+	for _, ship := range rGetPlayerShips.GetShips() {
 		currentShipRecap = fmt.Sprintf(
 			"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
 			ship.Name, strings.ToUpper(ship.Rarity.Slug),

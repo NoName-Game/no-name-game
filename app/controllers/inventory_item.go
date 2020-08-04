@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -91,15 +89,13 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -129,22 +125,17 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	// Verifico quale item ha scelto di usare e controllo se il player ha realmente
 	// l'item indicato
 	case 1:
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerItems(ctx, &pb.GetPlayerItemsRequest{
+		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return false, err
 		}
 
-		var playerInventoryItems []*pb.PlayerInventory
-		playerInventoryItems = response.GetPlayerInventory()
-
 		// Recupero nome item che il player vuole usare
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
-		for _, item := range playerInventoryItems {
+		for _, item := range rGetPlayerItems.GetPlayerInventory() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
 				c.Payload.Item = item.GetItem()
 				return false, err
@@ -175,21 +166,16 @@ func (c *InventoryItemController) Stage() (err error) {
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerItems(ctx, &pb.GetPlayerItemsRequest{
+		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			panic(err)
 		}
 
-		var playerInventoryItems []*pb.PlayerInventory
-		playerInventoryItems = response.GetPlayerInventory()
-
 		// Ciclo items e li inserisco nella keyboarc
 		var keyboardRowItems [][]tgbotapi.KeyboardButton
-		for _, item := range playerInventoryItems {
+		for _, item := range rGetPlayerItems.GetPlayerInventory() {
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
@@ -271,9 +257,7 @@ func (c *InventoryItemController) Stage() (err error) {
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
 		// Richiamo il ws per usare l'item selezionato
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		_, err := services.NnSDK.UseItem(ctx, &pb.UseItemRequest{
+		_, err := services.NnSDK.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
 		})

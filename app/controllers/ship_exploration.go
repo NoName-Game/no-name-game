@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -89,15 +88,13 @@ func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Up
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -226,26 +223,21 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
 	case 0:
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerLastPosition(ctx, &pb.GetPlayerLastPositionRequest{
+		// Recupero posizione corrente player
+		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		// Recupero posizione corrente player
-		var position *pb.PlayerPosition
-		position = response.GetPlayerPosition()
-
 		var currentPlayerPositions string
 		currentPlayerPositions = fmt.Sprintf(
 			"%s \nX: %v \nY: %v \nZ: %v \n",
 			helpers.Trans(c.Player.Language.Slug, "ship.exploration.current_position"),
-			position.X,
-			position.Y,
-			position.Z,
+			rGetPlayerLastPosition.GetPlayerPosition().GetX(),
+			rGetPlayerLastPosition.GetPlayerPosition().GetY(),
+			rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
 		)
 
 		// Invio messaggio con recap
@@ -276,10 +268,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerShips(ctx, &pb.GetPlayerShipsRequest{
+		// Recupero nave player equipaggiata
+		rGetPlayerShips, err := services.NnSDK.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
 			PlayerID: c.Player.GetID(),
 			Equipped: true,
 		})
@@ -287,13 +277,9 @@ func (c *ShipExplorationController) Stage() (err error) {
 			return err
 		}
 
-		// Recupero nave player equipaggiata
-		var eqippedShips []*pb.Ship
-		eqippedShips = response.GetShips()
-
 		// Recupero informazioni di esplorazione
-		responseExplorationInfo, err := services.NnSDK.GetShipExplorationInfo(ctx, &pb.GetShipExplorationInfoRequest{
-			Ship: eqippedShips[0],
+		responseExplorationInfo, err := services.NnSDK.GetShipExplorationInfo(helpers.NewContext(1), &pb.GetShipExplorationInfoRequest{
+			Ship: rGetPlayerShips.GetShips()[0], // TODO: migliorare
 		})
 		if err != nil {
 			return err
@@ -358,7 +344,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Update state
-		c.Payload.Ship = eqippedShips[0]
+		c.Payload.Ship = rGetPlayerShips.GetShips()[0]
 		c.Payload.StarNearestMapName = starNearestMapName
 		c.Payload.StarNearestMapInfo = starNearestMapInfo
 		c.State.Stage = 2

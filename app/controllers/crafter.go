@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -87,15 +86,13 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -219,28 +216,22 @@ func (c *CrafterController) Stage() (err error) {
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch c.Payload.Item {
 		case "armors":
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetAllArmorCategory(ctx, &pb.GetAllArmorCategoryRequest{})
+			rGetAllArmorCategory, err := services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
 			if err != nil {
 				return err
 			}
 
-			armorCategories := response.GetArmorCategory()
-			for _, category := range armorCategories {
+			for _, category := range rGetAllArmorCategory.GetArmorCategory() {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case "weapons":
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetAllWeaponCategory(ctx, &pb.GetAllWeaponCategoryRequest{})
+			rGetAllWeaponCategory, err := services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
 			if err != nil {
 				return err
 			}
 
-			weaponCategories := response.GetWeaponCategories()
-			for _, category := range weaponCategories {
+			for _, category := range rGetAllWeaponCategory.GetWeaponCategories() {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
@@ -264,17 +255,15 @@ func (c *CrafterController) Stage() (err error) {
 		// Aggiorno stato
 		c.State.Stage = 2
 	case 2:
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		response, err := services.NnSDK.GetPlayerResources(ctx, &pb.GetPlayerResourcesRequest{
+		rGetPlayerResources, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 			PlayerID: c.Player.ID,
 		})
 		if err != nil {
 			return err
 		}
 
-		playerResources := response.GetPlayerInventory()
-		mapInventory := helpers.InventoryResourcesToMap(playerResources)
+		mapInventory := helpers.InventoryResourcesToMap(rGetPlayerResources.GetPlayerInventory())
+
 		// Se l'inventario è vuoto allora concludi
 		if len(mapInventory) <= 0 {
 			message := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.no_resources"))
@@ -304,19 +293,17 @@ func (c *CrafterController) Stage() (err error) {
 				strings.Split(c.Update.Message.Text, " (")[0],
 				helpers.Trans(c.Player.Language.Slug, "crafting.add")+" ")[1]
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetResourceByName(ctx, &pb.GetResourceByNameRequest{
+			rGetResourceByName, err := services.NnSDK.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
 				Name: resourceName,
 			})
 			if err != nil {
 				return err
 			}
 
-			resource := response.GetResource()
-			resourceID := resource.ID
+			resourceID := rGetResourceByName.GetResource().GetID()
 			resourceMaxQuantity := mapInventory[resourceID]
 			hasResource := true
+
 			// Controllo che l'utente abbia effettivamente l'item
 			if mapInventory[resourceID] == 0 {
 				// Non ha l'item!
@@ -342,16 +329,14 @@ func (c *CrafterController) Stage() (err error) {
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
 		for r, q := range mapInventory {
 			// If PayloadResouces < Inventory quantity ok :)
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			response, err := services.NnSDK.GetResourceByID(ctx, &pb.GetResourceByIDRequest{
+			rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: r,
 			})
 			if err != nil {
 				return err
 			}
 
-			resource := response.GetResource()
+			resource := rGetResourceByID.GetResource()
 			if c.Payload.Resources[r] < q {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, "crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(int(q) - int(c.Payload.Resources[r]))) + ")",
@@ -377,21 +362,18 @@ func (c *CrafterController) Stage() (err error) {
 			),
 		)
 
-		//Add recipe message
+		// Add recipe message
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
 			for k, v := range c.Payload.Resources {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
-				response, err := services.NnSDK.GetResourceByID(ctx, &pb.GetResourceByIDRequest{
+				rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: k,
 				})
 				if err != nil {
 					return err
 				}
 
-				resource := response.GetResource()
-				recipe += resource.Name + " x " + strconv.Itoa(int(v)) + "\n"
+				recipe += rGetResourceByID.GetResource().Name + " x " + strconv.Itoa(int(v)) + "\n"
 			}
 		}
 
@@ -407,21 +389,18 @@ func (c *CrafterController) Stage() (err error) {
 		// Aggiorno stato
 		c.State.Stage = 3
 	case 3:
-		//Add recipe message
+		// Add recipe message
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
 			for k, v := range c.Payload.Resources {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
-				response, err := services.NnSDK.GetResourceByID(ctx, &pb.GetResourceByIDRequest{
+				rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: k,
 				})
 				if err != nil {
 					return err
 				}
 
-				resource := response.GetResource()
-				recipe += resource.Name + " x " + strconv.Itoa(int(v)) + "\n"
+				recipe += rGetResourceByID.GetResource().GetName() + " x " + strconv.Itoa(int(v)) + "\n"
 			}
 		}
 
@@ -468,10 +447,7 @@ func (c *CrafterController) Stage() (err error) {
 		// crafting completato
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",
@@ -488,10 +464,7 @@ func (c *CrafterController) Stage() (err error) {
 		}
 
 		// Creo la richiesta di craft
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		craftResponse, err := services.NnSDK.Craft(ctx, &pb.CraftRequest{
+		rCraft, err := services.NnSDK.Craft(helpers.NewContext(1), &pb.CraftRequest{
 			CraftType: c.Payload.Item,
 			Category:  c.Payload.Category,
 			Items:     string(items),
@@ -504,9 +477,9 @@ func (c *CrafterController) Stage() (err error) {
 		var text string
 		switch c.Payload.Item {
 		case "armors":
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", craftResponse.Armor.Name)
+			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraft.GetArmor().GetName())
 		case "weapons":
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", craftResponse.Weapon.Name)
+			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraft.GetWeapon().GetName())
 		}
 		msg := services.NewMessage(c.Player.ChatID, text)
 		_, err = services.SendMessage(msg)

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -93,15 +92,13 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	payloadUpdated, _ := json.Marshal(c.Payload)
 	c.State.Payload = string(payloadUpdated)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.UpdatePlayerState(ctx, &pb.UpdatePlayerStateRequest{
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 		PlayerState: c.State,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.State = response.GetPlayerState()
+	c.State = rUpdatePlayerState.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -288,56 +285,48 @@ func (c *MissionController) Stage() (err error) {
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
 	case 2:
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		responsePlayer, err := services.NnSDK.GetPlayerLastPosition(ctx, &pb.GetPlayerLastPositionRequest{
+		// Recupero ultima posizione del player, dando per scontato che sia
+		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
+		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		// Recupero ultima posizione del player, dando per scontato che sia
-		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		var lastPosition *pb.PlayerPosition
-		lastPosition = responsePlayer.GetPlayerPosition()
-
-		responsePlanet, err := services.NnSDK.GetPlanetByCoordinate(ctx, &pb.GetPlanetByCoordinateRequest{
-			X: lastPosition.GetX(),
-			Y: lastPosition.GetY(),
-			Z: lastPosition.GetZ(),
+		// Dalla ultima posizione recupero il pianeta corrente
+		rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
+			X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
+			Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
+			Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
 		})
 		if err != nil {
 			return err
 		}
-		// Dalla ultima posizione recupero il pianeta corrente
-		var planet *pb.Planet
-		planet = responsePlanet.GetPlanet()
 
 		// Recupero drop
-		responseDrop, err := services.NnSDK.DropResource(ctx, &pb.DropResourceRequest{
+		rDropResource, err := services.NnSDK.DropResource(helpers.NewContext(1), &pb.DropResourceRequest{
 			TypeExploration: c.Payload.ExplorationType,
 			QtyExploration:  int32(c.Payload.Times),
 			PlayerID:        c.Player.ID,
-			PlanetID:        planet.ID,
+			PlanetID:        rGetPlanetByCoordinate.GetPlanet().GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
 		// Se ho recuperato il drop lo inserisco nella lista degli elementi droppati
-		c.Payload.Dropped = append(c.Payload.Dropped, responseDrop)
+		c.Payload.Dropped = append(c.Payload.Dropped, rDropResource)
 
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"mission.extraction_recap",
-				responseDrop.GetResource().GetName(),
-				responseDrop.GetResource().GetRarity().GetName(),
-				strings.ToUpper(responseDrop.GetResource().GetRarity().GetSlug()),
-				responseDrop.GetQuantity(),
+				rDropResource.GetResource().GetName(),
+				rDropResource.GetResource().GetRarity().GetName(),
+				strings.ToUpper(rDropResource.GetResource().GetRarity().GetSlug()),
+				rDropResource.GetQuantity(),
 			),
 		)
 		msg.ParseMode = "markdown"
@@ -415,9 +404,7 @@ func (c *MissionController) Stage() (err error) {
 
 		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
 		for _, drop := range c.Payload.Dropped {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			_, err := services.NnSDK.ManagePlayerInventory(ctx, &pb.ManagePlayerInventoryRequest{
+			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   drop.Resource.ID,
 				ItemType: "resources",

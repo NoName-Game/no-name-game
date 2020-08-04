@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -31,22 +29,16 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// *******************
 	// Recupero risorse inventario
 	// *******************
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetPlayerResources(ctx, &pb.GetPlayerResourcesRequest{
+	rGetPlayerResource, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 		PlayerID: c.Player.GetID(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	var playerInventoryResources []*pb.PlayerInventory
-	playerInventoryResources = response.GetPlayerInventory()
-
 	var recapResources string
 	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
-	for _, resource := range playerInventoryResources {
+	for _, resource := range rGetPlayerResource.GetPlayerInventory() {
 		recapResources += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
 			resource.Quantity,
@@ -58,19 +50,16 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// *******************
 	// Recupero item inventario
 	// *******************
-	responseItems, err := services.NnSDK.GetPlayerItems(ctx, &pb.GetPlayerItemsRequest{
+	rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 		PlayerID: c.Player.GetID(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	var playerInventoryItems []*pb.PlayerInventory
-	playerInventoryItems = responseItems.GetPlayerInventory()
-
 	var recapItems string
 	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
-	for _, resource := range playerInventoryItems {
+	for _, resource := range rGetPlayerItems.GetPlayerInventory() {
 		recapItems += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
 			resource.Quantity,

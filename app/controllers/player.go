@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -39,9 +37,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	}
 
 	// Recupero armature del player
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	response, err := services.NnSDK.GetPlayerArmors(ctx, &pb.GetPlayerArmorsRequest{
+	rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 		PlayerID: c.Player.GetID(),
 		Equipped: true,
 	})
@@ -49,13 +45,10 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		panic(err)
 	}
 
-	var armors []*pb.Armor
-	armors = response.GetArmors()
-
 	// armatura base player
 	var defense, evasion, halving float32
-	if len(armors) > 0 {
-		for _, armor := range armors {
+	if len(rGetPlayerArmors.GetArmors()) > 0 {
+		for _, armor := range rGetPlayerArmors.GetArmors() {
 			defense += armor.Defense
 			evasion += armor.Evasion
 			halving += armor.Halving
@@ -116,18 +109,14 @@ func (c *PlayerController) Stage() {
 // GetPlayerTask
 // Metodo didicato alla reppresenteazione del risorse econimiche del player
 func (c *PlayerController) GetPlayerEconomy() (economy string, err error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
 	// Calcolo monete del player
-	responseMoney, _ := services.NnSDK.GetPlayerEconomy(ctx, &pb.GetPlayerEconomyRequest{
+	responseMoney, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
 		EconomyType: "money",
 	})
 
 	// Calcolo diamanti del player
-	responseDiamond, _ := services.NnSDK.GetPlayerEconomy(ctx, &pb.GetPlayerEconomyRequest{
+	responseDiamond, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
 		EconomyType: "diamond",
 	})

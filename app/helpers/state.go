@@ -1,11 +1,9 @@
 package helpers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"time"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -111,9 +109,7 @@ func CheckState(player pb.Player, controller string, payload interface{}, father
 		jsonPayload, _ := json.Marshal(payload)
 
 		// Creo il nuovo stato
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-		response, err := services.NnSDK.CreatePlayerState(ctx, &pb.CreatePlayerStateRequest{
+		rCreatePlayerState, err := services.NnSDK.CreatePlayerState(NewContext(1), &pb.CreatePlayerStateRequest{
 			PlayerState: &pb.PlayerState{
 				PlayerID:   player.GetID(),
 				Controller: controller,
@@ -128,7 +124,7 @@ func CheckState(player pb.Player, controller string, payload interface{}, father
 		}
 
 		// Ritorno stato aggiornato
-		playerState = response.GetPlayerState()
+		playerState = rCreatePlayerState.GetPlayerState()
 
 		// Ritorno indicando che si tratta di un nuovo stato, questo
 		// mi servirà per escludere il validator
