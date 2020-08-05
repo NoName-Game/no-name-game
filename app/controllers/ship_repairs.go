@@ -177,11 +177,9 @@ func (c *ShipRepairsController) Stage() (err error) {
 
 	// In questo riporto al player le risorse e tempistiche necessarie alla riparazione della nave
 	case 0:
-		// TODO: verificare, dovrebbe recuperarne solo una
 		// Recupero nave player equipaggiata
-		rGetPlayerShips, err := services.NnSDK.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
+		rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
-			Equipped: true,
 		})
 		if err != nil {
 			return err
@@ -189,7 +187,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 
 		// Recupero informazioni nave da riparare
 		rGetShipRepairInfo, err := services.NnSDK.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
-			Ship: rGetPlayerShips.GetShips()[0],
+			Ship: rGetPlayerShipEquipped.GetShip(),
 		})
 		if err != nil {
 			return err
@@ -200,7 +198,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		shipRecap = helpers.Trans(c.Player.Language.Slug, "ship.repairs.info")
 		if rGetShipRepairInfo.GetNeedRepairs() {
 			shipRecap += fmt.Sprintf("🔧 %v/100%% (%s)\n%s\n%s ",
-				rGetPlayerShips.GetShips()[0].GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+				rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.time", rGetShipRepairInfo.GetRepairTime()),
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.quantity_resources", rGetShipRepairInfo.GetQuantityResources(), rGetShipRepairInfo.GetTypeResources()),
 			)
@@ -236,7 +234,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.Payload.Ship = rGetPlayerShips.GetShips()[0]
+		c.Payload.Ship = rGetPlayerShipEquipped.GetShip()
 		c.Payload.QuantityResources = rGetShipRepairInfo.GetQuantityResources()
 		c.Payload.RepairTime = rGetShipRepairInfo.GetRepairTime()
 		c.Payload.TypeResources = rGetShipRepairInfo.GetTypeResources()

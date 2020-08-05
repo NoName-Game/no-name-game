@@ -269,9 +269,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
 		// Recupero nave player equipaggiata
-		rGetPlayerShips, err := services.NnSDK.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
+		rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
-			Equipped: true,
 		})
 		if err != nil {
 			return err
@@ -279,7 +278,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		// Recupero informazioni di esplorazione
 		responseExplorationInfo, err := services.NnSDK.GetShipExplorationInfo(helpers.NewContext(1), &pb.GetShipExplorationInfoRequest{
-			Ship: rGetPlayerShips.GetShips()[0], // TODO: migliorare
+			Ship: rGetPlayerShipEquipped.GetShip(),
 		})
 		if err != nil {
 			return err
@@ -344,7 +343,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Update state
-		c.Payload.Ship = rGetPlayerShips.GetShips()[0]
+		c.Payload.Ship = rGetPlayerShipEquipped.GetShip()
 		c.Payload.StarNearestMapName = starNearestMapName
 		c.Payload.StarNearestMapInfo = starNearestMapInfo
 		c.CurrentState.Stage = 2

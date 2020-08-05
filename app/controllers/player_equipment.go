@@ -207,7 +207,6 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 			PlayerID: c.Player.GetID(),
-			Equipped: true,
 		})
 		if err != nil {
 			return err
@@ -308,7 +307,6 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
 			rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 				PlayerID: c.Player.GetID(),
-				Equipped: false,
 			})
 			if err != nil {
 				return err

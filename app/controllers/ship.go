@@ -42,24 +42,20 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	}
 
 	// Recupero nave attiva de player
-	rGetPlayerShips, err := services.NnSDK.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
+	rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 		PlayerID: c.Player.GetID(),
-		Equipped: true,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	var currentShipRecap string
-	for _, ship := range rGetPlayerShips.GetShips() {
-		currentShipRecap = fmt.Sprintf(
-			"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
-			ship.Name, strings.ToUpper(ship.Rarity.Slug),
-			ship.ShipCategory.Name,
-			ship.ShipStats.Integrity, helpers.Trans(c.Player.Language.Slug, "integrity"),
-			ship.ShipStats.Tank, helpers.Trans(c.Player.Language.Slug, "fuel"),
-		)
-	}
+	currentShipRecap := fmt.Sprintf(
+		"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
+		rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
+		rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
+		rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+		rGetPlayerShipEquipped.GetShip().GetShipStats().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
+	)
 
 	// Invio messaggio
 	msg := services.NewMessage(c.Update.Message.Chat.ID,
