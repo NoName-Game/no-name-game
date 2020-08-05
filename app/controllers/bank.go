@@ -225,21 +225,30 @@ func (c *BankController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
-		var operationType uint32
+
+		var text string
+		text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
-			operationType = 0
-		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
-			operationType = 1
-		}
+			_, err = services.NnSDK.BankDeposit(helpers.NewContext(1), &pb.BankDepositRequest{
+				PlayerID: c.Player.ID,
+				Amount:   int32(value),
+			})
 
-		_, err = services.NnSDK.Bank(helpers.NewContext(1), &pb.BankRequest{
-			OperationType: operationType,
-			PlayerID:      c.Player.ID,
-			Amount:        int32(value),
-		})
-		if err != nil {
-			return err
+			// Errore nella transazione
+			if err != nil {
+				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
+			}
+		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
+			_, err = services.NnSDK.BankWithdraw(helpers.NewContext(1), &pb.BankWithdrawRequest{
+				PlayerID: c.Player.ID,
+				Amount:   int32(value),
+			})
+
+			// Errore nella transazione
+			if err != nil {
+				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
+			}
 		}
 
 		// Registro transazione
@@ -249,13 +258,6 @@ func (c *BankController) Stage() (err error) {
 			TransactionCategoryID: uint(transactionCategory),
 			PlayerID:              c.Player.ID,
 		})*/
-		var text string
-		if err != nil {
-			// Errore nella transazione
-			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
-		} else {
-			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
-		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, text)

@@ -463,24 +463,36 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 
-		// Creo la richiesta di craft
-		rCraft, err := services.NnSDK.Craft(helpers.NewContext(1), &pb.CraftRequest{
-			CraftType: c.Payload.Item,
-			Category:  c.Payload.Category,
-			Items:     string(items),
-			PlayerID:  c.Player.ID,
-		})
-		if err != nil {
-			return err
-		}
-
 		var text string
 		switch c.Payload.Item {
 		case "armors":
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraft.GetArmor().GetName())
+			// Creo la richiesta di craft armor
+			rCraftArmor, err := services.NnSDK.CraftArmor(helpers.NewContext(1), &pb.CraftArmorRequest{
+				Category: c.Payload.Category,
+				Items:    string(items),
+				PlayerID: c.Player.ID,
+			})
+
+			if err != nil {
+				return err
+			}
+
+			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraftArmor.GetArmor().GetName())
 		case "weapons":
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraft.GetWeapon().GetName())
+			// Creo la richiesta di craft weapon
+			rCraftWeapon, err := services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
+				Category: c.Payload.Category,
+				Items:    string(items),
+				PlayerID: c.Player.ID,
+			})
+
+			if err != nil {
+				return err
+			}
+
+			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraftWeapon.GetWeapon().GetName())
 		}
+
 		msg := services.NewMessage(c.Player.ChatID, text)
 		_, err = services.SendMessage(msg)
 		if err != nil {
