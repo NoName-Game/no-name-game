@@ -605,6 +605,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		rHitEnemy, err := services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
+			EnemyID:         enemy.GetID(),
 			PlayerID:        c.Player.ID,
 			PlayerPositionX: c.PlayerPositionX,
 			PlayerPositionY: c.PlayerPositionY,
@@ -619,19 +620,19 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 			// Costruisco messaggio di recap del drop
 			var dropRecap string
 
-			// TODO: da completare enemy drop
-			// if hitResponse.EnemyDrop.Resource.ID > 0 {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", hitResponse.EnemyDrop.Resource.Name)
-			// } else if hitResponse.EnemyDrop.Item.ID > 0 {
-			// 	itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", hitResponse.EnemyDrop.Item.Slug))
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
-			// } else if hitResponse.EnemyDrop.Transaction.ID > 0 {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", hitResponse.EnemyDrop.Transaction.Value)
-			// } else {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
-			// }
-			// // Aggiungo anche esperinza recuperata
-			// dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", hitResponse.PlayerExperience))
+			if rHitEnemy.GetEnemyDrop().GetResource() != nil {
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
+			} else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
+				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
+			} else if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
+			} else {
+				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
+			}
+
+			// Aggiungo anche esperinza recuperata
+			dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", rHitEnemy.GetPlayerExperience()))
 
 			// Aggiorno modifica del messaggio
 			editMessage = services.NewEditMessage(

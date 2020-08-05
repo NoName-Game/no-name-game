@@ -361,16 +361,15 @@ func (c *CraftingController) Stage() (err error) {
 	// In questo stage riepilogo le risorse necessarie e
 	// chiedo al conferma al player se continuare il crafting dell'item
 	case 2:
-		// TODO: da completare recipe
 		// Inserisco nel payload la recipelist per avere accesso più facile ad essa
-		// helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
+		helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
 
 		// ListRecipe() genera una string contenente gli oggetti necessari al crafting
 		var itemsRecipeList string
-		// itemsRecipeList, err = helpers.ListRecipe(c.Payload.Resources)
-		// if err != nil {
-		// 	return err
-		// }
+		itemsRecipeList, err = helpers.ListRecipe(c.Payload.Resources)
+		if err != nil {
+			return err
+		}
 
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(

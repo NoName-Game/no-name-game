@@ -405,22 +405,17 @@ func (c *ShipExplorationController) Stage() (err error) {
 	case 3:
 		// Costruisco chiamata per aggiornare posizione e scalare il quantitativo
 		// di carburante usato
-		// var request nnsdk.ExplorationEndRequest
-		// request.Position = []float64{
-		// 	c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.X,
-		// 	c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Y,
-		// 	c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Z,
-		// }
-		// request.Tank = c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel
-		// request.Integrity = c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity
-
-		// TODO: da completare
-
-		// _, err := shipProvider.EndShipExploration(c.Payload.Ship, request)
-		// if err != nil {
-		// 	err = fmt.Errorf("%s %s", "cant end exploration", err)
-		// 	return err
-		// }
+		_, err := services.NnSDK.EndShipExploration(helpers.NewContext(1), &pb.EndShipExplorationRequest{
+			Integrity: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity,
+			Tank:      c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel,
+			PositionX: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.X,
+			PositionY: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Y,
+			PositionZ: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Z,
+			ShipID:    c.Payload.Ship.ID,
+		})
+		if err != nil {
+			return err
+		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.exploration.end"))
