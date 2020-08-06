@@ -6,6 +6,8 @@ run:
   # include test files or not, default is true
   tests: true
 
+  modules-download-mode: readonly
+
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
