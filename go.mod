@@ -12,13 +12,12 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/joho/godotenv v1.3.0
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2
-	github.com/nicksnyder/go-i18n v2.0.2+incompatible
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/nicksnyder/go-i18n v2.0.2+incompatible // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.0.2
-	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
-	github.com/technoweenie/multipartstreamer v1.0.1
-	golang.org/x/sys v0.0.0-20190927073244-c990c680b611
+	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+	golang.org/x/sys v0.0.0-20190927073244-c990c680b611 // indirect
 	golang.org/x/text v0.3.2
 	google.golang.org/grpc v1.30.0
 	gopkg.in/yaml.v2 v2.2.4
