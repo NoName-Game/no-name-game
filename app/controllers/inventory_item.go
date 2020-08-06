@@ -125,7 +125,8 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	// Verifico quale item ha scelto di usare e controllo se il player ha realmente
 	// l'item indicato
 	case 1:
-		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		var rGetPlayerItems *pb.GetPlayerItemsResponse
+		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -166,7 +167,8 @@ func (c *InventoryItemController) Stage() (err error) {
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
-		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		var rGetPlayerItems *pb.GetPlayerItemsResponse
+		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {

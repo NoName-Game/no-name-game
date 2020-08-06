@@ -138,7 +138,8 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.GetFinishAt())
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.GetFinishAt())
 		if err != nil {
 			panic(err)
 		}
@@ -287,7 +288,8 @@ func (c *MissionController) Stage() (err error) {
 	case 2:
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
+		var rGetPlayerLastPosition *pb.GetPlayerLastPositionResponse
+		rGetPlayerLastPosition, err = services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -295,7 +297,8 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Dalla ultima posizione recupero il pianeta corrente
-		rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
+		var rGetPlanetByCoordinate *pb.GetPlanetByCoordinateResponse
+		rGetPlanetByCoordinate, err = services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
 			X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
 			Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
 			Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
@@ -305,7 +308,8 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Recupero drop
-		rDropResource, err := services.NnSDK.DropResource(helpers.NewContext(1), &pb.DropResourceRequest{
+		var rDropResource *pb.DropResourceResponse
+		rDropResource, err = services.NnSDK.DropResource(helpers.NewContext(1), &pb.DropResourceRequest{
 			TypeExploration: c.Payload.ExplorationType,
 			QtyExploration:  int32(c.Payload.Times),
 			PlayerID:        c.Player.ID,
@@ -350,7 +354,8 @@ func (c *MissionController) Stage() (err error) {
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}

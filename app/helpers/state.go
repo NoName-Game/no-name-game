@@ -109,7 +109,8 @@ func CheckState(player pb.Player, activeStates []*pb.PlayerState, controller str
 		jsonPayload, _ := json.Marshal(payload)
 
 		// Creo il nuovo stato
-		rCreatePlayerState, err := services.NnSDK.CreatePlayerState(NewContext(1), &pb.CreatePlayerStateRequest{
+		var rCreatePlayerState *pb.CreatePlayerStateResponse
+		rCreatePlayerState, err = services.NnSDK.CreatePlayerState(NewContext(1), &pb.CreatePlayerStateRequest{
 			PlayerState: &pb.PlayerState{
 				PlayerID:   player.GetID(),
 				Controller: controller,

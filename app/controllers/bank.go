@@ -158,7 +158,8 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		rGetPlayerEconomy, err := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
+		rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
 			EconomyType: "bank",
 		})

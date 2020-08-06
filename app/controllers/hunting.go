@@ -156,7 +156,8 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 		payloadUpdated, _ := json.Marshal(c.Payload)
 		c.CurrentState.Payload = string(payloadUpdated)
 
-		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.CurrentState,
 		})
 		if err != nil {
@@ -251,7 +252,8 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
+		var rGetPlayerLastPosition *pb.GetPlayerLastPositionResponse
+		rGetPlayerLastPosition, err = services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -259,7 +261,8 @@ func (c *HuntingController) Hunting() (err error) {
 		}
 
 		// Dalla ultima posizione recupero il pianeta corrente
-		rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
+		var rGetPlanetByCoordinate *pb.GetPlanetByCoordinateResponse
+		rGetPlanetByCoordinate, err = services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
 			X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
 			Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
 			Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
@@ -270,15 +273,15 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
 		// al DB registro il tutto su redis
-		rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
+		var rGetMapByID *pb.GetMapByIDResponse
+		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 			ID: rGetPlanetByCoordinate.GetPlanet().GetMapID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		var maps *pb.Maps
-		maps = rGetMapByID.GetMaps()
+		var maps = rGetMapByID.GetMaps()
 
 		// Registro mappa e posizione iniziale del player
 		err = helpers.SetRedisMapHunting(maps)
@@ -420,7 +423,8 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 		if nearTresure {
 			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
-			rDropTresure, err := services.NnSDK.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
+			var rDropTresure *pb.DropTresureResponse
+			rDropTresure, err = services.NnSDK.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
 				TresureID: tresure.ID,
 				PlayerID:  c.Player.ID,
 			})
@@ -574,7 +578,8 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	if c.Payload.EnemyID > 0 {
-		rGetEnemyByID, err := services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+		var rGetEnemyByID *pb.GetEnemyByIDResponse
+		rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 			ID: c.Payload.EnemyID,
 		})
 		if err != nil {
@@ -613,7 +618,8 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
-		rHitEnemy, err := services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
+		var rHitEnemy *pb.HitEnemyResponse
+		rHitEnemy, err = services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
 			EnemyID:         enemy.GetID(),
 			PlayerID:        c.Player.ID,
 			PlayerPositionX: c.PlayerPositionX,

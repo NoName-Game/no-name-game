@@ -137,7 +137,8 @@ func (c *ShipRepairsController) Validator() (hasErrors bool, err error) {
 
 		return false, err
 	case 2:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -264,7 +265,8 @@ func (c *ShipRepairsController) Stage() (err error) {
 		var recapResourceUsed string
 		recapResourceUsed = helpers.Trans(c.Player.Language.Slug, "ship.repairs.used_resources")
 		for _, resourceUsed := range rStartShipRepair.GetStartShipRepair() {
-			rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceUsed.ResourceID,
 			})
 			if err != nil {

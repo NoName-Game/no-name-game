@@ -180,7 +180,8 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al completamento del viaggio
 	case 3:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -224,7 +225,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// una nuova esplorazione
 	case 0:
 		// Recupero posizione corrente player
-		rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
+		var rGetPlayerLastPosition *pb.GetPlayerLastPositionResponse
+		rGetPlayerLastPosition, err = services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -269,7 +271,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
 		// Recupero nave player equipaggiata
-		rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -277,7 +280,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Recupero informazioni di esplorazione
-		responseExplorationInfo, err := services.NnSDK.GetShipExplorationInfo(helpers.NewContext(1), &pb.GetShipExplorationInfoRequest{
+		var responseExplorationInfo *pb.GetShipExplorationInfoResponse
+		responseExplorationInfo, err = services.NnSDK.GetShipExplorationInfo(helpers.NewContext(1), &pb.GetShipExplorationInfoRequest{
 			Ship: rGetPlayerShipEquipped.GetShip(),
 		})
 		if err != nil {

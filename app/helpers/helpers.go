@@ -61,6 +61,7 @@ func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 // NewContext - Recupero nuovo context per effettuare le chiamate
 func NewContext(seconds time.Duration) context.Context {
 	d := time.Now().Add(seconds * time.Second)
+	// nolint:govet // Escludo il check sul defer del cancel
 	ctx, _ := context.WithDeadline(context.Background(), d)
 
 	return ctx

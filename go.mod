@@ -1,6 +1,6 @@
 module bitbucket.org/no-name-game/nn-telegram
 
-go 1.12
+go 1.14
 
 replace bitbucket.org/no-name-game/nn-grpc => ../nn-grpc
 

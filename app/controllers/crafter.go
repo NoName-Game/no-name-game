@@ -149,7 +149,8 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 			return false, err
 		}
 	case 5:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -216,7 +217,8 @@ func (c *CrafterController) Stage() (err error) {
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch c.Payload.Item {
 		case "armors":
-			rGetAllArmorCategory, err := services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
+			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
+			rGetAllArmorCategory, err = services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
 			if err != nil {
 				return err
 			}
@@ -226,7 +228,8 @@ func (c *CrafterController) Stage() (err error) {
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case "weapons":
-			rGetAllWeaponCategory, err := services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
+			var rGetAllWeaponCategory *pb.GetAllWeaponCategoryResponse
+			rGetAllWeaponCategory, err = services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
 			if err != nil {
 				return err
 			}
@@ -255,7 +258,8 @@ func (c *CrafterController) Stage() (err error) {
 		// Aggiorno stato
 		c.CurrentState.Stage = 2
 	case 2:
-		rGetPlayerResources, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
+		var rGetPlayerResources *pb.GetPlayerResourcesResponse
+		rGetPlayerResources, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 			PlayerID: c.Player.ID,
 		})
 		if err != nil {
@@ -293,7 +297,8 @@ func (c *CrafterController) Stage() (err error) {
 				strings.Split(c.Update.Message.Text, " (")[0],
 				helpers.Trans(c.Player.Language.Slug, "crafting.add")+" ")[1]
 
-			rGetResourceByName, err := services.NnSDK.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
+			var rGetResourceByName *pb.GetResourceByNameResponse
+			rGetResourceByName, err = services.NnSDK.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
 				Name: resourceName,
 			})
 			if err != nil {
@@ -329,7 +334,8 @@ func (c *CrafterController) Stage() (err error) {
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
 		for r, q := range mapInventory {
 			// If PayloadResouces < Inventory quantity ok :)
-			rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: r,
 			})
 			if err != nil {
@@ -366,7 +372,8 @@ func (c *CrafterController) Stage() (err error) {
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
 			for k, v := range c.Payload.Resources {
-				rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				var rGetResourceByID *pb.GetResourceByIDResponse
+				rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: k,
 				})
 				if err != nil {
@@ -393,7 +400,8 @@ func (c *CrafterController) Stage() (err error) {
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
 			for k, v := range c.Payload.Resources {
-				rGetResourceByID, err := services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				var rGetResourceByID *pb.GetResourceByIDResponse
+				rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: k,
 				})
 				if err != nil {
@@ -467,12 +475,12 @@ func (c *CrafterController) Stage() (err error) {
 		switch c.Payload.Item {
 		case "armors":
 			// Creo la richiesta di craft armor
-			rCraftArmor, err := services.NnSDK.CraftArmor(helpers.NewContext(1), &pb.CraftArmorRequest{
+			var rCraftArmor *pb.CraftArmorResponse
+			rCraftArmor, err = services.NnSDK.CraftArmor(helpers.NewContext(1), &pb.CraftArmorRequest{
 				Category: c.Payload.Category,
 				Items:    string(items),
 				PlayerID: c.Player.ID,
 			})
-
 			if err != nil {
 				return err
 			}
@@ -480,12 +488,12 @@ func (c *CrafterController) Stage() (err error) {
 			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraftArmor.GetArmor().GetName())
 		case "weapons":
 			// Creo la richiesta di craft weapon
-			rCraftWeapon, err := services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
+			var rCraftWeapon *pb.CraftWeaponResponse
+			rCraftWeapon, err = services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
 				Category: c.Payload.Category,
 				Items:    string(items),
 				PlayerID: c.Player.ID,
 			})
-
 			if err != nil {
 				return err
 			}

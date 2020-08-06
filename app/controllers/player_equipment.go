@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
@@ -165,7 +164,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
+		var rGetPlayerArmors *pb.GetPlayerArmorsResponse
+		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 			PlayerID: c.Player.GetID(),
 			Equipped: true,
 		})
@@ -205,7 +205,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentWeaponsEquipment string
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
-		rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
+		var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
+		rGetPlayerWeapons, err = services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -273,7 +274,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Recupero nuovamente armature player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
+			var rGetPlayerArmors *pb.GetPlayerArmorsResponse
+			rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 				PlayerID: c.Player.GetID(),
 				Equipped: false,
 			})
@@ -305,7 +307,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
+			var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
+			rGetPlayerWeapons, err = services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 				PlayerID: c.Player.GetID(),
 			})
 			if err != nil {
@@ -365,7 +368,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			rFindArmorByName, err := services.NnSDK.FindArmorByName(helpers.NewContext(1), &pb.FindArmorByNameRequest{
+			var rFindArmorByName *pb.FindArmorByNameResponse
+			rFindArmorByName, err = services.NnSDK.FindArmorByName(helpers.NewContext(1), &pb.FindArmorByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
@@ -379,7 +383,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			equipmentID = rFindArmorByName.GetArmor().GetID()
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			rFindWeaponByName, err := services.NnSDK.FindWeaponByName(helpers.NewContext(1), &pb.FindWeaponByNameRequest{
+			var rFindWeaponByName *pb.FindWeaponByNameResponse
+			rFindWeaponByName, err = services.NnSDK.FindWeaponByName(helpers.NewContext(1), &pb.FindWeaponByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
@@ -444,11 +449,11 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 	case 3:
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			_, err := services.NnSDK.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
+			_, err = services.NnSDK.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
 				ID: c.Payload.EquipID,
 			})
 			if err != nil {
-				log.Fatalf("could not greet: %v", err)
+				return err
 			}
 
 			// Aggiorno equipped
@@ -459,7 +464,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				return err
 			}
 		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			_, err := services.NnSDK.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
+			_, err = services.NnSDK.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
 				ID: c.Payload.EquipID,
 			})
 			if err != nil {

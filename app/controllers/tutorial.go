@@ -111,7 +111,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		_, err := services.NnSDK.FindLanguageByName(helpers.NewContext(1), &pb.FindLanguageByNameRequest{
+		_, err = services.NnSDK.FindLanguageByName(helpers.NewContext(1), &pb.FindLanguageByNameRequest{
 			Name: c.Update.Message.Text,
 		})
 
@@ -137,7 +137,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 3:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		rGetPlayerStateByID, err := services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
 			ID: c.Payload.UseItemID,
 		})
 		if err != nil {
@@ -161,7 +162,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 5:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		rGetPlayerStateByID, err := services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
 			ID: c.Payload.MissionID,
 		})
 		if err != nil {
@@ -201,7 +203,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 6:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		rGetPlayerStateByID, err := services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
 			ID: c.Payload.InventoryEquipID,
 		})
 		if err != nil {
@@ -223,7 +226,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		rGetPlayerStateByID, err := services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
 			ID: c.Payload.HuntingID,
 		})
 		if err != nil {
@@ -259,7 +263,8 @@ func (c *TutorialController) Stage() (err error) {
 	// e potrà selezionare la sua lingua tramite tastierino
 	case 0:
 		// Recupero lingue disponibili
-		rGetLanguages, err := services.NnSDK.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{})
+		var rGetLanguages *pb.GetAllLanguagesResponse
+		rGetLanguages, err = services.NnSDK.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{})
 		if err != nil {
 			return err
 		}
@@ -488,7 +493,8 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.CurrentState.Stage = 3
 
-		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.CurrentState,
 		})
 		if err != nil {
@@ -522,11 +528,12 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.CurrentState.Stage = 5
 
-		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.CurrentState,
 		})
 		if err != nil {
-			return err
+			return
 		}
 
 		c.CurrentState = rUpdatePlayerState.GetPlayerState()
@@ -582,7 +589,8 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.CurrentState.Stage = 6
 
-		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.CurrentState,
 		})
 		if err != nil {
@@ -615,7 +623,8 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.CurrentState.Stage = 7
 
-		rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
 			PlayerState: c.CurrentState,
 		})
 		if err != nil {

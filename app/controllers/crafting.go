@@ -137,7 +137,8 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
-		rGetAllItems, err := services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{})
+		var rGetAllItems *pb.GetAllItemsResponse
+		rGetAllItems, err = services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{})
 		if err != nil {
 			return true, err
 		}
@@ -165,7 +166,8 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
 			// Verifico se il player ha tutto gli item necessari
-			rGetPlayerResources, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
+			var rGetPlayerResources *pb.GetPlayerResourcesResponse
+			rGetPlayerResources, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 				PlayerID: c.Player.GetID(),
 			})
 			if err != nil {
@@ -201,7 +203,8 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
 	case 4:
-		finishAt, err := ptypes.Timestamp(c.CurrentState.FinishAt)
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -243,7 +246,8 @@ func (c *CraftingController) Stage() (err error) {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
-		rGetAllItemCategories, err := services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
+		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
+		rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
@@ -285,7 +289,8 @@ func (c *CraftingController) Stage() (err error) {
 	// che possono essere anche craftati dal player
 	case 1:
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
-		rGetAllItemCategories, err := services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
+		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
+		rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
 		if err != nil {
 			return err
 		}
@@ -298,7 +303,8 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Lista oggetti craftabili
-		rGetItemByCategoryID, err := services.NnSDK.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
+		var rGetItemByCategoryID *pb.GetItemsByCategoryIDResponse
+		rGetItemByCategoryID, err = services.NnSDK.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
 		})
 		if err != nil {
@@ -306,7 +312,8 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Recupero tutti gli items del player
-		rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		var rGetPlayerItems *pb.GetPlayerItemsResponse
+		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -406,7 +413,7 @@ func (c *CraftingController) Stage() (err error) {
 	case 3:
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
+			_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",

@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	// Lista delle rotte che non devono subire
-	// gli effetti di abbandona anche se forzati a mano
+	// UnClearables - Lista delle rotte che non devono subire gli effetti di abbandona anche se forzati a mano
 	UnClearables = []string{"route.hunting"}
 )
 
@@ -26,21 +25,21 @@ type Controller interface {
 
 type BaseController struct {
 	Update     tgbotapi.Update
-	Controller string
-	Father     uint32
 	Validation struct {
 		HasErrors     bool
 		Message       string
 		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
-	Player       *pb.Player
-	PlayerStats  *pb.PlayerStats
-	CurrentState *pb.PlayerState
-	ActiveStates []*pb.PlayerState
-	Breaker      struct {
+	ActiveStates  []*pb.PlayerState
+	Controller    string
+	Player        *pb.Player
+	PlayerStats   *pb.PlayerStats
+	CurrentState  *pb.PlayerState
+	Father        uint32
+	ProxyStatment bool
+	Breaker       struct {
 		ToMenu bool
 	}
-	ProxyStatment bool
 }
 
 func (c *BaseController) InitController(controller string, payload interface{}, blockers []string, player *pb.Player, update tgbotapi.Update) (initialized bool) {
@@ -199,7 +198,7 @@ func (c *BaseController) Completing() (err error) {
 	if c.CurrentState.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
 		if c.CurrentState.GetFather() == 0 {
-			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 				PlayerState: c.CurrentState,
 			})
 			if err != nil {

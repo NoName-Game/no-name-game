@@ -11,7 +11,8 @@ import (
 // al crafting di un determianto item
 func ListRecipe(needed map[uint32]int32) (result string, err error) {
 	for resourceID, value := range needed {
-		rGetResourceByID, err := services.NnSDK.GetResourceByID(NewContext(1), &pb.GetResourceByIDRequest{
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		rGetResourceByID, err = services.NnSDK.GetResourceByID(NewContext(1), &pb.GetResourceByIDRequest{
 			ID: resourceID,
 		})
 		if err != nil {
