@@ -99,6 +99,13 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 		return
 	}
 
+	// Verifico se esistono condizioni per cambiare stato o uscire
+	if !proxy {
+		if c.BackTo(0, &MenuController{}) {
+			return
+		}
+	}
+
 	// Set and load payload
 	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
@@ -134,9 +141,11 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	c.NeedUpdateState = true
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
-		panic(err)
+	if !hasError {
+		err = c.Stage()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Verifico se c'è realmente bisogno di aggiornare lo stato,

@@ -90,12 +90,9 @@ func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (play
 // CheckPlayerHaveOneEquippedWeapon
 // Verifica se il player ha almeno un'arma equipaggiata
 func CheckPlayerHaveOneEquippedWeapon(player *pb.Player) bool {
-	rGetPlayerWeapons, err := services.NnSDK.GetPlayerWeaponEquipped(NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+	rGetPlayerWeapons, _ := services.NnSDK.GetPlayerWeaponEquipped(NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 		PlayerID: player.GetID(),
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	if rGetPlayerWeapons.GetWeapon() != nil && rGetPlayerWeapons.GetWeapon().GetID() > 0 {
 		return true

@@ -96,49 +96,31 @@ func (c *BaseController) LoadControllerData(controller string, player *pb.Player
 // Breaking - Metodo che permette di verificare se si vogliono fare
 // delle azioni che permetteranno di concludere
 func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backed bool) {
-	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
-		if c.Controller != "" {
-			if c.CurrentState.GetStage() <= canBackFrom {
-				// Cancello stato da redis
-				_ = helpers.DelRedisState(*c.Player)
+	// Verifico se è effetivamente un messaggio di testo e non una callback
+	if c.Update.Message != nil {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
+			if c.Controller != "" {
+				if c.CurrentState.GetStage() <= canBackFrom {
+					// Cancello stato da redis
+					_ = helpers.DelRedisState(*c.Player)
 
-				// Cancello record a db
-				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-					PlayerState: c.CurrentState,
-				})
-				if err != nil {
-					panic(err)
+					// Cancello record a db
+					_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+						PlayerState: c.CurrentState,
+					})
+					if err != nil {
+						panic(err)
+					}
+
+					controller.Handle(c.Player, c.Update, true)
+					backed = true
+					return
 				}
 
-				controller.Handle(c.Player, c.Update, true)
-				backed = true
+				c.CurrentState.Stage = 0
 				return
 			}
 
-			c.CurrentState.Stage = 0
-			return
-		}
-
-		// Cancello stato da redis
-		_ = helpers.DelRedisState(*c.Player)
-
-		// Cancello record a db
-		_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: c.CurrentState,
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		controller.Handle(c.Player, c.Update, true)
-		backed = true
-		return
-	}
-
-	// Abbandona - chiude definitivamente cancellando anche lo stato
-	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
-		c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
-		if !c.PlayerStats.GetDead() && c.Clearable() {
 			// Cancello stato da redis
 			_ = helpers.DelRedisState(*c.Player)
 
@@ -150,25 +132,46 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				panic(err)
 			}
 
+			controller.Handle(c.Player, c.Update, true)
+			backed = true
+			return
+		}
+
+		// Abbandona - chiude definitivamente cancellando anche lo stato
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
+			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
+			if !c.PlayerStats.GetDead() && c.Clearable() {
+				// Cancello stato da redis
+				_ = helpers.DelRedisState(*c.Player)
+
+				// Cancello record a db
+				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+					PlayerState: c.CurrentState,
+				})
+				if err != nil {
+					panic(err)
+				}
+
+				// Call menu controller
+				new(MenuController).Handle(c.Player, c.Update, true)
+
+				backed = true
+				return
+			}
+		}
+
+		// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
+		// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
+			// Cancello stato da redis
+			_ = helpers.DelRedisState(*c.Player)
+
 			// Call menu controller
 			new(MenuController).Handle(c.Player, c.Update, true)
 
 			backed = true
 			return
 		}
-	}
-
-	// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
-	// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
-	if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
-		// Cancello stato da redis
-		_ = helpers.DelRedisState(*c.Player)
-
-		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update, true)
-
-		backed = true
-		return
 	}
 
 	return
