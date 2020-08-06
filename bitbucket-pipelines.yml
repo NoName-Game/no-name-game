@@ -5,7 +5,8 @@ pipelines:
     "**":
       - step:
           script:
-            - mkdir -p ${GOPATH}/src/bitbucket.org/nn-grpc && git clone git@bitbucket.org:no-name-game/nn-grpc.git .
+            - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game
+            - git clone git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
             - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game &&  cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
 
             # Linter checks
