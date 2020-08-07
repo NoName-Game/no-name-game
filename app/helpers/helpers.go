@@ -1,8 +1,8 @@
 package helpers
 
 import (
+	"context"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func InArray(val interface{}, array interface{}) (exists bool) {
 }
 
 // KeyInMap - Check if ID is in map
-func KeyInMap(a uint, list map[uint]int) bool {
+func KeyInMap(a uint32, list map[uint32]int32) bool {
 	for k := range list {
 		if k == a {
 			return true
@@ -52,21 +52,17 @@ func StringInSlice(v string, a []string) bool {
 	return false
 }
 
-// Slugger - convert text in slug
-func Slugger(text string) string {
-	//FIXME: replace me with reaplace all in Go 1.12
-	return strings.Replace(strings.ToLower(text), " ", "_", -1)
-}
-
 // GetEndTime - Aggiunge un tempo di durata T.
 func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
 	return
 }
 
-// SetTrue - Ritorno un truePTR di un boolean type per il salvataggio a DB
-func SetTrue() *bool {
-	truePtr := new(bool)
-	*truePtr = true
-	return truePtr
+// NewContext - Recupero nuovo context per effettuare le chiamate
+func NewContext(seconds time.Duration) context.Context {
+	d := time.Now().Add(seconds * time.Second)
+	// nolint:govet // Escludo il check sul defer del cancel
+	ctx, _ := context.WithDeadline(context.Background(), d)
+
+	return ctx
 }

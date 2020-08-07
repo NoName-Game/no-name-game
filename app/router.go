@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -12,10 +12,10 @@ import (
 )
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing
-func routing(player nnsdk.Player, update tgbotapi.Update) {
+func routing(player *pb.Player, update tgbotapi.Update) {
 	// A prescindere da tutto verifico se il player è stato bannato
 	// Se così fosse non gestisco nemmeno l'update.
-	if *player.Banned {
+	if player.Banned {
 		invoke(Routes["route.banned"], "Handle", player, update, false)
 		return
 	}
@@ -37,7 +37,7 @@ func routing(player nnsdk.Player, update tgbotapi.Update) {
 
 	// Verifico se in memorià è presente già una rotta e se quella richiamata non sia menu
 	// userò quella come main per gestire ulteriori sottostati
-	isCachedRoute, _ := helpers.GetRedisState(player)
+	isCachedRoute, _ := helpers.GetRedisState(*player)
 	if isCachedRoute != "" {
 		invoke(Routes[isCachedRoute], "Handle", player, update, false)
 		return

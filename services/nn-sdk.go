@@ -5,44 +5,32 @@ import (
 	"log"
 	"os"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"google.golang.org/grpc"
+
 	_ "github.com/joho/godotenv/autoload" // Autload .env
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 )
 
 var (
 	// NnSDK - NoName SDK
-	NnSDK *nnsdk.NoNameSDK
+	NnSDK pb.NoNameClient
 )
 
 // NnSDKUp - Metodo di verfica e connessione al WS principale di NoName
 func NnSDKUp() (err error) {
-	// Up del servizio per la comunicazione
-	NnSDK, err = nnsdk.NewNoNameSDK()
+	// Set up a connection to the server.
+	var conn *grpc.ClientConn
+	conn, err = grpc.Dial(
+		fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")),
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+	)
 	if err != nil {
-		return err
+		log.Panicf("did not connect: %v", err)
 	}
 
-	// Imposto Host e versionamento del sistema API
-	NnSDK.SetWS(
-		nnsdk.WebService{
-			Host:       fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")),
-			APIVersion: os.Getenv("WS_API_VERSION"),
-		},
-	)
-
-	// Imposto username e password per l'autenticazione
-	NnSDK.SetAuth(
-		nnsdk.Authentication{
-			Username: os.Getenv("WS_USER"),
-			Password: os.Getenv("WS_PASSWORD"),
-		},
-	)
-
-	// Avvio autenticazione
-	_, err = NnSDK.Authenticate()
-	if err != nil {
-		return err
-	}
+	NnSDK = pb.NewNoNameClient(conn)
 
 	// Riporto a video stato servizio
 	log.Println("************************************************")

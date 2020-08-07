@@ -5,9 +5,11 @@ import (
 	"math"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	"github.com/golang/protobuf/ptypes"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -25,10 +27,9 @@ type ShipRestsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -49,7 +50,7 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -81,11 +82,15 @@ func (c *ShipRestsController) Handle(player nnsdk.Player, update tgbotapi.Update
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+	c.CurrentState.Payload = string(payloadUpdated)
+
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		PlayerState: c.CurrentState,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -107,7 +112,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -146,24 +151,23 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ShipRestsController) Stage() (err error) {
-	var playerProvider providers.PlayerProvider
-
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
 		// Recupero informazioni per il recupero totale delle energie
-		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
+		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Costruisco info per riposo
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 		if restsInfo.NeedRests {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.RestsTime)
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.GetRestsTime())
 		} else {
 			restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.dont_need")
 		}
@@ -180,7 +184,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !*c.Player.Stats.Dead {
+		if !c.PlayerStats.GetDead() {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			))
@@ -199,23 +203,25 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
 		// Recupero informazioni per il recupero totale delle energie
-		var restsInfo nnsdk.PlayerRestInfoResponse
-		restsInfo, err = playerProvider.GetRestsInfo(c.Player.ID)
+		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Setto timer recuperato dalla chiamata delle info
-		c.State.FinishAt = helpers.GetEndTime(0, int(restsInfo.RestsTime), 0)
+		finishTime := helpers.GetEndTime(0, int(restsInfo.GetRestsTime()), 0)
+		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing", c.State.FinishAt.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing", finishTime.Format("15:04:05")),
 		)
 
 		msg.ParseMode = "markdown"
@@ -232,7 +238,7 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.StartDateTime = time.Now()
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		// Calcolo differenza tra inizio e fine
 		var endDate time.Time
@@ -242,11 +248,12 @@ func (c *ShipRestsController) Stage() (err error) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 
 		// Fine riparazione
-		err = playerProvider.EndPlayerRest(c.Player.ID, nnsdk.PlayerRestEndRequest{
-			RestsTime: uint(diffMinutes),
+		_, err := services.NnSDK.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
+			PlayerID:  c.Player.GetID(),
+			RestsTime: uint32(diffMinutes),
 		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		// Invio messaggio
@@ -268,7 +275,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

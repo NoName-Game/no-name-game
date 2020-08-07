@@ -1,3 +1,0 @@
-[submodule "app/acme/nnsdk"]
-	path = app/acme/nnsdk
-	url = git@bitbucket.org:no-name-game/nn-go-sdk.git

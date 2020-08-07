@@ -33,10 +33,10 @@ package controllers
 // 	c.RouteName, c.Update, c.Message = "route.inventory.destroy", update, update.Message
 //
 // 	// Check current state for this routes
-// 	c.State, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
+// 	c.CurrentState, isNewState = helpers.CheckState(c.RouteName, c.Payload, helpers.Player)
 //
 // 	// Set and load payload
-// 	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+// 	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 //
 // 	// It's first message
 // 	if isNewState {
@@ -46,7 +46,7 @@ package controllers
 //
 // 	// Go to validator
 // 	if !c.Validator() {
-// 		c.State, err = providers.UpdatePlayerState(c.State)
+// 		c.CurrentState, err = providers.UpdatePlayerState(c.CurrentState)
 // 		if err != nil {
 // 			services.ErrorHandler("Cant update player", err)
 // 		}
@@ -68,23 +68,23 @@ package controllers
 // func (c *InventoryDestroyController) Validator() (hasErrors bool) {
 // 	c.Validation.Message = helpers.Trans("validationMessage")
 //
-// 	switch c.State.Stage {
+// 	switch c.CurrentState.Stage {
 // 	case 0:
 // 		if helpers.InArray(c.Message.Text, []string{
 // 			helpers.Trans("armors"),
 // 			helpers.Trans("weapons"),
 // 		}) {
-// 			c.State.Stage = 1
+// 			c.CurrentState.Stage = 1
 // 			return false
 // 		}
 // 	case 1:
 // 		if strings.Contains(c.Message.Text, helpers.Trans("destroy")) {
-// 			c.State.Stage = 2
+// 			c.CurrentState.Stage = 2
 // 			return false
 // 		}
 // 	case 2:
 // 		if c.Message.Text == helpers.Trans("confirm") {
-// 			c.State.Stage = 3
+// 			c.CurrentState.Stage = 3
 // 			return false
 // 		}
 // 	}
@@ -98,7 +98,7 @@ package controllers
 // func (c *InventoryDestroyController) Stage() {
 // 	var err error
 //
-// 	switch c.State.Stage {
+// 	switch c.CurrentState.Stage {
 // 	case 0:
 // 		msg := services.NewMessage(c.Message.Chat.ID, helpers.Trans("inventory.destroy.type"))
 // 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -148,8 +148,8 @@ package controllers
 // 		// Aggiorno stato
 // 		c.Payload.Type = c.Message.Text
 // 		payloadUpdated, _ := json.Marshal(c.Payload)
-// 		c.State.Payload = string(payloadUpdated)
-// 		c.State, err = providers.UpdatePlayerState(c.State)
+// 		c.CurrentState.Payload = string(payloadUpdated)
+// 		c.CurrentState, err = providers.UpdatePlayerState(c.CurrentState)
 // 		if err != nil {
 // 			services.ErrorHandler("Cant update player", err)
 // 		}
@@ -195,8 +195,8 @@ package controllers
 // 		// Aggiorno stato
 // 		c.Payload.EquipID = equipmentID
 // 		payloadUpdated, _ := json.Marshal(c.Payload)
-// 		c.State.Payload = string(payloadUpdated)
-// 		c.State, err = providers.UpdatePlayerState(c.State)
+// 		c.CurrentState.Payload = string(payloadUpdated)
+// 		c.CurrentState, err = providers.UpdatePlayerState(c.CurrentState)
 // 		if err != nil {
 // 			services.ErrorHandler("Cant update player", err)
 // 		}
@@ -236,7 +236,7 @@ package controllers
 // 		//====================================
 // 		// COMPLETE!
 // 		//====================================
-// 		helpers.FinishAndCompleteState(c.State, helpers.Player)
+// 		helpers.FinishAndCompleteState(c.CurrentState, helpers.Player)
 // 		//====================================
 //
 // 	}

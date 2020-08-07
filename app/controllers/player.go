@@ -3,9 +3,8 @@ package controllers
 import (
 	"fmt"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -15,20 +14,29 @@ import (
 // Player
 // ====================================
 type PlayerController struct {
+	Payload interface{}
 	BaseController
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
-	c.Player = player
-	c.Update = update
-	c.Controller = "route.player"
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(c.Player, c.Controller)
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(
+		"route.player",
+		c.Payload,
+		[]string{},
+		player,
+		update,
+	) {
+		return
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -38,17 +46,19 @@ func (c *PlayerController) Handle(player nnsdk.Player, update tgbotapi.Update, p
 	}
 
 	// Recupero armature del player
-	var playerProvider providers.PlayerProvider
-	var armors nnsdk.Armors
-	armors, err = playerProvider.GetPlayerArmors(c.Player, "true")
+	rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(100), &pb.GetPlayerArmorsRequest{
+		PlayerID: c.Player.GetID(),
+		Equipped: true,
+	})
 	if err != nil {
+		// log.Fatalln(err)
 		panic(err)
 	}
 
 	// armatura base player
 	var defense, evasion, halving float32
-	if len(armors) > 0 {
-		for _, armor := range armors {
+	if len(rGetPlayerArmors.GetArmors()) > 0 {
+		for _, armor := range rGetPlayerArmors.GetArmors() {
 			defense += armor.Defense
 			evasion += armor.Evasion
 			halving += armor.Halving
@@ -68,10 +78,10 @@ func (c *PlayerController) Handle(player nnsdk.Player, update tgbotapi.Update, p
 		"♥️ *%v*/100 HP\n"+
 		"🛡 Def: *%v* | Evs: *%v* | Hlv: *%v*\n"+
 		"%s",
-		c.Player.Username,
-		c.Player.Stats.Experience,
-		c.Player.Stats.Level,
-		*c.Player.Stats.LifePoint,
+		c.Player.GetUsername(),
+		c.PlayerStats.GetExperience(),
+		c.PlayerStats.GetLevel(),
+		c.PlayerStats.GetLifePoint(),
 		defense, evasion, halving,
 		economy,
 	)
@@ -109,16 +119,19 @@ func (c *PlayerController) Stage() {
 // GetPlayerTask
 // Metodo didicato alla reppresenteazione del risorse econimiche del player
 func (c *PlayerController) GetPlayerEconomy() (economy string, err error) {
-	var playerProvider providers.PlayerProvider
-
 	// Calcolo monete del player
-	var money nnsdk.MoneyResponse
-	money, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "money")
+	responseMoney, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+		PlayerID:    c.Player.GetID(),
+		EconomyType: "money",
+	})
 
-	var diamond nnsdk.MoneyResponse
-	diamond, _ = playerProvider.GetPlayerEconomy(c.Player.ID, "diamond")
+	// Calcolo diamanti del player
+	responseDiamond, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+		PlayerID:    c.Player.GetID(),
+		EconomyType: "diamond",
+	})
 
-	economy = fmt.Sprintf("💰 *%v* 💎 *%v*", money.Value, diamond.Value)
+	economy = fmt.Sprintf("💰 *%v* 💎 *%v*", responseMoney.GetValue(), responseDiamond.GetValue())
 
 	return
 }

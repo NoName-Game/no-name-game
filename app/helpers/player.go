@@ -3,15 +3,15 @@ package helpers
 import (
 	"errors"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // HandleUser - Eseguo varie verifiche per controllare il player
-func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
+func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	// Recupero utente filtrandolo per tipologia di messaggio
 	var user *tgbotapi.User
 	if update.Message != nil {
@@ -39,28 +39,34 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 	}
 
 	// Verifico se esiste già un player registrato
-	var playerProvider providers.PlayerProvider
-	player, err = playerProvider.FindPlayerByUsername(user.UserName)
-	if err != nil {
-		return player, err
-	}
+	rGetPlayerByUsername, _ := services.NnSDK.GetPlayerByUsername(NewContext(1), &pb.GetPlayerByUsernameRequest{
+		Username: user.UserName,
+	})
+
+	// Recupero player
+	player = rGetPlayerByUsername.GetPlayer()
 
 	// Se il player non esiste allora lo registro
-	if player.ID == 0 {
+	if player.GetID() == 0 {
 		// Recupero lingua di default
-		var language nnsdk.Language
-		var languageProvider providers.LanguageProvider
-		language, err = languageProvider.FindLanguageBySlug("it")
+		rFindLanguageBySlug, err := services.NnSDK.FindLanguageBySlug(NewContext(1), &pb.FindLanguageBySlugRequest{
+			Slug: "it",
+		})
 		if err != nil {
 			return player, err
 		}
 
 		// Registro player
-		player, err = playerProvider.SignIn(nnsdk.Player{
+		rSignIn, err := services.NnSDK.SignIn(NewContext(10), &pb.SignInRequest{
 			Username:   user.UserName,
-			ChatID:     int64(user.ID),
-			LanguageID: language.ID,
+			ChatID:     int64(user.ID), // TODO: !? Non dovrebbe esser chatID !?
+			LanguageID: rFindLanguageBySlug.GetLanguage().GetID(),
 		})
+		if err != nil {
+			return player, err
+		}
+
+		player = rSignIn.GetPlayer()
 
 		return player, err
 	}
@@ -69,7 +75,7 @@ func HandleUser(update tgbotapi.Update) (player nnsdk.Player, err error) {
 }
 
 // GetPlayerStateByFunction - Check if function exist in player states
-func GetPlayerStateByFunction(states nnsdk.PlayerStates, controller string) (playerState nnsdk.PlayerState, err error) {
+func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (playerState *pb.PlayerState, err error) {
 	for i, state := range states {
 		if state.Controller == controller {
 			playerState = states[i]
@@ -83,11 +89,13 @@ func GetPlayerStateByFunction(states nnsdk.PlayerStates, controller string) (pla
 
 // CheckPlayerHaveOneEquippedWeapon
 // Verifica se il player ha almeno un'arma equipaggiata
-func CheckPlayerHaveOneEquippedWeapon(player nnsdk.Player) bool {
-	for _, weapon := range player.Weapons {
-		if *weapon.Equipped {
-			return true
-		}
+func CheckPlayerHaveOneEquippedWeapon(player *pb.Player) bool {
+	rGetPlayerWeapons, _ := services.NnSDK.GetPlayerWeaponEquipped(NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+		PlayerID: player.GetID(),
+	})
+
+	if rGetPlayerWeapons.GetWeapon() != nil && rGetPlayerWeapons.GetWeapon().GetID() > 0 {
+		return true
 	}
 
 	return false
@@ -95,23 +103,25 @@ func CheckPlayerHaveOneEquippedWeapon(player nnsdk.Player) bool {
 
 // GetPlayerCurrentPlanet
 // Recupera il pianeta corrente del player
-func GetPlayerCurrentPlanet(player nnsdk.Player) (planet nnsdk.Planet, err error) {
-	var playerProvider providers.PlayerProvider
-	var planetProvider providers.PlanetProvider
-
+func GetPlayerCurrentPlanet(player *pb.Player) (planet *pb.Planet, err error) {
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-	var lastPosition nnsdk.PlayerPosition
-	lastPosition, err = playerProvider.GetPlayerLastPosition(player)
+	rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(NewContext(1), &pb.GetPlayerLastPositionRequest{
+		PlayerID: player.GetID(),
+	})
 	if err != nil {
 		return planet, err
 	}
 
 	// Dalla ultima posizione recupero il pianeta corrente
-	planet, err = planetProvider.GetPlanetByCoordinate(lastPosition.X, lastPosition.Y, lastPosition.Z)
+	responsePlanet, err := services.NnSDK.GetPlanetByCoordinate(NewContext(1), &pb.GetPlanetByCoordinateRequest{
+		X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
+		Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
+		Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
+	})
 	if err != nil {
 		return planet, err
 	}
 
-	return planet, nil
+	return responsePlanet.GetPlanet(), nil
 }

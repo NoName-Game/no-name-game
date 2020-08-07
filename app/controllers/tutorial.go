@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -23,21 +23,20 @@ import (
 type TutorialController struct {
 	BaseController
 	Payload struct {
-		UseItemID        uint
-		MissionID        uint
-		CraftingID       uint
-		HuntingID        uint
-		InventoryEquipID uint
+		UseItemID        uint32
+		MissionID        uint32
+		CraftingID       uint32
+		HuntingID        uint32
+		InventoryEquipID uint32
 	}
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -51,7 +50,7 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update,
 	}
 
 	// Stato recuperto correttamente
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -81,11 +80,15 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update,
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
-	_, err = playerStateProvider.UpdatePlayerState(c.State)
+	c.CurrentState.Payload = string(payloadUpdated)
+
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		PlayerState: c.CurrentState,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -98,11 +101,9 @@ func (c *TutorialController) Handle(player nnsdk.Player, update tgbotapi.Update,
 // Validator
 // ====================================
 func (c *TutorialController) Validator() (hasErrors bool, err error) {
-	var playerStateProvider providers.PlayerStateProvider
-	var languageProvider providers.LanguageProvider
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, nil
@@ -110,7 +111,9 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		_, err = languageProvider.FindLanguageBy(c.Update.Message.Text, "name")
+		_, err = services.NnSDK.FindLanguageByName(helpers.NewContext(1), &pb.FindLanguageByNameRequest{
+			Name: c.Update.Message.Text,
+		})
 
 		// Verifico se la lingua esiste, se così non fosse ritorno errore
 		if err != nil {
@@ -134,16 +137,22 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 3:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var itemState nnsdk.PlayerState
-		itemState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.UseItemID)
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+			ID: c.Payload.UseItemID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if itemState.ID == 0 {
-			c.State.Stage = 2
+		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
+			c.CurrentState.Stage = 2
 			return false, err
 		}
 
-		if !*itemState.Completed {
+		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
 			return true, err
 		}
 
@@ -153,16 +162,22 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 5:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var missionState nnsdk.PlayerState
-		missionState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.MissionID)
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+			ID: c.Payload.MissionID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if missionState.ID == 0 {
-			c.State.Stage = 3
+		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
+			c.CurrentState.Stage = 3
 			return false, err
 		}
 
-		if !*missionState.Completed {
+		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
 			return true, err
 		}
 
@@ -176,7 +191,7 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	// 	// Non è stato trovato lo stato ritorno allo stato precedente
 	// 	// e non ritorno errore
 	// 	if stateNotFoundErr != nil {
-	// 		c.State.Stage = 4
+	// 		c.CurrentState.Stage = 4
 	// 		return false, err
 	// 	}
 	//
@@ -188,16 +203,22 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 6:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var inventoryState nnsdk.PlayerState
-		inventoryState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.InventoryEquipID)
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+			ID: c.Payload.InventoryEquipID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if inventoryState.ID == 0 {
-			c.State.Stage = 5
+		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
+			c.CurrentState.Stage = 5
 			return false, err
 		}
 
-		if !*inventoryState.Completed {
+		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
 			return true, err
 		}
 
@@ -205,16 +226,22 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
-		var huntingState nnsdk.PlayerState
-		huntingState, _ = playerStateProvider.GetPlayerStateByID(c.Payload.HuntingID)
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+			ID: c.Payload.HuntingID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
 		// Non è stato trovato lo stato ritorno allo stato precedente
 		// e non ritorno errore
-		if huntingState.ID == 0 {
-			c.State.Stage = 6
+		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
+			c.CurrentState.Stage = 6
 			return false, err
 		}
 
-		if !*huntingState.Completed {
+		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
 			return true, err
 		}
 
@@ -231,23 +258,20 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 // Stage - Language -> Messages -> Exploration -> Crafting -> Hunting
 // ====================================
 func (c *TutorialController) Stage() (err error) {
-	var playerStateProvider providers.PlayerStateProvider
-	var languageProvider providers.LanguageProvider
-
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// Primo avvio in questo momento l'utente deve poter ricevere la lista delle lingue disponibili
 	// e potrà selezionare la sua lingua tramite tastierino
 	case 0:
 		// Recupero lingue disponibili
-		var languages nnsdk.Languages
-		languages, err = languageProvider.GetLanguages()
+		var rGetLanguages *pb.GetAllLanguagesResponse
+		rGetLanguages, err = services.NnSDK.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{})
 		if err != nil {
 			return err
 		}
 
 		// Aggiungo lingue alla tastiera
-		keyboard := make([]tgbotapi.KeyboardButton, len(languages))
-		for i, lang := range languages {
+		keyboard := make([]tgbotapi.KeyboardButton, len(rGetLanguages.GetLanguages()))
+		for i, lang := range rGetLanguages.GetLanguages() {
 			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
 		}
 
@@ -260,7 +284,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Aggiorna stato
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage è previsto un'invio di un set di messaggi
 	// che introducono al player cosa sta accadendo
@@ -450,7 +474,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Aggiorna stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 2:
@@ -467,19 +491,25 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.State.Stage = 3
-		c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+		c.CurrentState.Stage = 3
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.CurrentState,
+		})
 		if err != nil {
 			return err
 		}
 
+		c.CurrentState = rUpdatePlayerState.GetPlayerState()
+
 		// Richiamo missione come sottoprocesso di questo controller
 		useItemController := new(InventoryItemController)
-		useItemController.Father = c.State.ID
+		useItemController.Father = c.CurrentState.ID
 		useItemController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.UseItemID = useItemController.State.ID
+		c.Payload.UseItemID = useItemController.CurrentState.ID
 
 	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
 	case 3:
@@ -496,20 +526,26 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.State.Stage = 5
-		c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+		c.CurrentState.Stage = 5
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.CurrentState,
+		})
 		if err != nil {
-			return err
+			return
 		}
+
+		c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 		// Richiamo missione come sottoprocesso di questo controller
 		missionController := new(MissionController)
-		missionController.Father = c.State.ID
+		missionController.Father = c.CurrentState.ID
 		missionController.Payload.ForcedTime = 1
 		missionController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.MissionID = missionController.State.ID
+		c.Payload.MissionID = missionController.CurrentState.ID
 	// case 4:
 	// 	// Primo Craft
 	// 	_, err = services.SendMessage(
@@ -524,15 +560,15 @@ func (c *TutorialController) Stage() (err error) {
 	//
 	// 	// Forzo a mano l'aggiornamento dello stato del player
 	// 	// in quanto adesso devo richiamare un'altro controller
-	// 	c.State.Stage = 5
-	// 	c.State, err = providers.UpdatePlayerState(c.State)
+	// 	c.CurrentState.Stage = 5
+	// 	c.CurrentState, err = providers.UpdatePlayerState(c.CurrentState)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 	//
 	// 	// Richiamo crafting come sottoprocesso di questo controller
 	// 	craftingController := new(CraftingController)
-	// 	craftingController.Father = c.State.ID
+	// 	craftingController.Father = c.CurrentState.ID
 	// 	craftingController.Handle(c.Player, c.Update)
 	//
 	// 	// Recupero l'ID del task, mi serivirà per i controlli
@@ -551,19 +587,25 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.State.Stage = 6
-		c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+		c.CurrentState.Stage = 6
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.CurrentState,
+		})
 		if err != nil {
 			return err
 		}
 
+		c.CurrentState = rUpdatePlayerState.GetPlayerState()
+
 		// Richiamo crafting come sottoprocesso di questo controller
 		inventoryController := new(PlayerEquipmentController)
-		inventoryController.Father = c.State.ID
+		inventoryController.Father = c.CurrentState.ID
 		inventoryController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.InventoryEquipID = inventoryController.State.ID
+		c.Payload.InventoryEquipID = inventoryController.CurrentState.ID
 
 	case 6:
 		firstHuntingMessage := services.NewMessage(
@@ -579,19 +621,25 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.State.Stage = 7
-		c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+		c.CurrentState.Stage = 7
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.CurrentState,
+		})
 		if err != nil {
 			return err
 		}
 
+		c.CurrentState = rUpdatePlayerState.GetPlayerState()
+
 		// Richiamo crafting come sottoprocesso di questo controller
 		huntingController := new(HuntingController)
-		huntingController.Father = c.State.ID
+		huntingController.Father = c.CurrentState.ID
 		huntingController.Handle(c.Player, c.Update, true)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
-		c.Payload.HuntingID = huntingController.State.ID
+		c.Payload.HuntingID = huntingController.CurrentState.ID
 
 	case 7:
 		_, err = services.SendMessage(
@@ -605,33 +653,53 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Addesso posso cancellare tutti gli stati associati
-		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.UseItemID})
+		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			PlayerState: &pb.PlayerState{
+				ID: c.Payload.UseItemID,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
-		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.HuntingID})
+		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			PlayerState: &pb.PlayerState{
+				ID: c.Payload.HuntingID,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
-		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.InventoryEquipID})
+		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			PlayerState: &pb.PlayerState{
+				ID: c.Payload.InventoryEquipID,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
-		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.CraftingID})
+		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			PlayerState: &pb.PlayerState{
+				ID: c.Payload.CraftingID,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
-		_, err = playerStateProvider.DeletePlayerState(nnsdk.PlayerState{ID: c.Payload.MissionID})
+		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			PlayerState: &pb.PlayerState{
+				ID: c.Payload.MissionID,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

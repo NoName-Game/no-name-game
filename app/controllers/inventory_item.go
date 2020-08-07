@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/no-name-game/nn-telegram/app/acme/nnsdk"
-	"bitbucket.org/no-name-game/nn-telegram/app/providers"
+	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
@@ -21,17 +20,16 @@ import (
 type InventoryItemController struct {
 	BaseController
 	Payload struct {
-		Item nnsdk.Item
+		Item *pb.Item
 	}
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Update, proxy bool) {
+func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
-	var playerStateProvider providers.PlayerStateProvider
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
@@ -52,7 +50,7 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.State.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -89,11 +87,15 @@ func (c *InventoryItemController) Handle(player nnsdk.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.State.Payload = string(payloadUpdated)
-	c.State, err = playerStateProvider.UpdatePlayerState(c.State)
+	c.CurrentState.Payload = string(payloadUpdated)
+
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		PlayerState: c.CurrentState,
+	})
 	if err != nil {
 		panic(err)
 	}
+	c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -115,9 +117,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	var playerProvider providers.PlayerProvider
-
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -125,18 +125,20 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 	// Verifico quale item ha scelto di usare e controllo se il player ha realmente
 	// l'item indicato
 	case 1:
-		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
+		var rGetPlayerItems *pb.GetPlayerItemsResponse
+		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
-			panic(err)
+			return false, err
 		}
 
 		// Recupero nome item che il player vuole usare
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
 
-		for _, item := range playerInventoryItems {
+		for _, item := range rGetPlayerItems.GetPlayerInventory() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
-				c.Payload.Item = item.Item
+				c.Payload.Item = item.GetItem()
 				return false, err
 			}
 		}
@@ -160,29 +162,28 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *InventoryItemController) Stage() (err error) {
-	var itemProvider providers.ItemProvider
-	var playerProvider providers.PlayerProvider
-
-	switch c.State.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
-		var playerInventoryItems nnsdk.PlayerInventories
-		playerInventoryItems, err = playerProvider.GetPlayerItems(c.Player.ID)
+		var rGetPlayerItems *pb.GetPlayerItemsResponse
+		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+			PlayerID: c.Player.GetID(),
+		})
 		if err != nil {
 			panic(err)
 		}
 
 		// Ciclo items e li inserisco nella keyboarc
 		var keyboardRowItems [][]tgbotapi.KeyboardButton
-		for _, item := range playerInventoryItems {
+		for _, item := range rGetPlayerItems.GetPlayerInventory() {
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
 						"%s (%v)",
 						helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug),
-						*item.Quantity,
+						item.Quantity,
 					),
 				),
 			)
@@ -211,12 +212,13 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.State.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
+
 		var text string
-		if *c.Player.Stats.LifePoint + uint(c.Payload.Item.Value) > 100 {
+		if c.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
 			text = fmt.Sprintf(
 				"%s\n\n%s", // Domanda e descrizione
 				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",
@@ -226,15 +228,15 @@ func (c *InventoryItemController) Stage() (err error) {
 			)
 		} else {
 			text = fmt.Sprintf(
-					"%s\n\n%s", // Domanda e descrizione
-					helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
-						helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
-					),
-					helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
+				"%s\n\n%s", // Domanda e descrizione
+				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
+					helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+				),
+				helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
 			)
 		}
 
-		msg := services.NewMessage(c.Update.Message.Chat.ID,text)
+		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
 
 		msg.ParseMode = "markdown"
 
@@ -253,12 +255,12 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.State.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
 		// Richiamo il ws per usare l'item selezionato
-		err = itemProvider.UseItem(nnsdk.UseItemRequest{
+		_, err := services.NnSDK.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
 		})
@@ -280,7 +282,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		*c.State.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return
