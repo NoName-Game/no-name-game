@@ -44,9 +44,9 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		panic(err)
 	}
 
-	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n%s \n%s \n%s \n\n%s \n%s \n%s",
+	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n \n%s \n%s \n\n%s \n%s \n%s",
 		helpers.Trans(player.Language.Slug, "planet.intro"),
-		// helpers.Trans(player.Language.Slug, "planet.details.system", planet.PlanetSystem.Name),
+		// helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID().Name),
 		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlayerCurrentPlanet.GetPlanet().GetName()),
 		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlayerCurrentPlanet.GetPlanet().GetBiome().GetName()),
 		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlayerCurrentPlanet.GetPlanet().GetAtmosphere().GetName()),
