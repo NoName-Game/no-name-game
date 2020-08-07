@@ -9,7 +9,7 @@ pipelines:
             - cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
 
             # Clono SDK
-            - git clone git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
+            - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
 
             # Linter checks
             - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.30.0
