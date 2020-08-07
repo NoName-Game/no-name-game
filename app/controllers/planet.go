@@ -36,22 +36,24 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		}
 	}
 
-	planet, err := helpers.GetPlayerCurrentPlanet(c.Player)
+	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+	rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		PlayerID: c.Player.GetID(),
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n%s \n%s \n%s \n\n%s \n%s \n%s",
+	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n \n%s \n%s \n\n%s \n%s \n%s",
 		helpers.Trans(player.Language.Slug, "planet.intro"),
-		// helpers.Trans(player.Language.Slug, "planet.details.system", planet.PlanetSystem.Name),
-		helpers.Trans(player.Language.Slug, "planet.details.name", planet.Name),
-		helpers.Trans(player.Language.Slug, "planet.details.name", planet.Name),
-		helpers.Trans(player.Language.Slug, "planet.details.biome", planet.Biome.Name),
-		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", planet.Atmosphere.Name),
+		// helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID().Name),
+		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlayerCurrentPlanet.GetPlanet().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlayerCurrentPlanet.GetPlanet().GetBiome().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlayerCurrentPlanet.GetPlanet().GetAtmosphere().GetName()),
 
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.x", planet.X),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.y", planet.Y),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.z", planet.Z),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.x", rGetPlayerCurrentPlanet.GetPlanet().GetX()),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.y", rGetPlayerCurrentPlanet.GetPlanet().GetY()),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.z", rGetPlayerCurrentPlanet.GetPlanet().GetZ()),
 	)
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)

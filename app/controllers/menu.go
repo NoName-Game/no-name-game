@@ -108,32 +108,23 @@ func (c *MenuController) GetRecap() (message string, err error) {
 func (c *MenuController) GetPlayerPosition() (result string, err error) {
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-	rGetPlayerLastPosition, err := services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
+	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+	rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Dalla ultima posizione recupero il pianeta corrente
-	rGetPlanetByCoordinate, err := services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
-		X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
-		Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
-		Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
-	})
-	if err != nil {
-		panic(err)
-	}
-
 	// Verifico se il player si trova su un pianeta sicuro
-	c.SafePlanet = rGetPlanetByCoordinate.GetPlanet().GetSafe()
+	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
 
 	// Se è un pianeta sicuro modifico il messaggio
 	if c.SafePlanet {
-		return fmt.Sprintf("%s 🏟", rGetPlanetByCoordinate.GetPlanet().GetName()), err
+		return fmt.Sprintf("%s 🏟", rGetPlayerCurrentPlanet.GetPlanet().GetName()), err
 	}
 
-	return rGetPlanetByCoordinate.GetPlanet().GetName(), err
+	return rGetPlayerCurrentPlanet.GetPlanet().GetName(), err
 }
 
 // GetPlayerLife

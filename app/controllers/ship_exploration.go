@@ -225,8 +225,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 	// una nuova esplorazione
 	case 0:
 		// Recupero posizione corrente player
-		var rGetPlayerLastPosition *pb.GetPlayerLastPositionResponse
-		rGetPlayerLastPosition, err = services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
@@ -237,9 +237,9 @@ func (c *ShipExplorationController) Stage() (err error) {
 		currentPlayerPositions = fmt.Sprintf(
 			"%s \nX: %v \nY: %v \nZ: %v \n",
 			helpers.Trans(c.Player.Language.Slug, "ship.exploration.current_position"),
-			rGetPlayerLastPosition.GetPlayerPosition().GetX(),
-			rGetPlayerLastPosition.GetPlayerPosition().GetY(),
-			rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
+			rGetPlayerCurrentPlanet.GetPlanet().GetX(),
+			rGetPlayerCurrentPlanet.GetPlanet().GetY(),
+			rGetPlayerCurrentPlanet.GetPlanet().GetZ(),
 		)
 
 		// Invio messaggio con recap
@@ -412,9 +412,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		_, err := services.NnSDK.EndShipExploration(helpers.NewContext(1), &pb.EndShipExplorationRequest{
 			Integrity: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity,
 			Tank:      c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel,
-			PositionX: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.X,
-			PositionY: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Y,
-			PositionZ: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.Z,
+			PlanetID:  c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.ID,
 			ShipID:    c.Payload.Ship.ID,
 		})
 		if err != nil {
