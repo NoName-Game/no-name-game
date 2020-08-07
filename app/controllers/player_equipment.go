@@ -226,11 +226,24 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
 
+		// Statistica totale armatura
+		var defense, evasion, halving float32
+		if len(rGetPlayerArmors.GetArmors()) > 0 {
+			for _, armor := range rGetPlayerArmors.GetArmors() {
+				defense += armor.Defense
+				evasion += armor.Evasion
+				halving += armor.Halving
+			}
+		}
+
 		// Invio messagio con recap e con selettore categoria
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
-				"%s \n\n %s",
+				"%s \n\n%s \n %s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
+				fmt.Sprintf("🛡 Def: *%v* | Evs: *%v* | Hlv: *%v*\n",
+					defense, evasion, halving,
+				),
 				fmt.Sprintf(
 					"%s\n%s\n\n%s",
 					helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),

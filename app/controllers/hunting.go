@@ -252,20 +252,10 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		var rGetPlayerLastPosition *pb.GetPlayerLastPositionResponse
-		rGetPlayerLastPosition, err = services.NnSDK.GetPlayerLastPosition(helpers.NewContext(1), &pb.GetPlayerLastPositionRequest{
-			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
 		// Dalla ultima posizione recupero il pianeta corrente
-		var rGetPlanetByCoordinate *pb.GetPlanetByCoordinateResponse
-		rGetPlanetByCoordinate, err = services.NnSDK.GetPlanetByCoordinate(helpers.NewContext(1), &pb.GetPlanetByCoordinateRequest{
-			X: rGetPlayerLastPosition.GetPlayerPosition().GetX(),
-			Y: rGetPlayerLastPosition.GetPlayerPosition().GetY(),
-			Z: rGetPlayerLastPosition.GetPlayerPosition().GetZ(),
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
@@ -275,7 +265,7 @@ func (c *HuntingController) Hunting() (err error) {
 		// al DB registro il tutto su redis
 		var rGetMapByID *pb.GetMapByIDResponse
 		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-			ID: rGetPlanetByCoordinate.GetPlanet().GetMapID(),
+			ID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
 		})
 		if err != nil {
 			return err

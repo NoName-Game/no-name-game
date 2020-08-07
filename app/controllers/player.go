@@ -45,26 +45,6 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		}
 	}
 
-	// Recupero armature del player
-	rGetPlayerArmors, err := services.NnSDK.GetPlayerArmors(helpers.NewContext(100), &pb.GetPlayerArmorsRequest{
-		PlayerID: c.Player.GetID(),
-		Equipped: true,
-	})
-	if err != nil {
-		// log.Fatalln(err)
-		panic(err)
-	}
-
-	// armatura base player
-	var defense, evasion, halving float32
-	if len(rGetPlayerArmors.GetArmors()) > 0 {
-		for _, armor := range rGetPlayerArmors.GetArmors() {
-			defense += armor.Defense
-			evasion += armor.Evasion
-			halving += armor.Halving
-		}
-	}
-
 	// Calcolo lato economico del player
 	var economy string
 	economy, err = c.GetPlayerEconomy()
@@ -72,22 +52,44 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		panic(err)
 	}
 
-	armorsEquipment := fmt.Sprintf(""+
+	recapPlayer := fmt.Sprintf(""+
 		"👨🏼‍🚀 %s \n"+
-		"🏵 *%v* 🎖 *%v* \n"+
 		"♥️ *%v*/100 HP\n"+
-		"🛡 Def: *%v* | Evs: *%v* | Hlv: *%v*\n"+
-		"%s",
+		"🏵 *%v* 🎖 *%v* \n"+
+		"%s\n",
 		c.Player.GetUsername(),
+		c.PlayerStats.GetLifePoint(),
 		c.PlayerStats.GetExperience(),
 		c.PlayerStats.GetLevel(),
-		c.PlayerStats.GetLifePoint(),
-		defense, evasion, halving,
 		economy,
 	)
 
+	// Recupero quanti pianeti ha visitato
+	var rCountPlanetVisited *pb.CountPlanetVisitedResponse
+	rCountPlanetVisited, err = services.NnSDK.CountPlanetVisited(helpers.NewContext(100), &pb.CountPlanetVisitedRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		// log.Fatalln(err)
+		panic(err)
+	}
+
+	recapPlayer += fmt.Sprintf("\nTotale *pianeti* visitati: %v", rCountPlanetVisited.GetValue())
+
+	// Recupero quanti sistemi ha visitatao
+	var rCountSystemVisited *pb.CountSystemVisitedResponse
+	rCountSystemVisited, err = services.NnSDK.CountSystemVisited(helpers.NewContext(100), &pb.CountSystemVisitedRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		// log.Fatalln(err)
+		panic(err)
+	}
+
+	recapPlayer += fmt.Sprintf("\nTotale *sistemi* visitati: %v", rCountSystemVisited.GetValue())
+
 	// msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "player.intro"))
-	msg := services.NewMessage(c.Update.Message.Chat.ID, armorsEquipment)
+	msg := services.NewMessage(c.Update.Message.Chat.ID, recapPlayer)
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
