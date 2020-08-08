@@ -16,8 +16,8 @@ var (
 		"route.menu":     reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
 		"route.tutorial": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
-		"route.mission":  reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
-		"route.crafting": reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
+		"route.exploration": reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
+		"route.crafting":    reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
 
 		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 

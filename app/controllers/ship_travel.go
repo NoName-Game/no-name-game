@@ -127,7 +127,7 @@ func (c *ShipTravelController) Validator() (hasErrors bool, err error) {
 		// A prescindere verifico se il player ha una missione o una caccia attiva
 		// tutte le attività di che si svolgono sui pianeti devono essere portati a termine
 		for _, state := range c.ActiveStates {
-			if helpers.StringInSlice(state.Controller, []string{"route.mission", "route.hunting"}) {
+			if helpers.StringInSlice(state.Controller, []string{"route.exploration", "route.hunting"}) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.exploration.error.function_not_completed")
 				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(

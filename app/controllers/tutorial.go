@@ -515,7 +515,7 @@ func (c *TutorialController) Stage() (err error) {
 	case 3:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
 		firstMissionMessage := services.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_mission"),
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
 		)
 		firstMissionMessage.ParseMode = "markdown"
 
@@ -539,7 +539,7 @@ func (c *TutorialController) Stage() (err error) {
 		c.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 		// Richiamo missione come sottoprocesso di questo controller
-		missionController := new(MissionController)
+		missionController := new(ExplorationController)
 		missionController.Father = c.CurrentState.ID
 		missionController.Payload.ForcedTime = 1
 		missionController.Handle(c.Player, c.Update, true)
