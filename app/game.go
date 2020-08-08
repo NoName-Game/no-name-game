@@ -21,10 +21,10 @@ var (
 
 		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 
-		"route.ship":             reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
-		"route.ship.exploration": reflect.TypeOf((*controllers.ShipExplorationController)(nil)).Elem(),
-		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
-		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+		"route.ship":         reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
+		"route.ship.travel":  reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
+		"route.ship.repairs": reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
+		"route.ship.rests":   reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 
 		// Player
 		"route.player":          reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),

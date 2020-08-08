@@ -189,7 +189,7 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 	for _, state := range c.ActiveStates {
 		if state.Controller == "route.tutorial" {
 			return c.TutorialKeyboard()
-		} else if state.Controller == "route.ship.exploration" {
+		} else if state.Controller == "route.ship.travel" {
 			return c.ExplorationKeyboard()
 		} else if state.Controller == "route.mission" {
 			return c.MissionKeyboard()
@@ -302,6 +302,7 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 	})
 
 	return keyboardRow
