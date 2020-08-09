@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -16,6 +17,7 @@ import (
 type MissionController struct {
 	BaseController
 	Payload struct {
+		MissionID uint32
 	}
 }
 
@@ -141,8 +143,6 @@ func (c *MissionController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:
-		// TODO: dare almeno 3 possibilità al player di possibili missioni
-
 		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
 		keyboardRows = append(keyboardRows, []tgbotapi.KeyboardButton{
@@ -175,10 +175,40 @@ func (c *MissionController) Stage() (err error) {
 	case 1:
 		// Chiamo il ws e recupero il tipo di missione da effettuare
 		// attraverso il tipo di missione costruisco il corpo del messaggio
+		var rGetMission *pb.GetMissionResponse
+		rGetMission, err = services.NnSDK.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
+			PlayerID: c.Player.GetID(),
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		// In base alla categoria della missione costruisco il messaggio
+		var missionRecap string
+		switch rGetMission.GetMission().GetMissionCategory().GetSlug() {
+		case "resources_finding":
+			var missionPayload *pb.MissionResourcesFinding
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero enitità risorsa da cercare
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: missionPayload.GetResourceID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += fmt.Sprintf("Sei stato affidato ad una missione di tipologia: *%v*\nDevi recuperare *%v* quantità di 💠 *%v*. Buona Fortuna.",
+				rGetMission.GetMission().GetMissionCategory().GetName(),
+				missionPayload.GetResourceQty(),
+				rGetResourceByID.GetResource().GetName(),
+			)
+		}
 
 		// Invio messaggio di attesa
 		msg := services.NewMessage(c.Player.ChatID,
-			"vai a prendere un kebap",
+			missionRecap,
 		)
 		msg.ParseMode = "markdown"
 
@@ -188,6 +218,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
+		c.Payload.MissionID = rGetMission.GetMission().GetID()
 		c.CurrentState.Stage = 2
 		c.Breaker.ToMenu = true
 
