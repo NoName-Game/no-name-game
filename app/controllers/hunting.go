@@ -705,7 +705,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 		// Se ne il player e ne il mob è morto, continua lo scontro
 		// Messagio di notifica per vedere risultato attacco
-		if rHitEnemy.GetDodgeAttack() {
+		if rHitEnemy.GetEnemyDodge() {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
