@@ -248,10 +248,21 @@ func (c *MissionController) Stage() (err error) {
 		c.Breaker.ToMenu = true
 
 	case 2:
-		// Effettuo chiamata al WS per verificare che abbia completato la missione
-		// e recupero drop
+		// Effettuo chiamata al WS per recuperare reward del player
+		var rGetMissionReward *pb.GetMissionRewardResponse
+		rGetMissionReward, err = services.NnSDK.GetMissionReward(helpers.NewContext(1), &pb.GetMissionRewardRequest{
+			PlayerID:  c.Player.GetID(),
+			MissionID: c.Payload.MissionID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
 		msg := services.NewMessage(c.Player.ChatID,
-			"Bravo hai completato tutto, grazie ciao",
+			fmt.Sprintf("Complimenti, sei riuscito a completare la missione, guadagnando così: %v💰 e %v💎",
+				rGetMissionReward.GetMoney(),
+				rGetMissionReward.GetDiamond(),
+			),
 		)
 		msg.ParseMode = "markdown"
 
