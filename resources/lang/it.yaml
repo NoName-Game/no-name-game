@@ -348,7 +348,7 @@ safeplanet.bank.transaction_error: "Impossibile completare la transazione! Ripro
 # SAFE PLANET - MISSION
 safeplanet.mission.info: "Benvnuto vuoi avviare una nuova missione?"
 safeplanet.mission.start: "Avvia nuova missione"
-
+safeplanet.mission.check: "Non hai completato la missione ancora in corso. Cosa vuoi fare?"
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"

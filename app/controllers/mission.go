@@ -123,7 +123,32 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
-		// TODO: Aggiungere verifica stato missione e verifico se l'untente vuole abbandonare (copiare da esplorazine)
+		var rCheckMission *pb.CheckMissionResponse
+		rCheckMission, _ = services.NnSDK.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
+			PlayerID:  c.Player.GetID(),
+			MissionID: c.Payload.MissionID,
+		})
+
+		if rCheckMission.GetCompleted() == false {
+			c.Validation.Message = helpers.Trans(
+				c.Player.Language.Slug,
+				"safeplanet.mission.check",
+			)
+
+			// Aggiungo anche abbandona
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					),
+				),
+			)
+
+			return true, err
+		}
 
 		return false, err
 
@@ -225,7 +250,6 @@ func (c *MissionController) Stage() (err error) {
 	case 2:
 		// Effettuo chiamata al WS per verificare che abbia completato la missione
 		// e recupero drop
-
 		msg := services.NewMessage(c.Player.ChatID,
 			"Bravo hai completato tutto, grazie ciao",
 		)

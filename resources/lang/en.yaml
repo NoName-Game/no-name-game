@@ -36,6 +36,7 @@ route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.research: "🔍️ Ricerca"
+route.safeplanet.mission: "Missione"
 
 # ROUTES (BREAKER)
 route.breaker.continue: "Continua"
@@ -343,6 +344,11 @@ safeplanet.bank.withdraws: "Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
+
+# SAFE PLANET - MISSION
+safeplanet.mission.info: "Benvnuto vuoi avviare una nuova missione?"
+safeplanet.mission.start: "Avvia nuova missione"
+
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"
