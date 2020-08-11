@@ -41,7 +41,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(1, &MenuController{}) {
+		if c.BackTo(1, &CoalitionController{}) {
 			return
 		}
 	}
@@ -129,7 +129,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 			MissionID: c.Payload.MissionID,
 		})
 
-		if rCheckMission.GetCompleted() == false {
+		if !rCheckMission.GetCompleted() {
 			c.Validation.Message = helpers.Trans(
 				c.Player.Language.Slug,
 				"safeplanet.mission.check",
@@ -168,7 +168,6 @@ func (c *MissionController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:
-		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
 		keyboardRows = append(keyboardRows, []tgbotapi.KeyboardButton{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start")),
@@ -177,7 +176,7 @@ func (c *MissionController) Stage() (err error) {
 		// Aggiungo anche abbandona
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 			),
 		))
 
@@ -311,9 +310,11 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		msg := services.NewMessage(c.Player.ChatID,
-			fmt.Sprintf("Complimenti, sei riuscito a completare la missione, guadagnando così: %v💰 e %v💎",
+			helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.reward",
 				rGetMissionReward.GetMoney(),
 				rGetMissionReward.GetDiamond(),
+				rGetMissionReward.GetExp(),
 			),
 		)
 		msg.ParseMode = "markdown"

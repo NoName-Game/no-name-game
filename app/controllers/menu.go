@@ -166,6 +166,10 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 						tasks += fmt.Sprintf("- %s \n",
 							helpers.Trans(c.Player.Language.Slug, state.Controller),
 						)
+					} else if state.Controller == "route.safeplanet.mission" {
+						tasks += fmt.Sprintf("- %s \n",
+							helpers.Trans(c.Player.Language.Slug, state.Controller),
+						)
 					} else {
 						tasks += fmt.Sprintf("- %s %s\n",
 							helpers.Trans(c.Player.Language.Slug, state.Controller),
@@ -284,16 +288,16 @@ func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
 
 // MainMenu
 func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
+	var keyboardRow [][]tgbotapi.KeyboardButton
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.coalition")),
+	})
+
 	// Recupero gli npc attivi in questo momento
 	rGetAll, err := services.NnSDK.GetAllNPC(helpers.NewContext(1), &pb.GetAllNPCRequest{})
 	if err != nil {
 		panic(err)
 	}
-
-	var keyboardRow [][]tgbotapi.KeyboardButton
-	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.mission")),
-	})
 
 	for _, npc := range rGetAll.GetNPCs() {
 		row := tgbotapi.NewKeyboardButtonRow(

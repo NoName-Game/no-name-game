@@ -40,10 +40,11 @@ var (
 		"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 
 		// Safe Planet
-		"route.safeplanet.bank":    reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
-		"route.safeplanet.crafter": reflect.TypeOf((*controllers.CrafterController)(nil)).Elem(),
-		"route.menu.npc":           reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(), // TODO: da verificare
-		"route.safeplanet.mission": reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
+		"route.safeplanet.bank":      reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
+		"route.safeplanet.crafter":   reflect.TypeOf((*controllers.CrafterController)(nil)).Elem(),
+		"route.menu.npc":             reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(), // TODO: da verificare
+		"route.safeplanet.coalition": reflect.TypeOf((*controllers.CoalitionController)(nil)).Elem(),
+		"route.safeplanet.mission":   reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
 	}
 )
 
