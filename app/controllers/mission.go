@@ -3,10 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
-	"github.com/golang/protobuf/ptypes"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 
@@ -15,20 +11,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var (
-	MissionTypes = []string{"underground", "surface", "atmosphere"}
-)
-
 // ====================================
 // MissionController
 // ====================================
 type MissionController struct {
 	BaseController
 	Payload struct {
-		ExplorationType string // Indica il tipo di esplorazione scelta
-		Times           int    // Indica quante volte ha ripetuto
-		Dropped         []*pb.DropResourceResponse
-		ForcedTime      int // Questo valore serve per forzare le tempistiche
+		MissionID uint32
 	}
 }
 
@@ -41,9 +30,9 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(
-		"route.mission",
+		"route.safeplanet.mission",
 		c.Payload,
-		[]string{"hunting", "ship"},
+		[]string{},
 		player,
 		update,
 	) {
@@ -52,7 +41,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(1, &MenuController{}) {
+		if c.BackTo(1, &CoalitionController{}) {
 			return
 		}
 	}
@@ -124,73 +113,44 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	case 0:
 		return false, err
 
-	// In questo stage è necessario controllare che venga scelto
-	// un tipo di missione tra quelli disponibili
+	// Verifico se ha scelto di avviare una nuova missione
 	case 1:
-		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		for _, missionType := range MissionTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
-				return false, err
-			}
+		if helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start") == c.Update.Message.Text {
+			return false, err
 		}
 
 		return true, err
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.GetFinishAt())
-		if err != nil {
-			panic(err)
-		}
+		var rCheckMission *pb.CheckMissionResponse
+		rCheckMission, _ = services.NnSDK.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
+			PlayerID:  c.Player.GetID(),
+			MissionID: c.Payload.MissionID,
+		})
 
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"mission.validator.wait",
-			finishAt.Format("15:04:05"),
-		)
+		if !rCheckMission.GetCompleted() {
+			c.Validation.Message = helpers.Trans(
+				c.Player.Language.Slug,
+				"safeplanet.mission.check",
+			)
 
-		// Verifico che l'utente stia accedendo a questa funzionalità solo dopo
-		// che abbia finito lo stato attuale e che non abbia raggiunto il limite
-		// di volte per il quale è possibile ripetere la stessa azione
-		if time.Now().After(finishAt) && c.Payload.Times < 10 {
-			c.Payload.Times++
-
-			return false, err
-		}
-
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+			// Aggiungo anche abbandona
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					),
 				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+			)
 
-		return true, err
-
-	// In questo stage verifico l'azione che vuole intraprendere l'utente
-	case 3:
-		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
-			c.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
-			c.CurrentState.ToNotify = true
-
-			return false, err
-
-			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
-			// Passo allo stadio conclusivo
-			c.CurrentState.Stage = 4
-
-			return false, err
+			return true, err
 		}
 
-		return true, err
+		return false, err
 
 	default:
 		// Stato non riconosciuto ritorno errore
@@ -206,28 +166,23 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // ====================================
 func (c *MissionController) Stage() (err error) {
 	switch c.CurrentState.Stage {
-	// Primo avvio di missione, restituisco al player
-	// i vari tipi di missioni disponibili
+	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:
-		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, missionType := range MissionTypes {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType))),
-			)
-
-			keyboardRows = append(keyboardRows, keyboardRow)
-		}
+		keyboardRows = append(keyboardRows, []tgbotapi.KeyboardButton{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start")),
+		})
 
 		// Aggiungo anche abbandona
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 			),
 		))
 
 		// Invio messaggi con il tipo di missioni come tastierino
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.exploration"))
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.info"))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -243,24 +198,93 @@ func (c *MissionController) Stage() (err error) {
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
 	case 1:
-		// È il tempo minimo di una missione
-		baseMissionTime := 10
-
-		// Verifico se è stato forzato il tempo della prima missione Es. da tutorial
-		if c.Payload.ForcedTime > 0 {
-			baseMissionTime = c.Payload.ForcedTime
+		// Chiamo il ws e recupero il tipo di missione da effettuare
+		// attraverso il tipo di missione costruisco il corpo del messaggio
+		var rGetMission *pb.GetMissionResponse
+		rGetMission, err = services.NnSDK.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
+			PlayerID: c.Player.GetID(),
+		})
+		if err != nil {
+			return err
 		}
 
-		var endTime time.Time
-		endTime = helpers.GetEndTime(0, baseMissionTime, 0)
+		// In base alla categoria della missione costruisco il messaggio
+		var missionRecap string
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type",
+			helpers.Trans(c.Player.Language.Slug,
+				fmt.Sprintf("safeplanet.mission.type.%s", rGetMission.GetMission().GetMissionCategory().GetSlug()),
+			),
+		)
+
+		switch rGetMission.GetMission().GetMissionCategory().GetSlug() {
+		case "resources_finding":
+			var missionPayload *pb.MissionResourcesFinding
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero enitità risorsa da cercare
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: missionPayload.GetResourceID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.resources_finding.description",
+				missionPayload.GetResourceQty(),
+				rGetResourceByID.GetResource().GetName(),
+			)
+		case "planet_finding":
+			var missionPayload *pb.MissionPlanetFinding
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero pianeta da trovare
+			var rGetPlanetByID *pb.GetPlanetByIDResponse
+			rGetPlanetByID, err = services.NnSDK.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+				PlanetID: missionPayload.GetPlanetID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.planet_finding.description",
+				rGetPlanetByID.GetPlanet().GetName(),
+			)
+		case "kill_mob":
+			var missionPayload *pb.MissionKillMob
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero enemy da Uccidere
+			var rGetEnemyByID *pb.GetEnemyByIDResponse
+			rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+				ID: missionPayload.GetEnemyID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			// Recupero pianeta di dove si trova il mob
+			var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
+			rGetPlanetByMapID, err = services.NnSDK.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
+				MapID: rGetEnemyByID.GetEnemy().GetMapID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.kill_mob.description",
+				rGetEnemyByID.GetEnemy().GetName(),
+				rGetPlanetByMapID.GetPlanet().GetName(),
+			)
+		}
 
 		// Invio messaggio di attesa
 		msg := services.NewMessage(c.Player.ChatID,
-			helpers.Trans(
-				c.Player.Language.Slug,
-				"mission.wait",
-				endTime.Format("15:04:05"),
-			),
+			missionRecap,
 		)
 		msg.ParseMode = "markdown"
 
@@ -269,144 +293,42 @@ func (c *MissionController) Stage() (err error) {
 			return
 		}
 
-		// Importo nel payload la scelta di tipologia di missione
-		for _, missionType := range MissionTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
-				c.Payload.ExplorationType = missionType
-				break
-			}
-		}
-
 		// Avanzo di stato
+		c.Payload.MissionID = rGetMission.GetMission().GetID()
 		c.CurrentState.Stage = 2
-		c.CurrentState.ToNotify = true
-		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
 		c.Breaker.ToMenu = true
 
-	// In questo stage recupero quali risorse il player ha recuperato
-	// dalla missione e glielo notifico
 	case 2:
-		// Recupero ultima posizione del player, dando per scontato che sia
-		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.GetID(),
+		// Effettuo chiamata al WS per recuperare reward del player
+		var rGetMissionReward *pb.GetMissionRewardResponse
+		rGetMissionReward, err = services.NnSDK.GetMissionReward(helpers.NewContext(1), &pb.GetMissionRewardRequest{
+			PlayerID:  c.Player.GetID(),
+			MissionID: c.Payload.MissionID,
 		})
 		if err != nil {
-			return err
+			panic(err)
 		}
 
-		// Recupero drop
-		var rDropResource *pb.DropResourceResponse
-		rDropResource, err = services.NnSDK.DropResource(helpers.NewContext(1), &pb.DropResourceRequest{
-			TypeExploration: c.Payload.ExplorationType,
-			QtyExploration:  int32(c.Payload.Times),
-			PlayerID:        c.Player.ID,
-			PlanetID:        rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
-		// Se ho recuperato il drop lo inserisco nella lista degli elementi droppati
-		c.Payload.Dropped = append(c.Payload.Dropped, rDropResource)
-
-		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
 		msg := services.NewMessage(c.Player.ChatID,
-			helpers.Trans(
-				c.Player.Language.Slug,
-				"mission.extraction_recap",
-				rDropResource.GetResource().GetName(),
-				rDropResource.GetResource().GetRarity().GetName(),
-				strings.ToUpper(rDropResource.GetResource().GetRarity().GetSlug()),
-				rDropResource.GetQuantity(),
+			helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.reward",
+				rGetMissionReward.GetMoney(),
+				rGetMissionReward.GetDiamond(),
+				rGetMissionReward.GetExp(),
 			),
 		)
 		msg.ParseMode = "markdown"
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.continue")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.comeback")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
 			),
 		)
 
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
-		}
-
-		// Aggiorno lo stato
-		c.CurrentState.Stage = 3
-
-	// In questo stage verifico cosa ha scelto di fare il player
-	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
-	// mentre se ha deciso di concludere andrò avanti di stato
-	case 3:
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
-		if err != nil {
-			panic(err)
-		}
-
-		// Il player ha scelto di continuare la ricerca
-		msg := services.NewMessage(c.Player.ChatID,
-			helpers.Trans(
-				c.Player.Language.Slug,
-				"mission.wait",
-				finishAt.Format("15:04:05"),
-			),
-		)
-		msg.ParseMode = "markdown"
-
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
-		}
-
-		// Aggiorno lo stato
-		c.CurrentState.Stage = 2
-		c.Breaker.ToMenu = true
-
-	// Ritorno il messaggio con gli elementi droppati
-	case 4:
-		// Recap delle risorse ricavate da questa missione
-		var dropList string
-		for _, drop := range c.Payload.Dropped {
-			dropList += fmt.Sprintf(
-				"- %v x *%s* (%s)\n",
-				drop.Quantity,
-				drop.Resource.Name,
-				strings.ToUpper(drop.Resource.Rarity.Slug),
-			)
-		}
-
-		// Invio messaggio di chiusura missione
-		msg := services.NewMessage(c.Player.ChatID,
-			fmt.Sprintf("%s%s",
-				helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"),
-				dropList,
-			),
-		)
-		msg.ParseMode = "markdown"
-
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
-		}
-
-		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
-		for _, drop := range c.Payload.Dropped {
-			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
-				PlayerID: c.Player.GetID(),
-				ItemID:   drop.Resource.ID,
-				ItemType: "resources",
-				Quantity: drop.Quantity,
-			})
-			if err != nil {
-				return err
-			}
 		}
 
 		// Completo lo stato
