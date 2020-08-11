@@ -346,9 +346,17 @@ safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
 
 # SAFE PLANET - MISSION
-safeplanet.mission.info: "Benvnuto vuoi avviare una nuova missione?"
+safeplanet.mission.info: "Benvenuto nell'area missioni della *Coalizione*. Abbiamo un'infinità di missioni da affidarti.\nAl completamento di una missione verrai ricompensato con 💰 e 💎.\nVuoi avviare una nuova missione?"
 safeplanet.mission.start: "Avvia nuova missione"
 safeplanet.mission.check: "Non hai completato la missione ancora in corso. Cosa vuoi fare?"
+safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n"
+
+safeplanet.mission.type.planet_finding: "Trova il pianeta"
+safeplanet.mission.type.planet_finding.description: "La tua missione è quella di trovare e raggiungere il pianeta 🌏 *%s*.\nBuona Fortuna."
+safeplanet.mission.type.kill_mob: "Uccidi il nemico"
+safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare *%s* avvistato sul pianeta 🌏 *%s* e annientarlo.\nBuona Fortuna."
+safeplanet.mission.type.resources_finding: "Recupero risorse"
+safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di recuperare *%v* quantità di 💠 *%v*.\nBuona Fortuna."
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"

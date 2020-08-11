@@ -2,7 +2,9 @@ package helpers
 
 import (
 	"context"
+	"os"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -60,7 +62,12 @@ func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 
 // NewContext - Recupero nuovo context per effettuare le chiamate
 func NewContext(seconds time.Duration) context.Context {
-	d := time.Now().Add(seconds * time.Second)
+	TTLRPC, err := strconv.Atoi(os.Getenv("TTL_RPC"))
+	if err != nil {
+		TTLRPC = 1
+	}
+
+	d := time.Now().Add(seconds * time.Second * time.Duration(TTLRPC))
 	// nolint:govet // Escludo il check sul defer del cancel
 	ctx, _ := context.WithDeadline(context.Background(), d)
 

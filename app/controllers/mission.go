@@ -183,6 +183,7 @@ func (c *MissionController) Stage() (err error) {
 
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.info"))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -205,11 +206,18 @@ func (c *MissionController) Stage() (err error) {
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		// In base alla categoria della missione costruisco il messaggio
 		var missionRecap string
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type",
+			helpers.Trans(c.Player.Language.Slug,
+				fmt.Sprintf("safeplanet.mission.type.%s", rGetMission.GetMission().GetMissionCategory().GetSlug()),
+			),
+		)
+
 		switch rGetMission.GetMission().GetMissionCategory().GetSlug() {
 		case "resources_finding":
 			var missionPayload *pb.MissionResourcesFinding
@@ -224,10 +232,54 @@ func (c *MissionController) Stage() (err error) {
 				panic(err)
 			}
 
-			missionRecap += fmt.Sprintf("Sei stato affidato ad una missione di tipologia: *%v*\nDevi recuperare *%v* quantità di 💠 *%v*. Buona Fortuna.",
-				rGetMission.GetMission().GetMissionCategory().GetName(),
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.resources_finding.description",
 				missionPayload.GetResourceQty(),
 				rGetResourceByID.GetResource().GetName(),
+			)
+		case "planet_finding":
+			var missionPayload *pb.MissionPlanetFinding
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero pianeta da trovare
+			var rGetPlanetByID *pb.GetPlanetByIDResponse
+			rGetPlanetByID, err = services.NnSDK.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+				PlanetID: missionPayload.GetPlanetID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.planet_finding.description",
+				rGetPlanetByID.GetPlanet().GetName(),
+			)
+		case "kill_mob":
+			var missionPayload *pb.MissionKillMob
+			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
+
+			// Recupero enemy da Uccidere
+			var rGetEnemyByID *pb.GetEnemyByIDResponse
+			rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+				ID: missionPayload.GetEnemyID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			// Recupero pianeta di dove si trova il mob
+			var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
+			rGetPlanetByMapID, err = services.NnSDK.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
+				MapID: rGetEnemyByID.GetEnemy().GetMapID(),
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			missionRecap += helpers.Trans(c.Player.Language.Slug,
+				"safeplanet.mission.type.kill_mob.description",
+				rGetEnemyByID.GetEnemy().GetName(),
+				rGetPlanetByMapID.GetPlanet().GetName(),
 			)
 		}
 
