@@ -336,13 +336,13 @@ ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima d
 safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
 
 # SAFE PLANET - BANK
-safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co"
-safeplanet.bank.account_details: "Qui di seguito potrai trovare i dettagli del tuo conto:\nHai a disposizione: *%v* 💰"
-safeplanet.bank.deposit: "Deposito"
-safeplanet.bank.deposit_message: "Quanto desideri depositare?"
+safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co."
+safeplanet.bank.account_details: "Ecco i dettagli del tuo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰"
+safeplanet.bank.deposit: "🔽 Deposito"
+safeplanet.bank.deposit_message: "Quanto desideri depositare?\n\nPuoi indicare anche manualmente l'importo che desideri depositare."
 
-safeplanet.bank.withdraws: "Prelievo"
-safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
+safeplanet.bank.withdraws: "🔼 Prelievo"
+safeplanet.bank.withdraws_message: "Quanto desideri prelevare?\n\nPuoi indicare anche manualmente l'importo che desideri prelevare."
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
 

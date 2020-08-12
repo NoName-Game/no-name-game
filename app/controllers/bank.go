@@ -158,6 +158,7 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
+		// Bank
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 		rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
@@ -167,7 +168,24 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", rGetPlayerEconomy.GetValue()))
+		// Money
+		var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
+		rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.GetID(),
+			EconomyType: "money",
+		})
+		if err != nil {
+			return err
+		}
+
+		msg = services.NewMessage(c.Player.ChatID,
+			helpers.Trans(
+				c.Player.Language.Slug,
+				"safeplanet.bank.account_details",
+				rGetPlayerEconomyMoney.GetValue(),
+				rGetPlayerEconomy.GetValue(),
+			),
+		)
 		msg.ParseMode = "Markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -251,14 +269,6 @@ func (c *BankController) Stage() (err error) {
 				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
 			}
 		}
-
-		// Registro transazione
-		/*_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
-			Value:                 int32(value),
-			TransactionTypeID:     1,
-			TransactionCategoryID: uint(transactionCategory),
-			PlayerID:              c.Player.ID,
-		})*/
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
