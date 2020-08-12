@@ -38,6 +38,7 @@ func (c *CoalitionController) Handle(player *pb.Player, update tgbotapi.Update, 
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.mission")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.titan")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),

@@ -45,6 +45,7 @@ var (
 		"route.menu.npc":             reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(), // TODO: da verificare
 		"route.safeplanet.coalition": reflect.TypeOf((*controllers.CoalitionController)(nil)).Elem(),
 		"route.safeplanet.mission":   reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
+		"route.safeplanet.titan":     reflect.TypeOf((*controllers.TitanController)(nil)).Elem(),
 	}
 )
 

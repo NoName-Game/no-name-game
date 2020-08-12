@@ -38,6 +38,7 @@ route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.research: "🔍️ Ricerca"
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.mission: "🏢 Centro Missioni"
+route.safeplanet.titan: "Titan"
 
 # ROUTES (BREAKER)
 route.breaker.continue: "Continua"
@@ -336,13 +337,13 @@ ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima d
 safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
 
 # SAFE PLANET - BANK
-safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co"
-safeplanet.bank.account_details: "Qui di seguito potrai trovare i dettagli del tuo conto:\nHai a disposizione: *%v* 💰"
-safeplanet.bank.deposit: "Deposito"
-safeplanet.bank.deposit_message: "Quanto desideri depositare?"
+safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co."
+safeplanet.bank.account_details: "Ecco i dettagli del tuo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰"
+safeplanet.bank.deposit: "🔽 Deposito"
+safeplanet.bank.deposit_message: "Quanto desideri depositare?\n\nPuoi indicare anche manualmente l'importo che desideri depositare."
 
-safeplanet.bank.withdraws: "Prelievo"
-safeplanet.bank.withdraws_message: "Quanto desideri prelevare?"
+safeplanet.bank.withdraws: "🔼 Prelievo"
+safeplanet.bank.withdraws_message: "Quanto desideri prelevare?\n\nPuoi indicare anche manualmente l'importo che desideri prelevare."
 safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
 
@@ -362,6 +363,9 @@ safeplanet.mission.type.kill_mob: "Uccidi il nemico"
 safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare *%s* avvistato sul pianeta 🌏*%s* e annientarlo.\nBuona fortuna."
 safeplanet.mission.type.resources_finding: "Recupero risorse"
 safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di recuperare *%v* quantità di 💠*%v*.\nBuona fortuna."
+
+# SAFEPLANET - BOSS
+route.safeplanet.titan.info: "La colazione chiede il tuo aito per sconfiggere un nemico comune:"
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"
