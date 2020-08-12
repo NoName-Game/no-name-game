@@ -40,6 +40,9 @@ func (c *CoalitionController) Handle(player *pb.Player, update tgbotapi.Update, 
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.mission")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
 		),
 	)
