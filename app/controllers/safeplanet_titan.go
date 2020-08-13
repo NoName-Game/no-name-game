@@ -112,13 +112,24 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 		return false, err
 
 	case 1:
-		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.start") {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
-			return true, err
+		// Recupero quali titani sono stati scoperti e quindi raggiungibili
+		var rTitanDiscovered *pb.TitanDiscoveredResponse
+		rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{})
+		if err != nil {
+			return
 		}
 
-		return false, err
+		// Verifico sei il player ha passato il nome di un titano valido
+		if len(rTitanDiscovered.GetTitans()) > 0 {
+			for _, titan := range rTitanDiscovered.GetTitans() {
+				if c.Update.Message.Text == titan.GetName() {
+					return false, err
+				}
+			}
+		}
+
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+		return true, err
 	}
 
 	return true, err
@@ -129,31 +140,38 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 // ====================================
 func (c *SafePlanetTitanController) Stage() (err error) {
 	switch c.CurrentState.Stage {
-
-	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
-		// Costruisco info per riposo
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.info")
-
-		// TODO: Aggiunto bottoni su quali titani sono stati scoperti e raggiungibili
-
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		// if restsInfo.NeedRests {
-		// 	newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
-		// 		tgbotapi.NewKeyboardButton(
-		// 			helpers.Trans(c.Player.Language.Slug, "ship.rests.start"),
-		// 		),
-		// 	)
-		// 	keyboardRow = append(keyboardRow, newKeyboardRow)
-		// }
 
-		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !c.PlayerStats.GetDead() {
-			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			))
+		// Recupero quali titani sono stati scoperti e quindi raggiungibili
+		var rTitanDiscovered *pb.TitanDiscoveredResponse
+		rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{})
+		if err != nil {
+			return
 		}
+
+		// Se sono stati trovati dei tiani costruisco keyboard
+		if len(rTitanDiscovered.GetTitans()) > 0 {
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.choice")
+			for _, titan := range rTitanDiscovered.GetTitans() {
+				newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						// helpers.Trans(c.Player.Language.Slug, "ship.rests.start"),
+						titan.GetName(),
+					),
+				)
+				keyboardRow = append(keyboardRow, newKeyboardRow)
+			}
+		} else {
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.no_titans_founded")
+		}
+
+		// Aggiungo torna indietro
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+		))
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Player.ChatID, restsRecap)
@@ -172,25 +190,30 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
-		//TODO: Verifico verso quale pianeta/titano è stato scelto di teletrasportsi
+		// Recupero pianeta da titano
+		var rGetTitanByName *pb.GetTitanByNameResponse
+		rGetTitanByName, err = services.NnSDK.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
+			Name: c.Update.Message.Text,
+		})
+		if err != nil {
+			return
+		}
 
-		// Ripulisco messaggio per recupermi solo il nome
-		// equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
-
-		//TODO: Chiamo WS che aggiorneà la posizione del player
+		// Aggiunto nuova posizione al player
+		_, err = services.NnSDK.CreatePlayerPosition(helpers.NewContext(1), &pb.CreatePlayerPositionRequest{
+			PlayerID: c.Player.ID,
+			PlanetID: rGetTitanByName.GetTitan().GetPlanetID(),
+		})
+		if err != nil {
+			return
+		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing"),
+			helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.teleport"),
 		)
 
 		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup")),
-			),
-		)
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err

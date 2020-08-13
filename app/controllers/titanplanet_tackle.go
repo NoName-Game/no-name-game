@@ -29,11 +29,11 @@ type TitanPlanetTackleController struct {
 // Settings generali
 var (
 	titanKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "titanplanet.tackle.fight.up")),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.hit"),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", "titanplanet.tackle.fight.hit"),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "titanplanet.tackle.fight.down")),
 	)
 )
 
@@ -170,7 +170,7 @@ func (c *TitanPlanetTackleController) Stage() (err error) {
 	return
 }
 
-// Hunting - in questo passo mi restituisco la mappa al player
+// Tackle - Gestisco combattionmento con titano
 func (c *TitanPlanetTackleController) Tackle() (err error) {
 	// Recupero ultima posizione del player
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
@@ -178,7 +178,7 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		PlayerID: c.Player.GetID(),
 	})
 	if err != nil {
-		return err
+		return
 	}
 
 	// Recupero titano in base alla posizione del player
@@ -187,13 +187,14 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 	})
 
+	// Se ricevo un messaggio normale probabilmente è un avvio o un abbandona
 	if c.Update.Message != nil {
 		// Se è qualsiasi messaggio diverso da affronta non lo calcolo
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.titanplanet.tackle") {
 			return
 		}
 
-		// Questo messaggio è necessario per immettere il tasto di abbandona caccia
+		// Questo messaggio è necessario per immettere il tasto di abbandona
 		initHunting := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.init"))
 		initHunting.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -204,12 +205,12 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		)
 		_, err = services.SendMessage(initHunting)
 		if err != nil {
-			return err
+			return
 		}
 
-		//TODO: modificami
-		test2 := helpers.Trans(c.Player.Language.Slug, "combat.card",
-			rGetTitanByPlanetID.GetTitan().GetName(), strings.ToUpper("editmie"),
+		// Preparo messaggio con la cardi di combattimento
+		combactCard := helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.card",
+			rGetTitanByPlanetID.GetTitan().GetName(),
 			rGetTitanByPlanetID.GetTitan().GetLifePoint(),
 			rGetTitanByPlanetID.GetTitan().GetLifeMax(),
 			c.Player.Username,
@@ -218,38 +219,35 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 			helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 		)
 
-		// Invio quindi il mesaggio contenente mappa e azioni disponibili
-		msg := services.NewMessage(c.Player.ChatID, test2)
+		// Invio quindi il mesaggio contenente le azioni disponibili
+		msg := services.NewMessage(c.Player.ChatID, combactCard)
 		msg.ReplyMarkup = titanKeyboard
-		msg.ParseMode = "HTML"
+		msg.ParseMode = "markdown"
 
-		var huntingMessage tgbotapi.Message
-		huntingMessage, err = services.SendMessage(msg)
+		var tackleMessage tgbotapi.Message
+		tackleMessage, err = services.SendMessage(msg)
 		if err != nil {
-			return err
+			return
 		}
 
 		// Aggiorno lo stato e ritorno
-		// c.Payload.MapID = maps.ID
-		c.Payload.CallbackChatID = huntingMessage.Chat.ID
-		c.Payload.CallbackMessageID = huntingMessage.MessageID
+		c.Payload.CallbackChatID = tackleMessage.Chat.ID
+		c.Payload.CallbackMessageID = tackleMessage.MessageID
 
-		return err
+		return
 	}
 
-	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
-	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
+	// Se il messaggio è di tipo callback sicuramete è un messaggio di attacco
 	if c.Update.CallbackQuery != nil {
-		// Controllo tipo di callback data - move / fight
+		// Controllo tipo di callback data - fight
 		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-		if actionType[1] == "fight" {
-			err = c.Fight(actionType[2], rGetTitanByPlanetID.GetTitan())
+		if actionType[2] == "fight" {
+			err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
 		}
-
 		if err != nil {
-			return err
+			return
 		}
 
 		// Rimuove rotella di caricamento dal bottone
@@ -260,7 +258,7 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		return
 	}
 
-	return err
+	return
 }
 
 // ====================================
@@ -270,12 +268,6 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	switch action {
-	// Avvio di un nuovo combattimento
-	case "start":
-		// Setto nuove informazioni stato
-		c.Payload.TitanID = titan.GetID()
-		c.Payload.InFight = true
-
 	case "up":
 		// Setto nuova parte del corpo da colpire
 		if c.Payload.Selection > 0 {
@@ -305,35 +297,18 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 		}
 
 		// Verifico se il MOB è morto
-		if rHitTitan.GetTitanDie() {
-			// Costruisco messaggio di recap del drop
-			var dropRecap string
-
-			// if rHitEnemy.GetEnemyDrop().GetResource() != nil {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
-			// } else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
-			// 	itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
-			// } else if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
-			// } else {
-			// 	dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
-			// }
-
-			// Aggiungo anche esperinza recuperata
-			// dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", rHitEnemy.GetPlayerExperience()))
-
+		if rHitTitan.GetTitanDie() || titan.GetLifePoint() <= 0 {
 			// Aggiorno modifica del messaggio
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", titan.GetName(), dropRecap),
+				helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.mob_killed", titan.GetName()),
 			)
 
 			var ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
+						helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.titan_die",
 					),
 				),
 			)
@@ -342,7 +317,6 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 
 			// Setto stato
 			c.Payload.Kill++
-			c.Payload.InFight = false
 			c.Payload.TitanID = 0
 
 			// Invio messaggio
@@ -366,7 +340,7 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			var ok = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
 					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
+						helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.player-die",
 					),
 				),
 			)
@@ -400,16 +374,19 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 
 		ok := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action"),
+				tgbotapi.NewInlineKeyboardButtonData("Ok!", "titanplanet.tackle.fight.no_action"),
 			),
 		)
 		editMessage.ReplyMarkup = &ok
-	case "player-die":
+	case "player_die":
 		// Il player è morto
 		c.CurrentState.Completed = true
-
 		return
-	case "no-action":
+	case "titan_die":
+		// Il player è morto
+		c.CurrentState.Completed = true
+		return
+	case "no_action":
 		//
 	}
 
@@ -418,8 +395,8 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "combat.card",
-				titan.GetName(), strings.ToUpper("editme"),
+			helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.card",
+				titan.GetName(),
 				titan.GetLifePoint(),
 				titan.GetLifeMax(),
 				c.Player.Username,
