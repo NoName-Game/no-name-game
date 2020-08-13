@@ -11,9 +11,9 @@ import (
 )
 
 // ====================================
-// TitanController
+// SafePlanetTitanController
 // ====================================
-type TitanController struct {
+type SafePlanetTitanController struct {
 	BaseController
 	Payload struct{}
 }
@@ -21,7 +21,7 @@ type TitanController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *TitanController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -38,7 +38,7 @@ func (c *TitanController) Handle(player *pb.Player, update tgbotapi.Update, prox
 
 	// Verifico se vuole tornare indietro di stato
 	if !proxy {
-		if c.BackTo(1, &CoalitionController{}) {
+		if c.BackTo(1, &SafePlanetCoalitionController{}) {
 			return
 		}
 	}
@@ -96,7 +96,7 @@ func (c *TitanController) Handle(player *pb.Player, update tgbotapi.Update, prox
 // ====================================
 // Validator
 // ====================================
-func (c *TitanController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -127,7 +127,7 @@ func (c *TitanController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *TitanController) Stage() (err error) {
+func (c *SafePlanetTitanController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo

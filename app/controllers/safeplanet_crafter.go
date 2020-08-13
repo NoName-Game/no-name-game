@@ -15,9 +15,9 @@ import (
 )
 
 // ====================================
-// CrafterController (NPC Crafter)
+// SafePlanetCrafterController (NPC Crafter)
 // ====================================
-type CrafterController struct {
+type SafePlanetCrafterController struct {
 	Payload struct {
 		Item      string
 		Category  string
@@ -30,7 +30,7 @@ type CrafterController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -104,7 +104,7 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 // ====================================
 // Validator
 // ====================================
-func (c *CrafterController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetCrafterController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -190,7 +190,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *CrafterController) Stage() (err error) {
+func (c *SafePlanetCrafterController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:

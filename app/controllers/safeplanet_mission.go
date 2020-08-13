@@ -12,9 +12,9 @@ import (
 )
 
 // ====================================
-// MissionController
+// SafePlanetMissionController
 // ====================================
-type MissionController struct {
+type SafePlanetMissionController struct {
 	BaseController
 	Payload struct {
 		MissionID uint32
@@ -24,7 +24,7 @@ type MissionController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -41,7 +41,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(1, &CoalitionController{}) {
+		if c.BackTo(1, &SafePlanetCoalitionController{}) {
 			return
 		}
 	}
@@ -98,7 +98,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 // ====================================
 // Validator
 // ====================================
-func (c *MissionController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -164,7 +164,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *MissionController) Stage() (err error) {
+func (c *SafePlanetMissionController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:

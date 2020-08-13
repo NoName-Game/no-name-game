@@ -40,6 +40,9 @@ route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.mission: "🏢 Centro Missioni"
 route.safeplanet.titan: "Titan"
 
+# ROUTES - Titan planet
+route.titanplanet.tackle: "Affronta"
+
 # ROUTES (BREAKER)
 route.breaker.continue: "Continua"
 route.breaker.back: "⬅️ Indietro"
@@ -83,6 +86,12 @@ menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
+
+# MENU - SAFEPLANET
+menu.safeplanet: "Ti trovi su un pianeta sicuro."
+
+# MENU - SAFEPLANET
+menu.titanplanet: "Ti trovi sul pianeta di un titano."
 
 # BANNED
 banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
@@ -376,3 +385,8 @@ planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
 planet.details.biome: "Bioma: %s"
 planet.details.atmosphere: "Atmosfera: %s"
+
+# TITANPLANET
+titanplanet.tackle.error.no_weapon_equipped: "Devi equipaggiare un arma per affrontare il titano!"
+titanplanet.tackle.init: "Il titano si presenta davanti a te."
+titanplanet.tackle.leave: "Abbandona"

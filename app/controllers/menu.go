@@ -22,8 +22,9 @@ import (
 // ====================================
 type MenuController struct {
 	BaseController
-	SafePlanet bool // Flag per verificare se il player si trova su un pianeta sicuro
-	Payload    interface{}
+	SafePlanet  bool // Flag per verificare se il player si trova su un pianeta sicuro
+	TitanPlanet bool // Flag per verificare se il player si trova su un pianeta titano
+	Payload     interface{}
 }
 
 // ====================================
@@ -87,18 +88,26 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		return message, err
 	}
 
-	// Recupero status vitale del player
-	var life string
-	life, err = c.GetPlayerLife()
-	if err != nil {
-		return message, err
-	}
+	// Costruisco messaggio di racap in base a dove si trova il player
 
-	message = helpers.Trans(c.Player.Language.Slug, "menu",
-		planet,
-		life,
-		c.GetPlayerTasks(),
-	)
+	if c.SafePlanet {
+		message = helpers.Trans(c.Player.Language.Slug, "menu.safeplanet")
+	} else if c.TitanPlanet {
+		message = helpers.Trans(c.Player.Language.Slug, "menu.titanplanet")
+	} else {
+		// Recupero status vitale del player
+		var life string
+		life, err = c.GetPlayerLife()
+		if err != nil {
+			return message, err
+		}
+
+		message = helpers.Trans(c.Player.Language.Slug, "menu",
+			planet,
+			life,
+			c.GetPlayerTasks(),
+		)
+	}
 
 	return
 }
@@ -118,6 +127,7 @@ func (c *MenuController) GetPlayerPosition() (result string, err error) {
 
 	// Verifico se il player si trova su un pianeta sicuro
 	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
+	c.TitanPlanet = rGetPlayerCurrentPlanet.GetPlanet().GetTitan()
 
 	// Se è un pianeta sicuro modifico il messaggio
 	if c.SafePlanet {
@@ -206,14 +216,18 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 		return c.SafePlanetKeyboard()
 	}
 
+	// Verifico se il player si trova sul pianeta di un titano
+	if c.TitanPlanet {
+		return c.TitanPlanetKeyboard()
+	}
+
 	// Si trova su un pianeta normale
 	return c.MainKeyboard()
 }
 
 // MainMenu
 func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
-
-	keyboard = [][]tgbotapi.KeyboardButton{
+	return [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.exploration")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
@@ -228,14 +242,6 @@ func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 		},
 	}
-
-	if c.SafePlanet {
-		keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.menu.npc")),
-		))
-	}
-
-	return
 }
 
 // TutorialMenu
@@ -307,6 +313,21 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 		)
 		keyboardRow = append(keyboardRow, row)
 	}
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
+	})
+
+	return keyboardRow
+}
+
+// TitanPlanetKeboard
+func (c *MenuController) TitanPlanetKeyboard() [][]tgbotapi.KeyboardButton {
+	var keyboardRow [][]tgbotapi.KeyboardButton
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.titanplanet.tackle")),
+	})
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
