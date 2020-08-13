@@ -14,8 +14,8 @@ import (
 // SafePlanetTitanController
 // ====================================
 type SafePlanetTitanController struct {
-	BaseController
 	Payload struct{}
+	BaseController
 }
 
 // ====================================
