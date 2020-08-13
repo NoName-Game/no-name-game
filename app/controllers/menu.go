@@ -91,7 +91,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 
 	// Costruisco messaggio di racap in base a dove si trova il player
 	if c.SafePlanet {
-		message = helpers.Trans(c.Player.Language.Slug, "menu.safeplanet")
+		message = helpers.Trans(c.Player.Language.Slug, "menu.safeplanet", planet.GetName())
 	} else if c.TitanPlanet {
 		// Recupero titano pianeta corrente
 		var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse

@@ -80,20 +80,24 @@ integrity: "Integrità"
 use: "Usa"
 fuel: "Carburante"
 hours: "Ore"
+coordinate: "Coordinate"
 
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
+
+# MENU - TASK
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
 
 # MENU - SAFEPLANET
-menu.safeplanet: "Ti trovi su un pianeta sicuro."
+menu.safeplanet: "Benvenuto su 🏟*%s*\n\nPianeta sicuro e area protetta per *tutti*!"
 
 # MENU - SAFEPLANET
 menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
 menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta..."
 menu.titanplanet.titan_dead: "Sconfitto da da valorosi viaggiatori! Ora tutto sembra tranquillo."
+
 # BANNED
 banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
 
@@ -358,7 +362,7 @@ safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
 
 # SAFE PLANET - COALITION
-safeplanet.coalition.info: "La *coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
+safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
 
 # SAFE PLANET - MISSION
 safeplanet.mission.info: "Benvenuto nel centro missioni della *Coalizione*.\nAbbiamo un'infinità di missioni da affidarti.\n\nAl completamento di una di queste verrai ricompensato con 💰 e 💎."
@@ -381,14 +385,15 @@ route.safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato 
 route.safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
 
 # PLANET
-planet.intro: "Dettagli posizione attuale:"
-planet.details.system: "*Sistema:*\n 💫 %s"
-planet.details.name: "*Pianeta:*\n🌍 %s"
+planet.intro: "Dettaglio posizione attuale:"
+planet.details.system: "💫 Sistema: *%s*"
+planet.details.name: "🌍 Pianeta: *%s*"
 planet.details.coordinate.x: "🆇 %v"
 planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
-planet.details.biome: "Bioma: %s"
-planet.details.atmosphere: "Atmosfera: %s"
+planet.details.biome: "Bioma: *%s*"
+planet.details.atmosphere: "Atmosfera: *%s*"
+planet.details.count_visited_player: "👨🏼‍🚀 *%d* Esploratori hanno visitato questo pianeta."
 
 # TITANPLANET
 titanplanet.tackle.error.no_weapon_equipped: "Devi equipaggiare un arma per affrontare il titano!"
