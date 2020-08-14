@@ -2,6 +2,12 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/services"
+	gocache "github.com/patrickmn/go-cache"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
 )
@@ -122,4 +128,54 @@ func ChooseEnemyInMap(maps *pb.Maps, playerPositionX int32, playerPositionY int3
 		}
 	}
 	return -1, err
+}
+
+// SetMapInCache - Salvo mappa in cache per non appesantire le chiamate a DB
+func SetMapInCache(maps *pb.Maps) {
+	var jsonValue []byte
+	jsonValue, _ = json.Marshal(maps)
+
+	services.Cache.Set(
+		fmt.Sprintf("hunting_map_%v", maps.ID),
+		string(jsonValue),
+		gocache.NoExpiration,
+	)
+}
+
+// GetMapInCache - Recupera mappa in memoria
+func GetMapInCache(MapID uint32) (maps *pb.Maps, err error) {
+	record, found := services.Cache.Get(fmt.Sprintf("hunting_map_%v", MapID))
+	if found {
+		err = json.Unmarshal([]byte(record.(string)), &maps)
+		return
+	}
+
+	err = errors.New("map in cache not found")
+	return
+}
+
+// GetCachedPlayerPositionInMap - recupero posizione di una player in una specifica mappa
+func GetCachedPlayerPositionInMap(maps *pb.Maps, player *pb.Player, positionType string) (value int32, err error) {
+	record, found := services.Cache.Get(fmt.Sprintf(
+		"hunting_map_%v_player_%v_position_%s",
+		maps.ID,
+		player.ID,
+		positionType,
+	))
+
+	if found {
+		return record.(int32), nil
+	}
+
+	err = errors.New("cached state not found")
+	return
+}
+
+// SetCachedPlayerPositionInMap - Imposto posizione di un player su una determinata mappa
+func SetCachedPlayerPositionInMap(maps *pb.Maps, player *pb.Player, positionType string, value int32) {
+	services.Cache.Set(
+		fmt.Sprintf("hunting_map_%v_player_%v_position_%s", maps.ID, player.ID, positionType),
+		value,
+		60*time.Minute,
+	)
 }

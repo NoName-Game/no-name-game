@@ -100,8 +100,8 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 			if c.Controller != "" {
 				if c.CurrentState.GetStage() <= canBackFrom {
-					// Cancello stato da redis
-					_ = helpers.DelRedisState(*c.Player)
+					// Cancello stato da cache
+					helpers.DelCacheState(c.Player.ID)
 
 					// Cancello record a db
 					_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
@@ -120,8 +120,8 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				return
 			}
 
-			// Cancello stato da redis
-			_ = helpers.DelRedisState(*c.Player)
+			// Cancello stato da cache
+			helpers.DelCacheState(c.Player.ID)
 
 			// Cancello record a db
 			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
@@ -140,8 +140,8 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
 			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			if !c.PlayerStats.GetDead() && c.Clearable() {
-				// Cancello stato da redis
-				_ = helpers.DelRedisState(*c.Player)
+				// Cancello stato da cache
+				helpers.DelCacheState(c.Player.ID)
 
 				// Cancello record a db
 				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
@@ -162,8 +162,8 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
 		// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
-			// Cancello stato da redis
-			_ = helpers.DelRedisState(*c.Player)
+			// Cancello stato dalla memoria
+			helpers.DelCacheState(c.Player.ID)
 
 			// Call menu controller
 			new(MenuController).Handle(c.Player, c.Update, true)
@@ -206,11 +206,8 @@ func (c *BaseController) Completing() (err error) {
 			}
 		}
 
-		// Cancello stato da redis
-		err = helpers.DelRedisState(*c.Player)
-		if err != nil {
-			panic(err)
-		}
+		// Cancello stato dalla memoria
+		helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update, true)
@@ -220,11 +217,8 @@ func (c *BaseController) Completing() (err error) {
 
 	// Verifico se si vuole forzare il menu
 	if c.Breaker.ToMenu {
-		// Cancello stato da redis
-		err = helpers.DelRedisState(*c.Player)
-		if err != nil {
-			panic(err)
-		}
+		// Cancello stato dalla memoria
+		helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update, true)

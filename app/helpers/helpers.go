@@ -2,10 +2,13 @@ package helpers
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"reflect"
 	"strconv"
 	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // InArray - check if val exist in array
@@ -72,4 +75,14 @@ func NewContext(seconds time.Duration) context.Context {
 	ctx, _ := context.WithDeadline(context.Background(), d)
 
 	return ctx
+}
+
+// UnmarshalPayload - Unmarshal payload state
+func UnmarshalPayload(payload string, funcInterface interface{}) {
+	if payload != "" {
+		err := json.Unmarshal([]byte(payload), &funcInterface)
+		if err != nil {
+			services.ErrorHandler("Error unmarshal payload", err)
+		}
+	}
 }
