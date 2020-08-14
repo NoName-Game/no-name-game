@@ -74,19 +74,6 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	return
 }
 
-// GetPlayerStateByFunction - Check if function exist in player states
-func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (playerState *pb.PlayerState, err error) {
-	for i, state := range states {
-		if state.Controller == controller {
-			playerState = states[i]
-			return playerState, nil
-		}
-	}
-
-	err = errors.New("state not found")
-	return playerState, err
-}
-
 // CheckPlayerHaveOneEquippedWeapon
 // Verifica se il player ha almeno un'arma equipaggiata
 func CheckPlayerHaveOneEquippedWeapon(player *pb.Player) bool {

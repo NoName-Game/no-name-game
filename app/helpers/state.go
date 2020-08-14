@@ -76,3 +76,16 @@ func CheckState(player pb.Player, activeStates []*pb.PlayerState, controller str
 
 	return
 }
+
+// GetPlayerStateByFunction - Check if function exist in player states
+func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (playerState *pb.PlayerState, err error) {
+	for i, state := range states {
+		if state.Controller == controller {
+			playerState = states[i]
+			return playerState, nil
+		}
+	}
+
+	err = errors.New("state not found")
+	return playerState, err
+}
