@@ -104,11 +104,15 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 					helpers.DelCacheState(c.Player.ID)
 
 					// Cancello record a db
-					_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-						PlayerState: c.CurrentState,
-					})
-					if err != nil {
-						panic(err)
+					if c.CurrentState != nil {
+						_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+							PlayerStateID: c.CurrentState.ID,
+							ForceDelete:   true,
+						})
+
+						if err != nil {
+							panic(err)
+						}
 					}
 
 					controller.Handle(c.Player, c.Update, true)
@@ -125,7 +129,8 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 
 			// Cancello record a db
 			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerState: c.CurrentState,
+				PlayerStateID: c.CurrentState.ID,
+				ForceDelete:   true,
 			})
 			if err != nil {
 				panic(err)
@@ -144,11 +149,14 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				helpers.DelCacheState(c.Player.ID)
 
 				// Cancello record a db
-				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-					PlayerState: c.CurrentState,
-				})
-				if err != nil {
-					panic(err)
+				if c.CurrentState != nil {
+					_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+						PlayerStateID: c.CurrentState.ID,
+						ForceDelete:   true,
+					})
+					if err != nil {
+						panic(err)
+					}
 				}
 
 				// Call menu controller
@@ -199,7 +207,8 @@ func (c *BaseController) Completing() (err error) {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
 		if c.CurrentState.GetFather() == 0 {
 			_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerState: c.CurrentState,
+				PlayerStateID: c.CurrentState.ID,
+				ForceDelete:   true,
 			})
 			if err != nil {
 				return err

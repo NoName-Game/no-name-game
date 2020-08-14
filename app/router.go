@@ -42,6 +42,10 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 		invoke(Routes[isCachedRoute], "Handle", player, update, false)
 		return
 	}
+
+	// Se nulla di tutto questo dovesse andare ritorno il menu
+	invoke(Routes["route.menu"], "Handle", player, update, false)
+	return
 }
 
 // inRoutes - Verifica se esiste la rotta

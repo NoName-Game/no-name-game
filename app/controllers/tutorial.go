@@ -654,45 +654,40 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Addesso posso cancellare tutti gli stati associati
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				ID: c.Payload.UseItemID,
-			},
+			PlayerStateID: c.Payload.UseItemID,
+			ForceDelete:   true,
 		})
 		if err != nil {
 			return err
 		}
 
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				ID: c.Payload.HuntingID,
-			},
+			PlayerStateID: c.Payload.HuntingID,
+			ForceDelete:   true,
 		})
 		if err != nil {
 			return err
 		}
 
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				ID: c.Payload.InventoryEquipID,
-			},
+			PlayerStateID: c.Payload.InventoryEquipID,
+			ForceDelete:   true,
 		})
 		if err != nil {
 			return err
 		}
 
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				ID: c.Payload.CraftingID,
-			},
+			PlayerStateID: c.Payload.CraftingID,
+			ForceDelete:   true,
 		})
 		if err != nil {
 			return err
 		}
 
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				ID: c.Payload.MissionID,
-			},
+			PlayerStateID: c.Payload.MissionID,
+			ForceDelete:   true,
 		})
 		if err != nil {
 			return err

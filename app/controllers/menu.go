@@ -346,6 +346,10 @@ func (c *MenuController) TitanPlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	}
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 	})
