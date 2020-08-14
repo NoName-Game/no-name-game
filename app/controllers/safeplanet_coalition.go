@@ -10,14 +10,14 @@ import (
 // ====================================
 // Coalition
 // ====================================
-type CoalitionController struct {
+type SafePlanetCoalitionController struct {
 	BaseController
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *CoalitionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	c.Player = player
 	c.Update = update
@@ -38,6 +38,7 @@ func (c *CoalitionController) Handle(player *pb.Player, update tgbotapi.Update, 
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.mission")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.titan")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),
@@ -52,10 +53,10 @@ func (c *CoalitionController) Handle(player *pb.Player, update tgbotapi.Update, 
 	}
 }
 
-func (c *CoalitionController) Validator() {
+func (c *SafePlanetCoalitionController) Validator() {
 	//
 }
 
-func (c *CoalitionController) Stage() {
+func (c *SafePlanetCoalitionController) Stage() {
 	//
 }

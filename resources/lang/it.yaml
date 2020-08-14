@@ -38,6 +38,10 @@ route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.research: "🔍️ Ricerca"
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.mission: "🏢 Centro Missioni"
+route.safeplanet.titan: "👁 Titani"
+
+# ROUTES - Titan planet
+route.titanplanet.tackle: "Affronta 👁 Titano"
 
 # ROUTES (BREAKER)
 route.breaker.continue: "Continua"
@@ -76,12 +80,23 @@ integrity: "Integrità"
 use: "Usa"
 fuel: "Carburante"
 hours: "Ore"
+coordinate: "Coordinate"
 
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
+
+# MENU - TASK
 menu.tasks: "⏱ *Attività in corso:*\n"
 menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
+
+# MENU - SAFEPLANET
+menu.safeplanet: "Benvenuto su 🏟*%s*\n\nPianeta sicuro e area protetta per *tutti*!"
+
+# MENU - SAFEPLANET
+menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
+menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta..."
+menu.titanplanet.titan_dead: "Sconfitto da da valorosi viaggiatori! Ora tutto sembra tranquillo."
 
 # BANNED
 banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
@@ -347,7 +362,7 @@ safeplanet.bank.operation_done: "Operazione effettuata con successo"
 safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
 
 # SAFE PLANET - COALITION
-safeplanet.coalition.info: "La *coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
+safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
 
 # SAFE PLANET - MISSION
 safeplanet.mission.info: "Benvenuto nel centro missioni della *Coalizione*.\nAbbiamo un'infinità di missioni da affidarti.\n\nAl completamento di una di queste verrai ricompensato con 💰 e 💎."
@@ -363,12 +378,26 @@ safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare *
 safeplanet.mission.type.resources_finding: "Recupero risorse"
 safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di recuperare *%v* quantità di 💠*%v*.\nBuona fortuna."
 
+# SAFEPLANET - BOSS
+route.safeplanet.titan.info: "Benventuo nel centro 👁 *Titani*.\n\nLa colazione chiede il tuo aiuto per sconfiggere dei nemici davvero potenti!\nAffrontarli da solo è davvero impossibile, ma combattendo assieme e rimanendo uniti possiamo riuscirci!\n\n"
+route.safeplanet.titan.choice: "Se vuoi esser dei nostri scegli un titano dalla lista qui sotto e penseremo noi a trasportarti immediatamente da lui."
+route.safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato trovato nessun titano.\nEsplora lo spazio per trovarne qualcuno o torna più tardi."
+route.safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
+
 # PLANET
-planet.intro: "Dettagli posizione attuale:"
-planet.details.system: "*Sistema:*\n 💫 %s"
-planet.details.name: "*Pianeta:*\n🌍 %s"
+planet.intro: "Dettaglio posizione attuale:"
+planet.details.system: "💫 Sistema: *%s*"
+planet.details.name: "🌍 Pianeta: *%s*"
 planet.details.coordinate.x: "🆇 %v"
 planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
-planet.details.biome: "Bioma: %s"
-planet.details.atmosphere: "Atmosfera: %s"
+planet.details.biome: "Bioma: *%s*"
+planet.details.atmosphere: "Atmosfera: *%s*"
+planet.details.count_visited_player: "👨🏼‍🚀 *%d* Esploratori hanno visitato questo pianeta."
+
+# TITANPLANET
+titanplanet.tackle.error.no_weapon_equipped: "Devi equipaggiare un arma per affrontare il titano!"
+titanplanet.tackle.init: "Il titano si mostra alla tua presenza."
+titanplanet.tackle.leave: "⬅️ Abbandona"
+titanplanet.tackle.combat.card: "👁 %s\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
+titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."

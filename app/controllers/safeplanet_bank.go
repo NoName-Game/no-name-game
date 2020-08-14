@@ -13,9 +13,9 @@ import (
 )
 
 // ====================================
-// BankController
+// SafePlanetBankController
 // ====================================
-type BankController struct {
+type SafePlanetBankController struct {
 	Payload struct {
 		Type string
 	}
@@ -25,7 +25,7 @@ type BankController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -99,7 +99,7 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 // ====================================
 // Validator
 // ====================================
-func (c *BankController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetBankController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -134,7 +134,7 @@ func (c *BankController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *BankController) Stage() (err error) {
+func (c *SafePlanetBankController) Stage() (err error) {
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
