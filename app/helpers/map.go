@@ -140,8 +140,6 @@ func SetMapInCache(maps *pb.Maps) {
 		string(jsonValue),
 		gocache.NoExpiration,
 	)
-
-	return
 }
 
 // GetMapInCache - Recupera mappa in memoria
@@ -180,6 +178,4 @@ func SetCachedPlayerPositionInMap(maps *pb.Maps, player *pb.Player, positionType
 		value,
 		60*time.Minute,
 	)
-
-	return
 }

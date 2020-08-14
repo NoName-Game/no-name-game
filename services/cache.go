@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	// Cache
+	// Cache - In Memory Cache
 	Cache *gocache.Cache
 )
 

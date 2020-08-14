@@ -35,7 +35,6 @@ func SetCacheState(playerID uint32, data string) {
 // DelCacheState - Metodo generico per la cancellazione degli stati di un determinato player
 func DelCacheState(playerID uint32) {
 	services.Cache.Delete(fmt.Sprintf("state_%v", playerID))
-	return
 }
 
 // CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
