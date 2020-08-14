@@ -41,6 +41,9 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 		return
 	}
 
+	// TODO: da revisionare e migliorare
+	c.BackingTo = &PlayerController{}
+
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
 		if c.BackTo(1, &PlayerController{}) {
@@ -164,10 +167,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		var rGetPlayerArmors *pb.GetPlayerArmorsResponse
-		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
+		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
+		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
 			PlayerID: c.Player.GetID(),
-			Equipped: true,
 		})
 		if err != nil {
 			return err
@@ -205,23 +207,21 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentWeaponsEquipment string
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
-		var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
-		rGetPlayerWeapons, err = services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
+		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
+		rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		if len(rGetPlayerWeapons.GetWeapons()) > 0 {
-			for _, weapon := range rGetPlayerWeapons.GetWeapons() {
-				currentWeaponsEquipment += fmt.Sprintf(
-					"- %s (*%s*) %v🩸 \n",
-					weapon.Name,
-					strings.ToUpper(weapon.Rarity.Slug),
-					weapon.RawDamage,
-				)
-			}
+		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
+			currentWeaponsEquipment += fmt.Sprintf(
+				"- %s (*%s*) %v🩸 \n",
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
+				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
+			)
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
@@ -290,7 +290,6 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			var rGetPlayerArmors *pb.GetPlayerArmorsResponse
 			rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 				PlayerID: c.Player.GetID(),
-				Equipped: false,
 			})
 			if err != nil {
 				return err

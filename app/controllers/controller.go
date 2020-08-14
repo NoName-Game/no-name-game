@@ -40,6 +40,7 @@ type BaseController struct {
 	Breaker       struct {
 		ToMenu bool
 	}
+	BackingTo Controller
 }
 
 func (c *BaseController) InitController(controller string, payload interface{}, blockers []string, player *pb.Player, update tgbotapi.Update) (initialized bool) {
@@ -219,8 +220,12 @@ func (c *BaseController) Completing() (err error) {
 		helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update, true)
+		if c.BackingTo != nil {
+			c.BackingTo.Handle(c.Player, c.Update, true)
+			return
+		}
 
+		new(MenuController).Handle(c.Player, c.Update, true)
 		return
 	}
 
