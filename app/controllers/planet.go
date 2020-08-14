@@ -27,7 +27,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	c.Controller = "route.planet"
 
 	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	helpers.SetCacheState(c.Player.ID, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {

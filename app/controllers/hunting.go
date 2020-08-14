@@ -274,20 +274,9 @@ func (c *HuntingController) Hunting() (err error) {
 		var maps = rGetMapByID.GetMaps()
 
 		// Registro mappa e posizione iniziale del player
-		err = helpers.SetRedisMapHunting(maps)
-		if err != nil {
-			return err
-		}
-
-		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", maps.GetStartPositionX())
-		if err != nil {
-			return err
-		}
-
-		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", maps.GetStartPositionY())
-		if err != nil {
-			return err
-		}
+		helpers.SetMapInCache(maps)
+		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
+		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", maps.GetStartPositionY())
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
@@ -319,19 +308,19 @@ func (c *HuntingController) Hunting() (err error) {
 	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
 	if c.Payload.MapID > 0 && c.Update.CallbackQuery != nil {
 		var maps *pb.Maps
-		maps, err = helpers.GetRedisMapHunting(c.Payload.MapID)
+		maps, err = helpers.GetMapInCache(c.Payload.MapID)
 		if err != nil {
 			return err
 		}
 
 		// Recupero posizione player
 		// var playerPositionX, playerPositionY int
-		c.PlayerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
+		c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X")
 		if err != nil {
 			return err
 		}
 
-		c.PlayerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
+		c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y")
 		if err != nil {
 			return err
 		}
@@ -516,15 +505,8 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	}
 
 	// Aggiorno nuova posizione del player
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", c.PlayerPositionX)
-	if err != nil {
-		return
-	}
-
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", c.PlayerPositionY)
-	if err != nil {
-		return
-	}
+	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", c.PlayerPositionX)
+	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", c.PlayerPositionY)
 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
@@ -792,10 +774,6 @@ func (c *HuntingController) RefreshMap() (err error) {
 	}
 
 	// Registro mappa e posizione iniziale del player
-	err = helpers.SetRedisMapHunting(rGetMapByID.GetMaps())
-	if err != nil {
-		return err
-	}
-
+	helpers.SetMapInCache(rGetMapByID.GetMaps())
 	return
 }

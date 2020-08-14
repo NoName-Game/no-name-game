@@ -24,7 +24,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	c.Controller = "route.safeplanet.coalition"
 
 	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	helpers.SetCacheState(c.Player.ID, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
