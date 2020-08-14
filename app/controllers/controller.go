@@ -100,7 +100,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 			if c.Controller != "" {
 				if c.CurrentState.GetStage() <= canBackFrom {
-					// Cancello stato da redis
+					// Cancello stato da cache
 					helpers.DelCacheState(c.Player.ID)
 
 					// Cancello record a db
@@ -120,7 +120,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 				return
 			}
 
-			// Cancello stato da redis
+			// Cancello stato da cache
 			helpers.DelCacheState(c.Player.ID)
 
 			// Cancello record a db
@@ -140,7 +140,7 @@ func (c *BaseController) BackTo(canBackFrom int32, controller Controller) (backe
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
 			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			if !c.PlayerStats.GetDead() && c.Clearable() {
-				// Cancello stato da redis
+				// Cancello stato da cache
 				helpers.DelCacheState(c.Player.ID)
 
 				// Cancello record a db

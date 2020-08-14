@@ -12,7 +12,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-// GetRedisState - Metodo generico per il recupero degli stati di un player
+// GetCacheState - Metodo generico per il recupero degli stati di un player
 func GetCacheState(playerID uint32) (controller string, err error) {
 	value, found := services.Cache.Get(fmt.Sprintf("state_%v", playerID))
 	if found {
@@ -32,7 +32,7 @@ func SetCacheState(playerID uint32, data string) {
 	)
 }
 
-// DelRedisState - Metodo generico per la cancellazione degli stati di un determinato player
+// DelCacheState - Metodo generico per la cancellazione degli stati di un determinato player
 func DelCacheState(playerID uint32) {
 	services.Cache.Delete(fmt.Sprintf("state_%v", playerID))
 	return
@@ -71,7 +71,7 @@ func CheckState(player pb.Player, activeStates []*pb.PlayerState, controller str
 		isNewState = true
 	}
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
+	// Se tutto ok imposto e setto il nuovo stato in cache
 	SetCacheState(player.ID, controller)
 
 	return

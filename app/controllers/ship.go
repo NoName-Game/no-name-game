@@ -31,7 +31,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	c.Player = player
 	c.Update = update
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
+	// Se tutto ok imposto e setto il nuovo stato in cache
 	helpers.SetCacheState(c.Player.ID, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire

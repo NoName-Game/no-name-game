@@ -262,7 +262,7 @@ func (c *HuntingController) Hunting() (err error) {
 		}
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
-		// al DB registro il tutto su redis
+		// al DB registro il tutto sula cache
 		var rGetMapByID *pb.GetMapByIDResponse
 		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 			ID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
@@ -765,7 +765,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 // RefreshMap - Necessario per refreshare la mappa in caso
 // di sconfitta di mob o apertura di tesori.
 func (c *HuntingController) RefreshMap() (err error) {
-	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
+	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
 	rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 		ID: c.Payload.MapID,
 	})

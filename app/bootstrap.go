@@ -30,7 +30,7 @@ func bootstrap() (err error) {
 	// *************
 	err = services.CacheUp()
 	if err != nil {
-		services.ErrorHandler("error connecting to Redis", err)
+		services.ErrorHandler("error starting cache", err)
 		return err
 	}
 

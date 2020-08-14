@@ -23,7 +23,7 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update, 
 	c.Update = update
 	c.Controller = "route.inventory"
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
+	// Se tutto ok imposto e setto il nuovo stato in cache
 	helpers.SetCacheState(c.Player.ID, c.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire

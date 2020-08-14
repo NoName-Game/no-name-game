@@ -13,7 +13,7 @@ var (
 	Cache *gocache.Cache
 )
 
-// RedisUp - Inizializzo comunicazioe a RedisDB
+// CacheUp - Starte GoCache
 func CacheUp() (err error) {
 	Cache = gocache.New(10*time.Minute, 10*time.Minute)
 
