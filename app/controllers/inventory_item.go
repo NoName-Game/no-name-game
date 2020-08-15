@@ -30,27 +30,24 @@ type InventoryItemController struct {
 func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.inventory.items",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.inventory.items",
+		ControllerBack: ControllerBack{
+			To:        &InventoryController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &InventoryController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -87,15 +84,15 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -117,7 +114,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -162,7 +159,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *InventoryItemController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
@@ -212,13 +209,13 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
 
 		var text string
-		if c.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
+		if c.PlayerData.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
 			text = fmt.Sprintf(
 				"%s\n\n%s", // Domanda e descrizione
 				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",
@@ -255,7 +252,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
@@ -282,7 +279,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

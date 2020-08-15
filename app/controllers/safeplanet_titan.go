@@ -24,27 +24,24 @@ type SafePlanetTitanController struct {
 func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.safeplanet.titan",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.safeplanet.titan",
+		ControllerBack: ControllerBack{
+			To:        &SafePlanetCoalitionController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se vuole tornare indietro di stato
-	if !proxy {
-		if c.BackTo(1, &SafePlanetCoalitionController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -76,15 +73,15 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -106,7 +103,7 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -139,7 +136,7 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *SafePlanetTitanController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	case 0:
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.info")
@@ -186,7 +183,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
@@ -220,7 +217,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

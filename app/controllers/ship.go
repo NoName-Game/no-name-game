@@ -27,12 +27,12 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	// Inizializzo variabili del controler
 	var err error
 
-	c.Controller = "route.ship"
+	c.Configuration.Controller = "route.ship"
 	c.Player = player
 	c.Update = update
 
 	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Controller)
+	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {

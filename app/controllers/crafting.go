@@ -35,27 +35,24 @@ type CraftingController struct {
 func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.crafting",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.crafting",
+		ControllerBack: ControllerBack{
+			To:        &ShipController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &ShipController{}) {
-			return
-		}
-	}
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -86,15 +83,15 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, p
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -116,7 +113,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -204,7 +201,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 	// il tempo di attesa necessario al craft
 	case 4:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -242,7 +239,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
 func (c *CraftingController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
@@ -283,7 +280,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage recuperiamo la lista dei ITEMS, appartenenti alla categoria scelta
 	// che possono essere anche craftati dal player
@@ -363,7 +360,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 
 	// In questo stage riepilogo le risorse necessarie e
 	// chiedo al conferma al player se continuare il crafting dell'item
@@ -406,7 +403,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 3
 
 	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
 	// procedo con il rimuovere le risorse associate e notificargli l'attesa per il crafting
@@ -439,10 +436,10 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Aggiorna stato
-		// c.CurrentState.FinishAt = endTime
-		c.CurrentState.ToNotify = true
-		c.CurrentState.Stage = 4
-		c.Breaker.ToMenu = true
+		// c.PlayerData.CurrentState.FinishAt = endTime
+		c.PlayerData.CurrentState.ToNotify = true
+		c.PlayerData.CurrentState.Stage = 4
+		c.ForceBackTo = true
 
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo
@@ -478,7 +475,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

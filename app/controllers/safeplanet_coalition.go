@@ -21,10 +21,10 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Controller = "route.safeplanet.coalition"
+	c.Configuration.Controller = "route.safeplanet.coalition"
 
 	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Controller)
+	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {

@@ -38,27 +38,25 @@ type ExplorationController struct {
 func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.exploration",
-		c.Payload,
-		[]string{"hunting", "ship"},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:        "route.exploration",
+		ControllerBlocked: []string{"hunting", "ship"},
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &MenuController{}) {
-			return
-		}
-	}
-
-	// Stato recuperto correttamente
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	// Set and load payload
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -90,15 +88,15 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -119,7 +117,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -139,7 +137,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.GetFinishAt())
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.GetFinishAt())
 		if err != nil {
 			panic(err)
 		}
@@ -177,15 +175,15 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
-			c.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
-			c.CurrentState.ToNotify = true
+			c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
+			c.PlayerData.CurrentState.ToNotify = true
 
 			return false, err
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
 			// Passo allo stadio conclusivo
-			c.CurrentState.Stage = 4
+			c.PlayerData.CurrentState.Stage = 4
 
 			return false, err
 		}
@@ -205,7 +203,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *ExplorationController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
 	case 0:
@@ -238,7 +236,7 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
@@ -278,10 +276,10 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
-		c.CurrentState.Stage = 2
-		c.CurrentState.ToNotify = true
-		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.ToNotify = true
+		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
+		c.ForceBackTo = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
@@ -337,14 +335,14 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 3
 
 	// In questo stage verifico cosa ha scelto di fare il player
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -365,8 +363,8 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.CurrentState.Stage = 2
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.Stage = 2
+		c.ForceBackTo = true
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
@@ -410,7 +408,7 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

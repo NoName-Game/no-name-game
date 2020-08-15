@@ -27,27 +27,24 @@ type SafePlanetMissionController struct {
 func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.safeplanet.mission",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.safeplanet.mission",
+		ControllerBack: ControllerBack{
+			To:        &SafePlanetCoalitionController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &SafePlanetCoalitionController{}) {
-			return
-		}
-	}
-
-	// Stato recuperto correttamente
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	// Set and load payload
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -79,15 +76,15 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -108,7 +105,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -165,7 +162,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *SafePlanetMissionController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:
 		var keyboardRows [][]tgbotapi.KeyboardButton
@@ -193,7 +190,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
@@ -295,8 +292,8 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 
 		// Avanzo di stato
 		c.Payload.MissionID = rGetMission.GetMission().GetID()
-		c.CurrentState.Stage = 2
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.Stage = 2
+		c.ForceBackTo = true
 
 	case 2:
 		// Effettuo chiamata al WS per recuperare reward del player
@@ -332,7 +329,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return
