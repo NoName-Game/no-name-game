@@ -127,6 +127,7 @@ combat.found.item: "\nTrovando: 🔩*%s*"
 combat.found.transaction: "\nTrovando: *%v*💰"
 combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
 combat.experience: "Ottenendo anche *%v* di esperienza nel combattimento!"
+combat.mob_miss: "Hai schivato il colpo, ma hai comunque inflitto %d danni."
 
 # MISSION
 mission.exploration: "Seleziona campo di ricerca:"

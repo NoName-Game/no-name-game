@@ -711,6 +711,12 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 				c.Update.CallbackQuery.Message.MessageID,
 				helpers.Trans(c.Player.Language.Slug, "combat.miss", rHitEnemy.GetEnemyDamage()),
 			)
+		} else if rHitEnemy.GetPlayerDodge() {
+			editMessage = services.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "combat.mob_miss", rHitEnemy.GetPlayerDamage()),
+			)
 		} else {
 			editMessage = services.NewEditMessage(
 				c.Player.ChatID,
