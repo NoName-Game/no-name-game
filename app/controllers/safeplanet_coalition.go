@@ -8,55 +8,55 @@ import (
 )
 
 // ====================================
-// Inventory
+// Coalition
 // ====================================
-type InventoryController struct {
+type SafePlanetCoalitionController struct {
 	BaseController
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.inventory"
+	c.Configuration.Controller = "route.safeplanet.coalition"
 
 	// Se tutto ok imposto e setto il nuovo stato in cache
 	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
-		if c.BackTo(0, &PlayerController{}) {
+		if c.BackTo(0, &MenuController{}) {
 			return
 		}
 	}
 
-	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
+	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "safeplanet.coalition.info"))
+	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.recap")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.mission")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.titan")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.items")),
-			// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.destroy")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
 		),
 	)
-
 	_, err = services.SendMessage(msg)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (c *InventoryController) Validator() {
+func (c *SafePlanetCoalitionController) Validator() {
 	//
 }
 
-func (c *InventoryController) Stage() {
+func (c *SafePlanetCoalitionController) Stage() {
 	//
 }

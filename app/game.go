@@ -16,15 +16,15 @@ var (
 		"route.menu":     reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
 		"route.tutorial": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
-		"route.mission":  reflect.TypeOf((*controllers.MissionController)(nil)).Elem(),
-		"route.crafting": reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
+		"route.exploration": reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
+		"route.crafting":    reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
 
 		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 
-		"route.ship":             reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
-		"route.ship.exploration": reflect.TypeOf((*controllers.ShipExplorationController)(nil)).Elem(),
-		"route.ship.repairs":     reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
-		"route.ship.rests":       reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+		"route.ship":         reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
+		"route.ship.travel":  reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
+		"route.ship.repairs": reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
+		"route.ship.rests":   reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 
 		// Player
 		"route.player":          reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
@@ -40,9 +40,15 @@ var (
 		"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 
 		// Safe Planet
-		"route.safeplanet.bank":    reflect.TypeOf((*controllers.BankController)(nil)).Elem(),
-		"route.safeplanet.crafter": reflect.TypeOf((*controllers.CrafterController)(nil)).Elem(),
-		"route.menu.npc":           reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(),
+		"route.safeplanet.bank":      reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
+		"route.safeplanet.crafter":   reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
+		"route.menu.npc":             reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(), // TODO: da verificare
+		"route.safeplanet.coalition": reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem(),
+		"route.safeplanet.mission":   reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem(),
+		"route.safeplanet.titan":     reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem(),
+
+		// Titan Planet
+		"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
 	}
 )
 

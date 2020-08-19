@@ -87,27 +87,25 @@ var (
 func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.hunting",
-		c.Payload,
-		[]string{"mission"},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:        "route.hunting",
+		ControllerBlocked: []string{"mission"},
+		ProxyStatment:     proxy,
+		Payload:           c.Payload,
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -154,20 +152,20 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	if c.NeedUpdateState {
 		// Aggiorno stato finale
 		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.CurrentState.Payload = string(payloadUpdated)
+		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.CurrentState,
+			PlayerState: c.PlayerData.CurrentState,
 		})
 		if err != nil {
 			panic(err)
 		}
-		c.CurrentState = rUpdatePlayerState.GetPlayerState()
+		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if c.CurrentState.GetCompleted() {
+	if c.PlayerData.CurrentState.GetCompleted() {
 		// Cancello messaggio contentente la mappa
 		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
 		if err != nil {
@@ -191,7 +189,7 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 		return true, err
 	}
 
@@ -202,13 +200,13 @@ func (c *HuntingController) Validator() (hasErrors bool, err error) {
 // Stage Map -> Drop -> Finish
 // ====================================
 func (c *HuntingController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
 		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
-				c.CurrentState.Completed = true
+				c.PlayerData.CurrentState.Completed = true
 				return err
 			}
 		}
@@ -262,7 +260,7 @@ func (c *HuntingController) Hunting() (err error) {
 		}
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
-		// al DB registro il tutto su redis
+		// al DB registro il tutto sula cache
 		var rGetMapByID *pb.GetMapByIDResponse
 		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 			ID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
@@ -274,20 +272,9 @@ func (c *HuntingController) Hunting() (err error) {
 		var maps = rGetMapByID.GetMaps()
 
 		// Registro mappa e posizione iniziale del player
-		err = helpers.SetRedisMapHunting(maps)
-		if err != nil {
-			return err
-		}
-
-		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", maps.GetStartPositionX())
-		if err != nil {
-			return err
-		}
-
-		err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", maps.GetStartPositionY())
-		if err != nil {
-			return err
-		}
+		helpers.SetMapInCache(maps)
+		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
+		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", maps.GetStartPositionY())
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
@@ -319,19 +306,19 @@ func (c *HuntingController) Hunting() (err error) {
 	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
 	if c.Payload.MapID > 0 && c.Update.CallbackQuery != nil {
 		var maps *pb.Maps
-		maps, err = helpers.GetRedisMapHunting(c.Payload.MapID)
+		maps, err = helpers.GetMapInCache(c.Payload.MapID)
 		if err != nil {
 			return err
 		}
 
 		// Recupero posizione player
 		// var playerPositionX, playerPositionY int
-		c.PlayerPositionX, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "X")
+		c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X")
 		if err != nil {
 			return err
 		}
 
-		c.PlayerPositionY, err = helpers.GetRedisPlayerHuntingPosition(maps, c.Player, "Y")
+		c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y")
 		if err != nil {
 			return err
 		}
@@ -516,15 +503,8 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	}
 
 	// Aggiorno nuova posizione del player
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "X", c.PlayerPositionX)
-	if err != nil {
-		return
-	}
-
-	err = helpers.SetRedisPlayerHuntingPosition(maps, c.Player, "Y", c.PlayerPositionY)
-	if err != nil {
-		return
-	}
+	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", c.PlayerPositionX)
+	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", c.PlayerPositionY)
 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
@@ -754,7 +734,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		editMessage.ReplyMarkup = &mapKeyboard
 	case "player-die":
 		// Il player è morto
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 
 		return
 	case "no-action":
@@ -771,8 +751,8 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
-				c.PlayerStats.GetLifePoint(),
-				100+c.PlayerStats.GetLevel()*10,
+				c.PlayerData.PlayerStats.GetLifePoint(),
+				100+c.PlayerData.PlayerStats.GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 			),
 		)
@@ -789,7 +769,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 // RefreshMap - Necessario per refreshare la mappa in caso
 // di sconfitta di mob o apertura di tesori.
 func (c *HuntingController) RefreshMap() (err error) {
-	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record su redis
+	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
 	rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 		ID: c.Payload.MapID,
 	})
@@ -798,10 +778,6 @@ func (c *HuntingController) RefreshMap() (err error) {
 	}
 
 	// Registro mappa e posizione iniziale del player
-	err = helpers.SetRedisMapHunting(rGetMapByID.GetMaps())
-	if err != nil {
-		return err
-	}
-
+	helpers.SetMapInCache(rGetMapByID.GetMaps())
 	return
 }

@@ -24,10 +24,10 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Controller = "route.planet"
+	c.Configuration.Controller = "route.planet"
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	// Se tutto ok imposto e setto il nuovo stato in cache
+	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -36,6 +36,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		}
 	}
 
+	// Recupero pianeta corrente del player
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
 	rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
@@ -44,16 +45,43 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		panic(err)
 	}
 
-	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n\n \n%s \n%s \n\n%s \n%s \n%s",
-		helpers.Trans(player.Language.Slug, "planet.intro"),
-		// helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID().Name),
-		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlayerCurrentPlanet.GetPlanet().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlayerCurrentPlanet.GetPlanet().GetBiome().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlayerCurrentPlanet.GetPlanet().GetAtmosphere().GetName()),
+	// Riceco pianeta per ID, in modo da ottenere maggior informazioni
+	var rGetPlanetByID *pb.GetPlanetByIDResponse
+	rGetPlanetByID, err = services.NnSDK.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
 
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.x", rGetPlayerCurrentPlanet.GetPlanet().GetX()),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.y", rGetPlayerCurrentPlanet.GetPlanet().GetY()),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.z", rGetPlayerCurrentPlanet.GetPlanet().GetZ()),
+	// Aggiunto informazioni principali pianeta
+	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n%s \n%s \n%s \n\n",
+		helpers.Trans(player.Language.Slug, "planet.intro"),
+		helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlanetByID.GetPlanet().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlanetByID.GetPlanet().GetBiome().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlanetByID.GetPlanet().GetAtmosphere().GetName()),
+	)
+
+	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse
+	rCountPlayerVisitedCurrentPlanet, err = services.NnSDK.CountPlayerVisitedCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerVisitedCurrentPlanetRequest{
+		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiunto informazioni aggiuntive
+	planetDetailsMsg += fmt.Sprintf("%s\n\n",
+		helpers.Trans(player.Language.Slug, "planet.details.count_visited_player", rCountPlayerVisitedCurrentPlanet.GetValue()),
+	)
+
+	// Aggiungo coordinate pianeta
+	planetDetailsMsg += fmt.Sprintf("📡 %s:\n%s \n%s \n%s",
+		helpers.Trans(player.Language.Slug, "coordinate"),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.x", rGetPlanetByID.GetPlanet().GetX()),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.y", rGetPlanetByID.GetPlanet().GetY()),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.z", rGetPlanetByID.GetPlanet().GetZ()),
 	)
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)

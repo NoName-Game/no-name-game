@@ -37,12 +37,14 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 
 	// Verifico se in memorià è presente già una rotta e se quella richiamata non sia menu
 	// userò quella come main per gestire ulteriori sottostati
-	isCachedRoute, _ := helpers.GetRedisState(*player)
+	isCachedRoute, _ := helpers.GetCacheState(player.ID)
 	if isCachedRoute != "" {
 		invoke(Routes[isCachedRoute], "Handle", player, update, false)
 		return
 	}
 
+	// Se nulla di tutto questo dovesse andare ritorno il menu
+	invoke(Routes["route.menu"], "Handle", player, update, false)
 }
 
 // inRoutes - Verifica se esiste la rotta

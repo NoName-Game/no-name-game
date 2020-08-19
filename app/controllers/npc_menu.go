@@ -33,7 +33,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Init funzionalità
-	c.Controller = "route.menu.npc"
+	c.Configuration.Controller = "route.menu.npc"
 	c.Player = rGetPlayerByUsername.GetPlayer()
 
 	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.welcome"))
@@ -50,7 +50,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
-	if c.PlayerStats.GetDead() {
+	if c.PlayerData.PlayerStats.GetDead() {
 		restsController := new(ShipRestsController)
 		restsController.Handle(c.Player, c.Update, true)
 	}

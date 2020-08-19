@@ -13,9 +13,9 @@ import (
 )
 
 // ====================================
-// BankController
+// SafePlanetBankController
 // ====================================
-type BankController struct {
+type SafePlanetBankController struct {
 	Payload struct {
 		Type string
 	}
@@ -25,30 +25,27 @@ type BankController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.safeplanet.bank",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:    "route.safeplanet.bank",
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -79,15 +76,15 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -99,7 +96,7 @@ func (c *BankController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 // ====================================
 // Validator
 // ====================================
-func (c *BankController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetBankController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -109,7 +106,7 @@ func (c *BankController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -134,8 +131,8 @@ func (c *BankController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *BankController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+func (c *SafePlanetBankController) Stage() (err error) {
+	switch c.PlayerData.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 		var infoBank string
@@ -158,6 +155,7 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
+		// Bank
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 		rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
@@ -167,7 +165,24 @@ func (c *BankController) Stage() (err error) {
 			return err
 		}
 
-		msg = services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.account_details", rGetPlayerEconomy.GetValue()))
+		// Money
+		var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
+		rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.GetID(),
+			EconomyType: "money",
+		})
+		if err != nil {
+			return err
+		}
+
+		msg = services.NewMessage(c.Player.ChatID,
+			helpers.Trans(
+				c.Player.Language.Slug,
+				"safeplanet.bank.account_details",
+				rGetPlayerEconomyMoney.GetValue(),
+				rGetPlayerEconomy.GetValue(),
+			),
+		)
 		msg.ParseMode = "Markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -175,7 +190,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 	case 1:
 		var mainMessage string
 		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
@@ -215,7 +230,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 	case 2:
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
@@ -252,14 +267,6 @@ func (c *BankController) Stage() (err error) {
 			}
 		}
 
-		// Registro transazione
-		/*_, err = transactionProvider.CreateTransaction(nnsdk.TransactionRequest{
-			Value:                 int32(value),
-			TransactionTypeID:     1,
-			TransactionCategoryID: uint(transactionCategory),
-			PlayerID:              c.Player.ID,
-		})*/
-
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
 		msg.ParseMode = "markdown"
@@ -270,7 +277,7 @@ func (c *BankController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

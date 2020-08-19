@@ -16,14 +16,14 @@ import (
 )
 
 // ====================================
-// ShipExplorationController
+// ShipTravelController
 // ====================================
-type ShipExplorationController struct {
+type ShipTravelController struct {
 	BaseController
 	Payload struct {
 		Ship               *pb.Ship
 		StarNearestMapName map[int]string
-		StarNearestMapInfo map[int]*pb.GetShipExplorationInfo
+		StarNearestMapInfo map[int]*pb.GetShipTravelInfo
 		StarIDChosen       int
 	}
 }
@@ -31,30 +31,28 @@ type ShipExplorationController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.ship.exploration",
-		c.Payload,
-		[]string{"mission", "hunting"},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:        "route.ship.travel",
+		ControllerBlocked: []string{"mission", "hunting"},
+		ControllerBack: ControllerBack{
+			To:        &ShipController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se vuole tornare indietro di stato
-	if !proxy {
-		if c.BackTo(1, &ShipController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -86,15 +84,15 @@ func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -106,7 +104,7 @@ func (c *ShipExplorationController) Handle(player *pb.Player, update tgbotapi.Up
 // ====================================
 // Validator
 // ====================================
-func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
+func (c *ShipTravelController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -116,7 +114,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -126,8 +124,8 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	case 1:
 		// A prescindere verifico se il player ha una missione o una caccia attiva
 		// tutte le attività di che si svolgono sui pianeti devono essere portati a termine
-		for _, state := range c.ActiveStates {
-			if helpers.StringInSlice(state.Controller, []string{"route.mission", "route.hunting"}) {
+		for _, state := range c.PlayerData.ActiveStates {
+			if helpers.StringInSlice(state.Controller, []string{"route.exploration", "route.hunting"}) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.exploration.error.function_not_completed")
 				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
@@ -142,7 +140,7 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 		}
 
 		if !helpers.InArray(c.Update.Message.Text, []string{
-			helpers.Trans(c.Player.Language.Slug, "ship.exploration.start"),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.start"),
 		}) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
@@ -181,14 +179,14 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 	// il tempo di attesa necessario al completamento del viaggio
 	case 3:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
 
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
-			"ship.exploration.wait",
+			"ship.travel.wait",
 			finishAt.Format("15:04:05 01/02"),
 		)
 
@@ -218,8 +216,8 @@ func (c *ShipExplorationController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *ShipExplorationController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+func (c *ShipTravelController) Stage() (err error) {
+	switch c.PlayerData.CurrentState.Stage {
 
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
@@ -236,7 +234,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		var currentPlayerPositions string
 		currentPlayerPositions = fmt.Sprintf(
 			"%s \nX: %v \nY: %v \nZ: %v \n",
-			helpers.Trans(c.Player.Language.Slug, "ship.exploration.current_position"),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.current_position"),
 			rGetPlayerCurrentPlanet.GetPlanet().GetX(),
 			rGetPlayerCurrentPlanet.GetPlanet().GetY(),
 			rGetPlayerCurrentPlanet.GetPlanet().GetZ(),
@@ -246,14 +244,14 @@ func (c *ShipExplorationController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s\n\n%s",
-				helpers.Trans(c.Player.Language.Slug, "ship.exploration.info"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
 				currentPlayerPositions,
 			),
 		)
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.exploration.start")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.travel.start")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
@@ -266,7 +264,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
@@ -280,8 +278,8 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Recupero informazioni di esplorazione
-		var responseExplorationInfo *pb.GetShipExplorationInfoResponse
-		responseExplorationInfo, err = services.NnSDK.GetShipExplorationInfo(helpers.NewContext(1), &pb.GetShipExplorationInfoRequest{
+		var responseTravelInfo *pb.GetShipTravelInfoResponse
+		responseTravelInfo, err = services.NnSDK.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
 			Ship: rGetPlayerShipEquipped.GetShip(),
 		})
 		if err != nil {
@@ -290,12 +288,12 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		// It's for match with keyboard in validator and needed for next step
 		var starNearestMapName = make(map[int]string)
-		var starNearestMapInfo = make(map[int]*pb.GetShipExplorationInfo)
+		var starNearestMapInfo = make(map[int]*pb.GetShipTravelInfo)
 
 		var msgNearestStars string
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
-		for _, explorationInfo := range responseExplorationInfo.GetShipExplorationInfo {
+		for _, explorationInfo := range responseTravelInfo.GetInfo() {
 			// Se il pianeta è sicuro allora appendo al nome l'icona di riferimento
 			planetName := explorationInfo.Planet.Name
 			if explorationInfo.Planet.Safe {
@@ -331,7 +329,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s %s",
-				helpers.Trans(c.Player.Language.Slug, "ship.exploration.research"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.research"),
 				msgNearestStars,
 			),
 		)
@@ -350,7 +348,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		c.Payload.Ship = rGetPlayerShipEquipped.GetShip()
 		c.Payload.StarNearestMapName = starNearestMapName
 		c.Payload.StarNearestMapInfo = starNearestMapInfo
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 
 	// Verifico quale stella ha scelto il player e mando messaggio indicando il tempo
 	// necessario al suo raggiungimento
@@ -373,7 +371,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		// Verifico se la nave del player ha abbastanza carburante per raggiungere la stella
 		if c.Payload.StarNearestMapInfo[chosenStarID].Fuel > c.Payload.Ship.ShipStats.Tank {
 			msg := services.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "ship.exploration.not_enough_fuel"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.not_enough_fuel"),
 			)
 
 			_, err = services.SendMessage(msg)
@@ -386,11 +384,11 @@ func (c *ShipExplorationController) Stage() (err error) {
 
 		// Setto timer di ritorno
 		finishTime := helpers.GetEndTime(0, int(c.Payload.StarNearestMapInfo[chosenStarID].Time), 0)
-		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
+		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.exploration.exploring", finishTime.Format("15:04:05 01/02")),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishTime.Format("15:04:05 01/02")),
 		)
 		msg.ParseMode = "markdown"
 
@@ -400,16 +398,16 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.ToNotify = true
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.ToNotify = true
+		c.PlayerData.CurrentState.Stage = 3
 		c.Payload.StarIDChosen = chosenStarID
-		c.Breaker.ToMenu = true
+		c.ForceBackTo = true
 
 	// Fine esplorazione
 	case 3:
 		// Costruisco chiamata per aggiornare posizione e scalare il quantitativo
 		// di carburante usato
-		_, err := services.NnSDK.EndShipExploration(helpers.NewContext(1), &pb.EndShipExplorationRequest{
+		_, err := services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			Integrity: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity,
 			Tank:      c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel,
 			PlanetID:  c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.ID,
@@ -420,7 +418,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.exploration.end"))
+		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.end"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
@@ -433,7 +431,7 @@ func (c *ShipExplorationController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

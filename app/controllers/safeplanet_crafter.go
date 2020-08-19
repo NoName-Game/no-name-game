@@ -15,9 +15,9 @@ import (
 )
 
 // ====================================
-// CrafterController (NPC Crafter)
+// SafePlanetCrafterController (NPC Crafter)
 // ====================================
-type CrafterController struct {
+type SafePlanetCrafterController struct {
 	Payload struct {
 		Item      string
 		Category  string
@@ -30,30 +30,27 @@ type CrafterController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.safeplanet.crafter",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:    "route.safeplanet.crafter",
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -84,15 +81,15 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -104,7 +101,7 @@ func (c *CrafterController) Handle(player *pb.Player, update tgbotapi.Update, pr
 // ====================================
 // Validator
 // ====================================
-func (c *CrafterController) Validator() (hasErrors bool, err error) {
+func (c *SafePlanetCrafterController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -114,7 +111,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	case 0:
 		return false, err
 		// nothinggg
@@ -136,7 +133,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		return true, err
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.add")) {
-			c.CurrentState.Stage = 2
+			c.PlayerData.CurrentState.Stage = 2
 			c.Payload.AddFlag = true
 			return false, err
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "crafting.start") {
@@ -150,7 +147,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		}
 	case 5:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -174,7 +171,7 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 		)
 
 		// Verifico se ha finito il crafting
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -190,8 +187,8 @@ func (c *CrafterController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *CrafterController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+func (c *SafePlanetCrafterController) Stage() (err error) {
+	switch c.PlayerData.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 
@@ -212,7 +209,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 	case 1:
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 		switch c.Payload.Item {
@@ -256,7 +253,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 	case 2:
 		var rGetPlayerResources *pb.GetPlayerResourcesResponse
 		rGetPlayerResources, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
@@ -283,7 +280,7 @@ func (c *CrafterController) Stage() (err error) {
 				return err
 			}
 			// Completo lo stato
-			c.CurrentState.Completed = true
+			c.PlayerData.CurrentState.Completed = true
 		}
 
 		// Id Add new resource
@@ -394,7 +391,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 3
 	case 3:
 		// Add recipe message
 		var recipe string
@@ -427,7 +424,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Aggiorno stato
-		c.CurrentState.Stage = 4
+		c.PlayerData.CurrentState.Stage = 4
 	case 4:
 		// Il player ha avviato il crafting, stampa il tempo di attesa
 		// Aggiorna stato
@@ -447,10 +444,10 @@ func (c *CrafterController) Stage() (err error) {
 			panic(err)
 		}
 
-		c.CurrentState.FinishAt = endTimeProto
-		c.CurrentState.ToNotify = true
-		c.CurrentState.Stage = 5
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.FinishAt = endTimeProto
+		c.PlayerData.CurrentState.ToNotify = true
+		c.PlayerData.CurrentState.Stage = 5
+		c.ForceBackTo = true
 	case 5:
 		// crafting completato
 		// Rimuovo risorse usate al player
@@ -507,7 +504,7 @@ func (c *CrafterController) Stage() (err error) {
 			return err
 		}
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

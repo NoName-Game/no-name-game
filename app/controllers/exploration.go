@@ -16,13 +16,13 @@ import (
 )
 
 var (
-	MissionTypes = []string{"underground", "surface", "atmosphere"}
+	ExplorationTypes = []string{"underground", "surface", "atmosphere"}
 )
 
 // ====================================
-// MissionController
+// ExplorationController
 // ====================================
-type MissionController struct {
+type ExplorationController struct {
 	BaseController
 	Payload struct {
 		ExplorationType string // Indica il tipo di esplorazione scelta
@@ -35,30 +35,28 @@ type MissionController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.mission",
-		c.Payload,
-		[]string{"hunting", "ship"},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:        "route.exploration",
+		ControllerBlocked: []string{"hunting", "ship"},
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &MenuController{}) {
-			return
-		}
-	}
-
-	// Stato recuperto correttamente
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	// Set and load payload
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -90,15 +88,15 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	err = c.Completing()
 	if err != nil {
@@ -109,7 +107,7 @@ func (c *MissionController) Handle(player *pb.Player, update tgbotapi.Update, pr
 // ====================================
 // Validator
 // ====================================
-func (c *MissionController) Validator() (hasErrors bool, err error) {
+func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -119,7 +117,7 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -128,8 +126,8 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// un tipo di missione tra quelli disponibili
 	case 1:
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		for _, missionType := range MissionTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
+		for _, missionType := range ExplorationTypes {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType)) == c.Update.Message.Text {
 				return false, err
 			}
 		}
@@ -139,14 +137,14 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.GetFinishAt())
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.GetFinishAt())
 		if err != nil {
 			panic(err)
 		}
 
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
-			"mission.validator.wait",
+			"exploration.validator.wait",
 			finishAt.Format("15:04:05"),
 		)
 
@@ -176,16 +174,16 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 	// In questo stage verifico l'azione che vuole intraprendere l'utente
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.continue") {
-			c.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
-			c.CurrentState.ToNotify = true
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
+			c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
+			c.PlayerData.CurrentState.ToNotify = true
 
 			return false, err
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "mission.comeback") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
 			// Passo allo stadio conclusivo
-			c.CurrentState.Stage = 4
+			c.PlayerData.CurrentState.Stage = 4
 
 			return false, err
 		}
@@ -204,16 +202,16 @@ func (c *MissionController) Validator() (hasErrors bool, err error) {
 // ====================================
 // Stage
 // ====================================
-func (c *MissionController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+func (c *ExplorationController) Stage() (err error) {
+	switch c.PlayerData.CurrentState.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
 	case 0:
 		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, missionType := range MissionTypes {
+		for _, missionType := range ExplorationTypes {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType))),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType))),
 			)
 
 			keyboardRows = append(keyboardRows, keyboardRow)
@@ -227,7 +225,7 @@ func (c *MissionController) Stage() (err error) {
 		))
 
 		// Invio messaggi con il tipo di missioni come tastierino
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "mission.exploration"))
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "exploration.exploration"))
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -238,27 +236,27 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
 	case 1:
 		// È il tempo minimo di una missione
-		baseMissionTime := 10
+		baseExplorationTime := 10
 
 		// Verifico se è stato forzato il tempo della prima missione Es. da tutorial
 		if c.Payload.ForcedTime > 0 {
-			baseMissionTime = c.Payload.ForcedTime
+			baseExplorationTime = c.Payload.ForcedTime
 		}
 
 		var endTime time.Time
-		endTime = helpers.GetEndTime(0, baseMissionTime, 0)
+		endTime = helpers.GetEndTime(0, baseExplorationTime, 0)
 
 		// Invio messaggio di attesa
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
-				"mission.wait",
+				"exploration.wait",
 				endTime.Format("15:04:05"),
 			),
 		)
@@ -270,18 +268,18 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Importo nel payload la scelta di tipologia di missione
-		for _, missionType := range MissionTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("mission.%s", missionType)) == c.Update.Message.Text {
+		for _, missionType := range ExplorationTypes {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType)) == c.Update.Message.Text {
 				c.Payload.ExplorationType = missionType
 				break
 			}
 		}
 
 		// Avanzo di stato
-		c.CurrentState.Stage = 2
-		c.CurrentState.ToNotify = true
-		c.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.ToNotify = true
+		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(endTime)
+		c.ForceBackTo = true
 
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
@@ -315,7 +313,7 @@ func (c *MissionController) Stage() (err error) {
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
-				"mission.extraction_recap",
+				"exploration.extraction_recap",
 				rDropResource.GetResource().GetName(),
 				rDropResource.GetResource().GetRarity().GetName(),
 				strings.ToUpper(rDropResource.GetResource().GetRarity().GetSlug()),
@@ -326,8 +324,8 @@ func (c *MissionController) Stage() (err error) {
 
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.continue")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "mission.comeback")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
 			),
 		)
 
@@ -337,14 +335,14 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 3
 
 	// In questo stage verifico cosa ha scelto di fare il player
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
 		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.CurrentState.FinishAt)
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
 			panic(err)
 		}
@@ -353,7 +351,7 @@ func (c *MissionController) Stage() (err error) {
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
-				"mission.wait",
+				"exploration.wait",
 				finishAt.Format("15:04:05"),
 			),
 		)
@@ -365,8 +363,8 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		c.CurrentState.Stage = 2
-		c.Breaker.ToMenu = true
+		c.PlayerData.CurrentState.Stage = 2
+		c.ForceBackTo = true
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
@@ -384,7 +382,7 @@ func (c *MissionController) Stage() (err error) {
 		// Invio messaggio di chiusura missione
 		msg := services.NewMessage(c.Player.ChatID,
 			fmt.Sprintf("%s%s",
-				helpers.Trans(c.Player.Language.Slug, "mission.extraction_ended"),
+				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended"),
 				dropList,
 			),
 		)
@@ -410,7 +408,7 @@ func (c *MissionController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

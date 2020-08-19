@@ -27,12 +27,12 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	// Inizializzo variabili del controler
 	var err error
 
-	c.Controller = "route.ship"
+	c.Configuration.Controller = "route.ship"
 	c.Player = player
 	c.Update = update
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	// Se tutto ok imposto e setto il nuovo stato in cache
+	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
@@ -68,7 +68,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.exploration")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.rests")),

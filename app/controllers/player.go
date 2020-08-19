@@ -23,27 +23,20 @@ type PlayerController struct {
 // ====================================
 func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.player",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller:    "route.player",
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
-	}
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Calcolo lato economico del player
 	var economy string
@@ -58,9 +51,9 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, pro
 		"🏵 *%v* 🎖 *%v* \n"+
 		"%s\n",
 		c.Player.GetUsername(),
-		c.PlayerStats.GetLifePoint(),
-		c.PlayerStats.GetExperience(),
-		c.PlayerStats.GetLevel(),
+		c.PlayerData.PlayerStats.GetLifePoint(),
+		c.PlayerData.PlayerStats.GetExperience(),
+		c.PlayerData.PlayerStats.GetLevel(),
 		economy,
 	)
 

@@ -29,27 +29,24 @@ type PlayerEquipmentController struct {
 func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
 	// Inizializzo variabili del controler
 	var err error
+	c.Player = player
+	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(
-		"route.inventory.equip",
-		c.Payload,
-		[]string{},
-		player,
-		update,
-	) {
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.inventory.equip",
+		ControllerBack: ControllerBack{
+			To:        &PlayerController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
 		return
 	}
 
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(1, &PlayerController{}) {
-			return
-		}
-	}
-
 	// Set and load payload
-	helpers.UnmarshalPayload(c.CurrentState.Payload, &c.Payload)
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -80,15 +77,15 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Aggiorno stato finale
 	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.CurrentState.Payload = string(payloadUpdated)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.CurrentState,
+		PlayerState: c.PlayerData.CurrentState,
 	})
 	if err != nil {
 		panic(err)
 	}
-	c.CurrentState = rUpdatePlayerState.GetPlayerState()
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento
 	err = c.Completing()
@@ -110,7 +107,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 		),
 	)
 
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false, err
@@ -154,7 +151,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 // Stage
 // ====================================
 func (c *PlayerEquipmentController) Stage() (err error) {
-	switch c.CurrentState.Stage {
+	switch c.PlayerData.CurrentState.Stage {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
 	case 0:
@@ -164,10 +161,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
 
-		var rGetPlayerArmors *pb.GetPlayerArmorsResponse
-		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
+		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
+		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
 			PlayerID: c.Player.GetID(),
-			Equipped: true,
 		})
 		if err != nil {
 			return err
@@ -205,23 +201,21 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		var currentWeaponsEquipment string
 		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
-		var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
-		rGetPlayerWeapons, err = services.NnSDK.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
+		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
+		rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
 			return err
 		}
 
-		if len(rGetPlayerWeapons.GetWeapons()) > 0 {
-			for _, weapon := range rGetPlayerWeapons.GetWeapons() {
-				currentWeaponsEquipment += fmt.Sprintf(
-					"- %s (*%s*) %v🩸 \n",
-					weapon.Name,
-					strings.ToUpper(weapon.Rarity.Slug),
-					weapon.RawDamage,
-				)
-			}
+		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
+			currentWeaponsEquipment += fmt.Sprintf(
+				"- %s (*%s*) %v🩸 \n",
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
+				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
+			)
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
@@ -272,7 +266,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Avanzo di stage
-		c.CurrentState.Stage = 1
+		c.PlayerData.CurrentState.Stage = 1
 
 	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
@@ -290,7 +284,6 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			var rGetPlayerArmors *pb.GetPlayerArmorsResponse
 			rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
 				PlayerID: c.Player.GetID(),
-				Equipped: false,
 			})
 			if err != nil {
 				return err
@@ -367,7 +360,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 2
 
 	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
 	// equipaggiare e me lo metto nel payload in attesa di conferma
@@ -455,7 +448,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		c.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 3
 
 	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
 	// TODO: bisogna verifica che ci sia solo 1 arma o armatura equipaggiata
@@ -505,7 +498,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Completo lo stato
-		c.CurrentState.Completed = true
+		c.PlayerData.CurrentState.Completed = true
 	}
 
 	return

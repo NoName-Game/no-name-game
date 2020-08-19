@@ -2,8 +2,13 @@ package helpers
 
 import (
 	"context"
+	"encoding/json"
+	"os"
 	"reflect"
+	"strconv"
 	"time"
+
+	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
 // InArray - check if val exist in array
@@ -60,9 +65,24 @@ func GetEndTime(hours, minutes, seconds int) (t time.Time) {
 
 // NewContext - Recupero nuovo context per effettuare le chiamate
 func NewContext(seconds time.Duration) context.Context {
-	d := time.Now().Add(seconds * time.Second)
+	TTLRPC, err := strconv.Atoi(os.Getenv("TTL_RPC"))
+	if err != nil {
+		TTLRPC = 1
+	}
+
+	d := time.Now().Add(seconds * time.Second * time.Duration(TTLRPC))
 	// nolint:govet // Escludo il check sul defer del cancel
 	ctx, _ := context.WithDeadline(context.Background(), d)
 
 	return ctx
+}
+
+// UnmarshalPayload - Unmarshal payload state
+func UnmarshalPayload(payload string, funcInterface interface{}) {
+	if payload != "" {
+		err := json.Unmarshal([]byte(payload), &funcInterface)
+		if err != nil {
+			services.ErrorHandler("Error unmarshal payload", err)
+		}
+	}
 }

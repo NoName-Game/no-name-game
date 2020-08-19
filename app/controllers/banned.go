@@ -21,10 +21,10 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Controller = "route.banned"
+	c.Configuration.Controller = "route.banned"
 
-	// Se tutto ok imposto e setto il nuovo stato su redis
-	_ = helpers.SetRedisState(*c.Player, c.Controller)
+	// Se tutto ok imposto e setto il nuovo stato in cache
+	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if !proxy {
