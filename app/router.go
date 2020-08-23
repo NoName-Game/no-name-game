@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 

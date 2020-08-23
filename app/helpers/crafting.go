@@ -3,7 +3,7 @@ package helpers
 import (
 	"strconv"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 

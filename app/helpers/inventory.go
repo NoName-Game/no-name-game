@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 )
 
 func InventoryResourcesToMap(inventory []*pb.PlayerInventory) map[uint32]int32 {

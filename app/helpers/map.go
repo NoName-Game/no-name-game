@@ -9,7 +9,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	gocache "github.com/patrickmn/go-cache"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 )
 
 // DecodeMapToDisplay - Converte la logica della mappa in qualcosa di visibilie

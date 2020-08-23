@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 
-	pb "bitbucket.org/no-name-game/nn-grpc/rpc"
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 )
 
 var (
