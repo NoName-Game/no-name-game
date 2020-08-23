@@ -1,0 +1,234 @@
+package controllers
+
+import (
+	"encoding/json"
+
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+
+	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
+	"bitbucket.org/no-name-game/nn-telegram/services"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// ====================================
+// SafePlanetExpansionController
+// ====================================
+type SafePlanetExpansionController struct {
+	Payload struct{}
+	BaseController
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+	// Inizializzo variabili del controler
+	var err error
+	c.Player = player
+	c.Update = update
+
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.safeplanet.coalition.expansion",
+		ControllerBack: ControllerBack{
+			To:        &SafePlanetCoalitionController{},
+			FromStage: 1,
+		},
+		ProxyStatment: proxy,
+		Payload:       c.Payload,
+	}) {
+		return
+	}
+
+	// Set and load payload
+	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+
+	// Validate
+	var hasError bool
+	hasError, err = c.Validator()
+	if err != nil {
+		panic(err)
+	}
+
+	// Se ritornano degli errori
+	if hasError {
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+		validatorMsg.ParseMode = "markdown"
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
+
+		_, err = services.SendMessage(validatorMsg)
+		if err != nil {
+			panic(err)
+		}
+
+		return
+	}
+
+	// Ok! Run!
+	err = c.Stage()
+	if err != nil {
+		panic(err)
+	}
+
+	// Aggiorno stato finale
+	payloadUpdated, _ := json.Marshal(c.Payload)
+	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
+
+	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		PlayerState: c.PlayerData.CurrentState,
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+
+	// Verifico completamento
+	err = c.Completing()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ====================================
+// Validator
+// ====================================
+func (c *SafePlanetExpansionController) Validator() (hasErrors bool, err error) {
+	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+			),
+		),
+	)
+
+	switch c.PlayerData.CurrentState.Stage {
+	// È il primo stato non c'è nessun controllo
+	case 0:
+		return false, err
+
+	case 1:
+		// TODO: modificare qui
+		// Recupero quali titani sono stati scoperti e quindi raggiungibili
+		var rTitanDiscovered *pb.TitanDiscoveredResponse
+		rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{})
+		if err != nil {
+			return
+		}
+
+		// Verifico sei il player ha passato il nome di un titano valido
+		if len(rTitanDiscovered.GetTitans()) > 0 {
+			for _, titan := range rTitanDiscovered.GetTitans() {
+				if c.Update.Message.Text == titan.GetName() {
+					return false, err
+				}
+			}
+		}
+
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+		return true, err
+	}
+
+	return true, err
+}
+
+// ====================================
+// Stage
+// ====================================
+func (c *SafePlanetExpansionController) Stage() (err error) {
+	switch c.PlayerData.CurrentState.Stage {
+	case 0:
+		var expansionRecap string
+		expansionRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.info")
+		var keyboardRow [][]tgbotapi.KeyboardButton
+
+		// Recupero quanti pianeti mancano per l'ampliamento del sistema
+		var rGetExpansionInfo *pb.GetExpansionInfoResponse
+		rGetExpansionInfo, err = services.NnSDK.GetExpansionInfo(helpers.NewContext(1), &pb.GetExpansionInfoRequest{})
+		if err != nil {
+			return
+		}
+
+		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.last_system", rGetExpansionInfo.GetLastSystemDiscovered().GetName())
+
+		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 {
+			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.done")
+		} else {
+			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap", rGetExpansionInfo.GetMissPlanetsCounter())
+		}
+
+		// Mostro la lista dei pianeti sicuri disponibili
+		// if len(rTitanDiscovered.GetTitans()) > 0 {
+		// 	restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.choice")
+		// 	for _, titan := range rTitanDiscovered.GetTitans() {
+		// 		newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
+		// 			tgbotapi.NewKeyboardButton(
+		// 				// helpers.Trans(c.Player.Language.Slug, "ship.rests.start"),
+		// 				titan.GetName(),
+		// 			),
+		// 		)
+		// 		keyboardRow = append(keyboardRow, newKeyboardRow)
+		// 	}
+		// } else {
+		// 	restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.no_titans_founded")
+		// }
+
+		// Aggiungo torna indietro
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+		))
+
+		// Invio messaggio
+		msg := services.NewMessage(c.Player.ChatID, expansionRecap)
+		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboardRow,
+		}
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Aggiorno stato
+		// c.PlayerData.CurrentState.Stage = 1
+
+	// In questo stage avvio effettivamente il riposo
+	case 1:
+		// Recupero pianeta da titano
+		// var rGetTitanByName *pb.GetTitanByNameResponse
+		// rGetTitanByName, err = services.NnSDK.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
+		// 	Name: c.Update.Message.Text,
+		// })
+		// if err != nil {
+		// 	return
+		// }
+		//
+		// // Aggiunto nuova posizione al player
+		// _, err = services.NnSDK.CreatePlayerPosition(helpers.NewContext(1), &pb.CreatePlayerPositionRequest{
+		// 	PlayerID: c.Player.ID,
+		// 	PlanetID: rGetTitanByName.GetTitan().GetPlanetID(),
+		// })
+		// if err != nil {
+		// 	return
+		// }
+		//
+		// // Invio messaggio
+		// msg := services.NewMessage(c.Update.Message.Chat.ID,
+		// 	helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.teleport"),
+		// )
+		//
+		// msg.ParseMode = "markdown"
+		// _, err = services.SendMessage(msg)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // Completo lo stato
+		// c.PlayerData.CurrentState.Completed = true
+		// c.Configuration.ControllerBack.To = &MenuController{}
+	}
+
+	return
+}
