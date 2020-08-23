@@ -218,6 +218,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 
 		// Completo lo stato
 		c.PlayerData.CurrentState.Completed = true
+		c.Configuration.ControllerBack.To = &MenuController{}
 	}
 
 	return
