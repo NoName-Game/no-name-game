@@ -387,17 +387,14 @@ route.safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato 
 route.safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
 
 # SAFEPLANET -
-safeplanet.coalition.expansion.info: "La coalizione esprime la sua gratitudine a tutti gli esploratori che aiutano ad esplorare il sistema attuale.\nPer scoprire nuovi sistemi è necessario scoprire tutti i pianeti del sistema attuale.\n\n"
-safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: *%s*\n\n"
-safeplanet.coalition.expansion.recap: "Mancano da esplorare *%d* pianeti, su *%d* totali."
-safeplanet.coalition.expansion.done: "🎉 Complimenti esploratori!! Grazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTi informeremo quando sarà tutto pronto."
-safeplanet.coalition.expansion.no_safe_planets_founded: "\n\nNon sono stati trovati altri pianeti sicuri"
-safeplanet.coalition.expansion.choice: "\n\nScegli su quale pianeta vuoi esere teletrasportato"
-safeplanet.coalition.expansion.confirmation: "Stai per essere trasportato sul pianeta sicuro *%s*, il costo per questa operazione è di *%v*, sicuro di voler continuare?"
-safeplanet.coalition.expansion.teleport_ok: "Il viaggio avverà a breve"
-safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio"
-
-
+safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\nEsplorando tutti i pianeti al momento conosciuti, aiuterai la coalizione ad espandare i nostri confini.\n\n"
+safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
+safeplanet.coalition.expansion.recap: "Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
+safeplanet.coalition.expansion.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTorna a breve per scoprire i progressi."
+safeplanet.coalition.expansion.choice: "\n\nLa coalizione ti offre la possibilità ti teletrasportati istantaneamente su altri pianeti sicuri scoperti. Quale vuoi raggiungere?"
+safeplanet.coalition.expansion.confirmation: "Stai per essere trasportato sul pianeta sicuro 🏟*%s*, il costo per questa operazione è di 💎*%v*, sicuro di voler continuare?"
+safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
+safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
 
 # PLANET
 planet.intro: "Dettaglio posizione attuale:"

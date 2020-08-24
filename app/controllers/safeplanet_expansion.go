@@ -220,8 +220,6 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 				)
 				keyboardRow = append(keyboardRow, newKeyboardRow)
 			}
-		} else {
-			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.no_safe_planets_founded")
 		}
 
 		// Aggiungo torna indietro
