@@ -180,11 +180,11 @@ crafting.no_resources: "Non hai abbastanza risorse!"
 crafting.no_resource: "Non hai questa risorsa!"
 
 # ITEMS
-items.revitalizing_small: "Rivitalizzante piccolo"
+items.revitalizing_small: "Revitalizzante piccolo"
 items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
-items.revitalizing_medium: "Rivitalizzante medio"
+items.revitalizing_medium: "Revitalizzante medio"
 items.description.revitalizing_medium: "Permette di recuperare *%vHP*."
-items.revitalizing_max: "Rivitalizzante grande"
+items.revitalizing_max: "Revitalizzante grande"
 items.description.revitalizing_max: "Permette di recuperare *%vHP*."
 
 items.raw_fuel: "Carburante grezzo"
