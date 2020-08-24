@@ -531,7 +531,10 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	msg.ParseMode = "HTML"
 	_, err = services.SendMessage(msg)
 	if err != nil {
-		return err
+		// Il bot crasha nel caso ci fossero bad request da parte di telegram,
+		// penso sia opportuno solo in questo caso non pensare agli errori delle api che potrebbero causare crash non dettati da noi
+		services.ErrorHandler("Hunting TGBOTAPI Error", err)
+		return nil
 	}
 
 	// Visto che si è trattato solo di un movimento non è necessario aggiornare lo stato
