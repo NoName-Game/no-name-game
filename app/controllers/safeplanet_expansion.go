@@ -150,12 +150,17 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 			return
 		}
 
-		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.last_system", rGetExpansionInfo.GetLastSystemDiscovered().GetName())
+		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.last_system",
+			rGetExpansionInfo.GetLastSystemDiscovered().GetName(),
+		)
 
 		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 {
 			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.done")
 		} else {
-			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap", rGetExpansionInfo.GetMissPlanetsCounter())
+			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap",
+				rGetExpansionInfo.GetMissPlanetsCounter(),
+				rGetExpansionInfo.GetTotalPlanetsCounter(),
+			)
 		}
 
 		// Mostro la lista dei pianeti sicuri disponibili
