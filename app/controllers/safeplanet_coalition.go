@@ -41,6 +41,9 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.titan")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.expansion")),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
