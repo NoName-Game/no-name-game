@@ -40,12 +40,11 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	var recapResources string
 	recapResources = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "resources"))
 	for _, resource := range rGetPlayerResource.GetPlayerInventory() {
-		log.Println("Item: ", resource.GetResource().GetName())
 		recapResources += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
-			resource.GetQuantity(),
-			resource.GetResource().GetName(),
-			strings.ToUpper(resource.GetResource().GetRarity().GetSlug()),
+			resource.Quantity,
+			resource.Resource.Name,
+			strings.ToUpper(resource.Resource.Rarity.Slug),
 		)
 	}
 
@@ -61,13 +60,14 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 
 	var recapItems string
 	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
+	log.Println("len -> ", len(rGetPlayerItems.GetPlayerInventory()))
+	log.Println(rGetPlayerItems.GetPlayerInventory())
 	for _, resource := range rGetPlayerItems.GetPlayerInventory() {
-		log.Println("Item: ", resource.GetItem().GetName())
 		recapItems += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
 			resource.Quantity,
-			helpers.Trans(player.Language.Slug, "items."+resource.GetItem().GetName()),
-			strings.ToUpper(resource.GetItem().GetRarity().GetSlug()),
+			helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug),
+			strings.ToUpper(resource.Item.Rarity.Slug),
 		)
 	}
 
