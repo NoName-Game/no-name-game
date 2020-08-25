@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -47,6 +48,8 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 		)
 	}
 
+	log.Println(recapResources)
+
 	// *******************
 	// Recupero item inventario
 	// *******************
@@ -68,12 +71,16 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 		)
 	}
 
+	log.Println(recapItems)
+
 	// Riassumo il tutto
 	finalRecap = fmt.Sprintf("%s\n\n%s\n%s",
 		helpers.Trans(player.Language.Slug, "inventory.recap"), // Ecco il tuo inventario
 		recapResources,
 		recapItems,
 	)
+
+	log.Println(finalRecap)
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, finalRecap)
 	msg.ParseMode = "markdown"
