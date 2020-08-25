@@ -30,7 +30,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// Recupero risorse inventario
 	// *******************
 	rGetPlayerResource, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
-		PlayerID: c.Player.GetID(),
+		PlayerID: player.GetID(),
 	})
 	if err != nil {
 		panic(err)
@@ -51,7 +51,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// Recupero item inventario
 	// *******************
 	rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
-		PlayerID: c.Player.GetID(),
+		PlayerID: player.GetID(),
 	})
 	if err != nil {
 		panic(err)
@@ -64,7 +64,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 			"- %v x %s (*%s*)\n",
 			resource.Quantity,
 			helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug),
-			strings.ToUpper(resource.Item.Rarity.Slug),
+			helpers.Trans(player.Language.Slug, "items."+resource.Item.ItemCategory.Slug),
 		)
 	}
 

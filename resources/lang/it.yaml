@@ -180,6 +180,9 @@ crafting.no_resources: "Non hai abbastanza risorse!"
 crafting.no_resource: "Non hai questa risorsa!"
 
 # ITEMS
+items.medical: "💊"
+items.ship_support: "⚙️"
+
 items.revitalizing_small: "Revitalizzante piccolo"
 items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
 items.revitalizing_medium: "Revitalizzante medio"
