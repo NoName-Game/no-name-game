@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -264,7 +265,6 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		}
 
 		mapInventory := helpers.InventoryResourcesToMap(rGetPlayerResources.GetPlayerInventory())
-
 		// Se l'inventario è vuoto allora concludi
 		if len(mapInventory) <= 0 {
 			message := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.no_resources"))
@@ -327,9 +327,18 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 		}
 
+		// NNT-63 -> Add item keyboard is always random, so missclicking is quite a pain in the ***
+		// Sorting keys we can provide an Sorted Keyboard.
+		keys := make([]uint32, 0, len(mapInventory))
+		for k := range mapInventory {
+			keys = append(keys, k)
+		}
+		sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+
 		// Keyboard with resources
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
-		for r, q := range mapInventory {
+		for _, r := range keys {
+			q := mapInventory[r]
 			// If PayloadResouces < Inventory quantity ok :)
 			var rGetResourceByID *pb.GetResourceByIDResponse
 			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
