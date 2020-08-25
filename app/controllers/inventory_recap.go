@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -60,8 +59,6 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 
 	var recapItems string
 	recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
-	log.Println("len -> ", len(rGetPlayerItems.GetPlayerInventory()))
-	log.Println(rGetPlayerItems.GetPlayerInventory())
 	for _, resource := range rGetPlayerItems.GetPlayerInventory() {
 		recapItems += fmt.Sprintf(
 			"- %v x %s (*%s*)\n",
