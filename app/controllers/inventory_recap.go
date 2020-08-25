@@ -67,7 +67,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 			"- %v x %s (*%s*)\n",
 			resource.Quantity,
 			helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug),
-			strings.ToUpper(resource.Item.Rarity.Slug),
+			helpers.Trans(player.Language.Slug, "items."+resource.Item.ItemCategory.Slug),
 		)
 	}
 
