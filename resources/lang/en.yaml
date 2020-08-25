@@ -39,6 +39,7 @@ route.safeplanet.research: "🔍️ Ricerca"
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.mission: "🏢 Centro Missioni"
 route.safeplanet.titan: "👁 Titani"
+route.safeplanet.coalition.expansion: "💫 Espansione"
 
 # ROUTES - Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -144,6 +145,7 @@ combat.found.item: "\nTrovando: 🔩*%s*"
 combat.found.transaction: "\nTrovando: *%v*💰"
 combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
 combat.experience: "Ottenendo anche *%v* di esperienza nel combattimento!"
+combat.mob_miss: "Hai schivato il colpo, ma hai comunque inflitto %d danni."
 
 # MISSION
 exploration.exploration: "Seleziona campo di ricerca:"
@@ -178,11 +180,11 @@ crafting.no_resources: "Non hai abbastanza risorse!"
 crafting.no_resource: "Non hai questa risorsa!"
 
 # ITEMS
-items.revitalizing_small: "Rivitalizzante piccolo"
+items.revitalizing_small: "Revitalizzante piccolo"
 items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
-items.revitalizing_medium: "Rivitalizzante medio"
+items.revitalizing_medium: "Revitalizzante medio"
 items.description.revitalizing_medium: "Permette di recuperare *%vHP*."
-items.revitalizing_max: "Rivitalizzante grande"
+items.revitalizing_max: "Revitalizzante grande"
 items.description.revitalizing_max: "Permette di recuperare *%vHP*."
 
 items.raw_fuel: "Carburante grezzo"
@@ -383,6 +385,16 @@ route.safeplanet.titan.info: "Benventuo nel centro 👁 *Titani*.\n\nLa colazion
 route.safeplanet.titan.choice: "Se vuoi esser dei nostri scegli un titano dalla lista qui sotto e penseremo noi a trasportarti immediatamente da lui."
 route.safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato trovato nessun titano.\nEsplora lo spazio per trovarne qualcuno o torna più tardi."
 route.safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
+
+# SAFEPLANET -
+safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\nEsplorando tutti i pianeti al momento conosciuti, aiuterai la coalizione ad espandare i nostri confini.\n\n"
+safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
+safeplanet.coalition.expansion.recap: "Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
+safeplanet.coalition.expansion.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTorna a breve per scoprire i progressi."
+safeplanet.coalition.expansion.choice: "\n\nLa coalizione ti offre la possibilità ti teletrasportati istantaneamente su altri pianeti sicuri scoperti. Quale vuoi raggiungere?"
+safeplanet.coalition.expansion.confirmation: "Stai per essere trasportato sul pianeta sicuro 🏟*%s*, il costo per questa operazione è di 💎*%v*, sicuro di voler continuare?"
+safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
+safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
 
 # PLANET
 planet.intro: "Dettaglio posizione attuale:"
