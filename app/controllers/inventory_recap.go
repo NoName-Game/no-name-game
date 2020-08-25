@@ -31,7 +31,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// Recupero risorse inventario
 	// *******************
 	rGetPlayerResource, err := services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
-		PlayerID: c.Player.GetID(),
+		PlayerID: player.GetID(),
 	})
 	if err != nil {
 		panic(err)
@@ -52,7 +52,7 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 	// Recupero item inventario
 	// *******************
 	rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
-		PlayerID: c.Player.GetID(),
+		PlayerID: player.GetID(),
 	})
 	if err != nil {
 		panic(err)
@@ -77,8 +77,6 @@ func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Upd
 		recapResources,
 		recapItems,
 	)
-
-	log.Println(finalRecap)
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, finalRecap)
 	msg.ParseMode = "markdown"
