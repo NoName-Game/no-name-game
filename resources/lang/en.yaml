@@ -58,6 +58,7 @@ validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
 validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
 validator.not_valid: "Il parametro inserito non è valido"
 valodator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi"
+validator.command_not_valid: "Il comando da te scelto non"
 
 # GENERAL
 complete: "Fatto!"
@@ -180,6 +181,9 @@ crafting.no_resources: "Non hai abbastanza risorse!"
 crafting.no_resource: "Non hai questa risorsa!"
 
 # ITEMS
+items.medical: "💊"
+items.ship_support: "⚙️"
+
 items.revitalizing_small: "Revitalizzante piccolo"
 items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
 items.revitalizing_medium: "Revitalizzante medio"
