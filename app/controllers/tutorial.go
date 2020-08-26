@@ -663,7 +663,7 @@ func (c *TutorialController) Stage() (err error) {
 	case 7:
 		// Questo stage fa viaggiare il player forzatamente verso un pianeta sicuro
 		firstTravelMessage := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_travel"))
-
+		firstTravelMessage.ParseMode = "markdown"
 		_, err = services.SendMessage(firstTravelMessage)
 		if err != nil {
 			return err
@@ -724,12 +724,12 @@ func (c *TutorialController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
-			),
+		firstSafeMessage := services.NewMessage(
+			c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
 		)
+		firstSafeMessage.ParseMode = "markdown"
+		_, err = services.SendMessage(firstSafeMessage)
 		if err != nil {
 			return err
 		}
