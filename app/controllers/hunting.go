@@ -362,8 +362,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	// Eseguo azione
 	switch action {
 	case "up":
-		// Se non è un muro posso proseguire
-		if !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
+		if c.PlayerPositionX > 0 && !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
 			c.PlayerPositionX--
 			break
 		}
@@ -371,21 +370,21 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 		return
 	case "down":
 		// Se non è un muro posso proseguire
-		if !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
+		if c.PlayerPositionX < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
 			c.PlayerPositionX++
 			break
 		}
 
 		return
 	case "left":
-		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
+		if c.PlayerPositionY > 0 && !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
 			c.PlayerPositionY--
 			break
 		}
 
 		return
 	case "right":
-		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
+		if c.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
 			c.PlayerPositionY++
 			break
 		}
