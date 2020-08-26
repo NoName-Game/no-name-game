@@ -31,7 +31,7 @@ type ShipTravelController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -45,8 +45,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update,
 			To:        &ShipController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}

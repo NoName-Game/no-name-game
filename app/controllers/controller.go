@@ -18,7 +18,7 @@ var (
 
 // Controller - Intereffaccia base di tutti i controller
 type Controller interface {
-	Handle(*pb.Player, tgbotapi.Update, bool)
+	Handle(*pb.Player, tgbotapi.Update)
 	Validator()
 	Stage()
 }
@@ -46,7 +46,6 @@ type ControllerConfiguration struct {
 	ControllerBack    ControllerBack
 	Controller        string
 	Payload           interface{}
-	ProxyStatment     bool // Viene richiamato da qualche altro controller
 }
 
 type ControllerBack struct {
@@ -82,10 +81,8 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 	}
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !c.Configuration.ProxyStatment {
-		if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
-			return false
-		}
+	if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
+		return false
 	}
 
 	return true
@@ -119,44 +116,34 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 	if c.Update.Message != nil {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 			if c.Configuration.Controller != "" {
-				if c.PlayerData.CurrentState.GetStage() <= canBackFromStage {
-					// Cancello stato da cache
-					helpers.DelCacheState(c.Player.ID)
-
-					// Cancello record a db
-					if c.PlayerData.CurrentState != nil {
-						_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-							PlayerStateID: c.PlayerData.CurrentState.ID,
-							ForceDelete:   true,
-						})
-
-						if err != nil {
-							panic(err)
-						}
-					}
-
-					controller.Handle(c.Player, c.Update, true)
-					backed = true
+				if c.PlayerData.CurrentState.GetStage() > canBackFromStage {
+					c.PlayerData.CurrentState.Stage = 0
 					return
 				}
-
-				c.PlayerData.CurrentState.Stage = 0
-				return
 			}
 
 			// Cancello stato da cache
 			helpers.DelCacheState(c.Player.ID)
 
 			// Cancello record a db
-			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerStateID: c.PlayerData.CurrentState.ID,
-				ForceDelete:   true,
-			})
-			if err != nil {
-				panic(err)
+			if c.PlayerData.CurrentState != nil {
+				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+					PlayerStateID: c.PlayerData.CurrentState.ID,
+					ForceDelete:   true,
+				})
+				if err != nil {
+					panic(err)
+				}
 			}
 
-			controller.Handle(c.Player, c.Update, true)
+			// se è stato settato un controller esco
+			if controller != nil {
+				controller.Handle(c.Player, c.Update)
+				backed = true
+				return
+			}
+
+			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
 		}
@@ -180,7 +167,7 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 				}
 
 				// Call menu controller
-				new(MenuController).Handle(c.Player, c.Update, true)
+				new(MenuController).Handle(c.Player, c.Update)
 
 				backed = true
 				return
@@ -194,7 +181,7 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			helpers.DelCacheState(c.Player.ID)
 
 			// Call menu controller
-			new(MenuController).Handle(c.Player, c.Update, true)
+			new(MenuController).Handle(c.Player, c.Update)
 
 			backed = true
 			return
@@ -240,11 +227,11 @@ func (c *BaseController) Completing() (err error) {
 
 		// Call menu controller
 		if c.Configuration.ControllerBack.To != nil {
-			c.Configuration.ControllerBack.To.Handle(c.Player, c.Update, true)
+			c.Configuration.ControllerBack.To.Handle(c.Player, c.Update)
 			return
 		}
 
-		new(MenuController).Handle(c.Player, c.Update, true)
+		new(MenuController).Handle(c.Player, c.Update)
 		return
 	}
 
@@ -254,7 +241,7 @@ func (c *BaseController) Completing() (err error) {
 		helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update, true)
+		new(MenuController).Handle(c.Player, c.Update)
 	}
 
 	return

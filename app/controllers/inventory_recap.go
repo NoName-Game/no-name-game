@@ -20,7 +20,7 @@ type InventoryRecapController BaseController
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *InventoryRecapController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	var finalRecap string
 

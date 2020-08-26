@@ -25,7 +25,7 @@ type SafePlanetBankController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -33,9 +33,8 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.safeplanet.bank",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.safeplanet.bank",
+		Payload:    c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,

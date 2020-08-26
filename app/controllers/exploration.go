@@ -35,7 +35,7 @@ type ExplorationController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -49,8 +49,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 			To:        &MenuController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}

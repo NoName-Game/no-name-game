@@ -84,7 +84,7 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -94,7 +94,6 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	if !c.InitController(ControllerConfiguration{
 		Controller:        "route.hunting",
 		ControllerBlocked: []string{"mission"},
-		ProxyStatment:     proxy,
 		Payload:           c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},

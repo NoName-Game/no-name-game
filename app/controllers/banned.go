@@ -17,7 +17,7 @@ type BannedController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
@@ -27,10 +27,8 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
+	if c.BackTo(0, &MenuController{}) {
+		return
 	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "banned.message"))

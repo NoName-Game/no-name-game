@@ -16,7 +16,7 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 	// A prescindere da tutto verifico se il player è stato bannato
 	// Se così fosse non gestisco nemmeno l'update.
 	if player.Banned {
-		invoke(Routes["route.banned"], "Handle", player, update, false)
+		invoke(Routes["route.banned"], "Handle", player, update)
 		return
 	}
 
@@ -31,7 +31,7 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 	// Dirigo ad una rotta normale
 	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
 	if isRoute {
-		invoke(Routes[route], "Handle", player, update, false)
+		invoke(Routes[route], "Handle", player, update)
 		return
 	}
 
@@ -39,12 +39,12 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 	// userò quella come main per gestire ulteriori sottostati
 	isCachedRoute, _ := helpers.GetCacheState(player.ID)
 	if isCachedRoute != "" {
-		invoke(Routes[isCachedRoute], "Handle", player, update, false)
+		invoke(Routes[isCachedRoute], "Handle", player, update)
 		return
 	}
 
 	// Se nulla di tutto questo dovesse andare ritorno il menu
-	invoke(Routes["route.menu"], "Handle", player, update, false)
+	invoke(Routes["route.menu"], "Handle", player, update)
 }
 
 // inRoutes - Verifica se esiste la rotta

@@ -27,7 +27,7 @@ type InventoryItemController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -40,8 +40,7 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 			To:        &InventoryController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}

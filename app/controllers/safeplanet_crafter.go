@@ -31,7 +31,7 @@ type SafePlanetCrafterController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -39,9 +39,8 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.safeplanet.crafter",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.safeplanet.crafter",
+		Payload:    c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,

@@ -26,7 +26,7 @@ type SafePlanetExpansionController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -39,8 +39,7 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 2,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}

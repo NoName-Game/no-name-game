@@ -40,7 +40,7 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -48,9 +48,8 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.titanplanet.tackle",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.titanplanet.tackle",
+		Payload:    c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,
