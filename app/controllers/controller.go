@@ -279,6 +279,7 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 
 		// Call menu controller
 		if c.Configuration.ControllerBack.To != nil {
+			c.Update.Message.Text = ""
 			c.Configuration.ControllerBack.To.Handle(c.Player, c.Update)
 			return
 		}
