@@ -40,10 +40,11 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	c.Player = player
 	c.Update = update
 
-	// Controllo se il player no ha mai fatto il tutorial
-	if c.Player.GetTutorial() == true {
+	// Se il player ha già finito il tutorial non può assolutamente entrare in questo controller
+	if c.Player.GetTutorial() {
+		c.BlockUpdateState = true
 		c.ForceBackTo = true
-		_ = c.Completing()
+		_ = c.Completing(c.Payload)
 		return
 	}
 
