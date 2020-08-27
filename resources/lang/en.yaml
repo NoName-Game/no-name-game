@@ -61,6 +61,7 @@ validator.general: "Una tempesta solare ha corrotto i dati, riprova!"
 validator.state: "Una tempesta solare ha corrotto gli stati, riprova!"
 validator.not_valid: "Il parametro inserito non è valido"
 valodator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi"
+validator.command_not_valid: "Il comando da te scelto non"
 
 # GENERAL
 complete: "Fatto!"

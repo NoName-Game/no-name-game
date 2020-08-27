@@ -40,6 +40,14 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	c.Player = player
 	c.Update = update
 
+	// Se il player ha già finito il tutorial non può assolutamente entrare in questo controller
+	if c.Player.GetTutorial() {
+		c.BlockUpdateState = true
+		c.ForceBackTo = true
+		_ = c.Completing(c.Payload)
+		return
+	}
+
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
 		Controller: "route.tutorial",
@@ -734,6 +742,14 @@ func (c *TutorialController) Stage() (err error) {
 		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
 			PlayerStateID: c.Payload.MissionID,
 			ForceDelete:   true,
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = services.NnSDK.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
+			PlayerID: c.Player.ID,
+			End:      true,
 		})
 		if err != nil {
 			return err
