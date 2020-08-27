@@ -684,6 +684,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
 		c.PlayerData.CurrentState.Stage = 8
+		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
