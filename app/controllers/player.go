@@ -21,16 +21,15 @@ type PlayerController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.player",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.player",
+		Payload:    c.Payload,
 	}) {
 		return
 	}

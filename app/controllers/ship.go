@@ -23,7 +23,7 @@ type ShipController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 
@@ -35,10 +35,8 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
+	if c.BackTo(0, &MenuController{}) {
+		return
 	}
 
 	// Recupero nave attiva de player

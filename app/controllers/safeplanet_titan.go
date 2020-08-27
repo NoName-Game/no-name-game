@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
-
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -21,7 +19,7 @@ type SafePlanetTitanController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -34,8 +32,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -45,47 +42,18 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -93,20 +61,12 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	case 1:
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
@@ -120,16 +80,16 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 		if len(rTitanDiscovered.GetTitans()) > 0 {
 			for _, titan := range rTitanDiscovered.GetTitans() {
 				if c.Update.Message.Text == titan.GetName() {
-					return false, err
+					return false
 				}
 			}
 		}
 
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true, err
+		return true
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

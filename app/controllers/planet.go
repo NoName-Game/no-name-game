@@ -20,7 +20,7 @@ type PlanetController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
@@ -30,10 +30,8 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !proxy {
-		if c.BackTo(0, &MenuController{}) {
-			return
-		}
+	if c.BackTo(0, &MenuController{}) {
+		return
 	}
 
 	// Recupero pianeta corrente del player
@@ -88,7 +86,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update, pro
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 

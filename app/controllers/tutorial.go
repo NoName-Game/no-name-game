@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -35,7 +34,7 @@ type TutorialController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -43,9 +42,8 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, p
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.tutorial",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.tutorial",
+		Payload:    c.Payload,
 	}) {
 		return
 	}
@@ -55,45 +53,18 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, p
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -101,13 +72,12 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, p
 // ====================================
 // Validator
 // ====================================
-func (c *TutorialController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-
+func (c *TutorialController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, nil
+		return false
 
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
@@ -119,20 +89,20 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// Verifico se la lingua esiste, se così non fosse ritorno errore
 		if err != nil {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true, nil
+			return true
 		}
 
-		return false, nil
+		return false
 
 	// In questo stage devo verificare unicamente che venga passata una stringa
 	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true, nil
+			return true
 		}
 
-		return false, nil
+		return false
 
 	// In questo stage verifico se il player ha usato il rivitalizzante
 	case 3:
@@ -150,14 +120,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 2
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 
 	// In questo stage verifico se il player ha completato correttamente la missione
 	case 5:
@@ -175,14 +145,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 3
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	// case 5:
 	// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 	//
@@ -216,14 +186,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 5
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
@@ -239,14 +209,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 6
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	case 8:
 		var finishAt time.Time
 		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
@@ -262,18 +232,18 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 
 		// Verifico se ha finito il crafting
 		if time.Now().After(finishAt) {
-			return false, err
+			return false
 		}
 
-		return true, err
+		return true
 	case 9:
-		return false, err
+		return false
 	default:
 		// Stato non riconosciuto ritorno errore
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================
@@ -528,7 +498,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo missione come sottoprocesso di questo controller
 		useItemController := new(InventoryItemController)
 		useItemController.ControllerFather = c.PlayerData.CurrentState.ID
-		useItemController.Handle(c.Player, c.Update, true)
+		useItemController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.UseItemID = useItemController.PlayerData.CurrentState.ID
@@ -564,7 +534,7 @@ func (c *TutorialController) Stage() (err error) {
 		missionController := new(ExplorationController)
 		missionController.ControllerFather = c.PlayerData.CurrentState.ID
 		missionController.Payload.ForcedTime = 1
-		missionController.Handle(c.Player, c.Update, true)
+		missionController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.MissionID = missionController.PlayerData.CurrentState.ID
@@ -624,7 +594,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo crafting come sottoprocesso di questo controller
 		inventoryController := new(PlayerEquipmentController)
 		inventoryController.ControllerFather = c.PlayerData.CurrentState.ID
-		inventoryController.Handle(c.Player, c.Update, true)
+		inventoryController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.InventoryEquipID = inventoryController.PlayerData.CurrentState.ID
@@ -658,7 +628,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo crafting come sottoprocesso di questo controller
 		huntingController := new(HuntingController)
 		huntingController.ControllerFather = c.PlayerData.CurrentState.ID
-		huntingController.Handle(c.Player, c.Update, true)
+		huntingController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.HuntingID = huntingController.PlayerData.CurrentState.ID
@@ -687,30 +657,33 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.PlayerData.CurrentState.Stage = 8
 		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
-
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
+		c.ForceBackTo = true
+	case 8:
+		var rGetShipEquipped *pb.GetPlayerShipEquippedResponse
+		rGetShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.ID,
 		})
 		if err != nil {
-			return
-		}
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-	case 8:
-		rGetShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{PlayerID: c.Player.ID})
-		if err != nil {
 			return err
 		}
+
 		// Recupero la posizione del player e i pianeti sicuro
-		rGetPlayerCurrentPlanet, err := services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{PlayerID: c.Player.ID})
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: c.Player.ID,
+		})
 		if err != nil {
 			return err
 		}
+
 		systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
-		rGetSafePlanet, err := services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
+
+		var rGetSafePlanet *pb.GetSafePlanetsResponse
+		rGetSafePlanet, err = services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
 		if err != nil {
 			return err
 		}
+
 		var safePlanet *pb.Planet
 		for _, p := range rGetSafePlanet.GetSafePlanets() {
 			if p.GetPlanetSystemID() == systemID {
@@ -718,6 +691,7 @@ func (c *TutorialController) Stage() (err error) {
 				safePlanet = p
 			}
 		}
+
 		_, err = services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			Integrity: 0,
 			Tank:      0,
@@ -727,11 +701,13 @@ func (c *TutorialController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		firstSafeMessage := services.NewMessage(
 			c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
 		)
 		firstSafeMessage.ParseMode = "markdown"
+
 		_, err = services.SendMessage(firstSafeMessage)
 		if err != nil {
 			return err
@@ -739,16 +715,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
 		c.PlayerData.CurrentState.Stage = 9
-
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
-		})
-		if err != nil {
-			return err
-		}
-
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+		c.ForceBackTo = true
 	case 9:
 		_, err = services.SendMessage(
 			services.NewMessage(

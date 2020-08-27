@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"math"
 	"time"
 
@@ -27,7 +26,7 @@ type ShipRestsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -41,8 +40,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 			To:        &ShipController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -52,47 +50,18 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -100,33 +69,24 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update, 
 // ====================================
 // Validator
 // ====================================
-func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *ShipRestsController) Validator() (hasErrors bool) {
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.start") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	case 2:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup")
-			return true, err
+			return true
 		}
 
 		// Si vuole svegliare, ma non è passato ancora un minuto
@@ -136,13 +96,13 @@ func (c *ShipRestsController) Validator() (hasErrors bool, err error) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 		if diffMinutes <= 1 {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

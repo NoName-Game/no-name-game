@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -26,7 +25,7 @@ type PlayerEquipmentController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -39,8 +38,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 			To:        &PlayerController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -50,46 +48,18 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -97,20 +67,11 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 // ====================================
 // Validator
 // ====================================
-func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	// Verifico che la tipologia di equip che vuole il player esista
 	case 1:
@@ -118,33 +79,33 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool, err error) {
 			helpers.Trans(c.Player.Language.Slug, "armors"),
 			helpers.Trans(c.Player.Language.Slug, "weapons"),
 		}) {
-			return false, err
+			return false
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-		return true, err
+		return true
 
 	// Verifico che il player voglia continuare con l'equip
 	case 2:
 		if strings.Contains(c.Update.Message.Text, "🩸") || strings.Contains(c.Update.Message.Text, "🛡") {
-			return false, err
+			return false
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-		return true, err
+		return true
 
 	// Verifico la conferma dell'equip
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			return false, err
+			return false
 		}
 
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-		return true, err
+		return true
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

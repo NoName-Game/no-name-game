@@ -31,7 +31,7 @@ type SafePlanetCrafterController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -39,9 +39,8 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.safeplanet.crafter",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.safeplanet.crafter",
+		Payload:    c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,
@@ -55,46 +54,18 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		// validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -102,49 +73,41 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetCrafterController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	case 0:
-		return false, err
+		return false
 		// nothinggg
 	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
 			c.Payload.Item = "armors"
-			return false, err
+			return false
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapons") {
 			c.Payload.Item = "weapons"
-			return false, err
+			return false
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-		return true, err
+		return true
 	case 2:
 		if c.Payload.Category = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.Category != "" {
-			return false, err
+			return false
 		}
-		return true, err
+		return true
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.add")) {
 			c.PlayerData.CurrentState.Stage = 2
 			c.Payload.AddFlag = true
-			return false, err
+			return false
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "crafting.start") {
 			if len(c.Payload.Resources) > 0 {
-				return false, err
+				return false
 			}
 		}
 	case 4:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			return false, err
+			return false
 		}
 	case 5:
 		var finishAt time.Time
@@ -178,11 +141,11 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool, err error) {
 		}
 
 		if time.Now().After(finishAt) {
-			return false, err
+			return false
 		}
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -40,7 +39,7 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -48,9 +47,8 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller:    "route.titanplanet.tackle",
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Controller: "route.titanplanet.tackle",
+		Payload:    c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,
@@ -64,51 +62,15 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	if !hasError {
-		err = c.Stage()
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-	rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
 	if c.PlayerData.CurrentState.GetCompleted() {
@@ -119,8 +81,8 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 		}
 	}
 
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -128,18 +90,16 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 // ====================================
 // Validator
 // ====================================
-func (c *TitanPlanetTackleController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-
+func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
 	// Il player deve avere sempre e perfoza un'arma equipaggiata
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.error.no_weapon_equipped")
 		c.PlayerData.CurrentState.Completed = true
-		return true, err
+		return true
 	}
 
-	return false, err
+	return false
 }
 
 // ====================================

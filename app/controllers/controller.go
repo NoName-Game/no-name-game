@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -18,7 +19,7 @@ var (
 
 // Controller - Intereffaccia base di tutti i controller
 type Controller interface {
-	Handle(*pb.Player, tgbotapi.Update, bool)
+	Handle(*pb.Player, tgbotapi.Update)
 	Validator()
 	Stage()
 }
@@ -38,6 +39,7 @@ type BaseController struct {
 	}
 	ControllerFather uint32
 	ForceBackTo      bool
+	BlockUpdateState bool
 	Configuration    ControllerConfiguration
 }
 
@@ -46,7 +48,6 @@ type ControllerConfiguration struct {
 	ControllerBack    ControllerBack
 	Controller        string
 	Payload           interface{}
-	ProxyStatment     bool // Viene richiamato da qualche altro controller
 }
 
 type ControllerBack struct {
@@ -82,10 +83,8 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 	}
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
-	if !c.Configuration.ProxyStatment {
-		if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
-			return false
-		}
+	if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
+		return false
 	}
 
 	return true
@@ -112,6 +111,36 @@ func (c *BaseController) LoadControllerData() {
 	c.PlayerData.PlayerStats = rGetPlayerStats.GetPlayerStats()
 }
 
+// Validate - Metodo comune per mandare messaggio di validazione
+func (c *BaseController) Validate() {
+	// Se non ha un messaggio particolare allora setto configurazione di default
+	if c.Validation.Message == "" {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	}
+
+	// if c.Validation.ReplyKeyboard.Keyboard == nil {
+	// 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+	// 		tgbotapi.NewKeyboardButtonRow(
+	// 			tgbotapi.NewKeyboardButton(
+	// 				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+	// 			),
+	// 		),
+	// 	)
+	// }
+
+	// Invio il messaggio in caso di errore e chiudo
+	validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+	validatorMsg.ParseMode = "markdown"
+	if c.Validation.ReplyKeyboard.Keyboard != nil {
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
+	}
+
+	_, err := services.SendMessage(validatorMsg)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Breaking - Metodo che permette di verificare se si vogliono fare
 // delle azioni che permetteranno di concludere
 func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (backed bool) {
@@ -119,44 +148,36 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 	if c.Update.Message != nil {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
 			if c.Configuration.Controller != "" {
-				if c.PlayerData.CurrentState.GetStage() <= canBackFromStage {
-					// Cancello stato da cache
-					helpers.DelCacheState(c.Player.ID)
-
-					// Cancello record a db
-					if c.PlayerData.CurrentState != nil {
-						_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-							PlayerStateID: c.PlayerData.CurrentState.ID,
-							ForceDelete:   true,
-						})
-
-						if err != nil {
-							panic(err)
-						}
-					}
-
-					controller.Handle(c.Player, c.Update, true)
-					backed = true
+				if c.PlayerData.CurrentState.GetStage() > canBackFromStage {
+					c.PlayerData.CurrentState.Stage = 0
 					return
 				}
-
-				c.PlayerData.CurrentState.Stage = 0
-				return
 			}
 
 			// Cancello stato da cache
 			helpers.DelCacheState(c.Player.ID)
 
 			// Cancello record a db
-			_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerStateID: c.PlayerData.CurrentState.ID,
-				ForceDelete:   true,
-			})
-			if err != nil {
-				panic(err)
+			if c.PlayerData.CurrentState != nil {
+				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+					PlayerStateID: c.PlayerData.CurrentState.ID,
+					ForceDelete:   true,
+				})
+				if err != nil {
+					panic(err)
+				}
 			}
 
-			controller.Handle(c.Player, c.Update, true)
+			// se è stato settato un controller esco
+			if controller != nil {
+				// Rimuovo testo messaggio
+				c.Update.Message.Text = ""
+				controller.Handle(c.Player, c.Update)
+				backed = true
+				return
+			}
+
+			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
 		}
@@ -180,7 +201,7 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 				}
 
 				// Call menu controller
-				new(MenuController).Handle(c.Player, c.Update, true)
+				new(MenuController).Handle(c.Player, c.Update)
 
 				backed = true
 				return
@@ -194,7 +215,7 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			helpers.DelCacheState(c.Player.ID)
 
 			// Call menu controller
-			new(MenuController).Handle(c.Player, c.Update, true)
+			new(MenuController).Handle(c.Player, c.Update)
 
 			backed = true
 			return
@@ -221,7 +242,25 @@ func (c *BaseController) Clearable() (clearable bool) {
 }
 
 // Completing - Metodo per settare il completamento di uno stato
-func (c *BaseController) Completing() (err error) {
+func (c *BaseController) Completing(payload interface{}) (err error) {
+	// Controllo se posso aggiornare lo stato
+	// Alcune attività come hunting hanno il poter di bloccare questo passaggio
+	if !c.BlockUpdateState {
+		// Converto payload
+		payloadUpdated, _ := json.Marshal(payload)
+		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
+
+		// Aggiorno stato
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.PlayerData.CurrentState,
+		})
+		if err != nil {
+			return
+		}
+		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+	}
+
 	// Verifico se lo stato è completato chiudo
 	if c.PlayerData.CurrentState.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
@@ -240,11 +279,12 @@ func (c *BaseController) Completing() (err error) {
 
 		// Call menu controller
 		if c.Configuration.ControllerBack.To != nil {
-			c.Configuration.ControllerBack.To.Handle(c.Player, c.Update, true)
+			c.Update.Message.Text = ""
+			c.Configuration.ControllerBack.To.Handle(c.Player, c.Update)
 			return
 		}
 
-		new(MenuController).Handle(c.Player, c.Update, true)
+		new(MenuController).Handle(c.Player, c.Update)
 		return
 	}
 
@@ -254,7 +294,7 @@ func (c *BaseController) Completing() (err error) {
 		helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
-		new(MenuController).Handle(c.Player, c.Update, true)
+		new(MenuController).Handle(c.Player, c.Update)
 	}
 
 	return
