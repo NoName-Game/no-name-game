@@ -130,7 +130,7 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 		return false
 
 	// In questo stage verifico se il player ha completato correttamente la missione
-	case 5:
+	case 4:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
@@ -153,30 +153,35 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 		}
 
 		return false
-	// case 5:
-	// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
-	//
-	// 	var stateNotFoundErr error
-	// 	var missionState nnsdk.PlayerState
-	// 	missionState, stateNotFoundErr = providers.GetPlayerStateByID(c.Payload.CraftingID)
-	// 	// Non è stato trovato lo stato ritorno allo stato precedente
-	// 	// e non ritorno errore
-	// 	if stateNotFoundErr != nil {
-	// 		c.PlayerData.CurrentState.Stage = 4
-	// 		return false, err
-	// 	}
-	//
-	// 	if *missionState.Completed != true {
-	// 		return true, err
-	// 	}
-	//
-	// 	return false, err
-	case 6:
+	case 5:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
 		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
 		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
 			ID: c.Payload.InventoryEquipID,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		// Non è stato trovato lo stato ritorno allo stato precedente
+		// e non ritorno errore
+		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
+			c.PlayerData.CurrentState.Stage = 4
+			return false
+		}
+
+		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
+			return true
+		}
+
+		return false
+	case 6:
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
+
+		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
+		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
+			ID: c.Payload.HuntingID,
 		})
 		if err != nil {
 			panic(err)
@@ -195,29 +200,6 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 
 		return false
 	case 7:
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
-
-		var rGetPlayerStateByID *pb.GetPlayerStateByIDResponse
-		rGetPlayerStateByID, err = services.NnSDK.GetPlayerStateByID(helpers.NewContext(1), &pb.GetPlayerStateByIDRequest{
-			ID: c.Payload.HuntingID,
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		// Non è stato trovato lo stato ritorno allo stato precedente
-		// e non ritorno errore
-		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
-			c.PlayerData.CurrentState.Stage = 6
-			return false
-		}
-
-		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true
-		}
-
-		return false
-	case 8:
 		var finishAt time.Time
 		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
 		if err != nil {
@@ -236,7 +218,7 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 		}
 
 		return true
-	case 9:
+	case 8:
 		return false
 	default:
 		// Stato non riconosciuto ritorno errore
@@ -268,7 +250,7 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Invio messaggio
-		msg := services.NewMessage(c.Update.Message.Chat.ID, "Select language")
+		msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "select_language"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		_, err = services.SendMessage(msg)
 		if err != nil {
@@ -278,8 +260,9 @@ func (c *TutorialController) Stage() (err error) {
 		// Aggiorna stato
 		c.PlayerData.CurrentState.Stage = 1
 
-	// In questo stage è previsto un'invio di un set di messaggi
-	// che introducono al player cosa sta accadendo
+	// #############################
+	// SET MESSAGGI
+	// #############################
 	case 1:
 		// Recupero set di messaggi
 		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Configuration.Controller)
@@ -468,7 +451,9 @@ func (c *TutorialController) Stage() (err error) {
 		// Aggiorna stato
 		c.PlayerData.CurrentState.Stage = 2
 
-	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
+	// #############################
+	// USA ITEM
+	// #############################
 	case 2:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
 		firstUseMessage := services.NewMessage(c.Player.ChatID,
@@ -503,7 +488,9 @@ func (c *TutorialController) Stage() (err error) {
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.UseItemID = useItemController.PlayerData.CurrentState.ID
 
-	// In questo stage è previsto che l'utenta debba effettuare una prima esplorazione
+	// #############################
+	// PRIMA ESPLORAZIONE
+	// #############################
 	case 3:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
 		firstMissionMessage := services.NewMessage(c.Player.ChatID,
@@ -518,7 +505,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.PlayerData.CurrentState.Stage = 5
+		c.PlayerData.CurrentState.Stage = 4
 
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
@@ -538,34 +525,11 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.MissionID = missionController.PlayerData.CurrentState.ID
-	// case 4:
-	// 	// Primo Craft
-	// 	_, err = services.SendMessage(
-	// 		services.NewMessage(
-	// 			c.Player.ChatID,
-	// 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_crafting"),
-	// 		),
-	// 	)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	//
-	// 	// Forzo a mano l'aggiornamento dello stato del player
-	// 	// in quanto adesso devo richiamare un'altro controller
-	// 	c.PlayerData.CurrentState.Stage = 5
-	// 	c.PlayerData.CurrentState, err = providers.UpdatePlayerState(c.PlayerData.CurrentState)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	//
-	// 	// Richiamo crafting come sottoprocesso di questo controller
-	// 	craftingController := new(CraftingController)
-	// 	craftingController.Father = c.PlayerData.CurrentState.ID
-	// 	craftingController.Handle(c.Player, c.Update)
-	//
-	// 	// Recupero l'ID del task, mi serivirà per i controlli
-	// 	c.Payload.CraftingID = craftingController.State.ID
-	case 5:
+
+	// #############################
+	// EQUIPAGGIA ARMA
+	// #############################
+	case 4:
 		firstWeaponMessage := services.NewMessage(
 			c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
@@ -579,7 +543,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.PlayerData.CurrentState.Stage = 6
+		c.PlayerData.CurrentState.Stage = 5
 
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
@@ -599,7 +563,10 @@ func (c *TutorialController) Stage() (err error) {
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.InventoryEquipID = inventoryController.PlayerData.CurrentState.ID
 
-	case 6:
+	// #############################
+	// CACCIA!
+	// #############################
+	case 5:
 		firstHuntingMessage := services.NewMessage(
 			c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
@@ -613,7 +580,7 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.PlayerData.CurrentState.Stage = 7
+		c.PlayerData.CurrentState.Stage = 6
 
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
@@ -632,7 +599,11 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.HuntingID = huntingController.PlayerData.CurrentState.ID
-	case 7:
+
+	// #############################
+	// PRIMO VIAGGIO VERSO PIANETA SICURO
+	// #############################
+	case 6:
 		// Questo stage fa viaggiare il player forzatamente verso un pianeta sicuro
 		firstTravelMessage := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_travel"))
 		firstTravelMessage.ParseMode = "markdown"
@@ -655,10 +626,10 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.PlayerData.CurrentState.Stage = 8
+		c.PlayerData.CurrentState.Stage = 7
 		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 		c.ForceBackTo = true
-	case 8:
+	case 7:
 		var rGetShipEquipped *pb.GetPlayerShipEquippedResponse
 		rGetShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.ID,
@@ -714,9 +685,9 @@ func (c *TutorialController) Stage() (err error) {
 		}
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.PlayerData.CurrentState.Stage = 9
+		c.PlayerData.CurrentState.Stage = 8
 		c.ForceBackTo = true
-	case 9:
+	case 8:
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,

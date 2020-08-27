@@ -324,7 +324,23 @@ func (c *BaseController) InStatesBlocker() (inStates bool) {
 					}
 				}
 			}
+		}
+	}
 
+	return false
+}
+
+// InTutorial - Metodo che semplifica il controllo se il player si trova dentro un tutorial
+func (c *BaseController) InTutorial() bool {
+	for _, state := range c.PlayerData.ActiveStates {
+		if !state.Completed {
+			if c.PlayerData.CurrentState != nil {
+				if state.Father == 0 || state.Father != c.PlayerData.CurrentState.GetFather() {
+					if state.Controller == "route.tutorial" {
+						return true
+					}
+				}
+			}
 		}
 	}
 

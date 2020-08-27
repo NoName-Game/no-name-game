@@ -181,7 +181,8 @@ func (c *HuntingController) Hunting() (err error) {
 		// Se è qualsiasi messaggio diverso da hunting non lo calcolo
 		// in quanto adnrebbe a generare più volte il messaggio con la stessa mappa
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") &&
-			c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial") {
+			c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial") &&
+			c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue") {
 			return
 		}
 

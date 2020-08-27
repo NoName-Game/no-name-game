@@ -264,9 +264,16 @@ func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardB
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.PlayerData.ActiveStates {
 		if !state.GetCompleted() {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
-			)
+			var keyboardRow []tgbotapi.KeyboardButton
+			if state.Controller == "route.tutorial" {
+				keyboardRow = tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue")),
+				)
+			} else {
+				keyboardRow = tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
+				)
+			}
 
 			keyboardRows = append(keyboardRows, keyboardRow)
 		}

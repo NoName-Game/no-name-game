@@ -460,6 +460,13 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		// Completo lo stato
 		c.PlayerData.CurrentState.Completed = true
+
+		// ###################
+		// TUTORIAL - Solo il player si trova dentro il tutorial forzo di tornarare al menu
+		// ###################
+		if c.InTutorial() {
+			c.Configuration.ControllerBack.To = &MenuController{}
+		}
 	}
 
 	return
