@@ -62,37 +62,14 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	if !hasError {
-		err = c.Stage()
-		if err != nil {
-			panic(err)
-		}
+	if err = c.Stage(); err != nil {
+		panic(err)
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
@@ -104,27 +81,27 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 		}
 	}
 
-	err = c.Completing(c.Payload)
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
+
+	return
 }
 
 // ====================================
 // Validator
 // ====================================
-func (c *TitanPlanetTackleController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-
+func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
 	// Il player deve avere sempre e perfoza un'arma equipaggiata
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.error.no_weapon_equipped")
 		c.PlayerData.CurrentState.Completed = true
-		return true, err
+		return true
 	}
 
-	return false, err
+	return false
 }
 
 // ====================================

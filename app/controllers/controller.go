@@ -111,6 +111,36 @@ func (c *BaseController) LoadControllerData() {
 	c.PlayerData.PlayerStats = rGetPlayerStats.GetPlayerStats()
 }
 
+// Validate - Metodo comune per mandare messaggio di validazione
+func (c *BaseController) Validate() {
+	// Se non ha un messaggio particolare allora setto configurazione di default
+	if c.Validation.Message == "" {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+	}
+
+	if c.Validation.ReplyKeyboard.Keyboard == nil {
+		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				),
+			),
+		)
+	}
+
+	// Invio il messaggio in caso di errore e chiudo
+	validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+	validatorMsg.ParseMode = "markdown"
+	validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
+
+	_, err := services.SendMessage(validatorMsg)
+	if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
 // Breaking - Metodo che permette di verificare se si vogliono fare
 // delle azioni che permetteranno di concludere
 func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (backed bool) {

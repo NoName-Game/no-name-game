@@ -49,61 +49,33 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Verifico completamento
-	err = c.Completing(c.Payload)
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
+
+	return
 }
 
 // ====================================
 // Validator
 // ====================================
-func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *InventoryItemController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	// Verifico quale item ha scelto di usare e controllo se il player ha realmente
 	// l'item indicato
@@ -113,7 +85,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
-			return false, err
+			return false
 		}
 
 		// Recupero nome item che il player vuole usare
@@ -122,23 +94,23 @@ func (c *InventoryItemController) Validator() (hasErrors bool, err error) {
 		for _, item := range rGetPlayerItems.GetPlayerInventory() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
 				c.Payload.Item = item.GetItem()
-				return false, err
+				return false
 			}
 		}
 
-		return true, err
+		return true
 
 	// Verifico la conferma dell'uso
 	case 2:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			return false, err
+			return false
 		}
 
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true, err
+		return true
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

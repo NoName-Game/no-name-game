@@ -52,47 +52,33 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Verifico completamento
-	err = c.Completing(c.Payload)
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
+
+	return
 }
 
 // ====================================
 // Validator
 // ====================================
-func (c *TutorialController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-
+func (c *TutorialController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, nil
+		return false
 
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
@@ -104,20 +90,20 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// Verifico se la lingua esiste, se così non fosse ritorno errore
 		if err != nil {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true, nil
+			return true
 		}
 
-		return false, nil
+		return false
 
 	// In questo stage devo verificare unicamente che venga passata una stringa
 	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true, nil
+			return true
 		}
 
-		return false, nil
+		return false
 
 	// In questo stage verifico se il player ha usato il rivitalizzante
 	case 3:
@@ -135,14 +121,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 2
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 
 	// In questo stage verifico se il player ha completato correttamente la missione
 	case 5:
@@ -160,14 +146,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 3
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	// case 5:
 	// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 	//
@@ -201,14 +187,14 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 5
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	case 7:
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 
@@ -224,20 +210,20 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		// e non ritorno errore
 		if rGetPlayerStateByID.GetPlayerState().GetID() == 0 {
 			c.PlayerData.CurrentState.Stage = 6
-			return false, err
+			return false
 		}
 
 		if !rGetPlayerStateByID.GetPlayerState().GetCompleted() {
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	default:
 		// Stato non riconosciuto ritorno errore
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

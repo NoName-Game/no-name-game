@@ -42,56 +42,33 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Verifico completamento
-	err = c.Completing(c.Payload)
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
+
+	return
 }
 
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	case 1:
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
@@ -105,16 +82,16 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool, err error) {
 		if len(rTitanDiscovered.GetTitans()) > 0 {
 			for _, titan := range rTitanDiscovered.GetTitans() {
 				if c.Update.Message.Text == titan.GetName() {
-					return false, err
+					return false
 				}
 			}
 		}
 
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true, err
+		return true
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================
