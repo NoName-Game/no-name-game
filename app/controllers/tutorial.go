@@ -266,6 +266,8 @@ func (c *TutorialController) Validator() (hasErrors bool, err error) {
 		}
 
 		return true, err
+	case 9:
+		return false, err
 	default:
 		// Stato non riconosciuto ritorno errore
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
