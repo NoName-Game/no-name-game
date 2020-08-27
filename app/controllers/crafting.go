@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -32,7 +31,7 @@ type CraftingController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -45,8 +44,7 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, p
 			To:        &ShipController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -56,46 +54,18 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, p
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	// Verifico completamento
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -103,20 +73,12 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update, p
 // ====================================
 // Validator
 // ====================================
-func (c *CraftingController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *CraftingController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	// In questo stage verifico se mi è stata passata una categoria che esiste realmente
 	case 1:
@@ -127,17 +89,17 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		}) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
 		var rGetAllItems *pb.GetAllItemsResponse
 		rGetAllItems, err = services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{})
 		if err != nil {
-			return true, err
+			return true
 		}
 
 		// Recupero nome item che il player vuole craftare
@@ -154,10 +116,10 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 		if !itemExists {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "crafting.item_does_not_exist")
 
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 	// In questo stage è necessario che venga validato se il player ha tutti i
 	// materiali necessario al crafting dell'item da lui scelto
 	case 3:
@@ -168,7 +130,7 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 				PlayerID: c.Player.GetID(),
 			})
 			if err != nil {
-				return false, err
+				return false
 			}
 
 			// Ciclo gli elementi di cui devo verificare la presenza
@@ -188,14 +150,14 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 				if !haveResource {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "crafting.no_resource_to_craft")
 
-					return true, err
+					return true
 				}
 			}
 
-			return false, err
+			return false
 		}
 
-		return true, err
+		return true
 
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
@@ -226,13 +188,13 @@ func (c *CraftingController) Validator() (hasErrors bool, err error) {
 
 		// Verifico se ha finito il crafting
 		if time.Now().After(finishAt) {
-			return false, err
+			return false
 		}
 
-		return true, err
+		return true
 	}
 
-	return true, err
+	return true
 }
 
 // ====================================

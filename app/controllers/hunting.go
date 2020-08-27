@@ -33,7 +33,6 @@ type HuntingController struct {
 	}
 	PlayerPositionX int32
 	PlayerPositionY int32
-	NeedUpdateState bool
 }
 
 // Settings generali
@@ -84,7 +83,7 @@ var (
 // ====================================
 // Handle
 // ====================================
-func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -94,7 +93,6 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	if !c.InitController(ControllerConfiguration{
 		Controller:        "route.hunting",
 		ControllerBlocked: []string{"mission"},
-		ProxyStatment:     proxy,
 		Payload:           c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
@@ -109,59 +107,14 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
-	// Forzo il controllo dell'update, questo set servirà
-	// al controllo poco più sotto
-	c.NeedUpdateState = true
-
 	// Ok! Run!
-	if !hasError {
-		err = c.Stage()
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// Verifico se c'è realmente bisogno di aggiornare lo stato,
-	// effettuo questo controllo per evitare di fare un upadate inutile quando
-	// mi muovo e basta
-	if c.NeedUpdateState {
-		// Aggiorno stato finale
-		payloadUpdated, _ := json.Marshal(c.Payload)
-		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
-		})
-		if err != nil {
-			panic(err)
-		}
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+	if err = c.Stage(); err != nil {
+		panic(err)
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
@@ -173,8 +126,8 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 		}
 	}
 
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -182,18 +135,16 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update, pr
 // ====================================
 // Validator
 // ====================================
-func (c *HuntingController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-
+func (c *HuntingController) Validator() (hasErrors bool) {
 	// Il player deve avere sempre e perfoza un'arma equipaggiata
 	// Indipendentemente dallo stato in cui si trovi
 	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
 		c.PlayerData.CurrentState.Completed = true
-		return true, err
+		return true
 	}
 
-	return false, err
+	return false
 }
 
 // ====================================
@@ -362,8 +313,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	// Eseguo azione
 	switch action {
 	case "up":
-		// Se non è un muro posso proseguire
-		if !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
+		if c.PlayerPositionX > 0 && !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
 			c.PlayerPositionX--
 			break
 		}
@@ -371,21 +321,21 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 		return
 	case "down":
 		// Se non è un muro posso proseguire
-		if !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
+		if c.PlayerPositionX < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
 			c.PlayerPositionX++
 			break
 		}
 
 		return
 	case "left":
-		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
+		if c.PlayerPositionY > 0 && !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
 			c.PlayerPositionY--
 			break
 		}
 
 		return
 	case "right":
-		if !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
+		if c.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
 			c.PlayerPositionY++
 			break
 		}
@@ -538,7 +488,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	}
 
 	// Visto che si è trattato solo di un movimento non è necessario aggiornare lo stato
-	c.NeedUpdateState = false
+	c.BlockUpdateState = true
 
 	return
 }

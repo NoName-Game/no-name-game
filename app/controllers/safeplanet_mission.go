@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -24,7 +23,7 @@ type SafePlanetMissionController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -37,8 +36,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -48,46 +46,18 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -95,28 +65,19 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	// Verifico se ha scelto di avviare una nuova missione
 	case 1:
 		if helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start") == c.Update.Message.Text {
-			return false, err
+			return false
 		}
 
-		return true, err
+		return true
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
@@ -144,10 +105,10 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
 				),
 			)
 
-			return true, err
+			return true
 		}
 
-		return false, err
+		return false
 
 	default:
 		// Stato non riconosciuto ritorno errore
@@ -155,7 +116,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool, err error) {
 	}
 
 	// Ritorno errore generico
-	return true, err
+	return true
 }
 
 // ====================================

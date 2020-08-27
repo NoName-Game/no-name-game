@@ -21,7 +21,7 @@ type NpcMenuController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Il menù del player refresha sempre lo status del player
@@ -52,7 +52,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update, pr
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
 	if c.PlayerData.PlayerStats.GetDead() {
 		restsController := new(ShipRestsController)
-		restsController.Handle(c.Player, c.Update, true)
+		restsController.Handle(c.Player, c.Update)
 	}
 }
 

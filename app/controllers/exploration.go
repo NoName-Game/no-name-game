@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -35,7 +34,7 @@ type ExplorationController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -49,8 +48,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 			To:        &MenuController{},
 			FromStage: 1,
 		},
-		ProxyStatment: proxy,
-		Payload:       c.Payload,
+		Payload: c.Payload,
 	}) {
 		return
 	}
@@ -60,46 +58,18 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 
 	// Validate
 	var hasError bool
-	hasError, err = c.Validator()
-	if err != nil {
-		panic(err)
-	}
-
-	// Se ritornano degli errori
-	if hasError {
-		// Invio il messaggio in caso di errore e chiudo
-		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-		validatorMsg.ParseMode = "markdown"
-		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
-
-		_, err = services.SendMessage(validatorMsg)
-		if err != nil {
-			panic(err)
-		}
-
+	if hasError = c.Validator(); hasError {
+		c.Validate()
 		return
 	}
 
 	// Ok! Run!
-	err = c.Stage()
-	if err != nil {
+	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
-	err = c.Completing()
-	if err != nil {
+	// Completo progressione
+	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -107,20 +77,11 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 // Validator
 // ====================================
-func (c *ExplorationController) Validator() (hasErrors bool, err error) {
-	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
-	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-			),
-		),
-	)
-
+func (c *ExplorationController) Validator() (hasErrors bool) {
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false, err
+		return false
 
 	// In questo stage è necessario controllare che venga scelto
 	// un tipo di missione tra quelli disponibili
@@ -128,14 +89,15 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
 		for _, missionType := range ExplorationTypes {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType)) == c.Update.Message.Text {
-				return false, err
+				return false
 			}
 		}
 
-		return true, err
+		return true
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
+		var err error
 		var finishAt time.Time
 		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.GetFinishAt())
 		if err != nil {
@@ -154,7 +116,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 		if time.Now().After(finishAt) && c.Payload.Times < 10 {
 			c.Payload.Times++
 
-			return false, err
+			return false
 		}
 
 		// Aggiungo anche abbandona
@@ -169,7 +131,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 			),
 		)
 
-		return true, err
+		return true
 
 	// In questo stage verifico l'azione che vuole intraprendere l'utente
 	case 3:
@@ -178,17 +140,17 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 			c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
 			c.PlayerData.CurrentState.ToNotify = true
 
-			return false, err
+			return false
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
 			// Passo allo stadio conclusivo
 			c.PlayerData.CurrentState.Stage = 4
 
-			return false, err
+			return false
 		}
 
-		return true, err
+		return true
 
 	default:
 		// Stato non riconosciuto ritorno errore
@@ -196,7 +158,7 @@ func (c *ExplorationController) Validator() (hasErrors bool, err error) {
 	}
 
 	// Ritorno errore generico
-	return true, err
+	return true
 }
 
 // ====================================

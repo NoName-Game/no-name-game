@@ -31,7 +31,7 @@ type MenuController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy bool) {
+func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
@@ -63,7 +63,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update, proxy
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
 	if c.PlayerData.PlayerStats.GetDead() {
 		restsController := new(ShipRestsController)
-		restsController.Handle(c.Player, c.Update, true)
+		restsController.Handle(c.Player, c.Update)
 	}
 }
 
