@@ -170,6 +170,8 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 
 			// se è stato settato un controller esco
 			if controller != nil {
+				// Rimuovo testo messaggio
+				c.Update.Message.Text = ""
 				controller.Handle(c.Player, c.Update)
 				backed = true
 				return

@@ -86,7 +86,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 
