@@ -659,30 +659,29 @@ func (c *TutorialController) Stage() (err error) {
 		// in quanto adesso devo richiamare un'altro controller
 		c.PlayerData.CurrentState.Stage = 8
 		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
-
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
+		c.ForceBackTo = true
+	case 8:
+		rGetShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.ID,
 		})
 		if err != nil {
-			return
-		}
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-	case 8:
-		rGetShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{PlayerID: c.Player.ID})
-		if err != nil {
 			return err
 		}
+
 		// Recupero la posizione del player e i pianeti sicuro
-		rGetPlayerCurrentPlanet, err := services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{PlayerID: c.Player.ID})
+		rGetPlayerCurrentPlanet, err := services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: c.Player.ID,
+		})
 		if err != nil {
 			return err
 		}
+
 		systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
 		rGetSafePlanet, err := services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
 		if err != nil {
 			return err
 		}
+
 		var safePlanet *pb.Planet
 		for _, p := range rGetSafePlanet.GetSafePlanets() {
 			if p.GetPlanetSystemID() == systemID {
@@ -690,6 +689,7 @@ func (c *TutorialController) Stage() (err error) {
 				safePlanet = p
 			}
 		}
+
 		_, err = services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			Integrity: 0,
 			Tank:      0,
@@ -699,11 +699,13 @@ func (c *TutorialController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		firstSafeMessage := services.NewMessage(
 			c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
 		)
 		firstSafeMessage.ParseMode = "markdown"
+
 		_, err = services.SendMessage(firstSafeMessage)
 		if err != nil {
 			return err
@@ -711,16 +713,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
 		c.PlayerData.CurrentState.Stage = 9
-
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
-		})
-		if err != nil {
-			return err
-		}
-
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+		c.ForceBackTo = true
 	case 9:
 		_, err = services.SendMessage(
 			services.NewMessage(

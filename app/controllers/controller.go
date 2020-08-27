@@ -118,20 +118,22 @@ func (c *BaseController) Validate() {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
 	}
 
-	if c.Validation.ReplyKeyboard.Keyboard == nil {
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-				),
-			),
-		)
-	}
+	// if c.Validation.ReplyKeyboard.Keyboard == nil {
+	// 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+	// 		tgbotapi.NewKeyboardButtonRow(
+	// 			tgbotapi.NewKeyboardButton(
+	// 				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+	// 			),
+	// 		),
+	// 	)
+	// }
 
 	// Invio il messaggio in caso di errore e chiudo
 	validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
 	validatorMsg.ParseMode = "markdown"
-	validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
+	if c.Validation.ReplyKeyboard.Keyboard != nil {
+		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
+	}
 
 	_, err := services.SendMessage(validatorMsg)
 	if err != nil {
