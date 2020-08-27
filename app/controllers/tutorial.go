@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/golang/protobuf/ptypes"
 )
 
 // Tutorial:
@@ -217,6 +218,27 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 			return true
 		}
 
+		return false
+	case 8:
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
+		if err != nil {
+			panic(err)
+		}
+
+		c.Validation.Message = helpers.Trans(
+			c.Player.Language.Slug,
+			"ship.travel.wait",
+			finishAt.Format("15:04:05 01/02"),
+		)
+
+		// Verifico se ha finito il crafting
+		if time.Now().After(finishAt) {
+			return false
+		}
+
+		return true
+	case 9:
 		return false
 	default:
 		// Stato non riconosciuto ritorno errore
@@ -612,8 +634,94 @@ func (c *TutorialController) Stage() (err error) {
 
 		// Recupero l'ID del task, mi serivirà per i controlli
 		c.Payload.HuntingID = huntingController.PlayerData.CurrentState.ID
-
 	case 7:
+		// Questo stage fa viaggiare il player forzatamente verso un pianeta sicuro
+		firstTravelMessage := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_travel"))
+		firstTravelMessage.ParseMode = "markdown"
+		_, err = services.SendMessage(firstTravelMessage)
+		if err != nil {
+			return err
+		}
+
+		finishTime := helpers.GetEndTime(0, 30, 0)
+		// Invio messaggio
+		msg := services.NewMessage(c.Update.Message.Chat.ID,
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishTime.Format("15:04:05 01/02")),
+		)
+		msg.ParseMode = "markdown"
+
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Forzo a mano l'aggiornamento dello stato del player
+		// in quanto adesso devo richiamare un'altro controller
+		c.PlayerData.CurrentState.Stage = 8
+		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.PlayerData.CurrentState,
+		})
+		if err != nil {
+			return
+		}
+		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+	case 8:
+		rGetShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{PlayerID: c.Player.ID})
+		if err != nil {
+			return err
+		}
+		// Recupero la posizione del player e i pianeti sicuro
+		rGetPlayerCurrentPlanet, err := services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{PlayerID: c.Player.ID})
+		if err != nil {
+			return err
+		}
+		systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
+		rGetSafePlanet, err := services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
+		if err != nil {
+			return err
+		}
+		var safePlanet *pb.Planet
+		for _, p := range rGetSafePlanet.GetSafePlanets() {
+			if p.GetPlanetSystemID() == systemID {
+				// Il pianeta sicuro è quello del sistema del player
+				safePlanet = p
+			}
+		}
+		_, err = services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
+			Integrity: 0,
+			Tank:      0,
+			PlanetID:  safePlanet.ID,
+			ShipID:    rGetShipEquipped.GetShip().GetID(),
+		})
+		if err != nil {
+			return err
+		}
+		firstSafeMessage := services.NewMessage(
+			c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
+		)
+		firstSafeMessage.ParseMode = "markdown"
+		_, err = services.SendMessage(firstSafeMessage)
+		if err != nil {
+			return err
+		}
+		// Forzo a mano l'aggiornamento dello stato del player
+		// in quanto adesso devo richiamare un'altro controller
+		c.PlayerData.CurrentState.Stage = 9
+
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.PlayerData.CurrentState,
+		})
+		if err != nil {
+			return err
+		}
+
+		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+	case 9:
 		_, err = services.SendMessage(
 			services.NewMessage(
 				c.Player.ChatID,
