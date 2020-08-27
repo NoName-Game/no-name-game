@@ -64,7 +64,7 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update, p
 	if hasError {
 		// Invio il messaggio in caso di errore e chiudo
 		validatorMsg := services.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
-
+		validatorMsg.ParseMode = "markdown"
 		_, err = services.SendMessage(validatorMsg)
 		if err != nil {
 			panic(err)
