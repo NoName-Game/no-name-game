@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -38,6 +39,7 @@ type BaseController struct {
 	}
 	ControllerFather uint32
 	ForceBackTo      bool
+	BlockUpdateState bool
 	Configuration    ControllerConfiguration
 }
 
@@ -208,7 +210,25 @@ func (c *BaseController) Clearable() (clearable bool) {
 }
 
 // Completing - Metodo per settare il completamento di uno stato
-func (c *BaseController) Completing() (err error) {
+func (c *BaseController) Completing(payload interface{}) (err error) {
+	// Controllo se posso aggiornare lo stato
+	// Alcune attività come hunting hanno il poter di bloccare questo passaggio
+	if !c.BlockUpdateState {
+		// Converto payload
+		payloadUpdated, _ := json.Marshal(payload)
+		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
+
+		// Aggiorno stato
+		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+			PlayerState: c.PlayerData.CurrentState,
+		})
+		if err != nil {
+			return
+		}
+		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+	}
+
 	// Verifico se lo stato è completato chiudo
 	if c.PlayerData.CurrentState.GetCompleted() {
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato

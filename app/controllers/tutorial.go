@@ -1,10 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	"time"
-
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -77,20 +73,8 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
-	// Aggiorno stato finale
-	payloadUpdated, _ := json.Marshal(c.Payload)
-	c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
-	rUpdatePlayerState, err := services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-		PlayerState: c.PlayerData.CurrentState,
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
-
 	// Verifico completamento
-	err = c.Completing()
+	err = c.Completing(c.Payload)
 	if err != nil {
 		panic(err)
 	}
@@ -289,173 +273,173 @@ func (c *TutorialController) Stage() (err error) {
 	// che introducono al player cosa sta accadendo
 	case 1:
 		// Recupero set di messaggi
-		textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Configuration.Controller)
+		// textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Configuration.Controller)
+		//
+		// // Invio il primo messaggio per eliminare la tastiera
+		// initMessage := services.NewMessage(c.Update.Message.Chat.ID, "...")
+		// initMessage.ParseMode = "markdown"
+		// initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		// _, err = services.SendMessage(initMessage)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // ************************
+		// // Primo set di messaggi
+		// // ************************
+		// time.Sleep(1 * time.Second)
+		//
+		// var firstMessageConfig tgbotapi.MessageConfig
+		// firstMessageConfig = services.NewMessage(c.Player.ChatID, textList[0])
+		// firstMessageConfig.ParseMode = "markdown"
+		//
+		// var firstMessage tgbotapi.Message
+		// firstMessage, err = services.SendMessage(firstMessageConfig)
+		// if err != nil {
+		// 	return err
+		// }
 
-		// Invio il primo messaggio per eliminare la tastiera
-		initMessage := services.NewMessage(c.Update.Message.Chat.ID, "...")
-		initMessage.ParseMode = "markdown"
-		initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		_, err = services.SendMessage(initMessage)
-		if err != nil {
-			return err
-		}
-
-		// ************************
-		// Primo set di messaggi
-		// ************************
-		time.Sleep(1 * time.Second)
-
-		var firstMessageConfig tgbotapi.MessageConfig
-		firstMessageConfig = services.NewMessage(c.Player.ChatID, textList[0])
-		firstMessageConfig.ParseMode = "markdown"
-
-		var firstMessage tgbotapi.Message
-		firstMessage, err = services.SendMessage(firstMessageConfig)
-		if err != nil {
-			return err
-		}
-
-		// Mando primo set di messaggi
-		for i := 1; i <= 7; i++ {
-			time.Sleep(1 * time.Second)
-			edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
-			edited.ParseMode = "markdown"
-
-			_, err = services.SendMessage(edited)
-			if err != nil {
-				return err
-			}
-		}
-
-		// ************************
-		// Secondo set di messaggi
-		// ************************
-		time.Sleep(1 * time.Second)
-		var secondSetText = textList[8]
-
-		var secondMessageConfig tgbotapi.MessageConfig
-		secondMessageConfig = services.NewMessage(c.Player.ChatID, secondSetText)
-		secondMessageConfig.ParseMode = "markdown"
-
-		var secondMessage tgbotapi.Message
-		secondMessage, err = services.SendMessage(secondMessageConfig)
-		if err != nil {
-			return err
-		}
-
-		// PreviusText mi serve per andare a modificare il messaggio
-		// inviato ed appendergli la nuova parte di messaggio
-		for i := 9; i <= 12; i++ {
-			time.Sleep(2 * time.Second)
-			currentMessage := fmt.Sprintf("%s%s", secondSetText, textList[i])
-
-			edited := services.NewEditMessage(
-				c.Player.ChatID,
-				secondMessage.MessageID,
-				currentMessage,
-			)
-			edited.ParseMode = "markdown"
-
-			secondMessage, err = services.SendMessage(edited)
-			if err != nil {
-				return
-			}
-
-			// Concateno messaggi
-			secondSetText += textList[i]
-		}
-
-		// ************************
-		// Terzo set di messaggi
-		// ************************
-		time.Sleep(1 * time.Second)
-		thirdSetText := textList[13]
-
-		var thirdMessageConfig tgbotapi.MessageConfig
-		thirdMessageConfig = services.NewMessage(c.Player.ChatID, thirdSetText)
-		thirdMessageConfig.ParseMode = "markdown"
-
-		var thirdMessage tgbotapi.Message
-		thirdMessage, err = services.SendMessage(thirdMessageConfig)
-		if err != nil {
-			return err
-		}
-
-		// PreviusText mi serve per andare a modificare il messaggio
-		// inviato ed appendergli la nuova parte di messaggio
-		for i := 14; i <= 19; i++ {
-			currentMessage := fmt.Sprintf("%s%s", thirdSetText, textList[i])
-
-			time.Sleep(2 * time.Second)
-			edited := services.NewEditMessage(
-				c.Player.ChatID,
-				thirdMessage.MessageID,
-				currentMessage,
-			)
-			edited.ParseMode = "markdown"
-
-			thirdMessage, err = services.SendMessage(edited)
-			if err != nil {
-				return
-			}
-
-			thirdSetText += textList[i]
-		}
-
-		// Mando messaggio allert
-		time.Sleep(2 * time.Second)
-		alertMessage := services.NewMessage(c.Update.Message.Chat.ID, textList[20])
-		alertMessage.ParseMode = "markdown"
-		alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		_, err = services.SendMessage(alertMessage)
-		if err != nil {
-			return err
-		}
-
-		// ************************
-		// Quarto set di messaggi ( COUNTDOWN )
-		// ************************
-		time.Sleep(2 * time.Second)
-		var fourthMessageConfig tgbotapi.MessageConfig
-		fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[21])
-		fourthMessageConfig.ParseMode = "markdown"
-
-		var fourthMessage tgbotapi.Message
-		fourthMessage, err = services.SendMessage(fourthMessageConfig)
-		if err != nil {
-			return err
-		}
-
-		// Mando primo set di messaggi
-		for i := 22; i <= 27; i++ {
-			time.Sleep(1 * time.Second)
-			edited := services.NewEditMessage(
-				c.Player.ChatID,
-				fourthMessage.MessageID,
-				textList[i],
-			)
-
-			edited.ParseMode = "markdown"
-			_, err = services.SendMessage(edited)
-			if err != nil {
-				return err
-			}
-		}
-
-		// ************************
-		// Esplosione
-		// ************************
-		edit := services.NewEditMessage(
-			c.Player.ChatID,
-			fourthMessage.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "route.tutorial.explosion"),
-		)
-
-		edit.ParseMode = "HTML"
-		_, err = services.SendMessage(edit)
-		if err != nil {
-			return
-		}
+		// // Mando primo set di messaggi
+		// for i := 1; i <= 7; i++ {
+		// 	time.Sleep(1 * time.Second)
+		// 	edited := services.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
+		// 	edited.ParseMode = "markdown"
+		//
+		// 	_, err = services.SendMessage(edited)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// }
+		//
+		// // ************************
+		// // Secondo set di messaggi
+		// // ************************
+		// time.Sleep(1 * time.Second)
+		// var secondSetText = textList[8]
+		//
+		// var secondMessageConfig tgbotapi.MessageConfig
+		// secondMessageConfig = services.NewMessage(c.Player.ChatID, secondSetText)
+		// secondMessageConfig.ParseMode = "markdown"
+		//
+		// var secondMessage tgbotapi.Message
+		// secondMessage, err = services.SendMessage(secondMessageConfig)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // PreviusText mi serve per andare a modificare il messaggio
+		// // inviato ed appendergli la nuova parte di messaggio
+		// for i := 9; i <= 12; i++ {
+		// 	time.Sleep(2 * time.Second)
+		// 	currentMessage := fmt.Sprintf("%s%s", secondSetText, textList[i])
+		//
+		// 	edited := services.NewEditMessage(
+		// 		c.Player.ChatID,
+		// 		secondMessage.MessageID,
+		// 		currentMessage,
+		// 	)
+		// 	edited.ParseMode = "markdown"
+		//
+		// 	secondMessage, err = services.SendMessage(edited)
+		// 	if err != nil {
+		// 		return
+		// 	}
+		//
+		// 	// Concateno messaggi
+		// 	secondSetText += textList[i]
+		// }
+		//
+		// // ************************
+		// // Terzo set di messaggi
+		// // ************************
+		// time.Sleep(1 * time.Second)
+		// thirdSetText := textList[13]
+		//
+		// var thirdMessageConfig tgbotapi.MessageConfig
+		// thirdMessageConfig = services.NewMessage(c.Player.ChatID, thirdSetText)
+		// thirdMessageConfig.ParseMode = "markdown"
+		//
+		// var thirdMessage tgbotapi.Message
+		// thirdMessage, err = services.SendMessage(thirdMessageConfig)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // PreviusText mi serve per andare a modificare il messaggio
+		// // inviato ed appendergli la nuova parte di messaggio
+		// for i := 14; i <= 19; i++ {
+		// 	currentMessage := fmt.Sprintf("%s%s", thirdSetText, textList[i])
+		//
+		// 	time.Sleep(2 * time.Second)
+		// 	edited := services.NewEditMessage(
+		// 		c.Player.ChatID,
+		// 		thirdMessage.MessageID,
+		// 		currentMessage,
+		// 	)
+		// 	edited.ParseMode = "markdown"
+		//
+		// 	thirdMessage, err = services.SendMessage(edited)
+		// 	if err != nil {
+		// 		return
+		// 	}
+		//
+		// 	thirdSetText += textList[i]
+		// }
+		//
+		// // Mando messaggio allert
+		// time.Sleep(2 * time.Second)
+		// alertMessage := services.NewMessage(c.Update.Message.Chat.ID, textList[20])
+		// alertMessage.ParseMode = "markdown"
+		// alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		// _, err = services.SendMessage(alertMessage)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // ************************
+		// // Quarto set di messaggi ( COUNTDOWN )
+		// // ************************
+		// time.Sleep(2 * time.Second)
+		// var fourthMessageConfig tgbotapi.MessageConfig
+		// fourthMessageConfig = services.NewMessage(c.Player.ChatID, textList[21])
+		// fourthMessageConfig.ParseMode = "markdown"
+		//
+		// var fourthMessage tgbotapi.Message
+		// fourthMessage, err = services.SendMessage(fourthMessageConfig)
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // Mando primo set di messaggi
+		// for i := 22; i <= 27; i++ {
+		// 	time.Sleep(1 * time.Second)
+		// 	edited := services.NewEditMessage(
+		// 		c.Player.ChatID,
+		// 		fourthMessage.MessageID,
+		// 		textList[i],
+		// 	)
+		//
+		// 	edited.ParseMode = "markdown"
+		// 	_, err = services.SendMessage(edited)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// }
+		//
+		// // ************************
+		// // Esplosione
+		// // ************************
+		// edit := services.NewEditMessage(
+		// 	c.Player.ChatID,
+		// 	fourthMessage.MessageID,
+		// 	helpers.Trans(c.Player.Language.Slug, "route.tutorial.explosion"),
+		// )
+		//
+		// edit.ParseMode = "HTML"
+		// _, err = services.SendMessage(edit)
+		// if err != nil {
+		// 	return
+		// }
 
 		// Ultimo step apri gli occhi
 		var openEyeMessage tgbotapi.MessageConfig
