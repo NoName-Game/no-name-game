@@ -62,8 +62,6 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

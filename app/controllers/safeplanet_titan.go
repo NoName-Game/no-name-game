@@ -56,8 +56,6 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

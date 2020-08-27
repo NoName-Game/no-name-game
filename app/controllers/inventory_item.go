@@ -63,8 +63,6 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

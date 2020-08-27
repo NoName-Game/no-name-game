@@ -67,8 +67,6 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================
@@ -661,7 +659,8 @@ func (c *TutorialController) Stage() (err error) {
 		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 		c.ForceBackTo = true
 	case 8:
-		rGetShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+		var rGetShipEquipped *pb.GetPlayerShipEquippedResponse
+		rGetShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.ID,
 		})
 		if err != nil {
@@ -669,7 +668,8 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Recupero la posizione del player e i pianeti sicuro
-		rGetPlayerCurrentPlanet, err := services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.ID,
 		})
 		if err != nil {
@@ -677,7 +677,9 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
-		rGetSafePlanet, err := services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
+
+		var rGetSafePlanet *pb.GetSafePlanetsResponse
+		rGetSafePlanet, err = services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
 		if err != nil {
 			return err
 		}

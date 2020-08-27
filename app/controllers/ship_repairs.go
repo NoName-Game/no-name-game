@@ -67,8 +67,6 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

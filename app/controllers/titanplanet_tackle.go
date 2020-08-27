@@ -85,8 +85,6 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 	if err = c.Completing(c.Payload); err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // ====================================

@@ -139,8 +139,6 @@ func (c *BaseController) Validate() {
 	if err != nil {
 		panic(err)
 	}
-
-	return
 }
 
 // Breaking - Metodo che permette di verificare se si vogliono fare
