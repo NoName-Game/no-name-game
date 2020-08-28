@@ -185,11 +185,11 @@ items.medical: "💊"
 items.ship_support: "⚙️"
 
 items.revitalizing_small: "Revitalizzante piccolo"
-items.description.revitalizing_small: "Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
+items.description.revitalizing_small: "📖: Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
 items.revitalizing_medium: "Revitalizzante medio"
-items.description.revitalizing_medium: "Permette di recuperare *%vHP*."
+items.description.revitalizing_medium: "📖: Permette di recuperare *%vHP*."
 items.revitalizing_max: "Revitalizzante grande"
-items.description.revitalizing_max: "Permette di recuperare *%vHP*."
+items.description.revitalizing_max: "📖: Permette di recuperare *%vHP*."
 
 items.raw_fuel: "Carburante grezzo"
 items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricare il serbatoio della tua nave di *%v*"
@@ -203,8 +203,8 @@ player.intro: "Stato Player"
 #player.armors: "
 
 # INVENTORY
-inventory.intro: "Cosa vuoi gestire?"
-inventory.recap.resource: "Ecco il riepilogo del tue 💠 Risorse:"
+inventory.intro: "Cosa vuoi gestire del tuo invantario?"
+inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
 # inventory.summary: "Riassunto inventario"
 # inventory.equip: "Equipaggia Oggetto"
 # inventory.destroy: "Distruggi Oggetto"
@@ -216,25 +216,18 @@ inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
 inventory.weapons.what: "Quale tra le tue *armi* vorresti equipaggiare?"
 inventory.weapons.zero_equipment: "❌ Nessuna"
 
-
 # Inventario - equipaggia
 inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
 inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
 inventory.equip.confirm: "*Confermi di voler equipaggiare %v?*"
 inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
 
-# Inventario - distruggi
-inventory.destroy.type: "Quale tipologia vorresti distruggere?"
-inventory.destroy.what: "Cosa vorresti distruggere?"
-inventory.destroy.confirm: "Confermi di voler distruggere?"
-inventory.destroy.completed: "Equipaggiamento distrutto correttamente!"
-
 # Inventario - oggetti
-inventory.items.what: "Quale item vorresti usare?"
-inventory.items.use: "Usa:"
-inventory.items.confirm: "*Confermi di voler usare %v?*"
-inventory.items.confirm_warning: "*Confermi di voler usare %v?*\nAttezione, l'eccedenza verrà automaticamente scartata."
-inventory.items.completed: "Hai usato *%s* e di beneficiare delle sue caratteristiche."
+inventory.items.what: "Ecco gli 🔩 *Oggetti* in tuo possesso.\nDesideri usare qualcosa?"
+inventory.items.not_found: "L'oggetto che vuoi usare non sembra esser valido."
+inventory.items.confirm: "Confermi di voler usare *%v*?"
+inventory.items.confirm_warning: "\n\n⚠️Attezione, l'eccedenza verrà automaticamente scartata."
+inventory.items.completed: "Hai usato *%s* beneficiando delle sue caratteristiche."
 
 # ABILITY TREE
 ability.no_point_left: "Punti abilità non sufficienti"

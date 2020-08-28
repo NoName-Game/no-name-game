@@ -75,7 +75,6 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, finalResource)
 	msg.ParseMode = "markdown"
-
 	_, err = services.SendMessage(msg)
 	if err != nil {
 		panic(err)

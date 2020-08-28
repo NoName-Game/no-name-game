@@ -87,15 +87,23 @@ func (c *InventoryItemController) Validator() (hasErrors bool) {
 		}
 
 		// Recupero nome item che il player vuole usare
-		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
+		var itemChoosed string
+		itemSplit := strings.Split(c.Update.Message.Text, " (")
+		if len(itemSplit)-1 > 0 {
+			itemSplit := strings.Split(itemSplit[0], " - ")
+			if len(itemSplit)-1 > 0 {
+				itemChoosed = itemSplit[1]
+			}
+		}
 
 		for _, item := range rGetPlayerItems.GetPlayerInventory() {
-			if playerChoiche == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
+			if itemChoosed == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
 				c.Payload.Item = item.GetItem()
 				return false
 			}
 		}
 
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "inventory.items.not_found")
 		return true
 
 	// Verifico la conferma dell'uso
@@ -134,7 +142,8 @@ func (c *InventoryItemController) Stage() (err error) {
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
-						"%s (%v)",
+						"%s - %s (%v)",
+						helpers.Trans(c.Player.Language.Slug, "items."+item.Item.ItemCategory.Slug),
 						helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug),
 						item.Quantity,
 					),
@@ -153,7 +162,7 @@ func (c *InventoryItemController) Stage() (err error) {
 			c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.items.what"),
 		)
-
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowItems,
@@ -169,30 +178,23 @@ func (c *InventoryItemController) Stage() (err error) {
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
 	case 1:
-
 		var text string
+
+		text = fmt.Sprintf(
+			"%s\n%s", // Domanda e descrizione
+			helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
+				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+			),
+			helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
+		)
+
+		// Verifica eccedenza
 		if c.PlayerData.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
-			text = fmt.Sprintf(
-				"%s\n\n%s", // Domanda e descrizione
-				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning",
-					helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
-				),
-				helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
-			)
-		} else {
-			text = fmt.Sprintf(
-				"%s\n\n%s", // Domanda e descrizione
-				helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
-					helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
-				),
-				helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
-			)
+			text += helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning")
 		}
 
 		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
-
 		msg.ParseMode = "markdown"
-
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -228,7 +230,6 @@ func (c *InventoryItemController) Stage() (err error) {
 			),
 		)
 		msg.ParseMode = "markdown"
-
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
