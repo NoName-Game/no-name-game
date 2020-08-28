@@ -14,10 +14,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var (
-	ExplorationTypes = []string{"underground", "surface", "atmosphere"}
-)
-
 // ====================================
 // ExplorationController
 // ====================================
@@ -78,6 +74,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 // Validator
 // ====================================
 func (c *ExplorationController) Validator() (hasErrors bool) {
+	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
@@ -86,9 +83,16 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 	// In questo stage è necessario controllare che venga scelto
 	// un tipo di missione tra quelli disponibili
 	case 1:
+		// Recupero tutte le categorie di esplorazione possibili
+		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
+		rGetAllExplorationCategories, err = services.NnSDK.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{})
+		if err != nil {
+			panic(err)
+		}
+
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		for _, missionType := range ExplorationTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType)) == c.Update.Message.Text {
+		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug())) == c.Update.Message.Text {
 				return false
 			}
 		}
@@ -169,11 +173,18 @@ func (c *ExplorationController) Stage() (err error) {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili
 	case 0:
+		// Recupero tutte le categorie di esplorazione possibili
+		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
+		rGetAllExplorationCategories, err = services.NnSDK.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{})
+		if err != nil {
+			return err
+		}
+
 		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, missionType := range ExplorationTypes {
+		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType))),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug()))),
 			)
 
 			keyboardRows = append(keyboardRows, keyboardRow)
@@ -229,10 +240,17 @@ func (c *ExplorationController) Stage() (err error) {
 			return
 		}
 
+		// Recupero tutte le categorie di esplorazione possibili
+		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
+		rGetAllExplorationCategories, err = services.NnSDK.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{})
+		if err != nil {
+			return err
+		}
+
 		// Importo nel payload la scelta di tipologia di missione
-		for _, missionType := range ExplorationTypes {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType)) == c.Update.Message.Text {
-				c.Payload.ExplorationType = missionType
+		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug())) == c.Update.Message.Text {
+				c.Payload.ExplorationType = missionType.GetSlug()
 				break
 			}
 		}
