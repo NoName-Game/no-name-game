@@ -124,11 +124,8 @@ sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
 
 # HUNTING
-hunting.init: "Decidi di esplorare l'area circostante... fa' attenzione!"
-hunting.error.no_weapon_equipped: "Devi equipaggiare un arma per andare a caccia!"
-hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
-hunting.completed: "Caccia completata, torni alla base col bottino."
-hunting.leave: "Abbandona caccia"
+hunting.init: "Decidi di esplorare l'area circostante..."
+hunting.leave: "⬅️ Abbandona"
 
 tresure.found.resource: "Hai trovato 💠*%s*"
 tresure.found.item: "Hai trovato 🔩*%s*"
@@ -302,7 +299,8 @@ route.tutorial.first_safeplanet: "💭: Raggiungi l'orbita del pianeta definito 
 
 route.tutorial.error.function_not_completed: "💭: Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
 route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirai a trovare delle risposte."
-route.tutorial.completed.reward: "🎉 Hai completato il tutorial con successo. Ecco la tua ricompensa:\n -💰%d - 🏵%d"
+route.tutorial.completed.reward: "🎉 Complimenti esploratore, hai completato il tutorial con successo!\n Ecco la tua ricompensa:\n -💰*%d*\n- 🏵*%d* Exp"
+
 # CRON
 cron.route.testing.time_alert: "End Test time"
 cron.route.exploration_alert: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
@@ -406,7 +404,7 @@ safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
 safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
 
 # PLANET
-planet.intro: "Dettaglio posizione attuale:"
+planet.intro: "Dettagli posizione attuale:"
 planet.details.system: "💫 Sistema: *%s*"
 planet.details.name: "🌍 Pianeta: *%s*"
 planet.details.coordinate.x: "🆇 %v"
@@ -414,7 +412,7 @@ planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
 planet.details.biome: "Bioma: *%s*"
 planet.details.atmosphere: "Atmosfera: *%s*"
-planet.details.count_visited_player: "👨🏼‍🚀 *%d* Esploratori hanno visitato questo pianeta."
+planet.details.count_visited_player: "👨🏼‍🚀 *%d* Esploratori hanno visitato questo pianeta"
 
 # TITANPLANET
 titanplanet.tackle.error.no_weapon_equipped: "Devi equipaggiare un arma per affrontare il titano!"
@@ -422,3 +420,8 @@ titanplanet.tackle.init: "Il titano si mostra alla tua presenza."
 titanplanet.tackle.leave: "⬅️ Abbandona"
 titanplanet.tackle.combat.card: "👁 %s\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
 titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."
+
+# PLAYER
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
+player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
+player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"

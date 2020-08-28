@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -26,37 +24,28 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	c.Player = player
 	c.Update = update
 
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.player",
-		Payload:    c.Payload,
-	}) {
-		return
-	}
-
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
-
-	// Calcolo lato economico del player
-	var economy string
-	economy, err = c.GetPlayerEconomy()
+	// *************************
+	// Recupero economia player
+	// *************************
+	var money, diamond int32
+	money, diamond, err = c.GetPlayerEconomy()
 	if err != nil {
 		panic(err)
 	}
 
-	recapPlayer := fmt.Sprintf(""+
-		"👨🏼‍🚀 %s \n"+
-		"♥️ *%v*/100 HP\n"+
-		"🏵 *%v* 🎖 *%v* \n"+
-		"%s\n",
+	recapPlayer := helpers.Trans(
+		c.Player.Language.Slug,
+		"player.datails.card",
 		c.Player.GetUsername(),
 		c.PlayerData.PlayerStats.GetLifePoint(),
 		c.PlayerData.PlayerStats.GetExperience(),
 		c.PlayerData.PlayerStats.GetLevel(),
-		economy,
+		money, diamond,
 	)
 
+	// *************************
 	// Recupero quanti pianeti ha visitato
+	// *************************
 	var rCountPlanetVisited *pb.CountPlanetVisitedResponse
 	rCountPlanetVisited, err = services.NnSDK.CountPlanetVisited(helpers.NewContext(100), &pb.CountPlanetVisitedRequest{
 		PlayerID: c.Player.GetID(),
@@ -66,9 +55,15 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
-	recapPlayer += fmt.Sprintf("\nTotale *pianeti* visitati: %v", rCountPlanetVisited.GetValue())
+	recapPlayer += helpers.Trans(
+		c.Player.Language.Slug,
+		"player.datails.planet_visited",
+		rCountPlanetVisited.GetValue(),
+	)
 
+	// *************************
 	// Recupero quanti sistemi ha visitatao
+	// *************************
 	var rCountSystemVisited *pb.CountSystemVisitedResponse
 	rCountSystemVisited, err = services.NnSDK.CountSystemVisited(helpers.NewContext(100), &pb.CountSystemVisitedRequest{
 		PlayerID: c.Player.GetID(),
@@ -78,7 +73,11 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
-	recapPlayer += fmt.Sprintf("\nTotale *sistemi* visitati: %v", rCountSystemVisited.GetValue())
+	recapPlayer += helpers.Trans(
+		c.Player.Language.Slug,
+		"player.datails.system_visited",
+		rCountSystemVisited.GetValue(),
+	)
 
 	// msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "player.intro"))
 	msg := services.NewMessage(c.Update.Message.Chat.ID, recapPlayer)
@@ -86,9 +85,6 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.ability")),
-		),
-		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.equip")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -112,7 +108,7 @@ func (c *PlayerController) Stage() {
 
 // GetPlayerTask
 // Metodo didicato alla reppresenteazione del risorse econimiche del player
-func (c *PlayerController) GetPlayerEconomy() (economy string, err error) {
+func (c *PlayerController) GetPlayerEconomy() (money int32, diamond int32, err error) {
 	// Calcolo monete del player
 	responseMoney, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
@@ -125,7 +121,5 @@ func (c *PlayerController) GetPlayerEconomy() (economy string, err error) {
 		EconomyType: "diamond",
 	})
 
-	economy = fmt.Sprintf("💰 *%v* 💎 *%v*", responseMoney.GetValue(), responseDiamond.GetValue())
-
-	return
+	return responseMoney.GetValue(), responseDiamond.GetValue(), nil
 }
