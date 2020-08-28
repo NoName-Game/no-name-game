@@ -707,46 +707,25 @@ func (c *TutorialController) Stage() (err error) {
 		}
 
 		// Addesso posso cancellare tutti gli stati associati
-		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerStateID: c.Payload.UseItemID,
-			ForceDelete:   true,
-		})
-		if err != nil {
-			return err
+		var playerStatesIDToDelete = []uint32{
+			c.Payload.UseItemID,
+			c.Payload.HuntingID,
+			c.Payload.InventoryEquipID,
+			c.Payload.CraftingID,
+			c.Payload.MissionID,
 		}
 
-		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerStateID: c.Payload.HuntingID,
-			ForceDelete:   true,
-		})
-		if err != nil {
-			return err
+		for _, stateID := range playerStatesIDToDelete {
+			_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+				PlayerStateID: stateID,
+				ForceDelete:   true,
+			})
+			if err != nil {
+				return err
+			}
 		}
 
-		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerStateID: c.Payload.InventoryEquipID,
-			ForceDelete:   true,
-		})
-		if err != nil {
-			return err
-		}
-
-		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerStateID: c.Payload.CraftingID,
-			ForceDelete:   true,
-		})
-		if err != nil {
-			return err
-		}
-
-		_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-			PlayerStateID: c.Payload.MissionID,
-			ForceDelete:   true,
-		})
-		if err != nil {
-			return err
-		}
-
+		// Registro che il player ha completato il tutorial e recupero rewward
 		var rPlayerEndTutorial *pb.PlayerEndTutorialResponse
 		rPlayerEndTutorial, err = services.NnSDK.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
 			PlayerID: c.Player.ID,
@@ -756,12 +735,14 @@ func (c *TutorialController) Stage() (err error) {
 			return err
 		}
 
-		_, err = services.SendMessage(
-			services.NewMessage(
-				c.Player.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed.reward", rPlayerEndTutorial.GetMoney(), rPlayerEndTutorial.GetExp()),
-			),
-		)
+		rewardMessage := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
+			"route.tutorial.completed.reward",
+			rPlayerEndTutorial.GetMoney(),
+			rPlayerEndTutorial.GetExp(),
+		))
+		rewardMessage.ParseMode = "markdown"
+
+		_, err = services.SendMessage(rewardMessage)
 		if err != nil {
 			return err
 		}
