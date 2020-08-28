@@ -23,6 +23,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
+	c.Configuration.Controller = "route.player"
 
 	// *************************
 	// Recupero economia player
