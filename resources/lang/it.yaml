@@ -305,16 +305,18 @@ cron.route.death: "Hai recuperato le energie!"
 cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il prodotto!"
 
 # SHIP
-ship.report: "Rapporto Nave"
+ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
 # SHIP - Exploration
-ship.travel.info: "Vuoi raggiungere un nuovo pianeta?"
+ship.travel.info: "Vuoi raggiungere un nuovo 🌏 Pianeta?"
+ship.travel.ship_scanner: "\n\nLa tua 🚀 Nave ha attualmente equipaggiato uno scanner di livello: *%d*"
+ship.travel.tip: "\n\n📖: Effettuando una nuova ricerca potrai trovare nuovi pianeti in base alla tua posizione attuale e alla potenza dello scanner della tua nave."
 ship.travel.start: "📡 Ricerca"
 ship.travel.current_position: "🗺 Coordinati correnti:"
-ship.travel.research: "In base alla tua posizione sono stati rilevati i seguenti pianeti. Quale vuoi raggiungere?"
+ship.travel.research: "Sono stati rilevati 🌏*%d* pianeti!\nQuale vorresti raggiungere?"
 ship.travel.fuel_needed: "Carburante necessario"
 ship.travel.time_needed: "Tempo necessario"
-ship.travel.exploring: "🚀 Motori accesi, buon viaggio! Il tuo arrivo è previsto per le *%s*"
+ship.travel.exploring: "🚀 Motori accesi, buon viaggio!\nIl tuo arrivo è previsto per le *%s*"
 ship.travel.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli del viaggio."
 ship.travel.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna più tardi."
 route.travel.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."

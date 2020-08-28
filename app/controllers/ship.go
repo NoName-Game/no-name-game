@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -39,7 +38,9 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
+	// ****************************
 	// Recupero nave attiva de player
+	// ****************************
 	rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 		PlayerID: c.Player.GetID(),
 	})
@@ -47,23 +48,16 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
-	currentShipRecap := fmt.Sprintf(
-		"🚀 %s (%s)\n🏷 %s\n🔧 %v%% (%s)\n⛽ %v%% (%s)",
-		rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
-		rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
-		rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
-		rGetPlayerShipEquipped.GetShip().GetShipStats().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
-	)
-
 	// Invio messaggio
 	msg := services.NewMessage(c.Update.Message.Chat.ID,
-		fmt.Sprintf(
-			"%s:\n\n %s",
-			helpers.Trans(c.Player.Language.Slug, "ship.report"),
-			currentShipRecap,
+		helpers.Trans(c.Player.Language.Slug, "ship.report.card",
+			rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
+			rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
+			rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+			rGetPlayerShipEquipped.GetShip().GetShipStats().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
 		),
 	)
-
+	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel")),

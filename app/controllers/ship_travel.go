@@ -183,33 +183,25 @@ func (c *ShipTravelController) Stage() (err error) {
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
 	case 0:
-		// Recupero posizione corrente player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		// ****************************
+		// Recupero nave attiva de player
+		// ****************************
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
-			return err
+			panic(err)
 		}
-
-		var currentPlayerPositions string
-		currentPlayerPositions = fmt.Sprintf(
-			"%s \nX: %v \nY: %v \nZ: %v \n",
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.current_position"),
-			rGetPlayerCurrentPlanet.GetPlanet().GetX(),
-			rGetPlayerCurrentPlanet.GetPlanet().GetY(),
-			rGetPlayerCurrentPlanet.GetPlanet().GetZ(),
-		)
 
 		// Invio messaggio con recap
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			fmt.Sprintf(
-				"%s\n\n%s",
+			fmt.Sprintf("%s %s %s",
 				helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
-				currentPlayerPositions,
-			),
-		)
-
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetShipStats().GetRadar()),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.tip"),
+			))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.travel.start")),
@@ -261,12 +253,11 @@ func (c *ShipTravelController) Stage() (err error) {
 				planetName = fmt.Sprintf("%s 🏟", explorationInfo.Planet.Name)
 			}
 
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⛽️ -%v%%\nInt️ -%v%%\n⏱ %v (%s)",
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⏱ %v (%s) ⛽️ -%v%% 🔧 -%v%%",
 				planetName,
+				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
 				explorationInfo.Fuel,
 				explorationInfo.Integrity,
-				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
-				// explorationInfo.Planet.X, explorationInfo.Planet.Y, explorationInfo.Planet.Z,
 			)
 
 			// Aggiungo per la validazione
@@ -290,11 +281,11 @@ func (c *ShipTravelController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s %s",
-				helpers.Trans(c.Player.Language.Slug, "ship.travel.research"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.research", len(responseTravelInfo.GetInfo())),
 				msgNearestStars,
 			),
 		)
-
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowStars,
