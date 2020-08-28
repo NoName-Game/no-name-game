@@ -105,13 +105,6 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Set and load payload
 	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
-	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
-		c.Validate()
-		return
-	}
-
 	// Ok! Run!
 	if err = c.Stage(); err != nil {
 		panic(err)
@@ -136,14 +129,6 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 // Validator
 // ====================================
 func (c *HuntingController) Validator() (hasErrors bool) {
-	// Il player deve avere sempre e perfoza un'arma equipaggiata
-	// Indipendentemente dallo stato in cui si trovi
-	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "hunting.error.no_weapon_equipped")
-		c.PlayerData.CurrentState.Completed = true
-		return true
-	}
-
 	return false
 }
 

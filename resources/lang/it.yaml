@@ -124,11 +124,8 @@ sniper_rifle: "Fucile da cecchino"
 shotgun: "Fucile a pompa"
 
 # HUNTING
-hunting.init: "Decidi di esplorare l'area circostante... fa' attenzione!"
-hunting.error.no_weapon_equipped: "Devi equipaggiare un arma per andare a caccia!"
-hunting.searching: "Hai iniziato una caccia, sei in attesa fino alle %s"
-hunting.completed: "Caccia completata, torni alla base col bottino."
-hunting.leave: "Abbandona caccia"
+hunting.init: "Decidi di esplorare l'area circostante..."
+hunting.leave: "⬅️ Abbandona"
 
 tresure.found.resource: "Hai trovato 💠*%s*"
 tresure.found.item: "Hai trovato 🔩*%s*"
