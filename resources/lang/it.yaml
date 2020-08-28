@@ -302,7 +302,7 @@ route.tutorial.first_safeplanet: "💭: Raggiungi l'orbita del pianeta definito 
 
 route.tutorial.error.function_not_completed: "💭: Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
 route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirai a trovare delle risposte."
-
+route.tutorial.completed.reward: "🎉 Complimenti esploratore, hai completato il tutorial con successo!\n Ecco la tua ricompensa:\n -💰*%d*\n- 🏵*%d* Exp"
 # CRON
 cron.route.testing.time_alert: "End Test time"
 cron.route.exploration_alert: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."

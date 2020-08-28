@@ -747,10 +747,21 @@ func (c *TutorialController) Stage() (err error) {
 			return err
 		}
 
-		_, err = services.NnSDK.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
+		var rPlayerEndTutorial *pb.PlayerEndTutorialResponse
+		rPlayerEndTutorial, err = services.NnSDK.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
 			PlayerID: c.Player.ID,
 			End:      true,
 		})
+		if err != nil {
+			return err
+		}
+
+		_, err = services.SendMessage(
+			services.NewMessage(
+				c.Player.ChatID,
+				helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed.reward", rPlayerEndTutorial.GetMoney(), rPlayerEndTutorial.GetExp()),
+			),
+		)
 		if err != nil {
 			return err
 		}
