@@ -196,8 +196,10 @@ func (c *ShipTravelController) Stage() (err error) {
 
 		// Invio messaggio con recap
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			fmt.Sprintf("%s %s %s",
+			fmt.Sprintf("%s %s %s %s %s",
 				helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats"),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetShipStats().GetEngine()),
 				helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetShipStats().GetRadar()),
 				helpers.Trans(c.Player.Language.Slug, "ship.travel.tip"),
 			))

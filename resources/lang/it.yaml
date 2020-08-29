@@ -309,8 +309,10 @@ ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
 # SHIP - Exploration
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 Pianeta?"
-ship.travel.ship_scanner: "\n\nLa tua 🚀 Nave ha attualmente equipaggiato uno scanner di livello: *%d*"
-ship.travel.tip: "\n\n📖: Effettuando una nuova ricerca potrai trovare nuovi pianeti in base alla tua posizione attuale e alla potenza dello scanner della tua nave."
+ship.travel.ship_stats: "\n\nLa tua 🚀 Nave posside:"
+ship.travel.ship_engine: "\nMotori di livello: *%v*"
+ship.travel.ship_scanner: "\nScanner di livello: *%v*"
+ship.travel.tip: "\n\n📖: Effettuando una ricerca potrai trovare nuovi pianeti in base alla posizione attuale e alla potenza dello scanner della tua nave.\nIl tempo di raggiungimento è dato dalla forza dei motori della nave."
 ship.travel.start: "📡 Ricerca"
 ship.travel.current_position: "🗺 Coordinati correnti:"
 ship.travel.research: "Sono stati rilevati 🌏*%d* pianeti!\nQuale vorresti raggiungere?"
