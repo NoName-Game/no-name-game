@@ -71,10 +71,21 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool) {
 	switch c.PlayerData.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false
+		// Verifico se il player necessita davvero di dormire
+		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+			PlayerID: c.Player.GetID(),
+		})
+		if err != nil {
+			panic(err)
+		}
 
+		if !restsInfo.NeedRests {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.dont_need")
+			return true
+		}
+
+		return false
 	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.start") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -96,6 +107,13 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 		diffMinutes := math.RoundToEven(diffDate.Minutes())
 		if diffMinutes <= 1 {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					),
+				),
+			)
 			return true
 		}
 
@@ -123,12 +141,11 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Costruisco info per riposo
 		var restsRecap string
-		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
+		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests")
 		if restsInfo.NeedRests {
 			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.GetRestsTime())
-		} else {
-			restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests.dont_need")
 		}
+		restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 
 		// Aggiongo bottone start riposo
 		var keyboardRow [][]tgbotapi.KeyboardButton
@@ -179,7 +196,7 @@ func (c *ShipRestsController) Stage() (err error) {
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing", finishTime.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishTime.Format("15:04:05")),
 		)
 
 		msg.ParseMode = "markdown"

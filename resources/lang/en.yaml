@@ -309,8 +309,10 @@ ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
 # SHIP - Exploration
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 Pianeta?"
-ship.travel.ship_scanner: "\n\nLa tua 🚀 Nave ha attualmente equipaggiato uno scanner di livello: *%d*"
-ship.travel.tip: "\n\n📖: Effettuando una nuova ricerca potrai trovare nuovi pianeti in base alla tua posizione attuale e alla potenza dello scanner della tua nave."
+ship.travel.ship_stats: "\n\nLa tua 🚀 Nave posside:"
+ship.travel.ship_engine: "\nMotori di livello: *%v*"
+ship.travel.ship_scanner: "\nScanner di livello: *%v*"
+ship.travel.tip: "\n\n📖: Effettuando una ricerca potrai trovare nuovi pianeti in base alla posizione attuale e alla potenza dello scanner della tua nave.\nIl tempo di raggiungimento è dato dalla forza dei motori della nave."
 ship.travel.start: "📡 Ricerca"
 ship.travel.current_position: "🗺 Coordinati correnti:"
 ship.travel.research: "Sono stati rilevati 🌏*%d* pianeti!\nQuale vorresti raggiungere?"
@@ -341,13 +343,14 @@ ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrit�
 ship.better.info: "Info better"
 
 # SHIP - RESTS
-ship.rests.info: "💭: Il miglior modo per recuperare vita è mettersi a dormire.\nRiposando recupererai ogni minuto *1HP*!\n"
-ship.rests.time: "⏱: Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests: "Desideri recuperare un po' di enerige?"
+ship.rests.time: "\n\n⏱: Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests.info: "\n\n💭: Mettendosi a dormire recupererai *1HP* ogni minuto!\n"
 ship.rests.start: "Mettiti a dormire"
 ship.rests.wakeup: "Risvegliati"
-ship.rests.dont_need: "Sei pieno di energie, ci provi ma proprio non riesci ad addormentarti"
-ship.rests.reparing: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
-ship.rests.need_to_rest: "Non hai ancora recuperato abbastanza energie, torna a dormire!"
+ship.rests.dont_need: "Sei pieno di energie, ci provi, ma proprio non riesci ad addormentarti."
+ship.rests.sleep: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
+ship.rests.need_to_rest: "Ti risvegli pur non avendo recuperato le energie."
 ship.rests.reparing.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
 ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
 
