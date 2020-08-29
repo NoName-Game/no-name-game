@@ -328,16 +328,19 @@ ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il vi
 ship.warehouse.info: "Info warehouse"
 
 # SHIP - Repairs
-ship.repairs.info: "Dettagli di riparazione!\n\n"
-ship.repairs.time: "⏱ Tempo necessario: %v (minuti)"
-ship.repairs.quantity_resources: "💠 Risorse necessarie: %v (%s)"
+ship.repairs.info: "Vuoi riparare la tua nave?\n\n"
+ship.repairs.partial: "Riparazione *Parziale*:"
+ship.repairs.full: "Riparazione *Completa*:"
+ship.repairs.time: "⏱ Tempo necessario: *%v* (minuti)"
+ship.repairs.quantity_resources: "💠 Risorse necessarie: *%v*"
 ship.repairs.used_resources: "💠 Risorse impiegate per la riparazione:\n"
-ship.repairs.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave.\nDevi recuperare più risorse della stessa rarità della tua nave."
+ship.repairs.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave."
 ship.repairs.dont_need: "La tua nave non necessita di riparazioni."
-ship.repairs.start: "Avvia riparazione"
+ship.repairs.start_partial: "Riparazione parziale"
+ship.repairs.start_full: "Riparazione completa"
 ship.repairs.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
 ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
-ship.repairs.reparing.finish: "La tua nave ha recuperato la sua totale integrità."
+ship.repairs.reparing.finish: "La tua nave è stata riparata con successo."
 
 # SHIP - Better
 ship.better.info: "Info better"
