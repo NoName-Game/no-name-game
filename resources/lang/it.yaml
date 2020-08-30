@@ -13,12 +13,10 @@ select_language: "⚙️ For a better experience choose your favourite language:
 route.tutorial: "📖 Tutorial"
 route.tutorial.continue: "📖 Continua tutorial"
 route.exploration: "⭕️ Esplorazione"
-route.crafting: "🛠 Crafting"
 route.inventory: "🎒 Inventario"
 route.inventory.resources: "💠 Risorse"
 route.inventory.items: "🔩 Oggetti"
 route.inventory.equip: "🛡 Equipaggiamento"
-#route.inventory.destroy: "Distruggi Oggetto"
 route.player: "👨🏼‍🚀 Player"
 route.ability: "🧬 Abilità"
 route.hunting: "⚔️ Caccia"
@@ -27,7 +25,7 @@ route.ship.travel: "🔭 Nuovo Viaggio"
 route.ship.warehouse: "Deposito"
 route.ship.repairs: "🔧 Ripara"
 route.ship.rests: "💤 Riposa"
-route.ship.better: "Migliora"
+route.ship.laboratory: "🧪 Laboratorio"
 route.menu: "BoardSystem"
 route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
@@ -297,7 +295,7 @@ route.tutorial.completed.reward: "🎉 Complimenti esploratore, hai completato i
 # CRON
 cron.route.testing.time_alert: "End Test time"
 cron.route.exploration_alert: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
-cron.route.crafting_alert: "La realizzazione del tuo craft è stata ultimata!"
+cron.route.ship.laboratory_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
 cron.route.ship.travel_alert: "Nuovo pianeta raggiunto!"
@@ -324,9 +322,6 @@ ship.travel.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna p
 route.travel.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
 
-# SHIP - Warehouse
-ship.warehouse.info: "Info warehouse"
-
 # SHIP - Repairs
 ship.repairs.info: "Vuoi riparare la tua nave?\n\n"
 ship.repairs.partial: "Riparazione *Parziale*:"
@@ -342,9 +337,6 @@ ship.repairs.wait: "Il termine per la riparazione della tua nave è previsto all
 ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
 ship.repairs.reparing.finish: "La tua nave è stata riparata con successo."
 
-# SHIP - Better
-ship.better.info: "Info better"
-
 # SHIP - RESTS
 ship.rests: "Desideri recuperare un po' di enerige?"
 ship.rests.time: "\n\n⏱: Necessari *%v* minuti al recupero *totale* delle forze."
@@ -356,6 +348,18 @@ ship.rests.sleep: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recup
 ship.rests.need_to_rest: "Ti risvegli pur non avendo recuperato le energie."
 ship.rests.reparing.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
 ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
+
+# SHIP - LABORATORY
+ship.laboratory.categories.medical: "💊 Curative"
+ship.laboratory.categories.ship_support: "⚙️ Supporto nave"
+ship.laboratory.info: "📖: Nel laboratorio della tua nave puoi realizzare tramite l'impiego di alcune risorse degli oggetti, necessari per affrontare il tuo viaggio."
+ship.laboratory.type: "Quale categoria di oggetti ti interessa realizzare?"
+ship.laboratory.what: "Quale oggetto vorresti realizzare?"
+ship.laboratory.you_need: "Per realizzare *%s* verranno consumante le seguneti risorse:\n\n%s\nVuoi continuare?"
+ship.laboratory.craft_completed: "Il tuo oggetto è stato realizzato correttamente.\nHai ottenuto *%s*!"
+ship.laboratory.no_resource_to_craft: "Purtroppo ti mancano alcune risorse per completare il tuo oggetto, riprova quando avrai tutte le risorse."
+ship.laboratory.wait: "Produzione *avviata*!\nil termine per la realizzazione del tuo oggetto è previsto alle *%s*, torna più tardi."
+ship.laboratory.item_does_not_exist: "L'item scelto non esiste!"
 
 # SAFE PLANET
 safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"

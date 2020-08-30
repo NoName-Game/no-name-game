@@ -1,29 +1,9 @@
 package helpers
 
 import (
-	"strconv"
-
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 )
-
-// ListRecipe - Metodo che aiuta a recuperare la lista di risore necessarie
-// al crafting di un determianto item
-func ListRecipe(needed map[uint32]int32) (result string, err error) {
-	for resourceID, value := range needed {
-		var rGetResourceByID *pb.GetResourceByIDResponse
-		rGetResourceByID, err = services.NnSDK.GetResourceByID(NewContext(1), &pb.GetResourceByIDRequest{
-			ID: resourceID,
-		})
-		if err != nil {
-			return result, err
-		}
-
-		result += rGetResourceByID.GetResource().GetName() + " x" + strconv.Itoa(int(value)) + "\n"
-	}
-
-	return result, err
-}
 
 func CheckAndReturnCategorySlug(locale string, text string) (result string) {
 	for _, slug := range GetAllSlugCategories() {

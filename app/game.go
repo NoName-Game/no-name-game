@@ -18,14 +18,14 @@ var (
 		"route.tutorial.continue": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
 		"route.exploration": reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
-		"route.crafting":    reflect.TypeOf((*controllers.CraftingController)(nil)).Elem(),
+		"route.hunting":     reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 
-		"route.hunting": reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
-
-		"route.ship":         reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
-		"route.ship.travel":  reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
-		"route.ship.repairs": reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
-		"route.ship.rests":   reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+		// Ship
+		"route.ship":            reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
+		"route.ship.travel":     reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
+		"route.ship.repairs":    reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
+		"route.ship.rests":      reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+		"route.ship.laboratory": reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
 
 		// Player
 		"route.player":              reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),

@@ -15,12 +15,12 @@ import (
 )
 
 // ====================================
-// CraftingController
+// ShipLaboratoryController
 // Ogni player ha la possibilità di craftare al player degli item
 // che possono essere usati in diversi modo, es. per recuperare vita
 // o per ripristinare determinate cose
 // ====================================
-type CraftingController struct {
+type ShipLaboratoryController struct {
 	BaseController
 	Payload struct {
 		Item      *pb.Item         // Item da craftare
@@ -31,7 +31,7 @@ type CraftingController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
 	c.Player = player
@@ -39,7 +39,7 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
-		Controller: "route.crafting",
+		Controller: "route.ship.laboratory",
 		ControllerBack: ControllerBack{
 			To:        &ShipController{},
 			FromStage: 1,
@@ -73,7 +73,7 @@ func (c *CraftingController) Handle(player *pb.Player, update tgbotapi.Update) {
 // ====================================
 // Validator
 // ====================================
-func (c *CraftingController) Validator() (hasErrors bool) {
+func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	var err error
 	switch c.PlayerData.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -84,8 +84,8 @@ func (c *CraftingController) Validator() (hasErrors bool) {
 	case 1:
 		// category, err = providers.FindItemCategoryByName()
 		if !helpers.InArray(c.Update.Message.Text, []string{
-			helpers.Trans(c.Player.Language.Slug, "crafting.categories.medical"),
-			helpers.Trans(c.Player.Language.Slug, "crafting.categories.ship_support"),
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.medical"),
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.ship_support"),
 		}) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
@@ -114,7 +114,7 @@ func (c *CraftingController) Validator() (hasErrors bool) {
 		}
 
 		if !itemExists {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "crafting.item_does_not_exist")
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.item_does_not_exist")
 
 			return true
 		}
@@ -148,7 +148,7 @@ func (c *CraftingController) Validator() (hasErrors bool) {
 				// il controllo in quanti per continuare di stage il player
 				// deve possedere TUTTI gli elementi
 				if !haveResource {
-					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "crafting.no_resource_to_craft")
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.no_resource_to_craft")
 
 					return true
 				}
@@ -170,7 +170,7 @@ func (c *CraftingController) Validator() (hasErrors bool) {
 
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
-			"crafting.wait",
+			"ship.laboratory.wait",
 			finishAt.Format("15:04:05"),
 		)
 
@@ -200,7 +200,7 @@ func (c *CraftingController) Validator() (hasErrors bool) {
 // ====================================
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
-func (c *CraftingController) Stage() (err error) {
+func (c *ShipLaboratoryController) Stage() (err error) {
 	switch c.PlayerData.CurrentState.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
@@ -211,14 +211,19 @@ func (c *CraftingController) Stage() (err error) {
 			return err
 		}
 
+		laboratoryInfo := fmt.Sprintf("%s\n\n%s",
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.type"),
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.info"),
+		)
+
 		// Creo messaggio
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
+		msg := services.NewMessage(c.Player.ChatID, laboratoryInfo)
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)),
+					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)),
 				),
 			)
 			keyboardRow = append(keyboardRow, row)
@@ -256,7 +261,7 @@ func (c *CraftingController) Stage() (err error) {
 
 		var chosenCategory *pb.ItemCategory
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
-			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("crafting.categories.%s", category.Slug)) {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)) {
 				chosenCategory = category
 			}
 		}
@@ -280,7 +285,7 @@ func (c *CraftingController) Stage() (err error) {
 		}
 
 		// Creo messaggio
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.laboratory.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, item := range rGetItemByCategoryID.GetItems() {
@@ -330,22 +335,33 @@ func (c *CraftingController) Stage() (err error) {
 		// Inserisco nel payload la recipelist per avere accesso più facile ad essa
 		helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
 
-		// ListRecipe() genera una string contenente gli oggetti necessari al crafting
+		// Genero string contenente le risorse richieste per il craft
 		var itemsRecipeList string
-		itemsRecipeList, err = helpers.ListRecipe(c.Payload.Resources)
-		if err != nil {
-			return err
+		for resourceID, value := range c.Payload.Resources {
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: resourceID,
+			})
+			if err != nil {
+				return err
+			}
+
+			itemsRecipeList += fmt.Sprintf("- *%v* x %s (%s)\n",
+				value,
+				rGetResourceByID.GetResource().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+			)
 		}
 
 		msg := services.NewMessage(c.Player.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
-				"crafting.you_need",
+				"ship.laboratory.you_need",
 				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 				itemsRecipeList,
 			),
 		)
-
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
@@ -358,7 +374,6 @@ func (c *CraftingController) Stage() (err error) {
 				),
 			),
 		)
-		msg.ParseMode = "HTML"
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
@@ -370,6 +385,7 @@ func (c *CraftingController) Stage() (err error) {
 	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
 	// procedo con il rimuovere le risorse associate e notificargli l'attesa per il crafting
 	case 3:
+		// TODO: logica da spostare su WS
 		// Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
 			_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
@@ -389,9 +405,9 @@ func (c *CraftingController) Stage() (err error) {
 		// Notifico
 		var msg tgbotapi.MessageConfig
 		msg = services.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "crafting.wait", endTime.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", endTime.Format("15:04:05")),
 		)
-
+		msg.ParseMode = "markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
@@ -406,6 +422,7 @@ func (c *CraftingController) Stage() (err error) {
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo
 	case 4:
+		// TODO: logica da spostare su WS
 		// Aggiungo item all'inventario
 		_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 			PlayerID: c.Player.GetID(),
@@ -421,11 +438,11 @@ func (c *CraftingController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(
 				c.Player.Language.Slug,
-				"crafting.craft_completed",
+				"ship.laboratory.craft_completed",
 				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 			),
 		)
-
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
