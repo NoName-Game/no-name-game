@@ -231,9 +231,13 @@ func (c *ShipRestsController) Stage() (err error) {
 			panic(err)
 		}
 
+		if diffMinutes > 100 {
+			diffMinutes = 100
+		}
+
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.reparing.finish", diffMinutes),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", diffMinutes),
 		)
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
