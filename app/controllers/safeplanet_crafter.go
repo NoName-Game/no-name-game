@@ -2,8 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"sort"
-	"strconv"
+	"fmt"
 	"strings"
 	"time"
 
@@ -96,11 +95,11 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		}
 		return true
 	case 3:
-		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "crafting.add")) {
+		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")) {
 			c.PlayerData.CurrentState.Stage = 2
 			c.Payload.AddFlag = true
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "crafting.start") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
 			if len(c.Payload.Resources) > 0 {
 				return false
 			}
@@ -118,20 +117,8 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 
 		c.Validation.Message = helpers.Trans(
 			c.Player.Language.Slug,
-			"crafting.wait",
+			"safeplanet.crafting.wait_validation",
 			finishAt.Format("15:04:05"),
-		)
-
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
 		)
 
 		// Verifico se ha finito il crafting
@@ -155,8 +142,13 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 	switch c.PlayerData.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
+		startMsg := fmt.Sprintf("%s %s",
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.what"),
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.info"),
+		)
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.what"))
+		msg := services.NewMessage(c.Player.ChatID, startMsg)
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
@@ -165,7 +157,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			),
 		)
 		_, err = services.SendMessage(msg)
@@ -175,9 +167,13 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		// Avanzo di stage
 		c.PlayerData.CurrentState.Stage = 1
 	case 1:
+		var message string
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
+
 		switch c.Payload.Item {
 		case "armors":
+			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.armor.type")
+
 			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
 			rGetAllArmorCategory, err = services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
 			if err != nil {
@@ -189,6 +185,8 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		case "weapons":
+			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.weapon.type")
+
 			var rGetAllWeaponCategory *pb.GetAllWeaponCategoryResponse
 			rGetAllWeaponCategory, err = services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
 			if err != nil {
@@ -204,10 +202,9 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 		))
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.type"))
+		msg := services.NewMessage(c.Player.ChatID, message)
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -216,6 +213,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		// Aggiorno stato
 		c.PlayerData.CurrentState.Stage = 2
 	case 2:
@@ -227,10 +225,9 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			return err
 		}
 
-		mapInventory := helpers.InventoryResourcesToMap(rGetPlayerResources.GetPlayerInventory())
 		// Se l'inventario è vuoto allora concludi
-		if len(mapInventory) <= 0 {
-			message := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.no_resources"))
+		if len(rGetPlayerResources.GetPlayerInventory()) <= 0 {
+			message := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resources"))
 			message.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
@@ -246,16 +243,36 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			c.PlayerData.CurrentState.Completed = true
 		}
 
-		// Id Add new resource
+		type CraftResourceStruct struct {
+			ResourceID     uint32
+			ResourceName   string
+			ResourceRarity string
+			Quantity       int32
+		}
+
+		// Mappo tutte le risorse del player
+		var playerResources []CraftResourceStruct
+		for _, resource := range rGetPlayerResources.GetPlayerInventory() {
+			playerResources = append(playerResources, CraftResourceStruct{
+				ResourceID:     resource.GetResource().GetID(),
+				ResourceName:   resource.GetResource().GetName(),
+				ResourceRarity: resource.GetResource().GetRarity().GetSlug(),
+				Quantity:       resource.GetQuantity(),
+			})
+		}
+
+		// Se è stato aggiunto una risorsa ovvero quando viene processto il messaggio "aggiungi"
 		if c.Payload.AddFlag {
+			// Se è la prima risorsa inizializzo la mappa
 			if c.Payload.Resources == nil {
 				c.Payload.Resources = make(map[uint32]int32)
 			}
 
-			// Clear text from Add and other shit.
+			// Recupero risorsa da messaggio
 			resourceName := strings.Split(
 				strings.Split(c.Update.Message.Text, " (")[0],
-				helpers.Trans(c.Player.Language.Slug, "crafting.add")+" ")[1]
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")+" ",
+			)[1]
 
 			var rGetResourceByName *pb.GetResourceByNameResponse
 			rGetResourceByName, err = services.NnSDK.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
@@ -265,74 +282,67 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				return err
 			}
 
-			resourceID := rGetResourceByName.GetResource().GetID()
-			resourceMaxQuantity := mapInventory[resourceID]
-			hasResource := true
+			// Recupero dettagli risorsa
+			choosedResourceID := rGetResourceByName.GetResource().GetID()
 
 			// Controllo che l'utente abbia effettivamente l'item
-			if mapInventory[resourceID] == 0 {
-				// Non ha l'item!
-				hasResource = false
-				msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.no_resource"))
+			hasResource := false
+			for _, resource := range playerResources {
+				if resource.ResourceID == choosedResourceID {
+					hasResource = true
+
+					// Se il player ha effettivamente la risorsa creo/incremento
+					// Incremento quantitativo risorse
+					if helpers.KeyInMap(choosedResourceID, c.Payload.Resources) && hasResource {
+						if c.Payload.Resources[choosedResourceID] < resource.Quantity {
+							c.Payload.Resources[choosedResourceID]++
+						}
+					} else if hasResource {
+						c.Payload.Resources[choosedResourceID] = 1
+					}
+				}
+			}
+
+			// Se non è stato trovata corrispondenza invio errore
+			if !hasResource {
+				msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resource"))
 				_, err = services.SendMessage(msg)
 				if err != nil {
 					return err
 				}
-
-			}
-
-			if helpers.KeyInMap(resourceID, c.Payload.Resources) && hasResource {
-				if c.Payload.Resources[resourceID] < resourceMaxQuantity {
-					c.Payload.Resources[resourceID]++
-				}
-			} else if hasResource {
-				c.Payload.Resources[resourceID] = 1
 			}
 		}
 
-		// NNT-63 -> Add item keyboard is always random, so missclicking is quite a pain in the ***
-		// Sorting keys we can provide an Sorted Keyboard.
-		keys := make([]uint32, 0, len(mapInventory))
-		for k := range mapInventory {
-			keys = append(keys, k)
-		}
-		sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
-
-		// Keyboard with resources
+		// Costruisco keyboard
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
-		for _, r := range keys {
-			q := mapInventory[r]
-			// If PayloadResouces < Inventory quantity ok :)
-			var rGetResourceByID *pb.GetResourceByIDResponse
-			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-				ID: r,
-			})
-			if err != nil {
-				return err
-			}
 
-			resource := rGetResourceByID.GetResource()
-			if c.Payload.Resources[r] < q {
+		// Se sono già stati inseriti delle risorse mostro tasto start craft!
+		if len(c.Payload.Resources) > 0 {
+			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start"),
+				),
+			))
+		}
+
+		// Inserisco lista delle risorse
+		for _, resource := range playerResources {
+			if c.Payload.Resources[resource.ResourceID] <= resource.Quantity {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "crafting.add") + " " + resource.Name + " (" + (strconv.Itoa(int(q) - int(c.Payload.Resources[r]))) + ")",
+					fmt.Sprintf("%s %s (%s) %v/%v",
+						helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
+						resource.ResourceName,
+						resource.ResourceRarity,
+						resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
+					),
 				))
 				keyboardRowResources = append(keyboardRowResources, keyboardRow)
 			}
 		}
 
-		// If PayloadResources is not empty show craft button
-		if len(c.Payload.Resources) > 0 {
-			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "crafting.start"),
-				),
-			))
-		}
-
 		// Clear and exit
 		keyboardRowResources = append(keyboardRowResources,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
@@ -340,20 +350,25 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		// Add recipe message
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
-			for k, v := range c.Payload.Resources {
+			for resourceID, quantity := range c.Payload.Resources {
 				var rGetResourceByID *pb.GetResourceByIDResponse
 				rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-					ID: k,
+					ID: resourceID,
 				})
 				if err != nil {
 					return err
 				}
 
-				recipe += rGetResourceByID.GetResource().Name + " x " + strconv.Itoa(int(v)) + "\n"
+				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
+					quantity,
+					rGetResourceByID.GetResource().Name,
+					rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				)
 			}
 		}
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.choose_resources")+"\n"+recipe)
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.choose_resources", recipe))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,
@@ -362,32 +377,37 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		// Aggiorno stato
 		c.PlayerData.CurrentState.Stage = 3
 	case 3:
 		// Add recipe message
 		var recipe string
 		if len(c.Payload.Resources) > 0 {
-			for k, v := range c.Payload.Resources {
+			for resourceID, quantity := range c.Payload.Resources {
 				var rGetResourceByID *pb.GetResourceByIDResponse
 				rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-					ID: k,
+					ID: resourceID,
 				})
 				if err != nil {
 					return err
 				}
 
-				recipe += rGetResourceByID.GetResource().GetName() + " x " + strconv.Itoa(int(v)) + "\n"
+				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
+					quantity,
+					rGetResourceByID.GetResource().Name,
+					rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				)
 			}
 		}
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "crafting.confirm_choose_resources")+"\n\n "+recipe)
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.confirm_choose_resources", recipe))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
@@ -395,17 +415,30 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		if err != nil {
 			return err
 		}
+
 		// Aggiorno stato
 		c.PlayerData.CurrentState.Stage = 4
 	case 4:
-		// Il player ha avviato il crafting, stampa il tempo di attesa
-		// Aggiorna stato
+		// Il player ha avviato il crafting, Rimuovo risorse usate al player
+		for resourceID, quantity := range c.Payload.Resources {
+			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
+				PlayerID: c.Player.GetID(),
+				ItemID:   resourceID,
+				ItemType: "resources",
+				Quantity: -quantity,
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		// Stampa il tempo di attesa e aggiorna stato
 		endTime := helpers.GetEndTime(0, 10, 0)
 		var msg tgbotapi.MessageConfig
 		msg = services.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "crafting.wait", endTime.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.wait", endTime.Format("15:04:05")),
 		)
-
+		msg.ParseMode = "markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
@@ -422,19 +455,6 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		c.ForceBackTo = true
 	case 5:
 		// crafting completato
-		// Rimuovo risorse usate al player
-		for resourceID, quantity := range c.Payload.Resources {
-			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
-				PlayerID: c.Player.GetID(),
-				ItemID:   resourceID,
-				ItemType: "resources",
-				Quantity: -quantity,
-			})
-			if err != nil {
-				return err
-			}
-		}
-
 		items, err := json.Marshal(c.Payload.Resources)
 		if err != nil {
 			return err
@@ -454,7 +474,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				return err
 			}
 
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraftArmor.GetArmor().GetName())
+			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftArmor.GetArmor().GetName())
 		case "weapons":
 			// Creo la richiesta di craft weapon
 			var rCraftWeapon *pb.CraftWeaponResponse
@@ -467,14 +487,16 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				return err
 			}
 
-			text = helpers.Trans(c.Player.Language.Slug, "crafting.craft_completed", rCraftWeapon.GetWeapon().GetName())
+			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftWeapon.GetWeapon().GetName())
 		}
 
 		msg := services.NewMessage(c.Player.ChatID, text)
+		msg.ParseMode = "markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
 			return err
 		}
+
 		// Completo lo stato
 		c.PlayerData.CurrentState.Completed = true
 	}

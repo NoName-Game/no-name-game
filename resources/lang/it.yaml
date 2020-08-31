@@ -94,7 +94,7 @@ menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
 
 # MENU - SAFEPLANET
-menu.safeplanet: "Benvenuto su 🏟*%s*\n\nPianeta sicuro e area protetta per *tutti*!"
+menu.safeplanet: "Benvenuto su 🏟*%s*\n\n✌️️Pianeta *sicuro* e area protetta per *tutti*!"
 
 # MENU - SAFEPLANET
 menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
@@ -158,26 +158,6 @@ exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo 
 exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*"
 exploration.continue: "Continua ad esplorare"
 
-# CRAFTING
-crafting.categories.medical: "💊 Curative"
-crafting.categories.ship_support: "⚙️ Supporto nave"
-crafting.craft: "Crafting:"
-crafting.start: "Inizia!"
-crafting.craft_different_item: "Crea altro!"
-crafting.what: "Cosa vuoi realizzare?"
-crafting.type: "Quale categoria di craft ti interessa realizzare?"
-crafting.add: "Aggiungi"
-crafting.choose_resources: "Quali risorse vuoi usare?"
-crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta?"
-crafting.craft_completed: "Il tuo item è stato craftato correttamente. Hai ottenuto: %s!"
-crafting.wait: "Il termine per la realizzazione del tuo craft è previsto alle %s, torna più tardi."
-crafting.choose_one_resource_to_craft: "Devi scegliere almene una risorsa per craftare"
-crafting.no_resource_to_craft: "Ti mancano alcune risorse per completare la ricetta!"
-crafting.you_need: "Perderai queste risorse per assemblare <b>%s</b>.\n\n%s\nVuoi continuare?"
-crafting.item_does_not_exist: "L'item scelto non esiste!"
-crafting.no_resources: "Non hai abbastanza risorse!"
-crafting.no_resource: "Non hai questa risorsa!"
-
 # ITEMS
 items.medical: "💊"
 items.ship_support: "⚙️"
@@ -196,12 +176,8 @@ items.description.refined_fuel: "Di buona qualità, permetterà di ricare il ser
 items.final_fuel: "Carburante finale"
 items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
 
-# PLAYER
-player.intro: "Stato Player"
-#player.armors: "
-
 # INVENTORY
-inventory.intro: "Cosa vuoi gestire del tuo invantario?"
+inventory.intro: "Cosa vuoi gestire del tuo inventario?"
 inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
 # inventory.summary: "Riassunto inventario"
 # inventory.equip: "Equipaggia Oggetto"
@@ -300,7 +276,7 @@ cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
 cron.route.ship.travel_alert: "Nuovo pianeta raggiunto!"
 cron.route.death: "Hai recuperato le energie!"
-cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il prodotto!"
+cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 
 # SHIP
 ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
@@ -398,7 +374,7 @@ route.safeplanet.titan.choice: "Se vuoi esser dei nostri scegli un titano dalla 
 route.safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato trovato nessun titano.\nEsplora lo spazio per trovarne qualcuno o torna più tardi."
 route.safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
 
-# SAFEPLANET -
+# SAFEPLANET - COALITION
 safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\nEsplorando tutti i pianeti al momento conosciuti, aiuterai la coalizione ad espandare i nostri confini.\n\n"
 safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
 safeplanet.coalition.expansion.recap: "Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
@@ -407,6 +383,21 @@ safeplanet.coalition.expansion.choice: "\n\nLa coalizione ti offre la possibilit
 safeplanet.coalition.expansion.confirmation: "Stai per essere trasportato sul pianeta sicuro 🏟*%s*, il costo per questa operazione è di 💎*%v*, sicuro di voler continuare?"
 safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
 safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
+
+# SAFEPLANET - CRAFTER
+safeplanet.crafting.start: "⚒️ Inizia!"
+safeplanet.crafting.what: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa vorresti realizzare?\n\n"
+safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
+safeplanet.crafting.armor.type: "Quale parte di armatura vorresti realizzare?"
+safeplanet.crafting.weapon.type: "Quale tipologia di arma vorresti realizzare?"
+safeplanet.crafting.add: "Aggiungi"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\n%s"
+safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta e quindi di consumare le seguenti 💠 *Risorse*?\n\n%s"
+safeplanet.crafting.wait: "*Bene, così sia!*\nMi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
+safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
+safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine! Spero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
+safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
+safeplanet.crafting.no_resource: "Non hai questa risorsa!"
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"
