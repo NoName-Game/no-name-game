@@ -251,9 +251,9 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		}
 
 		type CraftResourceStruct struct {
-			ResourceID     uint32
 			ResourceName   string
 			ResourceRarity string
+			ResourceID     uint32
 			Quantity       int32
 		}
 
@@ -440,7 +440,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 	case 4:
 		// Il player ha avviato il crafting, Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
+			_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",
@@ -458,6 +458,9 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			TransactionCategoryID: 9, // Crafter Safe Planet
 			PlayerID:              c.Player.GetID(),
 		})
+		if err != nil {
+			return err
+		}
 
 		// Stampa il tempo di attesa e aggiorna stato
 		endTime := helpers.GetEndTime(0, 10, 0)
