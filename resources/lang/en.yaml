@@ -84,6 +84,10 @@ use: "Usa"
 fuel: "Carburante"
 hours: "Ore"
 coordinate: "Coordinate"
+head: "Testa"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
 
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
@@ -107,19 +111,8 @@ banned.message: "Sei stato bannato, contatta un amministratore per maggior infor
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"
 armors: "🛡 Armature"
-helmet: "Elmo"
-gauntlets: "Braccia"
-chest: "Petto"
-leg: "Gambe"
-
-head: "Testa"
-
 weapon: "🗡 Arma"
 weapons: "🗡 Armi"
-knife: "Coltello"
-auto_rifle: "Fucile Automatico"
-sniper_rifle: "Fucile da cecchino"
-shotgun: "Fucile a pompa"
 
 # HUNTING
 hunting.init: "Decidi di esplorare l'area circostante..."
@@ -183,7 +176,7 @@ inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
 # inventory.equip: "Equipaggia Oggetto"
 # inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
-inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare"
+inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
 inventory.armors.what: "Quale tra le tue *armature* vorresti equipaggiare?"
 inventory.armors.zero_equipment: "❌ Nessuna"
 inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
@@ -193,7 +186,9 @@ inventory.weapons.zero_equipment: "❌ Nessuna"
 # Inventario - equipaggia
 inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
 inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
-inventory.equip.confirm: "*Confermi di voler equipaggiare %v?*"
+inventory.equip.confirm: "Confermi di voler equipaggiare *%s*?"
+inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma *%s*, sostituendo *%s*?"
+inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura *%s*, sostituendo *%s*?"
 inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
 
 # Inventario - oggetti
@@ -322,7 +317,7 @@ ship.rests.wakeup: "Risvegliati"
 ship.rests.dont_need: "Sei pieno di energie, ci provi, ma proprio non riesci ad addormentarti."
 ship.rests.sleep: "Chiudi gli occhi e inizi il tuo meritato riposo, per un recupero totale delle energie è consigliato un risveglio alle *%s*"
 ship.rests.need_to_rest: "Ti risvegli pur non avendo recuperato le energie."
-ship.rests.reparing.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
+ship.rests.finish: "Ti risvegli sentendoti meglio, hai recuperato *%vHP*!"
 ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima di eseguire qualsiasi altra operazione"
 
 # SHIP - LABORATORY
@@ -388,16 +383,16 @@ safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effettu
 safeplanet.crafting.start: "⚒️ Inizia!"
 safeplanet.crafting.what: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa vorresti realizzare?\n\n"
 safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
-safeplanet.crafting.armor.type: "Quale parte di armatura vorresti realizzare?"
-safeplanet.crafting.weapon.type: "Quale tipologia di arma vorresti realizzare?"
+safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
 safeplanet.crafting.add: "Aggiungi"
-safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\n%s"
-safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta e quindi di consumare le seguenti 💠 *Risorse*?\n\n%s"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Bene, così sia!*\nMi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine! Spero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
 safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
+safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"
