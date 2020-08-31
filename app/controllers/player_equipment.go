@@ -159,7 +159,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		// Recupero arma equipaggiata
 		// ******************
 		var currentWeaponsEquipment string
-		currentWeaponsEquipment = fmt.Sprintf("*%s*:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
+		currentWeaponsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
 		rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
@@ -171,7 +171,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
 			currentWeaponsEquipment += fmt.Sprintf(
-				"*%s* (*%s*)\nDMG:*%.2v* | PCS: *%.2v* | PNT: *%.2v*",
+				"\n*%s* (*%s*)\nDMG:*%.2v* | PCS: *%.2v* | PNT: *%.2v*",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
