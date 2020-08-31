@@ -82,8 +82,12 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
 			c.Payload.Item = "armors"
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapons") {
-			c.Payload.Item = "weapons"
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapon") {
+			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle risorse
+			// in quanto le armi non hanno una categoria
+			c.PlayerData.CurrentState.Stage = 2
+			c.Payload.Item = "weapon"
+
 			return false
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -154,7 +158,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
@@ -181,19 +185,6 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 
 			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
-			}
-		case "weapons":
-			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.weapon.type")
-
-			var rGetAllWeaponCategory *pb.GetAllWeaponCategoryResponse
-			rGetAllWeaponCategory, err = services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
-			if err != nil {
-				return err
-			}
-
-			for _, category := range rGetAllWeaponCategory.GetWeaponCategories() {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
@@ -475,11 +466,10 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 
 			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftArmor.GetArmor().GetName())
-		case "weapons":
+		case "weapon":
 			// Creo la richiesta di craft weapon
 			var rCraftWeapon *pb.CraftWeaponResponse
 			rCraftWeapon, err = services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
-				Category: c.Payload.Category,
 				Items:    string(items),
 				PlayerID: c.Player.ID,
 			})

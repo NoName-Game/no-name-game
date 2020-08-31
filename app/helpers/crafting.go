@@ -20,17 +20,9 @@ func GetAllSlugCategories() (result []string) {
 		panic(err)
 	}
 
-	rGetAllWeaponCategory, err := services.NnSDK.GetAllWeaponCategory(NewContext(1), &pb.GetAllWeaponCategoryRequest{})
-	if err != nil {
-		panic(err)
-	}
-
 	for i := 0; i < len(rGetAllArmorCategory.GetArmorCategories()); i++ {
 		result = append(result, rGetAllArmorCategory.GetArmorCategories()[i].Slug)
 	}
 
-	for i := 0; i < len(rGetAllWeaponCategory.GetWeaponCategories()); i++ {
-		result = append(result, rGetAllWeaponCategory.GetWeaponCategories()[i].Slug)
-	}
 	return
 }
