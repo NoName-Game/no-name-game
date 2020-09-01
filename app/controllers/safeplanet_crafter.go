@@ -23,6 +23,7 @@ type SafePlanetCrafterController struct {
 		Category  string
 		Resources map[uint32]int32
 		AddFlag   bool
+		Price     uint32
 	}
 	BaseController
 }
@@ -82,8 +83,12 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
 			c.Payload.Item = "armors"
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapons") {
-			c.Payload.Item = "weapons"
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapon") {
+			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle risorse
+			// in quanto le armi non hanno una categoria
+			c.PlayerData.CurrentState.Stage = 2
+			c.Payload.Item = "weapon"
+
 			return false
 		}
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -106,6 +111,21 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		}
 	case 4:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
+			// Verifico se il player ha i soldi per pagare il lavoro
+			var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
+			rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+				PlayerID:    c.Player.GetID(),
+				EconomyType: "money",
+			})
+			if err != nil {
+				panic(err)
+			}
+
+			if rGetPlayerEconomyMoney.GetValue() < int32(c.Payload.Price) {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money")
+				return true
+			}
+
 			return false
 		}
 	case 5:
@@ -154,7 +174,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
@@ -181,19 +201,6 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 
 			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
-				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
-			}
-		case "weapons":
-			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.weapon.type")
-
-			var rGetAllWeaponCategory *pb.GetAllWeaponCategoryResponse
-			rGetAllWeaponCategory, err = services.NnSDK.GetAllWeaponCategory(helpers.NewContext(1), &pb.GetAllWeaponCategoryRequest{})
-			if err != nil {
-				return err
-			}
-
-			for _, category := range rGetAllWeaponCategory.GetWeaponCategories() {
 				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
@@ -244,9 +251,9 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		}
 
 		type CraftResourceStruct struct {
-			ResourceID     uint32
 			ResourceName   string
 			ResourceRarity string
+			ResourceID     uint32
 			Quantity       int32
 		}
 
@@ -283,22 +290,26 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 
 			// Recupero dettagli risorsa
-			choosedResourceID := rGetResourceByName.GetResource().GetID()
+			choosedResource := rGetResourceByName.GetResource()
 
 			// Controllo che l'utente abbia effettivamente l'item
 			hasResource := false
 			for _, resource := range playerResources {
-				if resource.ResourceID == choosedResourceID {
+				if resource.ResourceID == choosedResource.GetID() {
 					hasResource = true
+
+					// TODO: spostare questa logica sul ws
+					// Aumento prezzo in base alla rarità della risorsa usata
+					c.Payload.Price += 10 * choosedResource.GetRarity().GetID()
 
 					// Se il player ha effettivamente la risorsa creo/incremento
 					// Incremento quantitativo risorse
-					if helpers.KeyInMap(choosedResourceID, c.Payload.Resources) && hasResource {
-						if c.Payload.Resources[choosedResourceID] < resource.Quantity {
-							c.Payload.Resources[choosedResourceID]++
+					if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
+						if c.Payload.Resources[choosedResource.GetID()] < resource.Quantity {
+							c.Payload.Resources[choosedResource.GetID()]++
 						}
 					} else if hasResource {
-						c.Payload.Resources[choosedResourceID] = 1
+						c.Payload.Resources[choosedResource.GetID()] = 1
 					}
 				}
 			}
@@ -367,7 +378,11 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 		}
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.choose_resources", recipe))
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.crafting.choose_resources",
+			c.Payload.Price,
+			recipe,
+		))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -401,7 +416,11 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 		}
 
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.confirm_choose_resources", recipe))
+		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.crafting.confirm_choose_resources",
+			c.Payload.Price,
+			recipe,
+		))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -421,7 +440,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 	case 4:
 		// Il player ha avviato il crafting, Rimuovo risorse usate al player
 		for resourceID, quantity := range c.Payload.Resources {
-			_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
+			_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
 				PlayerID: c.Player.GetID(),
 				ItemID:   resourceID,
 				ItemType: "resources",
@@ -430,6 +449,17 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			if err != nil {
 				return err
 			}
+		}
+
+		// Rimuovo money
+		_, err = services.NnSDK.CreateTransaction(helpers.NewContext(1), &pb.CreateTransactionRequest{
+			Value:                 -int32(c.Payload.Price),
+			TransactionTypeID:     1, // Gold
+			TransactionCategoryID: 9, // Crafter Safe Planet
+			PlayerID:              c.Player.GetID(),
+		})
+		if err != nil {
+			return err
 		}
 
 		// Stampa il tempo di attesa e aggiorna stato
@@ -475,11 +505,10 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			}
 
 			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftArmor.GetArmor().GetName())
-		case "weapons":
+		case "weapon":
 			// Creo la richiesta di craft weapon
 			var rCraftWeapon *pb.CraftWeaponResponse
 			rCraftWeapon, err = services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
-				Category: c.Payload.Category,
 				Items:    string(items),
 				PlayerID: c.Player.ID,
 			})

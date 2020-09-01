@@ -84,6 +84,10 @@ use: "Usa"
 fuel: "Carburante"
 hours: "Ore"
 coordinate: "Coordinate"
+head: "Testa"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
 
 # MENU
 menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
@@ -94,7 +98,7 @@ menu.tasks.minutes_left: "*%v* minuti al termine"
 menu.tasks.completed: "*completata!*"
 
 # MENU - SAFEPLANET
-menu.safeplanet: "Benvenuto su 🏟*%s*\n\n✌️️Pianeta *sicuro* e area protetta per *tutti*!"
+menu.safeplanet: "Benvenuto su 🏟*%s*\nPianeta *sicuro* e area protetta per *tutti*!✌️\n\n%s"
 
 # MENU - SAFEPLANET
 menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
@@ -107,19 +111,8 @@ banned.message: "Sei stato bannato, contatta un amministratore per maggior infor
 # ARMORS/WEAPONS
 armor: "🛡 Armatura"
 armors: "🛡 Armature"
-helmet: "Elmo"
-gauntlets: "Braccia"
-chest: "Petto"
-leg: "Gambe"
-
-head: "Testa"
-
 weapon: "🗡 Arma"
 weapons: "🗡 Armi"
-knife: "Coltello"
-auto_rifle: "Fucile Automatico"
-sniper_rifle: "Fucile da cecchino"
-shotgun: "Fucile a pompa"
 
 # HUNTING
 hunting.init: "Decidi di esplorare l'area circostante..."
@@ -183,17 +176,19 @@ inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
 # inventory.equip: "Equipaggia Oggetto"
 # inventory.destroy: "Distruggi Oggetto"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
-inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare"
+inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
 inventory.armors.what: "Quale tra le tue *armature* vorresti equipaggiare?"
-inventory.armors.zero_equipment: "❌ Nessuna"
+inventory.armors.zero_equipment: "\n❌ Nessuna\n"
 inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
 inventory.weapons.what: "Quale tra le tue *armi* vorresti equipaggiare?"
-inventory.weapons.zero_equipment: "❌ Nessuna"
+inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 
 # Inventario - equipaggia
 inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
 inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
-inventory.equip.confirm: "*Confermi di voler equipaggiare %v?*"
+inventory.equip.confirm: "Confermi di voler equipaggiare *%s*?"
+inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma *%s*, sostituendo *%s*?"
+inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura *%s*, sostituendo *%s*?"
 inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
 
 # Inventario - oggetti
@@ -259,7 +254,7 @@ route.tutorial.open_eye: "Apri gli occhi..."
 route.tutorial.first_use_item: "💭: Ti ritrovi su un pianeta sconosciuto, piuttosto malconcio.\nVerifichi immediatamente se nel tuo *inventario* sia presente qualcosa per recuperare un po' di energie...\n\n📖 *Oggetti:*\nAccedendo al tuo inventario avrai la possibilità di usare gli item da te craftati o trovati. Questi oggetti si dividono in diverse catergorie, sta a solo a te decidere di cosa beneficiare."
 route.tutorial.first_exploration: "💭: Sei riuscito a recuperare un po' di forze per continuare...\nTi rialzi in piedi e guardando verso la nave (non del tutto integra) decidi di tentare un'esplorazione di ricerca nella zona.\n\n📖 *Esplorazione:*\nÈ una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
 route.tutorial.first_crafting: "💭: Recuperate le risorse pensi a un modo per poter ripistinare parte dell'integrità della nave.\n\n📖 *Crafting:*\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza aprono molte strade. (SKIPPABILE)"
-route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante. Decidi quindi di equipaggiarla.\n\n📖 *Equipaggiamento:*\nArmi e armature, migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
+route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante. Decidi quindi di equipaggiarla.\n\n📖 *Equipaggiamento:*\nArmi e armature. Migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
 route.tutorial.first_hunting: "💭: Equipaggi l'arma e ti fai coraggio, decidi quindi di esplorare l'area intorno a te.\n\n📖 *Caccia:*\nÈ una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e monete!\nOvviamente se muori...beh muori.. fai attenzione!."
 route.tutorial.first_travel: "💭: Ritorni dalla caccia ancora malconcio a causa degli scontri ma soddisfatto.\nDecidi di rientrare nella nave e noti che lo *Scanner* ha rilevato un *Pianeta Sicuro*.\nDecidi dunque di impostare le coordinate e di accendere i motori per scappare dall'ostile ambiente dei pianeti non civilizzati.\n\n📖 *Viaggi:*\nViaggia e esplora i diversi pianeti che l'universo ti mette a disposizione.\n\nMa fa attenzione al carburante e alla tua nave...potresti ritrovarti bloccato su un pianeta ostile.\n"
 route.tutorial.first_safeplanet: "💭: Raggiungi l'orbita del pianeta definito *Sicuro* dallo scanner e subito una comunicazione radio viene avviata.\nNon comprendi il significato dei suoni che arrivano, dunque decidi di far uso del tuo traduttore incorporato nella tuta spaziale e immediamente ti rendi conto di essere in contatto con un'altra forma di vita!\nEsegui tutte le noiose pratiche burocratiche e attracchi all'hangar della base...\n\n📖 *Pianeti Sicuri:*\nDopo mesi passati tra viaggi spaziali interminabili, mostri ripugnanti su pianeti remoti e scomodi letti è sempre bello far ritorno in un pianeta con della civiltà..\nI Pianeti Sicuri sono pianeti controllati dalla *Coalizione* dove è vietato effettuare le solite attività di esplorazione, ma è possibile parlare con varie persone per usufruire di servizi! Buona Permanenza!"
@@ -341,21 +336,21 @@ ship.laboratory.item_does_not_exist: "L'item scelto non esiste!"
 safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
 
 # SAFE PLANET - BANK
-safeplanet.bank.info: "Benvenuto alla succursale della banca Dipper&Co."
-safeplanet.bank.account_details: "Ecco i dettagli del tuo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰"
+safeplanet.bank.info: "💰 Benvenuto alla succursale della banca Dipper&Co."
+safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰"
 safeplanet.bank.deposit: "🔽 Deposito"
-safeplanet.bank.deposit_message: "Quanto desideri depositare?\n\nPuoi indicare anche manualmente l'importo che desideri depositare."
+safeplanet.bank.deposit_message: "Quanto desidera depositare?\n\nPuo indicare anche manualmente l'importo che desidera depositare."
 
 safeplanet.bank.withdraws: "🔼 Prelievo"
-safeplanet.bank.withdraws_message: "Quanto desideri prelevare?\n\nPuoi indicare anche manualmente l'importo che desideri prelevare."
-safeplanet.bank.operation_done: "Operazione effettuata con successo"
-safeplanet.bank.transaction_error: "Impossibile completare la transazione! Riprova"
+safeplanet.bank.withdraws_message: "Quanto desidera prelevare?\n\nPuo indicare anche manualmente l'importo che desidera prelevare."
+safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con *successo*!\n\nI nostri servizi sono sempre a sua disposizione.\nTorni pure quando vuole."
+safeplanet.bank.transaction_error: "Non è stato possibile completare la transazione! Riprovi più tardi."
 
 # SAFE PLANET - COALITION
 safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
 
 # SAFE PLANET - MISSION
-safeplanet.mission.info: "Benvenuto nel centro missioni della *Coalizione*.\nAbbiamo un'infinità di missioni da affidarti.\n\nAl completamento di una di queste verrai ricompensato con 💰 e 💎."
+safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
 safeplanet.mission.start: "Avvia Missione"
 safeplanet.mission.check: "Non hai completato la tua missione ancora in corso.\nCosa vuoi fare?"
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n"
@@ -388,16 +383,16 @@ safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effettu
 safeplanet.crafting.start: "⚒️ Inizia!"
 safeplanet.crafting.what: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa vorresti realizzare?\n\n"
 safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
-safeplanet.crafting.armor.type: "Quale parte di armatura vorresti realizzare?"
-safeplanet.crafting.weapon.type: "Quale tipologia di arma vorresti realizzare?"
+safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
 safeplanet.crafting.add: "Aggiungi"
-safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\n%s"
-safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con la seguente ricetta e quindi di consumare le seguenti 💠 *Risorse*?\n\n%s"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Bene, così sia!*\nMi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine! Spero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
 safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
+safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
 
 # PLANET
 planet.intro: "Dettagli posizione attuale:"

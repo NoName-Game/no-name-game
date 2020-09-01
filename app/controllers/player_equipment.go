@@ -17,8 +17,9 @@ import (
 type PlayerEquipmentController struct {
 	BaseController
 	Payload struct {
-		Type    string
-		EquipID uint32
+		ItemType     string // Armor/Weapon
+		ItemCategory string // Head/Leg/Chest/Arms
+		EquipID      uint32
 	}
 }
 
@@ -72,36 +73,44 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
-
-	// Verifico che la tipologia di equip che vuole il player esista
 	case 1:
-		if helpers.InArray(c.Update.Message.Text, []string{
-			helpers.Trans(c.Player.Language.Slug, "armors"),
-			helpers.Trans(c.Player.Language.Slug, "weapons"),
-		}) {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
+			c.Payload.ItemType = "armors"
+			return false
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapons") {
+			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle armi
+			// in quanto le armi non hanno una categoria
+			c.Payload.ItemType = "weapons"
+			c.PlayerData.CurrentState.Stage = 2
 			return false
 		}
+
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
 		return true
-
-	// Verifico che il player voglia continuare con l'equip
+	// Verifico che la tipologia di equip che vuole il player esista
 	case 2:
+		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory != "" {
+			return false
+		}
+
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+		return true
+	// Verifico che il player voglia continuare con l'equip
+	case 3:
 		if strings.Contains(c.Update.Message.Text, "🩸") || strings.Contains(c.Update.Message.Text, "🛡") {
 			return false
 		}
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
 
 	// Verifico la conferma dell'equip
-	case 3:
+	case 4:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return false
 		}
 
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
 		return true
 	}
 
@@ -120,7 +129,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		// Recupero armatura equipaggiata
 		// ******************
 		var currentArmorsEquipment string
-		currentArmorsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "armor"))
+		currentArmorsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "armor"))
 
 		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
 		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
@@ -132,35 +141,25 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		// armatura base player
 		if len(rGetPlayerArmors.GetArmors()) > 0 {
-			var helmet, gauntlets, chest, leg string
+			// var head, gauntlets, chest, leg string
 			for _, armor := range rGetPlayerArmors.GetArmors() {
-				switch armor.ArmorCategory.Slug {
-				case "helmet":
-					helmet = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
-				case "gauntlets":
-					gauntlets = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
-				case "chest":
-					chest = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
-				case "leg":
-					leg = fmt.Sprintf("%s \nDef: *%v* | Evs: *%v* | Hlv: *%v* | Pot: *%v* ", armor.Name, armor.Defense, armor.Evasion, armor.Halving, armor.Potential)
-				}
+				currentArmorsEquipment += fmt.Sprintf("\n%s\n*%s* (*%s*)\nDEF: *%.2v* | EVS: *%.2v* | HLV: *%.2v*\n",
+					helpers.Trans(c.Player.Language.Slug, armor.GetArmorCategory().GetSlug()),
+					armor.Name, strings.ToUpper(armor.GetRarity().GetSlug()),
+					armor.Defense,
+					armor.Evasion,
+					armor.Halving,
+				)
 			}
-
-			currentArmorsEquipment += fmt.Sprintf("%s \n\n%s \n\n%s \n\n%s",
-				helmet,
-				gauntlets,
-				chest,
-				leg,
-			)
 		} else {
 			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
 		}
 
 		// ******************
-		// Recupero armi equipaggiate
+		// Recupero arma equipaggiata
 		// ******************
 		var currentWeaponsEquipment string
-		currentWeaponsEquipment = fmt.Sprintf("%s:\n", helpers.Trans(c.Player.Language.Slug, "weapon"))
+		currentWeaponsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
 		rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
@@ -172,48 +171,30 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
 			currentWeaponsEquipment += fmt.Sprintf(
-				"- %s (*%s*) %v🩸 \n",
+				"\n*%s* (*%s*)\nDMG:*%.2v* | PCS: *%.2v* | PNT: *%.2v*",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetPrecision(),
+				rGetPlayerWeaponEquippedResponse.GetWeapon().GetPenetration(),
 			)
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
 		}
 
-		// Statistica totale armatura
-		var defense, evasion, halving float32
-		if len(rGetPlayerArmors.GetArmors()) > 0 {
-			for _, armor := range rGetPlayerArmors.GetArmors() {
-				defense += armor.Defense
-				evasion += armor.Evasion
-				halving += armor.Halving
-			}
-		}
-
 		// Invio messagio con recap e con selettore categoria
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
-				"%s \n\n%s \n %s",
-				helpers.Trans(c.Player.Language.Slug, "inventory.type"),
-				fmt.Sprintf("🛡 Def: *%v* | Evs: *%v* | Hlv: *%v*\n",
-					defense, evasion, halving,
-				),
-				fmt.Sprintf(
-					"%s\n%s\n\n%s",
-					helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
-					currentArmorsEquipment,
-					currentWeaponsEquipment,
-				),
+				"%s\n\n%s\n%s",
+				helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
+				currentArmorsEquipment,
+				currentWeaponsEquipment,
 			),
 		)
 		msg.ParseMode = "markdown"
-
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapons")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
@@ -231,30 +212,78 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
+		var message string
+		var keyboardRowCategories [][]tgbotapi.KeyboardButton
+
+		switch c.Payload.ItemType {
+		case "armors":
+			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.armor.type")
+
+			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
+			rGetAllArmorCategory, err = services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
+			if err != nil {
+				return err
+			}
+
+			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
+				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
+			}
+		}
+
+		// Clear and exit
+		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+		))
+
+		msg := services.NewMessage(c.Player.ChatID, message)
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboardRowCategories,
+		}
+		_, err = services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+
+		// Aggiorno stato
+		c.PlayerData.CurrentState.Stage = 2
+	case 2:
 		var mainMessage string
 		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
-		c.Payload.Type = c.Update.Message.Text
 
-		switch c.Payload.Type {
-		case helpers.Trans(c.Player.Language.Slug, "armors"):
+		switch c.Payload.ItemType {
+		// **************************
+		// GESTIONE ARMATURE
+		// **************************
+		case "armors":
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
-			// Recupero nuovamente armature player, richiamando la rotta dedicata
-			// in questa maniera posso filtrare per quelle che non sono equipaggiate
-			var rGetPlayerArmors *pb.GetPlayerArmorsResponse
-			rGetPlayerArmors, err = services.NnSDK.GetPlayerArmors(helpers.NewContext(1), &pb.GetPlayerArmorsRequest{
-				PlayerID: c.Player.GetID(),
+			// Recupero categoria scelta dal player
+			var rGetArmorCategoryBySlugRequest *pb.GetArmorCategoryBySlugResponse
+			rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
+				Slug: c.Payload.ItemCategory,
 			})
 			if err != nil {
 				return err
 			}
 
-			if len(rGetPlayerArmors.GetArmors()) > 0 {
+			// Recupero armature non equipaggiate filtrate per la categoria scelta
+			var rGetPlayerArmorsByCategoryID *pb.GetPlayerArmorsByCategoryIDResponse
+			rGetPlayerArmorsByCategoryID, err = services.NnSDK.GetPlayerArmorsByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorsByCategoryIDRequest{
+				PlayerID:   c.Player.GetID(),
+				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
+			})
+			if err != nil {
+				return err
+			}
+
+			if len(rGetPlayerArmorsByCategoryID.GetArmors()) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.what")
 
 				// Ciclo armature del player
-				for _, armor := range rGetPlayerArmors.GetArmors() {
+				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
@@ -269,7 +298,10 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				}
 			}
 
-		case helpers.Trans(c.Player.Language.Slug, "weapons"):
+		// **************************
+		// GESTIONE ARMI
+		// **************************
+		case "weapons":
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.armors.no_one")
 
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
@@ -321,20 +353,20 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 2
+		c.PlayerData.CurrentState.Stage = 3
 
 	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
 	// equipaggiare e me lo metto nel payload in attesa di conferma
-	case 2:
+	case 3:
 		var equipmentName string
 		var equipmentID uint32
 		var equipmentError bool
+		var confirmMessage string
 
 		// Ripulisco messaggio per recupermi solo il nome
 		equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
-
-		switch c.Payload.Type {
-		case helpers.Trans(c.Player.Language.Slug, "armors"):
+		switch c.Payload.ItemType {
+		case "armors":
 			var rFindArmorByName *pb.FindArmorByNameResponse
 			rFindArmorByName, err = services.NnSDK.FindArmorByName(helpers.NewContext(1), &pb.FindArmorByNameRequest{
 				Name: equipmentName,
@@ -347,9 +379,27 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rFindArmorByName.GetArmor().GetPlayerID() != c.Player.ID {
 				equipmentError = true
 			}
-
 			equipmentID = rFindArmorByName.GetArmor().GetID()
-		case helpers.Trans(c.Player.Language.Slug, "weapons"):
+
+			// Recupero armatura attualmente equipaggiata per la categoria scelta
+			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
+			rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+				PlayerID:   c.Player.GetID(),
+				CategoryID: rFindArmorByName.GetArmor().GetArmorCategory().GetID(),
+			})
+			if err != nil {
+				return err
+			}
+
+			// Preparo messaggio di conferma
+			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rFindArmorByName.GetArmor().GetName())
+			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
+				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_armor",
+					rFindArmorByName.GetArmor().GetName(),
+					rGetPlayerArmorEquippedByCategoryID.GetArmor().GetName(),
+				)
+			}
+		case "weapons":
 			var rFindWeaponByName *pb.FindWeaponByNameResponse
 			rFindWeaponByName, err = services.NnSDK.FindWeaponByName(helpers.NewContext(1), &pb.FindWeaponByNameRequest{
 				Name: equipmentName,
@@ -364,6 +414,25 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			equipmentID = rFindWeaponByName.GetWeapon().GetID()
+
+			// Recupero arma attualmente equipaggiata
+			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
+			rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+				PlayerID: c.Player.GetID(),
+			})
+			if err != nil {
+				return err
+			}
+
+			// Preparo messaggio di conferma
+			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rFindWeaponByName.GetWeapon().GetName())
+			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
+				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_weapon",
+					rFindWeaponByName.GetWeapon().GetName(),
+					rGetPlayerWeaponEquipped.GetWeapon().GetName(),
+				)
+			}
+
 		}
 
 		if equipmentError {
@@ -388,11 +457,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		}
 
 		// Invio messaggio per conferma equipaggiamento
-		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", equipmentName),
-		)
+		msg := services.NewMessage(c.Update.Message.Chat.ID, confirmMessage)
 		msg.ParseMode = "markdown"
-
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -409,38 +475,83 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		c.PlayerData.CurrentState.Stage = 3
+		c.PlayerData.CurrentState.Stage = 4
 
 	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
-	// TODO: bisogna verifica che ci sia solo 1 arma o armatura equipaggiata
-	case 3:
-		switch c.Payload.Type {
-		case helpers.Trans(c.Player.Language.Slug, "armors"):
-			_, err = services.NnSDK.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
-				ID: c.Payload.EquipID,
+	case 4:
+		switch c.Payload.ItemType {
+		case "armors":
+			// Recupero categoria scelta dal player
+			var rGetArmorCategoryBySlugRequest *pb.GetArmorCategoryBySlugResponse
+			rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
+				Slug: c.Payload.ItemCategory,
 			})
 			if err != nil {
 				return err
 			}
 
-			// Aggiorno equipped
-			_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
-				Armor: &pb.Armor{Equipped: true},
+			// Recupero armatura attualmente equipaggiata per la categoria scelta
+			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
+			rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+				PlayerID:   c.Player.GetID(),
+				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
 			})
 			if err != nil {
 				return err
 			}
-		case helpers.Trans(c.Player.Language.Slug, "weapons"):
-			_, err = services.NnSDK.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
-				ID: c.Payload.EquipID,
+
+			// Rimuovo equipaggiamento attuale
+			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
+				_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
+					Armor: &pb.Armor{
+						ID:       rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID(),
+						Equipped: false,
+					},
+				})
+				if err != nil {
+					return err
+				}
+			}
+
+			// Aggiorno con quello nuovo
+			_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
+				Armor: &pb.Armor{
+					ID:       c.Payload.EquipID,
+					Equipped: true,
+				},
 			})
 			if err != nil {
 				return err
+			}
+		case "weapons":
+			// Recupero arma attualmente equipaggiata
+			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
+			rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+				PlayerID: c.Player.GetID(),
+			})
+			if err != nil {
+				return err
+			}
+
+			// Rimovo arma attualmente equipaggiata
+			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
+				_, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
+					Weapon: &pb.Weapon{
+						ID:       rGetPlayerWeaponEquipped.GetWeapon().GetID(),
+						Equipped: false,
+					},
+				})
+				if err != nil {
+					return err
+				}
 			}
 
 			// Aggiorno equipped
 			_, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
-				Weapon: &pb.Weapon{Equipped: true},
+				Weapon: &pb.Weapon{
+					ID:       c.Payload.EquipID,
+					Equipped: true,
+				},
 			})
 			if err != nil {
 				return err

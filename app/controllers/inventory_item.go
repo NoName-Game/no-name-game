@@ -90,7 +90,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool) {
 		var itemChoosed string
 		itemSplit := strings.Split(c.Update.Message.Text, " (")
 		if len(itemSplit)-1 > 0 {
-			itemSplit := strings.Split(itemSplit[0], " - ")
+			itemSplit = strings.Split(itemSplit[0], " - ")
 			if len(itemSplit)-1 > 0 {
 				itemChoosed = itemSplit[1]
 			}
