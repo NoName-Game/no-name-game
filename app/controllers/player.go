@@ -34,12 +34,24 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		panic(err)
 	}
 
+	// *************************
+	// Recupero esperienza player
+	// *************************
+	var rGetPlayerExperience *pb.GetPlayerExperienceResponse
+	rGetPlayerExperience, err = services.NnSDK.GetPlayerExperience(helpers.NewContext(1), &pb.GetPlayerExperienceRequest{
+		PlayerID: c.Player.GetID(),
+	})
+	if err != nil {
+		// log.Fatalln(err)
+		panic(err)
+	}
+
 	recapPlayer := helpers.Trans(
 		c.Player.Language.Slug,
 		"player.datails.card",
 		c.Player.GetUsername(),
 		c.PlayerData.PlayerStats.GetLifePoint(),
-		c.PlayerData.PlayerStats.GetExperience(),
+		rGetPlayerExperience.GetValue(),
 		c.PlayerData.PlayerStats.GetLevel(),
 		money, diamond,
 	)
