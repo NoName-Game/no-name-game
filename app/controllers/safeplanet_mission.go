@@ -218,7 +218,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			// Recupero enemy da Uccidere
 			var rGetEnemyByID *pb.GetEnemyByIDResponse
 			rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
-				ID: missionPayload.GetEnemyID(),
+				EnemyID: missionPayload.GetEnemyID(),
 			})
 			if err != nil {
 				panic(err)

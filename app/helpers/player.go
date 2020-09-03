@@ -49,7 +49,7 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	// Se il player non esiste allora lo registro
 	if player.GetID() == 0 {
 		// Recupero lingua di default
-		rFindLanguageBySlug, err := services.NnSDK.FindLanguageBySlug(NewContext(1), &pb.FindLanguageBySlugRequest{
+		rFindLanguageBySlug, err := services.NnSDK.GetLanguageBySlug(NewContext(1), &pb.GetLanguageBySlugRequest{
 			Slug: "it",
 		})
 		if err != nil {

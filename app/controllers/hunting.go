@@ -200,7 +200,7 @@ func (c *HuntingController) Hunting() (err error) {
 		// al DB registro il tutto sula cache
 		var rGetMapByID *pb.GetMapByIDResponse
 		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-			ID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
+			MapID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
 		})
 		if err != nil {
 			return err
@@ -489,7 +489,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 	if c.Payload.EnemyID > 0 {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
 		rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
-			ID: c.Payload.EnemyID,
+			EnemyID: c.Payload.EnemyID,
 		})
 		if err != nil {
 			return err
@@ -529,11 +529,9 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		var rHitEnemy *pb.HitEnemyResponse
 		rHitEnemy, err = services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
-			EnemyID:         enemy.GetID(),
-			PlayerID:        c.Player.ID,
-			PlayerPositionX: c.PlayerPositionX,
-			PlayerPositionY: c.PlayerPositionY,
-			BodySelection:   c.Payload.Selection,
+			EnemyID:       enemy.GetID(),
+			PlayerID:      c.Player.ID,
+			BodySelection: c.Payload.Selection,
 		})
 		if err != nil {
 			return err
@@ -710,7 +708,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 func (c *HuntingController) RefreshMap() (err error) {
 	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
 	rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-		ID: c.Payload.MapID,
+		MapID: c.Payload.MapID,
 	})
 	if err != nil {
 		return err

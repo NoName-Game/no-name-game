@@ -367,8 +367,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
 		switch c.Payload.ItemType {
 		case "armors":
-			var rFindArmorByName *pb.FindArmorByNameResponse
-			rFindArmorByName, err = services.NnSDK.FindArmorByName(helpers.NewContext(1), &pb.FindArmorByNameRequest{
+			var rGetArmorByName *pb.GetArmorByNameResponse
+			rGetArmorByName, err = services.NnSDK.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
@@ -376,32 +376,32 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			// Verifico se appartiene correttamente al player
-			if rFindArmorByName.GetArmor().GetPlayerID() != c.Player.ID {
+			if rGetArmorByName.GetArmor().GetPlayerID() != c.Player.ID {
 				equipmentError = true
 			}
-			equipmentID = rFindArmorByName.GetArmor().GetID()
+			equipmentID = rGetArmorByName.GetArmor().GetID()
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
 			rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
-				CategoryID: rFindArmorByName.GetArmor().GetArmorCategory().GetID(),
+				CategoryID: rGetArmorByName.GetArmor().GetArmorCategory().GetID(),
 			})
 			if err != nil {
 				return err
 			}
 
 			// Preparo messaggio di conferma
-			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rFindArmorByName.GetArmor().GetName())
+			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rGetArmorByName.GetArmor().GetName())
 			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
 				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_armor",
-					rFindArmorByName.GetArmor().GetName(),
+					rGetArmorByName.GetArmor().GetName(),
 					rGetPlayerArmorEquippedByCategoryID.GetArmor().GetName(),
 				)
 			}
 		case "weapons":
-			var rFindWeaponByName *pb.FindWeaponByNameResponse
-			rFindWeaponByName, err = services.NnSDK.FindWeaponByName(helpers.NewContext(1), &pb.FindWeaponByNameRequest{
+			var rGetWeaponByName *pb.GetWeaponByNameResponse
+			rGetWeaponByName, err = services.NnSDK.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
 				Name: equipmentName,
 			})
 			if err != nil {
@@ -409,11 +409,11 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			// Verifico se appartiene correttamente al player
-			if rFindWeaponByName.GetWeapon().GetPlayerID() != c.Player.ID {
+			if rGetWeaponByName.GetWeapon().GetPlayerID() != c.Player.ID {
 				equipmentError = true
 			}
 
-			equipmentID = rFindWeaponByName.GetWeapon().GetID()
+			equipmentID = rGetWeaponByName.GetWeapon().GetID()
 
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
@@ -425,10 +425,10 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 
 			// Preparo messaggio di conferma
-			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rFindWeaponByName.GetWeapon().GetName())
+			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rGetWeaponByName.GetWeapon().GetName())
 			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
 				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_weapon",
-					rFindWeaponByName.GetWeapon().GetName(),
+					rGetWeaponByName.GetWeapon().GetName(),
 					rGetPlayerWeaponEquipped.GetWeapon().GetName(),
 				)
 			}
