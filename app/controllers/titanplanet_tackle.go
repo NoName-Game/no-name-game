@@ -342,9 +342,12 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 	case "titan_die":
 		// Il player è morto
 		c.PlayerData.CurrentState.Completed = true
+		// Drop Moment
+		err = c.Drop(titan)
 		return
 	case "no_action":
 		//
+
 	}
 
 	// Non sono state fatte modifiche al messaggio
@@ -368,6 +371,42 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 
 	// Invio messaggio modificato
 	_, err = services.SendMessage(editMessage)
+
+	return
+}
+
+func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) (err error) {
+
+	// THIS FUNCTION TAKE ALL THE DAMAGES INFLICTED BY PLAYER AND GIVE HIM THE RIGHT DROP
+
+	var rTitanDamage *pb.GetTitanDamageByTitanIDResponse
+	rTitanDamage, err = services.NnSDK.GetTitanDamageByTitanID(helpers.NewContext(1), &pb.GetTitanDamageByTitanIDRequest{
+		TitanID: titan.ID,
+	})
+	if err != nil {
+		return err
+	}
+	for _, damage := range rTitanDamage.Damages {
+		var rGetPlayer *pb.GetPlayerByIDResponse
+		rGetPlayer, err = services.NnSDK.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
+			ID: damage.PlayerID,
+		})
+		if err != nil {
+			return err
+		}
+		// Parte calcolo drop
+		// TODO
+
+		// Crafto messaggio drop
+		msg := services.NewMessage(rGetPlayer.GetPlayer().ChatID, helpers.Trans(
+			rGetPlayer.GetPlayer().GetLanguage().GetSlug(), "titanplanet.tackle.reward", damage.GetDamageInflicted() /*Aggiungere lista drop*/),
+		)
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		_, err := services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+	}
 
 	return
 }
