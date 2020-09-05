@@ -49,20 +49,20 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	// Se il player non esiste allora lo registro
 	if player.GetID() == 0 {
 		// Recupero lingua di default
-		rFindLanguageBySlug, err := services.NnSDK.GetLanguageBySlug(NewContext(1), &pb.GetLanguageBySlugRequest{
+		var rGetLanguageBySlug *pb.GetLanguageBySlugResponse
+		if rGetLanguageBySlug, err = services.NnSDK.GetLanguageBySlug(NewContext(1), &pb.GetLanguageBySlugRequest{
 			Slug: "it",
-		})
-		if err != nil {
+		}); err != nil {
 			return player, err
 		}
 
 		// Registro player
-		rSignIn, err := services.NnSDK.SignIn(NewContext(10), &pb.SignInRequest{
+		var rSignIn *pb.SignInResponse
+		if rSignIn, err = services.NnSDK.SignIn(NewContext(10), &pb.SignInRequest{
 			Username:   user.UserName,
 			ChatID:     int64(user.ID), // TODO: !? Non dovrebbe esser chatID !?
-			LanguageID: rFindLanguageBySlug.GetLanguage().GetID(),
-		})
-		if err != nil {
+			LanguageID: rGetLanguageBySlug.GetLanguage().GetID(),
+		}); err != nil {
 			return player, err
 		}
 

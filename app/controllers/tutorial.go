@@ -90,7 +90,7 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 	// In questo stage è necessario controllare se la lingua passata è quella giusta
 	case 1:
 		// Recupero lingue disponibili
-		_, err = services.NnSDK.FindLanguageByName(helpers.NewContext(1), &pb.FindLanguageByNameRequest{
+		_, err = services.NnSDK.GetLanguageByName(helpers.NewContext(1), &pb.GetLanguageByNameRequest{
 			Name: c.Update.Message.Text,
 		})
 
