@@ -31,6 +31,7 @@ route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Pianeta"
+route.conqueror: "Conquistatore"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"

@@ -49,6 +49,9 @@ var (
 
 		// Titan Planet
 		"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
+
+		// Conqueror
+		"route.conqueror": reflect.TypeOf((*controllers.ConquerorController)(nil)).Elem(),
 	}
 )
 
