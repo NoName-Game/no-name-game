@@ -52,11 +52,24 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		panic(err)
 	}
 
+	// Intro msg
 	var conquerorsListMsg string
-	for _, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
-		conquerorsListMsg += fmt.Sprintf("\nPlayer: %s, Kills: %d",
+	conquerorsListMsg = helpers.Trans(player.Language.Slug, "conqueror.intro")
+
+	// Eseguo recap conquistatori
+	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
+	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
+		if i < 1 {
+			conquerorsListMsg += fmt.Sprintf("\n- 👨🏼‍🚀 *%s* ⚔️ *%d* 🚩",
+				conquerors.GetPlayer().GetUsername(),
+				conquerors.GetNKills(),
+			)
+			continue
+		}
+
+		conquerorsListMsg += fmt.Sprintf("\n- 👨🏼‍🚀 %s ⚔️ %d",
 			conquerors.GetPlayer().GetUsername(),
-			conquerors.GetKill(),
+			conquerors.GetNKills(),
 		)
 	}
 
