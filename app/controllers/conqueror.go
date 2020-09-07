@@ -60,21 +60,22 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
 	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
 		if i < 1 {
-			conquerorsListMsg += fmt.Sprintf("\n- 👨🏼‍🚀 *%s* ⚔️ *%d* 🚩",
+			conquerorsListMsg += fmt.Sprintf("- 👨🏼‍🚀 *%s* ⚔️ *%d* 🚩\n",
 				conquerors.GetPlayer().GetUsername(),
 				conquerors.GetNKills(),
 			)
 			continue
 		}
 
-		conquerorsListMsg += fmt.Sprintf("\n- 👨🏼‍🚀 %s ⚔️ %d",
+		conquerorsListMsg += fmt.Sprintf("- 👨🏼‍🚀 %s ⚔️ %d\n",
 			conquerors.GetPlayer().GetUsername(),
 			conquerors.GetNKills(),
 		)
 	}
 
+	// Nessun conquistatore
 	if len(rGetConquerorsByPlanetID.GetConquerors()) < 1 {
-		conquerorsListMsg += "Non esiste nessun player che ha conquistato un cazzo"
+		conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.planet_free")
 	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, conquerorsListMsg)

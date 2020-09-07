@@ -136,7 +136,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		}
 
 		if rGetCurrentConquerorByPlanetID.GetPlayer() != nil {
-			currentConqueror = rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername()
+			currentConqueror = fmt.Sprintf("🚩 %s", rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername())
 		} else {
 			currentConqueror = helpers.Trans(c.Player.Language.Slug, "conqueror.planet_free")
 		}
