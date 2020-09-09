@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"math/rand"
+	"strconv"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -22,6 +24,8 @@ type TitanPlanetTackleController struct {
 		Selection         int32 // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight           bool
 		Kill              uint32
+		EventID           uint32
+		inEvent           bool // Player have an event
 	}
 }
 
@@ -196,26 +200,55 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 
 	// Se il messaggio è di tipo callback sicuramete è un messaggio di attacco
 	if c.Update.CallbackQuery != nil {
-		// Controllo tipo di callback data - fight
-		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+		// Verifico che non sia in corso un'evento
+		if c.Payload.inEvent {
+			// evento in corso
+			var rGetEvent *pb.GetTitanEventByIDResponse
+			rGetEvent, err = services.NnSDK.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
+				ID: c.Payload.EventID,
+			})
 
-		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-		if actionType[2] == "fight" {
-			err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
-		}
-		if err != nil {
+		} else {
+			// Controllo tipo di callback data - fight
+			actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+
+			// Verifica tipo di movimento e mi assicuro che non sia in combattimento
+			if actionType[2] == "fight" {
+				err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
+			}
+			if err != nil {
+				return
+			}
+
+			// Rimuove rotella di caricamento dal bottone
+			err = services.AnswerCallbackQuery(
+				services.NewAnswer(c.Update.CallbackQuery.ID, "", false),
+			)
+
 			return
 		}
-
-		// Rimuove rotella di caricamento dal bottone
-		err = services.AnswerCallbackQuery(
-			services.NewAnswer(c.Update.CallbackQuery.ID, "", false),
-		)
-
-		return
 	}
 
 	return
+}
+
+// ====================================
+// Event
+// ====================================
+func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, titan *pb.Titan) (err error) {
+	var editMessage tgbotapi.EditMessageTextConfig
+	// Standard message titanplanet.event.event1.choice1
+	// route.event.eventID.choiceID
+	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+	action := actionType[2]
+	switch action {
+	case "fight":
+		// arriverà dallo scontro, stampo semplicemente messaggio.
+
+	case "event":
+		// Teoricamente è una risposta
+		choiceID, err := strconv.Atoi(actionType[3])
+	}
 }
 
 // ====================================
@@ -335,6 +368,17 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			),
 		)
 		editMessage.ReplyMarkup = &ok
+		// 15% probabilità che si scateni un evento al prossimo giro.
+		if r := rand.Int31n(101); r <= 15 {
+			c.Payload.inEvent = true
+			// Recupero un evento random
+			var rEventRandom *pb.GetRandomEventResponse
+			rEventRandom, err = services.NnSDK.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{})
+			if err != nil {
+				return
+			}
+			c.Payload.EventID = rEventRandom.GetEvent().GetID()
+		}
 	case "player_die":
 		// Il player è morto
 		c.PlayerData.CurrentState.Completed = true
