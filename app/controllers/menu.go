@@ -125,8 +125,25 @@ func (c *MenuController) GetRecap() (message string, err error) {
 			return message, err
 		}
 
+		// Recupero conquistatore attuale
+		var currentConqueror string
+		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
+		rGetCurrentConquerorByPlanetID, err = services.NnSDK.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+			PlanetID: planet.ID,
+		})
+		if err != nil {
+			return
+		}
+
+		if rGetCurrentConquerorByPlanetID.GetPlayer() != nil {
+			currentConqueror = fmt.Sprintf("🚩 %s", rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername())
+		} else {
+			currentConqueror = helpers.Trans(c.Player.Language.Slug, "conqueror.planet_free")
+		}
+
 		message = helpers.Trans(c.Player.Language.Slug, "menu",
 			planet.GetName(),
+			currentConqueror,
 			life,
 			c.GetPlayerTasks(),
 		)
@@ -252,6 +269,7 @@ func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),

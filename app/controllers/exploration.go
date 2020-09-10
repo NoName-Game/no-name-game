@@ -197,8 +197,36 @@ func (c *ExplorationController) Stage() (err error) {
 			),
 		))
 
+		// Costruisco risposta
+		var messageExploration string
+		messageExploration = helpers.Trans(c.Player.Language.Slug, "exploration.exploration")
+
+		// Recupero posizione player
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: c.Player.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		// Verifico se sono conquistatore
+		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
+		rGetCurrentConquerorByPlanetID, err = services.NnSDK.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+		})
+		if err != nil {
+			return err
+		}
+
+		// Verifico se il player è un conquistatore
+		if c.Player.ID == rGetCurrentConquerorByPlanetID.GetPlayer().GetID() {
+			messageExploration += helpers.Trans(c.Player.Language.Slug, "exploration.conqueror_bonus")
+		}
+
 		// Invio messaggi con il tipo di missioni come tastierino
-		msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "exploration.exploration"))
+		msg := services.NewMessage(c.Player.ChatID, messageExploration)
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,

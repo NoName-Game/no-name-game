@@ -31,6 +31,7 @@ route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Pianeta"
+route.conqueror: "🚩 Conquistatore"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
@@ -90,7 +91,7 @@ chest: "Petto"
 leg: "Gambe"
 
 # MENU
-menu: "*BoardSystem v0.1*\n🌏 %s\n%s\n\n%s"
+menu: "*BoardSystem v0.1*\n🌏 %s \n%s \n%s \n\n%s"
 
 # MENU - TASK
 menu.tasks: "⏱ *Attività in corso:*\n"
@@ -150,6 +151,7 @@ exploration.comeback: "Concludi"
 exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle *%s*"
 exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*"
 exploration.continue: "Continua ad esplorare"
+exploration.conqueror_bonus: "\n\n🚩*Bouns Conquistatore! (x2)*\nSembra che tu conosca molto bene questo pianeta! Grazie a questa tua esperienza la tue ricerche di forniranno più 💠 Risorse!"
 
 # ITEMS
 items.medical: "💊"
@@ -416,3 +418,9 @@ titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA br
 player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
 player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
+
+
+# CONQUEROR
+conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore di questa pianeta sconfingendo nemici in esplorazione.\n\n📖: Scala la classifica, questo ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
+conqueror.planet_free: "🚩 Nessun Conquistatore"
+conqueror.list.intro: "Ecco i miglior 10 conquistatori:\n"
