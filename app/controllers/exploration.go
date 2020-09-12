@@ -12,8 +12,6 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // ====================================
@@ -21,12 +19,7 @@ import (
 // ====================================
 type ExplorationController struct {
 	BaseController
-	Payload struct {
-		ExplorationType string // Indica il tipo di esplorazione scelta
-		Times           int    // Indica quante volte ha ripetuto
-		Dropped         []*pb.DropResourceResponse
-		ForcedTime      int // Questo valore serve per forzare le tempistiche
-	}
+	ExplorationTypeChoiched string // Esplorazione scelta dall'utente
 }
 
 // ====================================
@@ -46,13 +39,9 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 			To:        &MenuController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
 	}) {
 		return
 	}
-
-	// Set and load payload
-	// helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
 
 	// Validate
 	var hasError bool
@@ -61,82 +50,15 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 		return
 	}
 
-	log.Info("Prima di stage: ", c.CurrentState.Stage)
-
 	// Ok! Run!
 	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
-}
-
-// ====================================
-// Validator
-// ====================================
-func (c *ExplorationController) ValidatorNEW() (hasErrors bool) {
-	var err error
-
-	var rExplorationCheck *pb.ExplorationCheckResponse
-	if rExplorationCheck, err = services.NnSDK.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
-		PlayerID: c.Player.ID,
-	}); err != nil {
-		panic(err)
-	}
-
-	// Se il player NON si trova in esplorazione
-	if !rExplorationCheck.GetInExploration() {
-		// Se NON è in missione
-
-		// Verifico se viene specifica una missione in particolare
-
-		// Recupero tutte le categorie di esplorazione possibili
-		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
-		if rGetAllExplorationCategories, err = services.NnSDK.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
-			panic(err)
-		}
-
-		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
-		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug())) == c.Update.Message.Text {
-				return false
-			}
-		}
-	}
-
-	// Il Player deve terminare prima l'esplorazione in corso
-	if !rExplorationCheck.GetFinishExploration() {
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(rExplorationCheck.GetExplorationEndTime())
-		if err != nil {
-			panic(err)
-		}
-
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"exploration.validator.wait",
-			finishAt.Format("15:04:05"),
-		)
-
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
-
-		return true
-	}
-
-	return false
 }
 
 // ====================================
@@ -161,6 +83,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
 		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
 			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug())) == c.Update.Message.Text {
+				c.ExplorationTypeChoiched = missionType.GetSlug()
 				return false
 			}
 		}
@@ -210,14 +133,10 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 	case 3:
 		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
-			// c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(helpers.GetEndTime(0, 10*(2*c.Payload.Times), 0))
-			// c.PlayerData.CurrentState.ToNotify = true
-
 			return false
 
 			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
-			// Passo allo stadio conclusivo
 			c.CurrentState.Stage = 4
 
 			return false
@@ -310,27 +229,11 @@ func (c *ExplorationController) Stage() (err error) {
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player
 	case 1:
-		// Recupero tutte le categorie di esplorazione possibili
-		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
-		rGetAllExplorationCategories, err = services.NnSDK.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{})
-		if err != nil {
-			return err
-		}
-
-		// Recupero dal messaggio quale esplorazione vuole effettuare il player
-		var explorationChoiced string
-		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug())) == c.Update.Message.Text {
-				explorationChoiced = missionType.GetSlug()
-				break
-			}
-		}
-
 		// Avvio nuova esplorazione
 		var rExplorationStart *pb.ExplorationStartResponse
 		if rExplorationStart, err = services.NnSDK.ExplorationStart(helpers.NewContext(1), &pb.ExplorationStartRequest{
 			PlayerID:                c.Player.ID,
-			ExplorationCategorySlug: explorationChoiced,
+			ExplorationCategorySlug: c.ExplorationTypeChoiched,
 		}); err != nil {
 			return err
 		}
@@ -361,36 +264,19 @@ func (c *ExplorationController) Stage() (err error) {
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
 	case 2:
-		// Recupero ultima posizione del player, dando per scontato che sia
-		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-		// var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		// rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-		// 	PlayerID: c.Player.GetID(),
-		// })
-		// if err != nil {
-		// 	return err
-		// }
-		//
-		// // Recupero drop
-		// var rDropResource *pb.DropResourceResponse
-		// rDropResource, err = services.NnSDK.DropResource(helpers.NewContext(1), &pb.DropResourceRequest{
-		// 	TypeExploration: c.Payload.ExplorationType,
-		// 	QtyExploration:  int32(c.Payload.Times),
-		// 	PlayerID:        c.Player.ID,
-		// 	PlanetID:        rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-		// })
-		// if err != nil {
-		// 	return err
-		// }
-		//
-		// // Se ho recuperato il drop lo inserisco nella lista degli elementi droppati
-		// c.Payload.Dropped = append(c.Payload.Dropped, rDropResource)
-
 		var rExplorationCheck *pb.ExplorationCheckResponse
 		if rExplorationCheck, err = services.NnSDK.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			return
+		}
+
+		// Recupero dattigli risorsa
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		if rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			ID: rExplorationCheck.GetDropResult().GetResourceID(),
+		}); err != nil {
+			return
 		}
 
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
@@ -398,9 +284,9 @@ func (c *ExplorationController) Stage() (err error) {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"exploration.extraction_recap",
-				rExplorationCheck.GetDropResult().GetResource().GetName(),
-				rExplorationCheck.GetDropResult().GetResource().GetRarity().GetName(),
-				strings.ToUpper(rExplorationCheck.GetDropResult().GetResource().GetRarity().GetSlug()),
+				rGetResourceByID.GetResource().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetName(),
+				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
 				rExplorationCheck.GetDropResult().GetQuantity(),
 			),
 		)
@@ -412,31 +298,23 @@ func (c *ExplorationController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno lo stato
-		// c.PlayerData.CurrentState.Stage = 3
 		c.CurrentState.Stage = 3
 
 	// In questo stage verifico cosa ha scelto di fare il player
 	// se ha deciso di continuare allora ritornerò ad uno stato precedente,
 	// mentre se ha deciso di concludere andrò avanti di stato
 	case 3:
-		// var finishAt time.Time
-		// finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
-		// if err != nil {
-		// 	panic(err)
-		// }
-
 		// Continua esplorazione
 		var rExplorationContinue *pb.ExplorationContinueResponse
 		if rExplorationContinue, err = services.NnSDK.ExplorationContinue(helpers.NewContext(1), &pb.ExplorationContinueRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			return err
 		}
 
 		// Converto finishAt in formato Time
@@ -459,8 +337,6 @@ func (c *ExplorationController) Stage() (err error) {
 		}
 
 		// Aggiorno lo stato
-		// c.PlayerData.CurrentState.Stage = 2
-
 		c.CurrentState.Stage = 2
 		c.ForceBackTo = true
 
@@ -470,17 +346,25 @@ func (c *ExplorationController) Stage() (err error) {
 		if rExplorationEnd, err = services.NnSDK.ExplorationEnd(helpers.NewContext(1), &pb.ExplorationEndRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			return err
 		}
 
 		// Recap delle risorse ricavate da questa missione
 		var dropList string
 		for _, drop := range rExplorationEnd.GetDropResults() {
+			// Recupero dattigli risorsa
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			if rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: drop.ResourceID,
+			}); err != nil {
+				return
+			}
+
 			dropList += fmt.Sprintf(
 				"- %v x *%s* (%s)\n",
 				drop.Quantity,
-				drop.Resource.Name,
-				strings.ToUpper(drop.Resource.Rarity.Slug),
+				rGetResourceByID.GetResource().GetName(),
+				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
 			)
 		}
 
@@ -496,19 +380,6 @@ func (c *ExplorationController) Stage() (err error) {
 		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
-
-		// Aggiungo le risorse trovare dal player al suo inventario e chiudo
-		// for _, drop := range c.Payload.Dropped {
-		// 	_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
-		// 		PlayerID: c.Player.GetID(),
-		// 		ItemID:   drop.Resource.ID,
-		// 		ItemType: "resources",
-		// 		Quantity: drop.Quantity,
-		// 	})
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
 
 		// Completo lo stato
 		c.CurrentState.Completed = true

@@ -527,7 +527,7 @@ func (c *TutorialController) Stage() (err error) {
 		// Richiamo missione come sottoprocesso di questo controller
 		missionController := new(ExplorationController)
 		missionController.ControllerFather = c.PlayerData.CurrentState.ID
-		missionController.Payload.ForcedTime = 1
+		// missionController.Payload.ForcedTime = 1
 		missionController.Handle(c.Player, c.Update)
 
 		// Recupero l'ID del task, mi serivirà per i controlli
