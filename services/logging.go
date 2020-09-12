@@ -69,11 +69,11 @@ func bootSentry() (err error) {
 // Metodo per il settaggio del serivizo di loggin su file
 func bootLog() (err error) {
 	// Verifico se esiste il file di logging
-	var file *os.File
-	file, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
-	if err != nil {
-		return err
-	}
+	// var file *os.File
+	// file, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	// if err != nil {
+	// 	return err
+	// }
 
 	// DateFormatter
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -84,7 +84,8 @@ func bootLog() (err error) {
 	logrus.SetLevel(logrus.InfoLevel)
 
 	// Imposto file output
-	logrus.SetOutput(file)
+	// logrus.SetOutput(file)
+	logrus.SetOutput(os.Stdout)
 
 	return
 }

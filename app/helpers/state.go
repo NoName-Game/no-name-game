@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	gocache "github.com/patrickmn/go-cache"
+	"strconv"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
@@ -13,28 +12,71 @@ import (
 )
 
 // GetCacheState - Metodo generico per il recupero degli stati di un player
-func GetCacheState(playerID uint32) (controller string, err error) {
-	value, found := services.Cache.Get(fmt.Sprintf("state_%v", playerID))
-	if found {
-		return value.(string), nil
+func GetCacheState(playerID uint32) (result string, err error) {
+	if result, err = services.Redis.Get(fmt.Sprintf("current_state_player_%v", playerID)).Result(); err != nil {
+		err = errors.New("cached state not found")
 	}
 
-	err = errors.New("cached state not found")
 	return
 }
 
 // SetCacheState - Metodo generico per il settaggio di uno stato in memoria di un determinato player
-func SetCacheState(playerID uint32, data string) {
-	services.Cache.Set(
-		fmt.Sprintf("state_%v", playerID),
-		data,
-		gocache.NoExpiration,
-	)
+func SetCacheState(playerID uint32, controller string) {
+	if err := services.Redis.Set(fmt.Sprintf("current_state_player_%v", playerID), controller, 0).Err(); err != nil {
+		panic(err)
+	}
 }
 
 // DelCacheState - Metodo generico per la cancellazione degli stati di un determinato player
 func DelCacheState(playerID uint32) {
-	services.Cache.Delete(fmt.Sprintf("state_%v", playerID))
+	if err := services.Redis.Del(fmt.Sprintf("current_state_player_%v", playerID)).Err(); err != nil {
+		panic(err)
+	}
+}
+
+func GetCacheControllerStage(playerID uint32, controller string) (result string, err error) {
+	if result, err = services.Redis.Get(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Result(); err != nil {
+		err = errors.New("cached state not found")
+	}
+
+	return
+}
+
+func SetCacheControllerStage(playerID uint32, controller string, stage int32) {
+	if err := services.Redis.Set(fmt.Sprintf("player_%v_controller_%s", playerID, controller), stage, 0).Err(); err != nil {
+		panic(err)
+	}
+}
+
+func DelCacheControllerStage(playerID uint32, controller string) {
+	if err := services.Redis.Del(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Err(); err != nil {
+		panic(err)
+	}
+}
+
+func CheckStateNew(playerID uint32, controller string, stage int32) (controllerCached string, stageCached int32, err error) {
+	// Aggiorno sempre il controller in cui si trova il player
+	SetCacheState(playerID, controller)
+
+	// Verifico se sono presenti degli stati per questo controller in memoria
+	var playerControllerStateString string
+	playerControllerStateString, _ = GetCacheControllerStage(playerID, controller)
+
+	// Se ho trovato qualcosa splitto
+	if playerControllerStateString != "" {
+		// Recupero stage
+		var stage64 int64
+		if stage64, err = strconv.ParseInt(playerControllerStateString, 10, 32); err != nil {
+			panic(err)
+		}
+
+		return controller, int32(stage64), err
+	}
+
+	// Se non ho trovato nuessuno stato lo creo
+	SetCacheControllerStage(playerID, controller, stage)
+
+	return controller, stage, err
 }
 
 // CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
