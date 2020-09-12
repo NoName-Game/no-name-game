@@ -30,7 +30,7 @@ func BotUp() (err error) {
 	}
 
 	// Nel caso in cui fosse in ambiente di sviluppo abilito il debug
-	if appDebug := os.Getenv("TELEGRAM_DEBUG"); appDebug != "false" {
+	if appDebug := os.Getenv("APP_DEBUG"); appDebug != "false" {
 		botAPI.Debug = true
 	}
 
