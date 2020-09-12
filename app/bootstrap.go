@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bitbucket.org/no-name-game/nn-telegram/app/commands"
 	"bitbucket.org/no-name-game/nn-telegram/services"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
@@ -27,8 +28,7 @@ func bootstrap() (err error) {
 	// *************
 	// Cache
 	// *************
-	// err = services.CacheUp()
-	err = services.RedisUp()
+	err = services.CacheUp()
 	if err != nil {
 		services.ErrorHandler("error starting cache", err)
 		return err
@@ -55,8 +55,8 @@ func bootstrap() (err error) {
 	// *************
 	// Cron
 	// *************
-	// var cron commands.Cron
-	// go cron.Notify()
+	var cron commands.Cron
+	go cron.Notify()
 
 	return err
 }
