@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -207,7 +208,7 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 			rGetEvent, err = services.NnSDK.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
 				ID: c.Payload.EventID,
 			})
-
+			c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
 		} else {
 			// Controllo tipo di callback data - fight
 			actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
@@ -240,15 +241,120 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 	// Standard message titanplanet.event.event1.choice1
 	// route.event.eventID.choiceID
 	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
-	action := actionType[2]
-	switch action {
+	switch actionType[2] {
 	case "fight":
 		// arriverà dallo scontro, stampo semplicemente messaggio.
+		editMessage = services.NewEditMessage(
+			c.Player.GetChatID(),
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+			)
+		var keyboardRow [][]tgbotapi.InlineKeyboardButton
+		for _, choice := range event.Choices {
+			keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), choice.GetTextCode()), choice.GetTextCode()),
+				))
+		}
 
-	case "event":
-		// Teoricamente è una risposta
-		choiceID, err := strconv.Atoi(actionType[3])
+		var ok = tgbotapi.InlineKeyboardMarkup{InlineKeyboard:keyboardRow}
+		editMessage.ReplyMarkup = &ok
+	default:
+		// Teoricamente è una choice
+		if actionType[1] == "event" {
+			// controllo che la choice faccia effettivamente parte dell'evento
+			choiceID, err := strconv.Atoi(strings.Split(actionType[3], "choice")[1])
+			if err != nil {
+				return
+			}
+			exist := false
+			for _, choice := range event.Choices {
+				if choice.ID == uint32(choiceID) {
+					exist = true
+				}
+			}
+			if exist {
+				var rSubmitAnswer *pb.SubmitAnswerResponse
+				rSubmitAnswer, err = services.NnSDK.SubmitAnswer(helpers.NewContext(1), &pb.SubmitAnswerRequest{
+					TitanID:  titan.ID,
+					ChoiceID: uint32(choiceID),
+					PlayerID: c.Player.GetID(),
+				})
+				if err != nil {
+					return
+				}
+
+				if rSubmitAnswer.IsMalus {
+					// Malus!
+					// Player riceve danni
+					editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.wrong"))
+					var ok = tgbotapi.NewInlineKeyboardMarkup(
+						tgbotapi.NewInlineKeyboardRow(
+							tgbotapi.NewInlineKeyboardButtonData(
+								helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
+							),
+						),
+					)
+					editMessage.ReplyMarkup = &ok
+					editMessage.ParseMode = tgbotapi.ModeMarkdown
+
+				} else {
+					// Bonus!
+					// titano riceve danni
+					if rSubmitAnswer.Hit.TitanDie {
+						editMessage = services.NewEditMessage(
+							c.Player.ChatID,
+							c.Update.CallbackQuery.Message.MessageID,
+							helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.mob_killed", titan.GetName()),
+						)
+
+						var ok = tgbotapi.NewInlineKeyboardMarkup(
+							tgbotapi.NewInlineKeyboardRow(
+								tgbotapi.NewInlineKeyboardButtonData(
+									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.titan_die",
+								),
+							),
+						)
+						editMessage.ParseMode = "markdown"
+						editMessage.ReplyMarkup = &ok
+
+						// Setto stato
+						c.Payload.Kill++
+						c.Payload.TitanID = 0
+					} else {
+						editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.correct"))
+						var ok = tgbotapi.NewInlineKeyboardMarkup(
+							tgbotapi.NewInlineKeyboardRow(
+								tgbotapi.NewInlineKeyboardButtonData(
+									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
+								),
+							),
+						)
+						editMessage.ReplyMarkup = &ok
+						editMessage.ParseMode = tgbotapi.ModeMarkdown
+					}
+				}
+				c.Payload.inEvent = false
+			} else {
+				// Risposta non presente fra quelle predefinite dall'evento. ERRORE
+				return errors.New("choice choosen not in event choices")
+			}
+		}
 	}
+	// Non sono state fatte modifiche al messaggio
+	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
+		services.NewEditMessage(
+			c.Player.GetChatID(),
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+		)
+		editMessage.ParseMode = "markdown"
+		editMessage.ReplyMarkup = &titanKeyboard
+	}
+
+	// Invio messaggio modificato
+	_, err = services.SendMessage(editMessage)
+
+	return
 }
 
 // ====================================

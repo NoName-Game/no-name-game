@@ -15,8 +15,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.4.2
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	golang.org/x/sys v0.0.0-20190927073244-c990c680b611 // indirect
-	golang.org/x/text v0.3.2
-	google.golang.org/grpc v1.30.0
+	golang.org/x/text v0.3.3
+	google.golang.org/grpc v1.31.1
 	gopkg.in/yaml.v2 v2.2.4
 )
