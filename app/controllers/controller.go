@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -10,6 +9,8 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -37,6 +38,11 @@ type BaseController struct {
 		PlayerStats  *pb.PlayerStats
 		CurrentState *pb.PlayerState
 	}
+	CurrentState struct {
+		Controller string
+		Stage      int32
+		Completed  bool
+	}
 	ControllerFather uint32
 	ForceBackTo      bool
 	BlockUpdateState bool
@@ -62,25 +68,30 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 	c.Configuration = configuration
 
 	// Carico controller data
-	c.LoadControllerData()
+	c.LoadControllerData() // TODO: Verificare
 
 	// Verifico se il player si trova in determinati stati non consentiti
 	// e che quindi non permettano l'init del controller richiamato
-	var inStateBlocked = c.InStatesBlocker()
+	var inStateBlocked = c.InStatesBlocker() // TODO: Verificare
 	if inStateBlocked {
 		return false
 	}
 
-	// Verifico lo stato della player
-	if c.PlayerData.CurrentState, _, err = helpers.CheckState(
-		c.Player,
-		c.PlayerData.ActiveStates,
-		c.Configuration.Controller,
-		c.Configuration.Payload,
-		c.ControllerFather,
-	); err != nil {
+	// TODO: test
+	if c.CurrentState.Controller, c.CurrentState.Stage, err = helpers.CheckStateNew(c.Player.ID, c.Configuration.Controller, c.CurrentState.Stage); err != nil {
 		panic(err)
 	}
+
+	// Verifico lo stato della player
+	// if c.PlayerData.CurrentState, _, err = helpers.CheckState(
+	// 	c.Player,
+	// 	c.PlayerData.ActiveStates,
+	// 	c.Configuration.Controller,
+	// 	c.Configuration.Payload,
+	// 	c.ControllerFather,
+	// ); err != nil {
+	// 	panic(err)
+	// }
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
@@ -155,18 +166,19 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			}
 
 			// Cancello stato da cache
-			helpers.DelCacheState(c.Player.ID)
+			// helpers.DelCacheState(c.Player.ID)
 
+			// TODO: ora questa parte non dovrebbe più esserci
 			// Cancello record a db
-			if c.PlayerData.CurrentState != nil {
-				_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-					PlayerStateID: c.PlayerData.CurrentState.ID,
-					ForceDelete:   true,
-				})
-				if err != nil {
-					panic(err)
-				}
-			}
+			// if c.PlayerData.CurrentState != nil {
+			// 	_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+			// 		PlayerStateID: c.PlayerData.CurrentState.ID,
+			// 		ForceDelete:   true,
+			// 	})
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// }1
 
 			// se è stato settato un controller esco
 			if controller != nil {
@@ -187,18 +199,20 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			if !c.PlayerData.PlayerStats.GetDead() && c.Clearable() {
 				// Cancello stato da cache
-				helpers.DelCacheState(c.Player.ID)
+				// helpers.DelCacheState(c.Player.ID)
+				helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
 
+				// TODO: modificare andando a richiamare una cancellazione a ws
 				// Cancello record a db
-				if c.PlayerData.CurrentState != nil {
-					_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-						PlayerStateID: c.PlayerData.CurrentState.ID,
-						ForceDelete:   true,
-					})
-					if err != nil {
-						panic(err)
-					}
-				}
+				// if c.PlayerData.CurrentState != nil {
+				// 	_, err := services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+				// 		PlayerStateID: c.PlayerData.CurrentState.ID,
+				// 		ForceDelete:   true,
+				// 	})
+				// 	if err != nil {
+				// 		panic(err)
+				// 	}
+				// }
 
 				// Call menu controller
 				new(MenuController).Handle(c.Player, c.Update)
@@ -212,7 +226,7 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 		// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
 			// Cancello stato dalla memoria
-			helpers.DelCacheState(c.Player.ID)
+			// helpers.DelCacheState(c.Player.ID)
 
 			// Call menu controller
 			new(MenuController).Handle(c.Player, c.Update)
@@ -246,36 +260,46 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 	// Controllo se posso aggiornare lo stato
 	// Alcune attività come hunting hanno il poter di bloccare questo passaggio
 	if !c.BlockUpdateState {
+		// TODO: da vedere
+
+		// Aggiorno cache state
+		helpers.SetCacheControllerStage(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
+
+		log.Info("Aggiorno stato", c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
+
 		// Converto payload
-		payloadUpdated, _ := json.Marshal(payload)
-		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
+		// payloadUpdated, _ := json.Marshal(payload)
+		// c.PlayerData.CurrentState.Payload = string(payloadUpdated)
 
 		// Aggiorno stato
-		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
-		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
-			PlayerState: c.PlayerData.CurrentState,
-		})
-		if err != nil {
-			return
-		}
-		c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
+		// var rUpdatePlayerState *pb.UpdatePlayerStateResponse
+		// rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{
+		// 	PlayerState: c.PlayerData.CurrentState,
+		// })
+		// if err != nil {
+		// 	return
+		// }
+		// c.PlayerData.CurrentState = rUpdatePlayerState.GetPlayerState()
 	}
 
 	// Verifico se lo stato è completato chiudo
-	if c.PlayerData.CurrentState.GetCompleted() {
+	if c.CurrentState.Completed {
+
+		// TODO: la cancellazione dello stato dovrebbe avvenire solo su WS
 		// Posso cancellare lo stato solo se non è figlio di qualche altro stato
-		if c.PlayerData.CurrentState.GetFather() == 0 {
-			_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
-				PlayerStateID: c.PlayerData.CurrentState.ID,
-				ForceDelete:   true,
-			})
-			if err != nil {
-				return err
-			}
-		}
+		// if c.PlayerData.CurrentState.GetFather() == 0 {
+		// 	_, err = services.NnSDK.DeletePlayerState(helpers.NewContext(1), &pb.DeletePlayerStateRequest{
+		// 		PlayerStateID: c.PlayerData.CurrentState.ID,
+		// 		ForceDelete:   true,
+		// 	})
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// }
 
 		// Cancello stato dalla memoria
 		helpers.DelCacheState(c.Player.ID)
+		helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
 
 		// Call menu controller
 		if c.Configuration.ControllerBack.To != nil {
@@ -291,7 +315,9 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 	// Verifico se si vuole forzare il menu
 	if c.ForceBackTo {
 		// Cancello stato dalla memoria
-		helpers.DelCacheState(c.Player.ID)
+
+		// TODO: Verficare
+		// helpers.DelCacheState(c.Player.ID)
 
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update)
