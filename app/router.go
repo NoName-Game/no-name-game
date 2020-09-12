@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"reflect"
 	"strings"
 
@@ -39,7 +40,12 @@ func routing(player *pb.Player, update tgbotapi.Update) {
 	// userò quella come main per gestire ulteriori sottostati
 	isCachedRoute, _ := helpers.GetCacheState(player.ID)
 	if isCachedRoute != "" {
-		invoke(Routes[isCachedRoute], "Handle", player, update)
+		// TODO: mettere in helper
+		s := strings.Split(isCachedRoute, "_")
+
+		log.Println(isCachedRoute, s, s[0], "\n\n\n")
+
+		invoke(Routes[s[0]], "Handle", player, update)
 		return
 	}
 
