@@ -22,17 +22,22 @@ import (
 // ====================================
 type HuntingController struct {
 	BaseController
-	Payload struct {
-		CallbackChatID    int64
-		CallbackMessageID int
-		MapID             uint32
-		EnemyID           uint32
-		Selection         int32 // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
-		InFight           bool
-		Kill              uint32
-	}
 	PlayerPositionX int32
 	PlayerPositionY int32
+}
+
+type HuntingCacheData struct {
+	CallbackMessageID int    `json:"callback_message_id"`
+	MapID             uint32 `json:"map_id"`
+}
+
+func (h *HuntingCacheData) MarshalBinary() ([]byte, error) {
+	return json.Marshal(h)
+}
+
+func (h *HuntingCacheData) UnmarshalBinary(data []byte) error {
+	// convert data to yours, let's assume its json data
+	return json.Unmarshal(data, h)
 }
 
 // Settings generali
@@ -93,7 +98,6 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if !c.InitController(ControllerConfiguration{
 		Controller:        "route.hunting",
 		ControllerBlocked: []string{"mission"},
-		Payload:           c.Payload,
 		ControllerBack: ControllerBack{
 			To:        &MenuController{},
 			FromStage: 0,
@@ -102,25 +106,28 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
-
 	// Ok! Run!
 	if err = c.Stage(); err != nil {
 		panic(err)
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if c.PlayerData.CurrentState.GetCompleted() {
-		// Cancello messaggio contentente la mappa
-		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
-		if err != nil {
-			panic(err)
+	if c.CurrentState.Completed {
+		// Recupero informazioni da cache
+		var cachedData []byte
+		if cachedData, err = helpers.GetHuntingCacheData(c.Player.ID); err == nil {
+			var data HuntingCacheData
+			_ = json.Unmarshal(cachedData, &data)
+
+			// Cancello messaggio contentente la mappa
+			if err = services.DeleteMessage(c.Player.ChatID, data.CallbackMessageID); err != nil {
+				panic(err)
+			}
 		}
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
 }
@@ -136,20 +143,19 @@ func (c *HuntingController) Validator() (hasErrors bool) {
 // Stage Map -> Drop -> Finish
 // ====================================
 func (c *HuntingController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
 		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
-				c.PlayerData.CurrentState.Completed = true
+				c.CurrentState.Completed = true
 				return err
 			}
 		}
 
 		// Avvio ufficialmente la caccia!
-		err = c.Hunting()
-		if err != nil {
+		if err = c.Hunting(); err != nil {
 			return err
 		}
 	}
@@ -162,7 +168,7 @@ func (c *HuntingController) Hunting() (err error) {
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
-	if c.Payload.MapID == 0 || c.Update.Message != nil {
+	if c.Update.CallbackQuery == nil && c.Update.Message != nil {
 		// Se è qualsiasi messaggio diverso da hunting non lo calcolo
 		// in quanto adnrebbe a generare più volte il messaggio con la stessa mappa
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.hunting") &&
@@ -180,8 +186,7 @@ func (c *HuntingController) Hunting() (err error) {
 				),
 			),
 		)
-		_, err = services.SendMessage(initHunting)
-		if err != nil {
+		if _, err = services.SendMessage(initHunting); err != nil {
 			return err
 		}
 
@@ -189,20 +194,18 @@ func (c *HuntingController) Hunting() (err error) {
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		// Dalla ultima posizione recupero il pianeta corrente
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		if rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
 		// al DB registro il tutto sula cache
 		var rGetMapByID *pb.GetMapByIDResponse
-		rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
+		if rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 			MapID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
@@ -215,8 +218,7 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		decodedMap, err = helpers.DecodeMapToDisplay(maps, maps.GetStartPositionX(), maps.GetStartPositionY())
-		if err != nil {
+		if decodedMap, err = helpers.DecodeMapToDisplay(maps, maps.GetStartPositionX(), maps.GetStartPositionY()); err != nil {
 			return err
 		}
 
@@ -226,37 +228,42 @@ func (c *HuntingController) Hunting() (err error) {
 		msg.ParseMode = "HTML"
 
 		var huntingMessage tgbotapi.Message
-		huntingMessage, err = services.SendMessage(msg)
-		if err != nil {
+		if huntingMessage, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno lo stato e ritorno
-		c.Payload.MapID = maps.ID
-		c.Payload.CallbackChatID = huntingMessage.Chat.ID
-		c.Payload.CallbackMessageID = huntingMessage.MessageID
+		helpers.SetHuntingCacheData(c.Player.ID, &HuntingCacheData{
+			CallbackMessageID: huntingMessage.MessageID,
+			MapID:             maps.ID,
+		})
 
 		return err
 	}
 
 	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
 	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
-	if c.Payload.MapID > 0 && c.Update.CallbackQuery != nil {
+	if c.Update.CallbackQuery != nil && c.Update.Message == nil {
+		var cachedData []byte
+		if cachedData, err = helpers.GetHuntingCacheData(c.Player.ID); err != nil {
+			return err
+		}
+
+		var data HuntingCacheData
+		_ = json.Unmarshal(cachedData, &data)
+
 		var maps *pb.Maps
-		maps, err = helpers.GetMapInCache(c.Payload.MapID)
-		if err != nil {
+		if maps, err = helpers.GetMapInCache(data.MapID); err != nil {
 			return err
 		}
 
 		// Recupero posizione player
 		// var playerPositionX, playerPositionY int
-		c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X")
-		if err != nil {
+		if c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X"); err != nil {
 			return err
 		}
 
-		c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y")
-		if err != nil {
+		if c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y"); err != nil {
 			return err
 		}
 
@@ -265,9 +272,9 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
 		if actionType[1] == "move" {
-			err = c.Move(actionType[2], maps)
+			err = c.movements(actionType[2], maps)
 		} else if actionType[1] == "fight" {
-			err = c.Fight(actionType[2], maps)
+			err = c.fight(actionType[2], maps)
 		}
 
 		if err != nil {
@@ -288,12 +295,11 @@ func (c *HuntingController) Hunting() (err error) {
 // ====================================
 // Movements
 // ====================================
-func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
+func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) {
 	// Refresh della mappa
 	var cellGrid [][]bool
-	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
-	if err != nil {
-		return err
+	if err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid); err != nil {
+		return
 	}
 
 	// Eseguo azione
@@ -337,11 +343,10 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
 			var rDropTresure *pb.DropTresureResponse
-			rDropTresure, err = services.NnSDK.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
+			if rDropTresure, err = services.NnSDK.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
 				TresureID: tresure.ID,
 				PlayerID:  c.Player.ID,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -386,12 +391,11 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 					editMessage.ReplyMarkup = &ok
 
 					// Invio messaggio
-					_, err = services.SendMessage(editMessage)
-					if err != nil {
-						return err
+					if _, err = services.SendMessage(editMessage); err != nil {
+						return
 					}
 
-					return err
+					return
 				}
 				// Player sopravvive...
 				editMessage = services.NewEditMessage(
@@ -417,25 +421,22 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 			editMessage.ParseMode = "markdown"
 
 			// Un tesoro è stato aperto, devo refreshare la mappa per cancellarlo
-			err = c.RefreshMap()
-			if err != nil {
-				return err
+			if err = c.RefreshMap(maps.ID); err != nil {
+				return
 			}
 
-			_, err = services.SendMessage(editMessage)
-			if err != nil {
-				return err
+			if _, err = services.SendMessage(editMessage); err != nil {
+				return
 			}
 
-			return err
+			return
 		}
 
-		return err
+		return
 	case "no-action":
 		// No action
 	default:
-		err = errors.New("action not recognized")
-		return err
+		return errors.New("action not recognized")
 	}
 
 	// Aggiorno nuova posizione del player
@@ -444,9 +445,8 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
-	decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY)
-	if err != nil {
-		return err
+	if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY); err != nil {
+		return
 	}
 
 	// Se l'azione è valida e completa aggiorno risultato
@@ -465,8 +465,7 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 	}
 
 	msg.ParseMode = "HTML"
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		// Il bot crasha nel caso ci fossero bad request da parte di telegram,
 		// penso sia opportuno solo in questo caso non pensare agli errori delle api che potrebbero causare crash non dettati da noi
 		services.ErrorHandler("Hunting TGBOTAPI Error", err)
@@ -475,63 +474,65 @@ func (c *HuntingController) Move(action string, maps *pb.Maps) (err error) {
 
 	// Visto che si è trattato solo di un movimento non è necessario aggiornare lo stato
 	c.BlockUpdateState = true
-
 	return
 }
 
 // ====================================
 // Fight
 // ====================================
-func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
+func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	var enemy *pb.Enemy
 	var editMessage tgbotapi.EditMessageTextConfig
 
-	if c.Payload.EnemyID > 0 {
+	// Recupero dettagli aggiornati enemy
+	enemy, _ = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
+	if enemy != nil {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
-		rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
-			EnemyID: c.Payload.EnemyID,
-		})
-		if err != nil {
+		if rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+			EnemyID: enemy.ID,
+		}); err != nil {
 			return err
 		}
-
-		// Se impostato recupero informazioni più aggiornate del mob
 		enemy = rGetEnemyByID.GetEnemy()
-	} else {
-		// Recupero il mob più vicino con il quale combattere e me lo setto nel payload
-		enemy, _ = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
+	}
+
+	// Recupero parte del corpo che si vuole colpire
+	var bodySelection int32
+	if bodySelection, err = helpers.GetCachedHuntingBodySelection(c.Player.ID); err != nil {
+		bodySelection = 1
 	}
 
 	switch action {
 	// Avvio di un nuovo combattimento
 	case "start":
-		// Setto nuove informazioni stato
-		c.Payload.EnemyID = enemy.ID
-		c.Payload.InFight = true
-
+		// In questo metodo non c'è niente da fare procedo con il stampare la card del combattimento
 	case "up":
 		// Setto nuova parte del corpo da colpire
-		if c.Payload.Selection > 0 {
-			c.Payload.Selection--
+		if bodySelection > 0 {
+			bodySelection--
 		} else {
-			c.Payload.Selection = 3
+			bodySelection = 3
 		}
 
+		// Aggiorno posizione
+		helpers.SetCachedHuntingBodySelection(c.Player.ID, bodySelection)
 	case "down":
 		// Setto nuova parte del corpo da colpire
-		if c.Payload.Selection < 3 {
-			c.Payload.Selection++
+		if bodySelection < 3 {
+			bodySelection++
 		} else {
-			c.Payload.Selection = 0
+			bodySelection = 0
 		}
 
+		// Aggiorno posizione
+		helpers.SetCachedHuntingBodySelection(c.Player.ID, bodySelection)
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		var rHitEnemy *pb.HitEnemyResponse
 		rHitEnemy, err = services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
 			EnemyID:       enemy.GetID(),
 			PlayerID:      c.Player.ID,
-			BodySelection: c.Payload.Selection,
+			BodySelection: bodySelection,
 		})
 		if err != nil {
 			return err
@@ -573,23 +574,17 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 			editMessage.ParseMode = "markdown"
 			editMessage.ReplyMarkup = &ok
 
-			// Setto stato
-			c.Payload.Kill++
-			c.Payload.InFight = false
-			c.Payload.EnemyID = 0
-
-			err = c.RefreshMap()
-			if err != nil {
-				return err
+			// Se il mob è morto è necessario aggiornare la mappa
+			if err = c.RefreshMap(maps.ID); err != nil {
+				return
 			}
 
 			// Invio messaggio
-			_, err = services.SendMessage(editMessage)
-			if err != nil {
-				return err
+			if _, err = services.SendMessage(editMessage); err != nil {
+				return
 			}
 
-			return err
+			return
 		}
 
 		// Verifico se il PLAYER è morto
@@ -612,12 +607,11 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 			editMessage.ReplyMarkup = &ok
 
 			// Invio messaggio
-			_, err = services.SendMessage(editMessage)
-			if err != nil {
-				return err
+			if _, err = services.SendMessage(editMessage); err != nil {
+				return
 			}
 
-			return err
+			return
 		}
 
 		// Se ne il player e ne il mob è morto, continua lo scontro
@@ -648,11 +642,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 			),
 		)
 		editMessage.ReplyMarkup = &ok
-
 	case "return_map":
-		c.Payload.InFight = false
-		c.Payload.EnemyID = 0
-
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
 		decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY)
@@ -671,14 +661,14 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 		editMessage.ReplyMarkup = &mapKeyboard
 	case "player-die":
 		// Il player è morto
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 
 		return
 	case "no-action":
 		//
 	}
 
-	// Non sono state fatte modifiche al messaggio
+	// Edit message viene passato vuoto solo se non si tratta di hit o bodyselection
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
 		editMessage = services.NewEditMessage(
 			c.Player.ChatID,
@@ -690,7 +680,7 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 				c.Player.Username,
 				c.PlayerData.PlayerStats.GetLifePoint(),
 				100+c.PlayerData.PlayerStats.GetLevel()*10,
-				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
+				helpers.Trans(c.Player.Language.Slug, bodyParts[bodySelection]),
 			),
 		)
 		editMessage.ParseMode = "markdown"
@@ -699,19 +689,18 @@ func (c *HuntingController) Fight(action string, maps *pb.Maps) (err error) {
 
 	// Invio messaggio modificato
 	_, err = services.SendMessage(editMessage)
-
 	return
 }
 
 // RefreshMap - Necessario per refreshare la mappa in caso
 // di sconfitta di mob o apertura di tesori.
-func (c *HuntingController) RefreshMap() (err error) {
+func (c *HuntingController) RefreshMap(MapID uint32) (err error) {
 	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
-	rGetMapByID, err := services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-		MapID: c.Payload.MapID,
-	})
-	if err != nil {
-		return err
+	var rGetMapByID *pb.GetMapByIDResponse
+	if rGetMapByID, err = services.NnSDK.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
+		MapID: MapID,
+	}); err != nil {
+		return
 	}
 
 	// Registro mappa e posizione iniziale del player
