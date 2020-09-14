@@ -35,7 +35,6 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.menu"
 
 	// Carico controller data
 	c.LoadControllerData()
@@ -55,8 +54,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Send recap message
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 

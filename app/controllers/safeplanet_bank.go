@@ -42,8 +42,10 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -58,7 +60,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -67,7 +69,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 // Validator
 // ====================================
 func (c *SafePlanetBankController) Validator() (hasErrors bool) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -93,7 +95,7 @@ func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *SafePlanetBankController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
 		var infoBank string
@@ -111,28 +113,25 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		)
 
 		msg.ParseMode = "HTML"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Bank
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
-		rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+		if rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
 			EconomyType: "bank",
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
 		// Money
 		var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
-		rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+		if rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
 			EconomyType: "money",
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
@@ -145,13 +144,12 @@ func (c *SafePlanetBankController) Stage() (err error) {
 			),
 		)
 		msg.ParseMode = "Markdown"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Avanzo di stage
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 	case 1:
 		var mainMessage string
 		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
@@ -185,13 +183,12 @@ func (c *SafePlanetBankController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowQuantities,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
@@ -207,23 +204,17 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
 		switch c.Payload.Type {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
-			_, err = services.NnSDK.BankDeposit(helpers.NewContext(1), &pb.BankDepositRequest{
+			if _, err = services.NnSDK.BankDeposit(helpers.NewContext(1), &pb.BankDepositRequest{
 				PlayerID: c.Player.ID,
 				Amount:   int32(value),
-			})
-
-			// Errore nella transazione
-			if err != nil {
+			}); err != nil {
 				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
 			}
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
-			_, err = services.NnSDK.BankWithdraw(helpers.NewContext(1), &pb.BankWithdrawRequest{
+			if _, err = services.NnSDK.BankWithdraw(helpers.NewContext(1), &pb.BankWithdrawRequest{
 				PlayerID: c.Player.ID,
 				Amount:   int32(value),
-			})
-
-			// Errore nella transazione
-			if err != nil {
+			}); err != nil {
 				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
 			}
 		}
@@ -232,13 +223,12 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID, text)
 		msg.ParseMode = "markdown"
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

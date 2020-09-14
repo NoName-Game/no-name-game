@@ -12,7 +12,6 @@ import (
 // Player
 // ====================================
 type PlayerController struct {
-	Payload interface{}
 	BaseController
 }
 
@@ -23,14 +22,23 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.player"
+
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.player",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
+		return
+	}
 
 	// *************************
 	// Recupero economia player
 	// *************************
 	var money, diamond int32
-	money, diamond, err = c.GetPlayerEconomy()
-	if err != nil {
+	if money, diamond, err = c.GetPlayerEconomy(); err != nil {
 		panic(err)
 	}
 
@@ -38,10 +46,9 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Recupero esperienza player
 	// *************************
 	var rGetPlayerExperience *pb.GetPlayerExperienceResponse
-	rGetPlayerExperience, err = services.NnSDK.GetPlayerExperience(helpers.NewContext(1), &pb.GetPlayerExperienceRequest{
+	if rGetPlayerExperience, err = services.NnSDK.GetPlayerExperience(helpers.NewContext(1), &pb.GetPlayerExperienceRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		// log.Fatalln(err)
 		panic(err)
 	}
@@ -105,8 +112,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		),
 	)
 
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

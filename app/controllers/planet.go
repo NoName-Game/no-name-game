@@ -24,31 +24,31 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.planet"
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &MenuController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.planet",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
 	// Recupero pianeta corrente del player
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+	if rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
 	// Riceco pianeta per ID, in modo da ottenere maggior informazioni
 	var rGetPlanetByID *pb.GetPlanetByIDResponse
-	rGetPlanetByID, err = services.NnSDK.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+	if rGetPlanetByID, err = services.NnSDK.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
@@ -62,10 +62,9 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	)
 
 	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse
-	rCountPlayerVisitedCurrentPlanet, err = services.NnSDK.CountPlayerVisitedCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerVisitedCurrentPlanetRequest{
+	if rCountPlayerVisitedCurrentPlanet, err = services.NnSDK.CountPlayerVisitedCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerVisitedCurrentPlanetRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
@@ -90,8 +89,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		),
 	)
 
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

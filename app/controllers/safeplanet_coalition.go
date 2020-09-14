@@ -21,13 +21,15 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.safeplanet.coalition"
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &MenuController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.safeplanet.coalition",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
@@ -48,8 +50,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
 		),
 	)
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

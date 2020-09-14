@@ -44,8 +44,10 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -60,7 +62,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -69,7 +71,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 // Validator
 // ====================================
 func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -81,7 +83,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle armi
 			// in quanto le armi non hanno una categoria
 			c.Payload.ItemType = "weapons"
-			c.PlayerData.CurrentState.Stage = 2
+			c.CurrentState.Stage = 2
 			return false
 		}
 
@@ -121,7 +123,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *PlayerEquipmentController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
 	case 0:
@@ -132,10 +134,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		currentArmorsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "armor"))
 
 		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
-		rGetPlayerArmors, err = services.NnSDK.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
+		if rGetPlayerArmors, err = services.NnSDK.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
@@ -162,10 +163,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		currentWeaponsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
-		rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+		if rGetPlayerWeaponEquippedResponse, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
@@ -202,13 +202,12 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Avanzo di stage
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage chiedo di indicarmi quale armatura o arma intende equipaggiare
 	case 1:
@@ -220,9 +219,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.armor.type")
 
 			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
-			rGetAllArmorCategory, err = services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{})
-			if err != nil {
-				return err
+			if rGetAllArmorCategory, err = services.NnSDK.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{}); err != nil {
+				return
 			}
 
 			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
@@ -241,13 +239,12 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = services.SendMessage(msg); err != nil {
+			return
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		var mainMessage string
 		// Costruisco keyboard risposta
@@ -262,20 +259,18 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Recupero categoria scelta dal player
 			var rGetArmorCategoryBySlugRequest *pb.GetArmorCategoryBySlugResponse
-			rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
+			if rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
 				Slug: c.Payload.ItemCategory,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
 			// Recupero armature non equipaggiate filtrate per la categoria scelta
 			var rGetPlayerArmorsByCategoryID *pb.GetPlayerArmorsByCategoryIDResponse
-			rGetPlayerArmorsByCategoryID, err = services.NnSDK.GetPlayerArmorsByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorsByCategoryIDRequest{
+			if rGetPlayerArmorsByCategoryID, err = services.NnSDK.GetPlayerArmorsByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorsByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -347,13 +342,12 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 3
+		c.CurrentState.Stage = 3
 
 	// In questo stato ricerco effettivamente l'arma o l'armatura che il player vuole
 	// equipaggiare e me lo metto nel payload in attesa di conferma
@@ -368,10 +362,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		switch c.Payload.ItemType {
 		case "armors":
 			var rGetArmorByName *pb.GetArmorByNameResponse
-			rGetArmorByName, err = services.NnSDK.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
+			if rGetArmorByName, err = services.NnSDK.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
 				Name: equipmentName,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -383,11 +376,10 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
-			rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+			if rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorByName.GetArmor().GetArmorCategory().GetID(),
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -401,10 +393,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			}
 		case "weapons":
 			var rGetWeaponByName *pb.GetWeaponByNameResponse
-			rGetWeaponByName, err = services.NnSDK.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
+			if rGetWeaponByName, err = services.NnSDK.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
 				Name: equipmentName,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -417,10 +408,9 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
-			rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+			if rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -448,9 +438,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				),
 			)
 
-			_, err = services.SendMessage(msg)
-			if err != nil {
-				return err
+			if _, err = services.SendMessage(msg); err != nil {
+				return
 			}
 
 			return
@@ -468,14 +457,13 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = services.SendMessage(msg); err != nil {
+			return
 		}
 
 		// Aggiorno stato
 		c.Payload.EquipID = equipmentID
-		c.PlayerData.CurrentState.Stage = 4
+		c.CurrentState.Stage = 4
 
 	// In questo stage se l'utente ha confermato continuo con l'equipaggiamento
 	case 4:
@@ -483,78 +471,71 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		case "armors":
 			// Recupero categoria scelta dal player
 			var rGetArmorCategoryBySlugRequest *pb.GetArmorCategoryBySlugResponse
-			rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
+			if rGetArmorCategoryBySlugRequest, err = services.NnSDK.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
 				Slug: c.Payload.ItemCategory,
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				return
 			}
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
-			rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+			if rGetPlayerArmorEquippedByCategoryID, err = services.NnSDK.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				return
 			}
 
 			// Rimuovo equipaggiamento attuale
 			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
-				_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
+				if _, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
 					Armor: &pb.Armor{
 						ID:       rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID(),
 						Equipped: false,
 					},
-				})
-				if err != nil {
-					return err
+				}); err != nil {
+					return
 				}
 			}
 
 			// Aggiorno con quello nuovo
-			_, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
+			if _, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
 				Armor: &pb.Armor{
 					ID:       c.Payload.EquipID,
 					Equipped: true,
 				},
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				return
 			}
 		case "weapons":
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
-			rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+			if rGetPlayerWeaponEquipped, err = services.NnSDK.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				return
 			}
 
 			// Rimovo arma attualmente equipaggiata
 			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
-				_, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
+				if _, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
 					Weapon: &pb.Weapon{
 						ID:       rGetPlayerWeaponEquipped.GetWeapon().GetID(),
 						Equipped: false,
 					},
-				})
-				if err != nil {
-					return err
+				}); err != nil {
+					return
 				}
 			}
 
 			// Aggiorno equipped
-			_, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
+			if _, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
 				Weapon: &pb.Weapon{
 					ID:       c.Payload.EquipID,
 					Equipped: true,
 				},
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				return
 			}
 		}
 
@@ -564,13 +545,12 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = services.SendMessage(msg); err != nil {
+			return
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 
 		// ###################
 		// TUTORIAL - Solo il player si trova dentro il tutorial forzo di tornarare al menu

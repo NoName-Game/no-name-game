@@ -24,16 +24,18 @@ type NpcMenuController struct {
 func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
+	// Init funzionalità
+	c.Configuration.Controller = "route.menu.npc"
+
 	// Il menù del player refresha sempre lo status del player
-	rGetPlayerByUsername, err := services.NnSDK.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+	var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+	if rGetPlayerByUsername, err = services.NnSDK.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
 		Username: player.GetUsername(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
-	// Init funzionalità
-	c.Configuration.Controller = "route.menu.npc"
+	// Recupero dettagli utente
 	c.Player = rGetPlayerByUsername.GetPlayer()
 
 	msg := services.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.welcome"))
@@ -44,8 +46,7 @@ func (c *NpcMenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Send recap message
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 
