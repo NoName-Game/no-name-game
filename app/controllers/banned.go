@@ -21,19 +21,20 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.banned"
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &MenuController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.banned",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "banned.message"))
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

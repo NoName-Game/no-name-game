@@ -21,13 +21,15 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.inventory"
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &PlayerController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.inventory",
+		ControllerBack: ControllerBack{
+			To:        &PlayerController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
@@ -42,8 +44,7 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 		),
 	)
 
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

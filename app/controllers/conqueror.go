@@ -24,13 +24,15 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	var err error
 	c.Player = player
 	c.Update = update
-	c.Configuration.Controller = "route.conqueror"
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &MenuController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.conqueror",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
@@ -86,8 +88,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		),
 	)
 
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

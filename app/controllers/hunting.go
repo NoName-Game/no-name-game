@@ -36,7 +36,6 @@ func (h *HuntingCacheData) MarshalBinary() ([]byte, error) {
 }
 
 func (h *HuntingCacheData) UnmarshalBinary(data []byte) error {
-	// convert data to yours, let's assume its json data
 	return json.Unmarshal(data, h)
 }
 

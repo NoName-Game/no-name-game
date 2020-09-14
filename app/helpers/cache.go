@@ -171,24 +171,6 @@ func GetCachedHuntingBodySelection(playerID uint32) (value int32, err error) {
 // =================
 // Map  - ChatDetails
 // =================
-func SetCachedHuntingChatDetails(playerID uint32, messageID int) {
-	if err := services.Redis.Set(fmt.Sprintf("hunting_player_%v_chat_details", playerID), messageID, 60*time.Minute).Err(); err != nil {
-		panic(err)
-	}
-}
-
-func GetCachedHuntingChatDetails(playerID uint32) (value int, err error) {
-	var result string
-	if result, err = services.Redis.Get(fmt.Sprintf("hunting_player_%v_chat_details", playerID)).Result(); err != nil {
-		err = errors.New("cached state not found")
-	}
-
-	// Recupero valore posizione
-	position, _ := strconv.Atoi(result)
-
-	return position, err
-}
-
 func SetHuntingCacheData(playerID uint32, data interface{}) {
 	if err := services.Redis.Set(fmt.Sprintf("player_%v_hunting_cache_data", playerID), data, 60*time.Minute).Err(); err != nil {
 		panic(err)
@@ -202,4 +184,28 @@ func GetHuntingCacheData(playerID uint32) (value []byte, err error) {
 	}
 
 	return []byte(result), err
+}
+
+// TEST CACHE PAYLOAD DATA
+func SetPayloadController(playerID uint32, controller string, data interface{}) {
+	if err := services.Redis.Set(fmt.Sprintf("player_%v_controller_%s_payload", playerID, controller), data, 60*time.Minute).Err(); err != nil {
+		panic(err)
+	}
+}
+
+func GetPayloadController(playerID uint32, controller string, payload interface{}) (err error) {
+	var result string
+	result, _ = services.Redis.Get(fmt.Sprintf("player_%v_controller_%s_payload", playerID, controller)).Result()
+
+	if result != "" {
+		return json.Unmarshal([]byte(result), &payload)
+	}
+
+	return
+}
+
+func DelPayloadController(playerID uint32, controller string) {
+	if err := services.Redis.Del(fmt.Sprintf("player_%v_controller_%s_payload", playerID, controller)).Err(); err != nil {
+		panic(err)
+	}
 }

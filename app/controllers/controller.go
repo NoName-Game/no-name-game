@@ -175,6 +175,8 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			// Cancello stato dalla memoria
 			helpers.DelCacheState(c.Player.ID)
 			helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
+
+			helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
 			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
@@ -187,6 +189,8 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 				// Cancello stato da cache
 				helpers.DelCacheState(c.Player.ID)
 				helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
+
+				helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
 
 				// Cancello stato da ws
 				if _, err := services.NnSDK.DeletePlayerStateByController(helpers.NewContext(1), &pb.DeletePlayerStateByControllerRequest{
@@ -247,6 +251,9 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 
 		// Aggiorno cache state
 		helpers.SetCacheControllerStage(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
+
+		// TODO: da verifice
+		helpers.SetPayloadController(c.Player.ID, c.CurrentState.Controller, payload)
 	}
 
 	// Verifico se lo stato è completato chiudo
@@ -254,6 +261,8 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 		// Cancello stato dalla memoria
 		helpers.DelCacheState(c.Player.ID)
 		helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
+
+		helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
 
 		// Call menu controller
 		if c.Configuration.ControllerBack.To != nil {
@@ -270,6 +279,7 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 	if c.ForceBackTo {
 		// Cancello stato dalla memoria
 		helpers.DelCacheState(c.Player.ID)
+		helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
 
 		// Call menu controller
 		new(MenuController).Handle(c.Player, c.Update)
