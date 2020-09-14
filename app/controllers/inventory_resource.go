@@ -14,16 +14,28 @@ import (
 // ====================================
 // InventoryResource
 // ====================================
-
-type InventoryResourceController BaseController
+type InventoryResourceController struct {
+	BaseController
+}
 
 // ====================================
 // Handle
 // ====================================
 func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	var finalResource string
 	c.Update = update
+	c.Player = player
+
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.inventory.resources",
+		ControllerBack: ControllerBack{
+			To:        &InventoryController{},
+			FromStage: 0,
+		},
+	}) {
+		return
+	}
 
 	// *******************
 	// Recupero risorse inventario
@@ -46,28 +58,8 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 		)
 	}
 
-	// // *******************
-	// // Recupero item inventario
-	// // *******************
-	// rGetPlayerItems, err := services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
-	// 	PlayerID: player.GetID(),
-	// })
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// var recapItems string
-	// recapItems = fmt.Sprintf("*%s*:\n", helpers.Trans(player.Language.Slug, "items"))
-	// for _, resource := range rGetPlayerItems.GetPlayerInventory() {
-	// 	recapItems += fmt.Sprintf(
-	// 		"- %v x %s (*%s*)\n",
-	// 		resource.Quantity,
-	// 		helpers.Trans(player.Language.Slug, "items."+resource.Item.Slug),
-	// 		helpers.Trans(player.Language.Slug, "items."+resource.Item.ItemCategory.Slug),
-	// 	)
-	// }
-
 	// Riassumo il tutto
+	var finalResource string
 	finalResource = fmt.Sprintf("%s\n\n%s",
 		helpers.Trans(player.Language.Slug, "inventory.recap.resource"), // Ecco il tuo inventario
 		recapResources,
@@ -75,8 +67,7 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 
 	msg := services.NewMessage(c.Update.Message.Chat.ID, finalResource)
 	msg.ParseMode = "markdown"
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }

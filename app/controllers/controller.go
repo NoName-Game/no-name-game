@@ -102,7 +102,7 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 func (c *BaseController) LoadControllerData() {
 	// Recupero stato utente
 	rGetActivePlayerStates, err := services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
-		PlayerID: c.Player.GetID(),
+		PlayerID: c.Player.ID,
 	})
 	if err != nil {
 		panic(err)
@@ -110,12 +110,13 @@ func (c *BaseController) LoadControllerData() {
 	c.PlayerData.ActiveStates = rGetActivePlayerStates.GetStates()
 
 	// Recupero stats utente
-	rGetPlayerStats, err := services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
-		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
+	var rGetPlayerStats *pb.GetPlayerStatsResponse
+	if rGetPlayerStats, err = services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
 		panic(err)
 	}
+
 	c.PlayerData.PlayerStats = rGetPlayerStats.GetPlayerStats()
 }
 
