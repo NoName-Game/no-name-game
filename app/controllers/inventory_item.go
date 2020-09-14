@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -14,27 +13,16 @@ import (
 
 // ====================================
 // InventoryItemController
+// ====================================
 // Con questo controller il player avrà la possibilità di usare gli item
 // da lui craftati e non. Quindi di beneficiare dei potenziamenti.
 // ====================================
+
 type InventoryItemController struct {
 	BaseController
-	Payload InventoryItemPayload
-}
-
-// ====================================
-// InventoryItemController - Payload
-// ====================================
-type InventoryItemPayload struct {
-	Item *pb.Item
-}
-
-func (p *InventoryItemPayload) MarshalBinary() ([]byte, error) {
-	return json.Marshal(p)
-}
-
-func (p *InventoryItemPayload) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, &p)
+	Payload struct {
+		Item *pb.Item
+	}
 }
 
 // ====================================

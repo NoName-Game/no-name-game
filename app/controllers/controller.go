@@ -43,7 +43,6 @@ type BaseController struct {
 	}
 	ControllerFather uint32
 	ForceBackTo      bool
-	BlockUpdateState bool
 	Configuration    ControllerConfiguration
 }
 
@@ -245,16 +244,12 @@ func (c *BaseController) Clearable() (clearable bool) {
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing(payload interface{}) (err error) {
 	// Controllo se posso aggiornare lo stato
-	// Alcune attività come hunting hanno il poter di bloccare questo passaggio
-	if !c.BlockUpdateState {
-		// TODO: da vedere forse si può togliere il controllo
+	// TODO: da vedere forse si può togliere il controllo
+	// Aggiorno cache state
+	helpers.SetCacheControllerStage(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
 
-		// Aggiorno cache state
-		helpers.SetCacheControllerStage(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
-
-		// TODO: da verifice
-		helpers.SetPayloadController(c.Player.ID, c.CurrentState.Controller, payload)
-	}
+	// TODO: da verifice
+	helpers.SetPayloadController(c.Player.ID, c.CurrentState.Controller, payload)
 
 	// Verifico se lo stato è completato chiudo
 	if c.CurrentState.Completed {

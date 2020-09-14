@@ -41,7 +41,7 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Se il player ha già finito il tutorial non può assolutamente entrare in questo controller
 	if c.Player.GetTutorial() {
-		c.BlockUpdateState = true
+		// c.BlockUpdateState = true
 		c.ForceBackTo = true
 		_ = c.Completing(c.Payload)
 		return

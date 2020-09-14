@@ -15,31 +15,26 @@ import (
 
 // ====================================
 // HuntingController
-//
+// ====================================
 // In questo controller il player avrà la possibilità di esplorare
 // la mappa del pianeta che sta visitando, e di conseguenza affrontare mob,
 // recupeare tesori e cascare in delle trappole
 // ====================================
+
 type HuntingController struct {
 	BaseController
-	PlayerPositionX int32
-	PlayerPositionY int32
+	Payload struct {
+		CallbackMessageID int
+		MapID             uint32
+		PlayerPositionX   int32
+		PlayerPositionY   int32
+		BodySelection     int32
+	}
 }
 
-type HuntingCacheData struct {
-	CallbackMessageID int    `json:"callback_message_id"`
-	MapID             uint32 `json:"map_id"`
-}
-
-func (h *HuntingCacheData) MarshalBinary() ([]byte, error) {
-	return json.Marshal(h)
-}
-
-func (h *HuntingCacheData) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, h)
-}
-
-// Settings generali
+// ====================================
+// HuntingController - Settings
+// ====================================
 var (
 	// Parti di corpo disponibili per l'attacco
 	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
@@ -105,6 +100,11 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
+
 	// Ok! Run!
 	if err = c.Stage(); err != nil {
 		panic(err)
@@ -112,21 +112,14 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
 	if c.CurrentState.Completed {
-		// Recupero informazioni da cache
-		var cachedData []byte
-		if cachedData, err = helpers.GetHuntingCacheData(c.Player.ID); err == nil {
-			var data HuntingCacheData
-			_ = json.Unmarshal(cachedData, &data)
-
-			// Cancello messaggio contentente la mappa
-			if err = services.DeleteMessage(c.Player.ChatID, data.CallbackMessageID); err != nil {
-				panic(err)
-			}
+		// Cancello messaggio contentente la mappa
+		if err = services.DeleteMessage(c.Player.ChatID, c.Payload.CallbackMessageID); err != nil {
+			panic(err)
 		}
 	}
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -212,8 +205,10 @@ func (c *HuntingController) Hunting() (err error) {
 
 		// Registro mappa e posizione iniziale del player
 		helpers.SetMapInCache(maps)
-		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
-		helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", maps.GetStartPositionY())
+		c.Payload.PlayerPositionX = maps.GetStartPositionX()
+		c.Payload.PlayerPositionY = maps.GetStartPositionY()
+		// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
+		// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", maps.GetStartPositionY())
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
@@ -232,10 +227,12 @@ func (c *HuntingController) Hunting() (err error) {
 		}
 
 		// Aggiorno lo stato e ritorno
-		helpers.SetHuntingCacheData(c.Player.ID, &HuntingCacheData{
-			CallbackMessageID: huntingMessage.MessageID,
-			MapID:             maps.ID,
-		})
+		c.Payload.CallbackMessageID = huntingMessage.MessageID
+		c.Payload.MapID = maps.ID
+		// helpers.SetHuntingCacheData(c.Player.ID, &HuntingCacheData{
+		// 	CallbackMessageID: huntingMessage.MessageID,
+		// 	MapID:             maps.ID,
+		// })
 
 		return err
 	}
@@ -243,28 +240,20 @@ func (c *HuntingController) Hunting() (err error) {
 	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
 	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
 	if c.Update.CallbackQuery != nil && c.Update.Message == nil {
-		var cachedData []byte
-		if cachedData, err = helpers.GetHuntingCacheData(c.Player.ID); err != nil {
-			return err
-		}
-
-		var data HuntingCacheData
-		_ = json.Unmarshal(cachedData, &data)
-
 		var maps *pb.Maps
-		if maps, err = helpers.GetMapInCache(data.MapID); err != nil {
+		if maps, err = helpers.GetMapInCache(c.Payload.MapID); err != nil {
 			return err
 		}
 
 		// Recupero posizione player
 		// var playerPositionX, playerPositionY int
-		if c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X"); err != nil {
-			return err
-		}
-
-		if c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y"); err != nil {
-			return err
-		}
+		// if c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X"); err != nil {
+		// 	return err
+		// }
+		//
+		// if c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y"); err != nil {
+		// 	return err
+		// }
 
 		// Controllo tipo di callback data - move / fight
 		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
@@ -304,30 +293,30 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 	// Eseguo azione
 	switch action {
 	case "up":
-		if c.PlayerPositionX > 0 && !cellGrid[c.PlayerPositionX-1][c.PlayerPositionY] {
-			c.PlayerPositionX--
+		if c.Payload.PlayerPositionX > 0 && !cellGrid[c.Payload.PlayerPositionX-1][c.Payload.PlayerPositionY] {
+			c.Payload.PlayerPositionX--
 			break
 		}
 
 		return
 	case "down":
 		// Se non è un muro posso proseguire
-		if c.PlayerPositionX < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX+1][c.PlayerPositionY] {
-			c.PlayerPositionX++
+		if c.Payload.PlayerPositionX < int32(len(cellGrid)-1) && !cellGrid[c.Payload.PlayerPositionX+1][c.Payload.PlayerPositionY] {
+			c.Payload.PlayerPositionX++
 			break
 		}
 
 		return
 	case "left":
-		if c.PlayerPositionY > 0 && !cellGrid[c.PlayerPositionX][c.PlayerPositionY-1] {
-			c.PlayerPositionY--
+		if c.Payload.PlayerPositionY > 0 && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY-1] {
+			c.Payload.PlayerPositionY--
 			break
 		}
 
 		return
 	case "right":
-		if c.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.PlayerPositionX][c.PlayerPositionY+1] {
-			c.PlayerPositionY++
+		if c.Payload.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY+1] {
+			c.Payload.PlayerPositionY++
 			break
 		}
 
@@ -337,7 +326,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 		// chiamata per verificare il drop
 		var nearTresure bool
 		var tresure *pb.Tresure
-		tresure, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
+		tresure, nearTresure = helpers.CheckForTresure(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 		if nearTresure {
 			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
@@ -439,12 +428,12 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 	}
 
 	// Aggiorno nuova posizione del player
-	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", c.PlayerPositionX)
-	helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", c.PlayerPositionY)
+	// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", c.PlayerPositionX)
+	// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", c.PlayerPositionY)
 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
-	if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY); err != nil {
+	if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
 		return
 	}
 
@@ -453,8 +442,8 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 
 	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
 	var nearMob, nearTresure bool
-	_, nearMob = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
-	_, nearTresure = helpers.CheckForTresure(maps, c.PlayerPositionX, c.PlayerPositionY)
+	_, nearMob = helpers.CheckForMob(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
+	_, nearTresure = helpers.CheckForTresure(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	if nearMob {
 		msg.ReplyMarkup = &fightKeyboard
 	} else if nearTresure {
@@ -471,8 +460,6 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 		return nil
 	}
 
-	// Visto che si è trattato solo di un movimento non è necessario aggiornare lo stato
-	c.BlockUpdateState = true
 	return
 }
 
@@ -484,7 +471,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	// Recupero dettagli aggiornati enemy
-	enemy, _ = helpers.CheckForMob(maps, c.PlayerPositionX, c.PlayerPositionY)
+	enemy, _ = helpers.CheckForMob(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	if enemy != nil {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
 		if rGetEnemyByID, err = services.NnSDK.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
@@ -495,43 +482,31 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 		enemy = rGetEnemyByID.GetEnemy()
 	}
 
-	// Recupero parte del corpo che si vuole colpire
-	var bodySelection int32
-	if bodySelection, err = helpers.GetCachedHuntingBodySelection(c.Player.ID); err != nil {
-		bodySelection = 1
-	}
-
 	switch action {
 	// Avvio di un nuovo combattimento
 	case "start":
 		// In questo metodo non c'è niente da fare procedo con il stampare la card del combattimento
 	case "up":
 		// Setto nuova parte del corpo da colpire
-		if bodySelection > 0 {
-			bodySelection--
+		if c.Payload.BodySelection > 0 {
+			c.Payload.BodySelection--
 		} else {
-			bodySelection = 3
+			c.Payload.BodySelection = 3
 		}
-
-		// Aggiorno posizione
-		helpers.SetCachedHuntingBodySelection(c.Player.ID, bodySelection)
 	case "down":
 		// Setto nuova parte del corpo da colpire
-		if bodySelection < 3 {
-			bodySelection++
+		if c.Payload.BodySelection < 3 {
+			c.Payload.BodySelection++
 		} else {
-			bodySelection = 0
+			c.Payload.BodySelection = 0
 		}
-
-		// Aggiorno posizione
-		helpers.SetCachedHuntingBodySelection(c.Player.ID, bodySelection)
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		var rHitEnemy *pb.HitEnemyResponse
 		rHitEnemy, err = services.NnSDK.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
 			EnemyID:       enemy.GetID(),
 			PlayerID:      c.Player.ID,
-			BodySelection: bodySelection,
+			BodySelection: c.Payload.BodySelection,
 		})
 		if err != nil {
 			return err
@@ -644,7 +619,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	case "return_map":
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		decodedMap, err = helpers.DecodeMapToDisplay(maps, c.PlayerPositionX, c.PlayerPositionY)
+		decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 		if err != nil {
 			return err
 		}
@@ -679,7 +654,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 				c.Player.Username,
 				c.PlayerData.PlayerStats.GetLifePoint(),
 				100+c.PlayerData.PlayerStats.GetLevel()*10,
-				helpers.Trans(c.Player.Language.Slug, bodyParts[bodySelection]),
+				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]),
 			),
 		)
 		editMessage.ParseMode = "markdown"
