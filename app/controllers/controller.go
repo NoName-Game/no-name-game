@@ -1,10 +1,9 @@
 package controllers
 
 import (
+	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 	"encoding/json"
 	"fmt"
-
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	"bitbucket.org/no-name-game/nn-telegram/services"
 
@@ -249,7 +248,6 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 		// Converto payload
 		payloadUpdated, _ := json.Marshal(payload)
 		c.PlayerData.CurrentState.Payload = string(payloadUpdated)
-
 		// Aggiorno stato
 		var rUpdatePlayerState *pb.UpdatePlayerStateResponse
 		rUpdatePlayerState, err = services.NnSDK.UpdatePlayerState(helpers.NewContext(1), &pb.UpdatePlayerStateRequest{

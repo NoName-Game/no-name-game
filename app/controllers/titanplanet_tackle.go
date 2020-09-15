@@ -24,9 +24,9 @@ type TitanPlanetTackleController struct {
 		TitanID           uint32
 		Selection         int32 // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight           bool
+		InEvent           bool // Player have an event
 		Kill              uint32
 		EventID           uint32
-		inEvent           bool // Player have an event
 	}
 }
 
@@ -202,13 +202,19 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 	// Se il messaggio è di tipo callback sicuramete è un messaggio di attacco
 	if c.Update.CallbackQuery != nil {
 		// Verifico che non sia in corso un'evento
-		if c.Payload.inEvent {
+		if c.Payload.InEvent {
 			// evento in corso
 			var rGetEvent *pb.GetTitanEventByIDResponse
 			rGetEvent, err = services.NnSDK.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
 				ID: c.Payload.EventID,
 			})
-			c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
+			if err != nil {
+				return
+			}
+			err = c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
+			if err != nil {
+				return
+			}
 		} else {
 			// Controllo tipo di callback data - fight
 			actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
@@ -264,7 +270,7 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 			// controllo che la choice faccia effettivamente parte dell'evento
 			choiceID, err := strconv.Atoi(strings.Split(actionType[3], "choice")[1])
 			if err != nil {
-				return
+				return err
 			}
 			exist := false
 			for _, choice := range event.Choices {
@@ -280,13 +286,13 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 					PlayerID: c.Player.GetID(),
 				})
 				if err != nil {
-					return
+					return err
 				}
 
 				if rSubmitAnswer.IsMalus {
 					// Malus!
 					// Player riceve danni
-					editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.wrong"))
+					editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.wrong"))
 					var ok = tgbotapi.NewInlineKeyboardMarkup(
 						tgbotapi.NewInlineKeyboardRow(
 							tgbotapi.NewInlineKeyboardButtonData(
@@ -321,7 +327,8 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 						c.Payload.Kill++
 						c.Payload.TitanID = 0
 					} else {
-						editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.correct"))
+						editMessage = services.NewEditMessage(
+							c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "titanplanet.event.correct", rSubmitAnswer.Hit.PlayerDamage))
 						var ok = tgbotapi.NewInlineKeyboardMarkup(
 							tgbotapi.NewInlineKeyboardRow(
 								tgbotapi.NewInlineKeyboardButtonData(
@@ -333,7 +340,7 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 						editMessage.ParseMode = tgbotapi.ModeMarkdown
 					}
 				}
-				c.Payload.inEvent = false
+				c.Payload.InEvent = false
 			} else {
 				// Risposta non presente fra quelle predefinite dall'evento. ERRORE
 				return errors.New("choice choosen not in event choices")
@@ -475,8 +482,9 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 		)
 		editMessage.ReplyMarkup = &ok
 		// 15% probabilità che si scateni un evento al prossimo giro.
-		if r := rand.Int31n(101); r <= 15 {
-			c.Payload.inEvent = true
+		r := rand.Int31n(101)
+		if r <= 50 {
+			c.Payload.InEvent = true
 			// Recupero un evento random
 			var rEventRandom *pb.GetRandomEventResponse
 			rEventRandom, err = services.NnSDK.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{})
@@ -484,6 +492,7 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 				return
 			}
 			c.Payload.EventID = rEventRandom.GetEvent().GetID()
+
 		}
 	case "player_die":
 		// Il player è morto

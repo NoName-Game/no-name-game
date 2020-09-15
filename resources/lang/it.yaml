@@ -428,3 +428,8 @@ player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore di questa pianeta sconfingendo nemici in esplorazione.\n\n📖: Scala la classifica, questo ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
 conqueror.planet_free: "🚩 Nessun Conquistatore"
 conqueror.list.intro: "Ecco i miglior 10 conquistatori:\n"
+
+# EVENTS
+titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
+titanplanet.event.event1.choice1: "SCELTA UNO"
+titanplanet.event.event1.choice2: "SCELTA UNO"
