@@ -413,6 +413,10 @@ titanplanet.tackle.init: "Il titano si mostra alla tua presenza."
 titanplanet.tackle.leave: "⬅️ Abbandona"
 titanplanet.tackle.combat.card: "👁 %s\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
 titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."
+titanplanet.tackle.reward: "Congratulazioni per aver sconfitto il titano!\n\nLa *Coalizione* ti premia per aver inflitto *%d danni*!\n\nResoconto premi:\n%s"
+titanplanet.event.correct: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
+titanplanet.event.wrong: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci un'ingente quantità di danni. Ti rimane solo 1 HP!"
+titanplanet.tackle.no_action: "Continua!"
 
 # PLAYER
 player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
@@ -424,3 +428,8 @@ player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore di questa pianeta sconfingendo nemici in esplorazione.\n\n📖: Scala la classifica, questo ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
 conqueror.planet_free: "🚩 Nessun Conquistatore"
 conqueror.list.intro: "Ecco i miglior 10 conquistatori:\n"
+
+# EVENTS
+titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
+titanplanet.event.event1.choice1: "SCELTA UNO"
+titanplanet.event.event1.choice2: "SCELTA UNO"

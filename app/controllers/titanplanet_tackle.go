@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"errors"
+	"math/rand"
+	"strconv"
 	"strings"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -21,7 +24,9 @@ type TitanPlanetTackleController struct {
 		TitanID           uint32
 		Selection         int32 // 0: HEAD, 1: BODY, 2: ARMS, 3: LEGS
 		InFight           bool
+		InEvent           bool // Player have an event
 		Kill              uint32
+		EventID           uint32
 	}
 }
 
@@ -196,24 +201,165 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 
 	// Se il messaggio è di tipo callback sicuramete è un messaggio di attacco
 	if c.Update.CallbackQuery != nil {
-		// Controllo tipo di callback data - fight
-		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+		// Verifico che non sia in corso un'evento
+		if c.Payload.InEvent {
+			// evento in corso
+			var rGetEvent *pb.GetTitanEventByIDResponse
+			rGetEvent, err = services.NnSDK.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
+				ID: c.Payload.EventID,
+			})
+			if err != nil {
+				return
+			}
+			err = c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
+			if err != nil {
+				return
+			}
+		} else {
+			// Controllo tipo di callback data - fight
+			actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
-		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-		if actionType[2] == "fight" {
-			err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
-		}
-		if err != nil {
+			// Verifica tipo di movimento e mi assicuro che non sia in combattimento
+			if actionType[2] == "fight" {
+				err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
+			}
+			if err != nil {
+				return
+			}
+
+			// Rimuove rotella di caricamento dal bottone
+			err = services.AnswerCallbackQuery(
+				services.NewAnswer(c.Update.CallbackQuery.ID, "", false),
+			)
+
 			return
 		}
-
-		// Rimuove rotella di caricamento dal bottone
-		err = services.AnswerCallbackQuery(
-			services.NewAnswer(c.Update.CallbackQuery.ID, "", false),
-		)
-
-		return
 	}
+
+	return
+}
+
+// ====================================
+// Event
+// ====================================
+func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, titan *pb.Titan) (err error) {
+	var editMessage tgbotapi.EditMessageTextConfig
+	// Standard message titanplanet.event.event1.choice1
+	// route.event.eventID.choiceID
+	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+	switch actionType[2] {
+	case "fight":
+		// arriverà dallo scontro, stampo semplicemente messaggio.
+		editMessage = services.NewEditMessage(
+			c.Player.GetChatID(),
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+			)
+		var keyboardRow [][]tgbotapi.InlineKeyboardButton
+		for _, choice := range event.Choices {
+			keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), choice.GetTextCode()), choice.GetTextCode()),
+				))
+		}
+
+		var ok = tgbotapi.InlineKeyboardMarkup{InlineKeyboard:keyboardRow}
+		editMessage.ReplyMarkup = &ok
+	default:
+		// Teoricamente è una choice
+		if actionType[1] == "event" {
+			// controllo che la choice faccia effettivamente parte dell'evento
+			choiceID, err := strconv.Atoi(strings.Split(actionType[3], "choice")[1])
+			if err != nil {
+				return err
+			}
+			exist := false
+			for _, choice := range event.Choices {
+				if choice.ID == uint32(choiceID) {
+					exist = true
+				}
+			}
+			if exist {
+				var rSubmitAnswer *pb.SubmitAnswerResponse
+				rSubmitAnswer, err = services.NnSDK.SubmitAnswer(helpers.NewContext(1), &pb.SubmitAnswerRequest{
+					TitanID:  titan.ID,
+					ChoiceID: uint32(choiceID),
+					PlayerID: c.Player.GetID(),
+				})
+				if err != nil {
+					return err
+				}
+
+				if rSubmitAnswer.IsMalus {
+					// Malus!
+					// Player riceve danni
+					editMessage = services.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.wrong"))
+					var ok = tgbotapi.NewInlineKeyboardMarkup(
+						tgbotapi.NewInlineKeyboardRow(
+							tgbotapi.NewInlineKeyboardButtonData(
+								helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
+							),
+						),
+					)
+					editMessage.ReplyMarkup = &ok
+					editMessage.ParseMode = tgbotapi.ModeMarkdown
+
+				} else {
+					// Bonus!
+					// titano riceve danni
+					if rSubmitAnswer.Hit.TitanDie {
+						editMessage = services.NewEditMessage(
+							c.Player.ChatID,
+							c.Update.CallbackQuery.Message.MessageID,
+							helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.mob_killed", titan.GetName()),
+						)
+
+						var ok = tgbotapi.NewInlineKeyboardMarkup(
+							tgbotapi.NewInlineKeyboardRow(
+								tgbotapi.NewInlineKeyboardButtonData(
+									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.titan_die",
+								),
+							),
+						)
+						editMessage.ParseMode = "markdown"
+						editMessage.ReplyMarkup = &ok
+
+						// Setto stato
+						c.Payload.Kill++
+						c.Payload.TitanID = 0
+					} else {
+						editMessage = services.NewEditMessage(
+							c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "titanplanet.event.correct", rSubmitAnswer.Hit.PlayerDamage))
+						var ok = tgbotapi.NewInlineKeyboardMarkup(
+							tgbotapi.NewInlineKeyboardRow(
+								tgbotapi.NewInlineKeyboardButtonData(
+									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
+								),
+							),
+						)
+						editMessage.ReplyMarkup = &ok
+						editMessage.ParseMode = tgbotapi.ModeMarkdown
+					}
+				}
+				c.Payload.InEvent = false
+			} else {
+				// Risposta non presente fra quelle predefinite dall'evento. ERRORE
+				return errors.New("choice choosen not in event choices")
+			}
+		}
+	}
+	// Non sono state fatte modifiche al messaggio
+	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
+		services.NewEditMessage(
+			c.Player.GetChatID(),
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+		)
+		editMessage.ParseMode = "markdown"
+		editMessage.ReplyMarkup = &titanKeyboard
+	}
+
+	// Invio messaggio modificato
+	_, err = services.SendMessage(editMessage)
 
 	return
 }
@@ -335,6 +481,19 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			),
 		)
 		editMessage.ReplyMarkup = &ok
+		// 15% probabilità che si scateni un evento al prossimo giro.
+		r := rand.Int31n(101)
+		if r <= 50 {
+			c.Payload.InEvent = true
+			// Recupero un evento random
+			var rEventRandom *pb.GetRandomEventResponse
+			rEventRandom, err = services.NnSDK.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{})
+			if err != nil {
+				return
+			}
+			c.Payload.EventID = rEventRandom.GetEvent().GetID()
+
+		}
 	case "player_die":
 		// Il player è morto
 		c.PlayerData.CurrentState.Completed = true
@@ -342,9 +501,12 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 	case "titan_die":
 		// Il player è morto
 		c.PlayerData.CurrentState.Completed = true
+		// Drop Moment
+		err = c.Drop(titan)
 		return
 	case "no_action":
 		//
+
 	}
 
 	// Non sono state fatte modifiche al messaggio
@@ -368,6 +530,42 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 
 	// Invio messaggio modificato
 	_, err = services.SendMessage(editMessage)
+
+	return
+}
+
+func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) (err error) {
+
+	// THIS FUNCTION TAKE ALL THE DAMAGES INFLICTED BY PLAYER AND GIVE HIM THE RIGHT DROP
+
+	var rTitanDamage *pb.GetTitanDamageByTitanIDResponse
+	rTitanDamage, err = services.NnSDK.GetTitanDamageByTitanID(helpers.NewContext(1), &pb.GetTitanDamageByTitanIDRequest{
+		TitanID: titan.ID,
+	})
+	if err != nil {
+		return err
+	}
+	for _, damage := range rTitanDamage.Damages {
+		var rGetPlayer *pb.GetPlayerByIDResponse
+		rGetPlayer, err = services.NnSDK.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
+			ID: damage.PlayerID,
+		})
+		if err != nil {
+			return err
+		}
+		// Parte calcolo drop
+		// TODO
+
+		// Crafto messaggio drop
+		msg := services.NewMessage(rGetPlayer.GetPlayer().ChatID, helpers.Trans(
+			rGetPlayer.GetPlayer().GetLanguage().GetSlug(), "titanplanet.tackle.reward", damage.GetDamageInflicted() /*Aggiungere lista drop*/),
+		)
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		_, err := services.SendMessage(msg)
+		if err != nil {
+			return err
+		}
+	}
 
 	return
 }
