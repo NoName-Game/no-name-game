@@ -2,3 +2,5 @@ vendor
 .env
 no-name-workspace.code-workspace
 .vscode
+
+.idea/
