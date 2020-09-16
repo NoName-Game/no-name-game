@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -19,11 +18,11 @@ import (
 // ====================================
 type SafePlanetCrafterController struct {
 	Payload struct {
-		Item        string
-		Category    string
-		Resources   map[uint32]int32
-		AddResource bool // Flag per verifica aggiunta nuova risorsa
-		Price       int32
+		ItemType     string
+		ItemCategory string
+		Resources    map[uint32]int32
+		AddResource  bool // Flag per verifica aggiunta nuova risorsa
+		Price        int32
 	}
 	BaseController
 }
@@ -80,14 +79,14 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 	case 0:
 		return false
 	case 1:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
-			c.Payload.Item = "armors"
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armor") {
+			c.Payload.ItemType = "armor"
 			return false
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapon") {
 			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle risorse
 			// in quanto le armi non hanno una categoria
 			c.CurrentState.Stage = 2
-			c.Payload.Item = "weapon"
+			c.Payload.ItemType = "weapon"
 
 			return false
 		}
@@ -95,7 +94,7 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
 	case 2:
-		if c.Payload.Category = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.Category != "" {
+		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory != "" {
 			return false
 		}
 		return true
@@ -177,7 +176,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armor")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
@@ -198,8 +197,8 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		var message string
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
 
-		switch c.Payload.Item {
-		case "armors":
+		switch c.Payload.ItemType {
+		case "armor":
 			message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.armor.type")
 
 			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
@@ -448,41 +447,16 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		// =========================
 		// Start crating
 		// =========================
-
 		var rCrafterStart *pb.CrafterStartResponse
 		if rCrafterStart, err = services.NnSDK.CrafterStart(helpers.NewContext(1), &pb.CrafterStartRequest{
-			PlayerID:  c.Player.ID,
-			Resources: c.Payload.Resources,
-			Price:     c.Payload.Price,
+			PlayerID:     c.Player.ID,
+			Resources:    c.Payload.Resources,
+			Price:        c.Payload.Price,
+			ItemType:     c.Payload.ItemType,
+			ItemCategory: c.Payload.ItemCategory,
 		}); err != nil {
 			return
 		}
-
-		// Il player ha avviato il crafting, Rimuovo risorse usate al player
-		// for resourceID, quantity := range c.Payload.Resources {
-		// 	_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
-		// 		PlayerID: c.Player.GetID(),
-		// 		ItemID:   resourceID,
-		// 		ItemType: "resources",
-		// 		Quantity: -quantity,
-		// 	})
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
-		//
-		// // Rimuovo money
-		// _, err = services.NnSDK.CreateTransaction(helpers.NewContext(1), &pb.CreateTransactionRequest{
-		// 	Value:                 -int32(c.Payload.Price),
-		// 	TransactionTypeID:     1, // Gold
-		// 	TransactionCategoryID: 9, // Crafter Safe Planet
-		// 	PlayerID:              c.Player.GetID(),
-		// })
-		// if err != nil {
-		// 	return err
-		// }
-		// Stampa il tempo di attesa e aggiorna stato
-		// endTime := helpers.GetEndTime(0, 10, 0)
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
@@ -499,54 +473,24 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			return
 		}
 
-		// endTimeProto, err := ptypes.TimestampProto(endTime)
-		// if err != nil {
-		// 	panic(err)
-		// }
-		//
-		// c.CurrentState.FinishAt = endTimeProto
-		// c.CurrentState.ToNotify = true
 		c.CurrentState.Stage = 5
 		c.ForceBackTo = true
 	case 5:
-		// TODO: ENDCRAFT
-
-		// crafting completato
-		items, err := json.Marshal(c.Payload.Resources)
-		if err != nil {
-			return err
+		var rCrafterEnd *pb.CrafterEndResponse
+		if rCrafterEnd, err = services.NnSDK.CrafterEnd(helpers.NewContext(1), &pb.CrafterEndRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			return
 		}
 
-		var text string
-		switch c.Payload.Item {
-		case "armors":
-			// Creo la richiesta di craft armor
-			var rCraftArmor *pb.CraftArmorResponse
-			rCraftArmor, err = services.NnSDK.CraftArmor(helpers.NewContext(1), &pb.CraftArmorRequest{
-				Category: c.Payload.Category,
-				Items:    string(items),
-				PlayerID: c.Player.ID,
-			})
-			if err != nil {
-				return err
-			}
-
-			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftArmor.GetArmor().GetName())
-		case "weapon":
-			// Creo la richiesta di craft weapon
-			var rCraftWeapon *pb.CraftWeaponResponse
-			rCraftWeapon, err = services.NnSDK.CraftWeapon(helpers.NewContext(1), &pb.CraftWeaponRequest{
-				Items:    string(items),
-				PlayerID: c.Player.ID,
-			})
-			if err != nil {
-				return err
-			}
-
-			text = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCraftWeapon.GetWeapon().GetName())
+		var endCraftMessage string
+		if rCrafterEnd.GetArmor() != nil {
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetArmor().GetName())
+		} else if rCrafterEnd.GetWeapon() != nil {
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetWeapon().GetName())
 		}
 
-		msg := services.NewMessage(c.Player.ChatID, text)
+		msg := services.NewMessage(c.Player.ChatID, endCraftMessage)
 		msg.ParseMode = "markdown"
 		_, err = services.SendMessage(msg)
 		if err != nil {
