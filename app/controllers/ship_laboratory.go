@@ -49,8 +49,10 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -65,7 +67,7 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -75,7 +77,7 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 // ====================================
 func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	var err error
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -97,14 +99,12 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	case 2:
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
 		var rGetAllItems *pb.GetAllItemsResponse
-		rGetAllItems, err = services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{})
-		if err != nil {
+		if rGetAllItems, err = services.NnSDK.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{}); err != nil {
 			return true
 		}
 
 		// Recupero nome item che il player vuole craftare
 		playerChoiche := strings.Split(c.Update.Message.Text, " (")[0]
-
 		var itemExists bool
 		for _, item := range rGetAllItems.GetItems() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", item.Slug)) {
@@ -124,36 +124,18 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	// materiali necessario al crafting dell'item da lui scelto
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
-			// Verifico se il player ha tutto gli item necessari
-			var rGetPlayerResources *pb.GetPlayerResourcesResponse
-			rGetPlayerResources, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
-				PlayerID: c.Player.GetID(),
-			})
-			if err != nil {
-				return false
+			var rLaboratoryCheckHaveResourceForCrafting *pb.LaboratoryCheckHaveResourceForCraftingResponse
+			if rLaboratoryCheckHaveResourceForCrafting, err = services.NnSDK.LaboratoryCheckHaveResourceForCrafting(helpers.NewContext(1), &pb.LaboratoryCheckHaveResourceForCraftingRequest{
+				PlayerID: c.Player.ID,
+				ItemID:   c.Payload.Item.ID,
+			}); err != nil {
+				panic(err)
 			}
 
-			// Ciclo gli elementi di cui devo verificare la presenza
-			for resourceID, quantity := range c.Payload.Resources {
-				var haveResource bool
-
-				// Ciclo inventario del player
-				for _, inventory := range rGetPlayerResources.GetPlayerInventory() {
-					if inventory.Resource.ID == resourceID && inventory.Quantity >= quantity {
-						haveResource = true
-					}
-				}
-
-				// Basta che anche solo una vola ritorni false per far fallire
-				// il controllo in quanti per continuare di stage il player
-				// deve possedere TUTTI gli elementi
-				if !haveResource {
-					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.no_resource_to_craft")
-
-					return true
-				}
+			if !rLaboratoryCheckHaveResourceForCrafting.GetHaveResources() {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.no_resource_to_craft")
+				return true
 			}
-
 			return false
 		}
 
@@ -162,36 +144,31 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
 	case 4:
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
-		if err != nil {
+		var rLaboratoryCheckCrafting *pb.LaboratoryCheckCraftingResponse
+		if rLaboratoryCheckCrafting, err = services.NnSDK.LaboratoryCheckCrafting(helpers.NewContext(1), &pb.LaboratoryCheckCraftingRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			panic(err)
 		}
 
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"ship.laboratory.wait",
-			finishAt.Format("15:04:05"),
-		)
+		// Il crafter sta già portando a terminre un lavoro per questo player
+		if !rLaboratoryCheckCrafting.GetFinishCrafting() {
+			var finishAt time.Time
+			finishAt, err = ptypes.Timestamp(rLaboratoryCheckCrafting.GetCraftingEndTime())
+			if err != nil {
+				panic(err)
+			}
 
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+			c.Validation.Message = helpers.Trans(
+				c.Player.Language.Slug,
+				"ship.laboratory.wait_validator",
+				finishAt.Format("15:04:05"),
+			)
 
-		// Verifico se ha finito il crafting
-		if time.Now().After(finishAt) {
-			return false
+			return true
 		}
 
-		return true
+		return false
 	}
 
 	return true
@@ -201,23 +178,20 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
 func (c *ShipLaboratoryController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
 		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
-		rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
-		if err != nil {
+		if rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
 			return err
 		}
 
-		laboratoryInfo := fmt.Sprintf("%s\n\n%s",
+		// Creo messaggio
+		msg := services.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s",
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.type"),
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.info"),
-		)
-
-		// Creo messaggio
-		msg := services.NewMessage(c.Player.ChatID, laboratoryInfo)
+		))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
@@ -241,21 +215,19 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			ResizeKeyboard: true,
 		}
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Avanzo di stage
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage recuperiamo la lista dei ITEMS, appartenenti alla categoria scelta
 	// che possono essere anche craftati dal player
 	case 1:
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
 		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
-		rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{})
-		if err != nil {
+		if rGetAllItemCategories, err = services.NnSDK.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
 			return err
 		}
 
@@ -268,19 +240,17 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 
 		// Lista oggetti craftabili
 		var rGetItemByCategoryID *pb.GetItemsByCategoryIDResponse
-		rGetItemByCategoryID, err = services.NnSDK.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
+		if rGetItemByCategoryID, err = services.NnSDK.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
 		// Recupero tutti gli items del player
 		var rGetPlayerItems *pb.GetPlayerItemsResponse
-		rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		if rGetPlayerItems, err = services.NnSDK.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
@@ -321,13 +291,12 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			ResizeKeyboard: true,
 		}
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Avanzo di stage
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// In questo stage riepilogo le risorse necessarie e
 	// chiedo al conferma al player se continuare il crafting dell'item
@@ -339,10 +308,9 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		var itemsRecipeList string
 		for resourceID, value := range c.Payload.Resources {
 			var rGetResourceByID *pb.GetResourceByIDResponse
-			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			if rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceID,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -374,64 +342,52 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 				),
 			),
 		)
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 3
+		c.CurrentState.Stage = 3
 
 	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
 	// procedo con il rimuovere le risorse associate e notificargli l'attesa per il crafting
 	case 3:
-		// TODO: logica da spostare su WS
-		// Rimuovo risorse usate al player
-		for resourceID, quantity := range c.Payload.Resources {
-			_, err = services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
-				PlayerID: c.Player.GetID(),
-				ItemID:   resourceID,
-				ItemType: "resources",
-				Quantity: -quantity,
-			})
-			if err != nil {
-				return err
-			}
+		var rLaboratoryStartCrafting *pb.LaboratoryStartCraftingResponse
+		if rLaboratoryStartCrafting, err = services.NnSDK.LaboratoryStartCrafting(helpers.NewContext(1), &pb.LaboratoryStartCraftingRequest{
+			PlayerID: c.Player.GetID(),
+			ItemID:   c.Payload.Item.ID,
+		}); err != nil {
+			return fmt.Errorf("error start laboratory crafting: %s", err.Error())
 		}
 
-		// Definisco endtime per il crafting
-		endTime := helpers.GetEndTime(0, 0, int(c.Payload.Item.Recipe.WaitingTime))
+		// Converto time
+		var finishAt time.Time
+		finishAt, err = ptypes.Timestamp(rLaboratoryStartCrafting.GetCraftingEndTime())
+		if err != nil {
+			panic(err)
+		}
 
-		// Notifico
-		var msg tgbotapi.MessageConfig
-		msg = services.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", endTime.Format("15:04:05")),
+		// Invio messaggio
+		msg := services.NewMessage(c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", finishAt.Format("15:04:05")),
 		)
 		msg.ParseMode = "markdown"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorna stato
-		// c.PlayerData.CurrentState.FinishAt = endTime
-		c.PlayerData.CurrentState.ToNotify = true
-		c.PlayerData.CurrentState.Stage = 4
+		c.CurrentState.Stage = 4
 		c.ForceBackTo = true
 
 	// In questo stage il player ha completato correttamente il crafting, quindi
 	// proseguo con l'assegnarli l'item e concludo
 	case 4:
-		// TODO: logica da spostare su WS
-		// Aggiungo item all'inventario
-		_, err := services.NnSDK.ManagePlayerInventory(helpers.NewContext(1), &pb.ManagePlayerInventoryRequest{
+		var rLaboratoryEndCrafting *pb.LaboratoryEndCraftingResponse
+		if rLaboratoryEndCrafting, err = services.NnSDK.LaboratoryEndCrafting(helpers.NewContext(1), &pb.LaboratoryEndCraftingRequest{
 			PlayerID: c.Player.GetID(),
-			ItemID:   c.Payload.Item.ID,
-			ItemType: "items",
-			Quantity: 1,
-		})
-		if err != nil {
-			return err
+		}); err != nil {
+			return fmt.Errorf("error end laboratory crafting: %s", err.Error())
 		}
 
 		// Invio messaggio
@@ -439,7 +395,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"ship.laboratory.craft_completed",
-				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+				helpers.Trans(c.Player.Language.Slug, "items."+rLaboratoryEndCrafting.GetItem().GetSlug()),
 			),
 		)
 		msg.ParseMode = "markdown"
@@ -448,13 +404,12 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			),
 		)
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return

@@ -332,6 +332,7 @@ ship.laboratory.you_need: "Per realizzare *%s* verranno consumante le seguneti r
 ship.laboratory.craft_completed: "Il tuo oggetto è stato realizzato correttamente.\nHai ottenuto *%s*!"
 ship.laboratory.no_resource_to_craft: "Purtroppo ti mancano alcune risorse per completare il tuo oggetto, riprova quando avrai tutte le risorse."
 ship.laboratory.wait: "Produzione *avviata*!\nil termine per la realizzazione del tuo oggetto è previsto alle *%s*, torna più tardi."
+ship.laboratory.wait_validator: "Il termine per la realizzazione del tuo oggetto è previsto alle *%s*, torna più tardi."
 ship.laboratory.item_does_not_exist: "L'item scelto non esiste!"
 
 # SAFE PLANET

@@ -25,26 +25,27 @@ type ShipController struct {
 func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-
-	c.Configuration.Controller = "route.ship"
 	c.Player = player
 	c.Update = update
 
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	helpers.SetCacheState(c.Player.ID, c.Configuration.Controller)
-
-	// Verifico se esistono condizioni per cambiare stato o uscire
-	if c.BackTo(0, &MenuController{}) {
+	// Init Controller
+	if !c.InitController(ControllerConfiguration{
+		Controller: "route.ship",
+		ControllerBack: ControllerBack{
+			To:        &MenuController{},
+			FromStage: 0,
+		},
+	}) {
 		return
 	}
 
 	// ****************************
 	// Recupero nave attiva de player
 	// ****************************
-	rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+	var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+	if rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
@@ -74,8 +75,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 		),
 	)
 
-	_, err = services.SendMessage(msg)
-	if err != nil {
+	if _, err = services.SendMessage(msg); err != nil {
 		panic(err)
 	}
 }
