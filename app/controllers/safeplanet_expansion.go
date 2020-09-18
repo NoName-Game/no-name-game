@@ -36,15 +36,17 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 		Controller: "route.safeplanet.coalition.expansion",
 		ControllerBack: ControllerBack{
 			To:        &SafePlanetCoalitionController{},
-			FromStage: 2,
+			FromStage: 1,
 		},
 		Payload: c.Payload,
 	}) {
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -59,7 +61,7 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -69,7 +71,7 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 // ====================================
 func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 	var err error
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -98,17 +100,16 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 		// Verifico la conferma dell'uso
 	case 2:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			// Verifico che il player abbia anche abbastanza soldi
+			// Verifico che il player ha abbastanza soldi
 			var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
-			rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			if rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 				PlayerID:    c.Player.ID,
 				EconomyType: "diamond",
-			})
-			if err != nil {
+			}); err != nil {
 				return
 			}
 
-			if rGetPlayerEconomy.GetValue() >= int32(c.Payload.Price) {
+			if rGetPlayerEconomy.GetValue() >= c.Payload.Price {
 				return false
 			}
 
@@ -127,7 +128,7 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *SafePlanetExpansionController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	case 0:
 		var expansionRecap string
 		expansionRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.info")
@@ -135,8 +136,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 
 		// Recupero quanti pianeti mancano per l'ampliamento del sistema
 		var rGetExpansionInfo *pb.GetExpansionInfoResponse
-		rGetExpansionInfo, err = services.NnSDK.GetExpansionInfo(helpers.NewContext(1), &pb.GetExpansionInfoRequest{})
-		if err != nil {
+		if rGetExpansionInfo, err = services.NnSDK.GetExpansionInfo(helpers.NewContext(1), &pb.GetExpansionInfoRequest{}); err != nil {
 			return
 		}
 
@@ -155,19 +155,17 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 
 		// Recupero ultima posizione del player
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		if rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			panic(err)
+		}); err != nil {
+			return err
 		}
 
 		// Mostro la lista dei pianeti sicuri disponibili
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
-		rGetSafePlanets, err = services.NnSDK.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
+		if rGetSafePlanets, err = services.NnSDK.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return
 		}
 
@@ -185,7 +183,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 
 		// Aggiungo torna indietro
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
 		// Invio messaggio
@@ -195,13 +193,12 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	case 1:
 		// Recupero quale pianeta vole raggiungere e dettaglio costo
@@ -209,18 +206,16 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 
 		// Recupero ultima posizione del player
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		if rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			panic(err)
+		}); err != nil {
+			return
 		}
 
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
-		rGetSafePlanets, err = services.NnSDK.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
+		if rGetSafePlanets, err = services.NnSDK.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return
 		}
 
@@ -251,23 +246,21 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
 		c.Payload.PlanetID = planet.GetID()
 		c.Payload.Price = int32(price)
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
 		// Concludo teletrasporto
-		_, err = services.NnSDK.EndTeletrasportSafePlanet(helpers.NewContext(1), &pb.EndTeletrasportSafePlanetRequest{
+		if _, err = services.NnSDK.EndTeletrasportSafePlanet(helpers.NewContext(1), &pb.EndTeletrasportSafePlanetRequest{
 			PlayerID: c.Player.ID,
 			PlanetID: c.Payload.PlanetID,
 			Price:    -c.Payload.Price,
-		})
-		if err != nil {
+		}); err != nil {
 			return
 		}
 
@@ -277,13 +270,12 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		)
 
 		msg.ParseMode = "markdown"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 		c.Configuration.ControllerBack.To = &MenuController{}
 	}
 
