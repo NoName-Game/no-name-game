@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
 
 	"bitbucket.org/no-name-game/nn-telegram/app/helpers"
@@ -37,8 +39,10 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -53,7 +57,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -63,7 +67,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 // ====================================
 func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 	var err error
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -71,8 +75,7 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 	case 1:
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
-		rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{})
-		if err != nil {
+		if rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
 			return
 		}
 
@@ -96,7 +99,7 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *SafePlanetTitanController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	case 0:
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.info")
@@ -104,9 +107,8 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
-		rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{})
-		if err != nil {
-			return
+		if rTitanDiscovered, err = services.NnSDK.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
+			return fmt.Errorf("cant get titan discovered: %s", err.Error())
 		}
 
 		// Se sono stati trovati dei tiani costruisco keyboard
@@ -137,23 +139,21 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
 		// Recupero pianeta da titano
 		var rGetTitanByName *pb.GetTitanByNameResponse
-		rGetTitanByName, err = services.NnSDK.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
+		if rGetTitanByName, err = services.NnSDK.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
 			Name: c.Update.Message.Text,
-		})
-		if err != nil {
-			return
+		}); err != nil {
+			return fmt.Errorf("cant get titan by name: %s", err.Error())
 		}
 
 		// Aggiunto nuova posizione al player
@@ -162,7 +162,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 			PlanetID: rGetTitanByName.GetTitan().GetPlanetID(),
 		})
 		if err != nil {
-			return
+			return fmt.Errorf("cant create player position: %s", err.Error())
 		}
 
 		// Invio messaggio
@@ -171,13 +171,12 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 		)
 
 		msg.ParseMode = "markdown"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 		c.Configuration.ControllerBack.To = &MenuController{}
 	}
 

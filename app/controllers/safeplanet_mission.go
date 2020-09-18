@@ -15,9 +15,7 @@ import (
 // ====================================
 type SafePlanetMissionController struct {
 	BaseController
-	Payload struct {
-		MissionID uint32
-	}
+	Payload struct{}
 }
 
 // ====================================
@@ -261,7 +259,6 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		}
 
 		// Avanzo di stato
-		c.Payload.MissionID = rGetMission.GetMission().GetID()
 		c.CurrentState.Stage = 2
 		c.ForceBackTo = true
 	case 2:
@@ -282,13 +279,6 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			),
 		)
 		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
-			),
-		)
-
 		if _, err = services.SendMessage(msg); err != nil {
 			return
 		}
