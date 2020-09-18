@@ -354,6 +354,7 @@ safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possia
 # SAFE PLANET - MISSION
 safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
 safeplanet.mission.start: "Avvia Missione"
+safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
 safeplanet.mission.check: "Non hai completato la tua missione ancora in corso.\nCosa vuoi fare?"
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n"
 safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la missione, guadagnando così:\n +*%v*💰\n+*%v*💎\n+*%v* Exp.\nLa coalizione ti rigrazia!"
