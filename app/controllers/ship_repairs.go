@@ -46,8 +46,10 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -62,7 +64,7 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -72,11 +74,31 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 func (c *ShipRepairsController) Validator() (hasErrors bool) {
 	var err error
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false
+		// Recupero nave player equipaggiata
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		if rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			panic(err)
+		}
 
+		// Recupero informazioni nave da riparare
+		var rGetShipRepairInfo *pb.GetShipRepairInfoResponse
+		if rGetShipRepairInfo, err = services.NnSDK.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
+			ShipID: rGetPlayerShipEquipped.GetShip().GetID(),
+		}); err != nil {
+			panic(err)
+		}
+
+		if !rGetShipRepairInfo.GetNeedRepairs() {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.repairs.dont_need")
+			return true
+		}
+
+		return false
 	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_partial") {
 			c.Payload.RepairType = pb.StartShipRepairRequest_PARTIAL
@@ -98,34 +120,30 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		return true
 
 	case 2:
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
-		if err != nil {
+		var rCheckShipRepair *pb.CheckShipRepairResponse
+		if rCheckShipRepair, err = services.NnSDK.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			panic(err)
 		}
 
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"ship.repairs.wait",
-			finishAt.Format("15:04:05 01/02"),
-		)
+		// Il crafter sta già portando a terminre un lavoro per questo player
+		if !rCheckShipRepair.GetFinishRepairing() {
+			var finishAt time.Time
+			if finishAt, err = ptypes.Timestamp(rCheckShipRepair.GetRepairingEndTime()); err != nil {
+				panic(err)
+			}
 
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+			c.Validation.Message = helpers.Trans(
+				c.Player.Language.Slug,
+				"ship.repairs.wait",
+				finishAt.Format("15:04:05"),
+			)
 
-		// Verifico se ha finito il crafting
-		if time.Now().After(finishAt) {
-			return false
+			return true
 		}
+
+		return false
 	}
 
 	return true
@@ -135,27 +153,26 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *ShipRepairsController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo riporto al player le risorse e tempistiche necessarie alla riparazione della nave
 	case 0:
 		// Recupero nave player equipaggiata
-		rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		if rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
 		// Recupero informazioni nave da riparare
-		rGetShipRepairInfo, err := services.NnSDK.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
+		var rGetShipRepairInfo *pb.GetShipRepairInfoResponse
+		if rGetShipRepairInfo, err = services.NnSDK.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
 			ShipID: rGetPlayerShipEquipped.GetShip().GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			return err
 		}
 
-		// Verifico se effettivamente la nave è da riparare
 		var shipRecap string
 		shipRecap = helpers.Trans(c.Player.Language.Slug, "ship.repairs.info")
 		if rGetShipRepairInfo.GetNeedRepairs() {
@@ -174,8 +191,6 @@ func (c *ShipRepairsController) Stage() (err error) {
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.time", rGetShipRepairInfo.GetFull().GetRepairTime()),
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.quantity_resources", rGetShipRepairInfo.GetFull().GetQuantityResources()),
 			)
-		} else {
-			shipRecap = helpers.Trans(c.Player.Language.Slug, "ship.repairs.dont_need")
 		}
 
 		// Invio messaggio
@@ -190,42 +205,19 @@ func (c *ShipRepairsController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 			),
 		)
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente la riparzione
 	case 1:
-		// Recupero nave player equipaggiata
-		rGetPlayerShipEquipped, err := services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
-			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
-		// Recupero informazioni nave da riparare
-		rGetShipRepairInfo, err := services.NnSDK.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
-			ShipID: rGetPlayerShipEquipped.GetShip().GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
-		var repairInfo *pb.GetShipRepairInfoResponse_ShipRepairInfo
-		if c.Payload.RepairType == pb.StartShipRepairRequest_FULL {
-			repairInfo = rGetShipRepairInfo.GetFull()
-		} else {
-			repairInfo = rGetShipRepairInfo.GetPartial()
-		}
-
 		// Avvio riparazione nave
-		rStartShipRepair, err := services.NnSDK.StartShipRepair(helpers.NewContext(1), &pb.StartShipRepairRequest{
-			ShipID:     rGetPlayerShipEquipped.GetShip().GetID(),
+		var rStartShipRepair *pb.StartShipRepairResponse
+		rStartShipRepair, err = services.NnSDK.StartShipRepair(helpers.NewContext(1), &pb.StartShipRepairRequest{
+			PlayerID:   c.Player.ID,
 			RapairType: c.Payload.RepairType,
 		})
 
@@ -234,8 +226,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 			errorMsg := services.NewMessage(c.Update.Message.Chat.ID,
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.not_enough_resource"),
 			)
-			_, err = services.SendMessage(errorMsg)
-			if err != nil {
+			if _, err = services.SendMessage(errorMsg); err != nil {
 				return err
 			}
 
@@ -247,10 +238,9 @@ func (c *ShipRepairsController) Stage() (err error) {
 		recapResourceUsed = helpers.Trans(c.Player.Language.Slug, "ship.repairs.used_resources")
 		for _, resourceUsed := range rStartShipRepair.GetStartShipRepair() {
 			var rGetResourceByID *pb.GetResourceByIDResponse
-			rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			if rGetResourceByID, err = services.NnSDK.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceUsed.ResourceID,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
 
@@ -260,36 +250,33 @@ func (c *ShipRepairsController) Stage() (err error) {
 			)
 		}
 
-		// Setto timer recuperato dalla chiamata delle info
-		finishTime := helpers.GetEndTime(0, int(repairInfo.GetRepairTime()), 0)
-		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
+		// Recupero orario fine riparazione
+		var finishAt time.Time
+		if finishAt, err = ptypes.Timestamp(rStartShipRepair.GetRepairingEndTime()); err != nil {
+			return
+		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s \n\n%s",
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing", finishTime.Format("15:04:05")),
+				helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing", finishAt.Format("15:04:05")),
 				recapResourceUsed,
 			),
 		)
 		msg.ParseMode = "markdown"
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.Payload.ShipID = rGetPlayerShipEquipped.GetShip().GetID()
-		c.PlayerData.CurrentState.ToNotify = true
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 		c.ForceBackTo = true
 	case 2:
 		// Fine riparazione
-		_, err := services.NnSDK.EndShipRepair(helpers.NewContext(1), &pb.EndShipRepairRequest{
-			ShipID:     c.Payload.ShipID,
-			RapairType: c.Payload.RepairType,
-		})
-		if err != nil {
+		if _, err := services.NnSDK.EndShipRepair(helpers.NewContext(1), &pb.EndShipRepairRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			return err
 		}
 
@@ -297,13 +284,12 @@ func (c *ShipRepairsController) Stage() (err error) {
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing.finish"),
 		)
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return
