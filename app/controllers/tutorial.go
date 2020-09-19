@@ -637,48 +637,49 @@ func (c *TutorialController) Stage() (err error) {
 		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
 		c.ForceBackTo = true
 	case 7:
-		var rGetShipEquipped *pb.GetPlayerShipEquippedResponse
-		rGetShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
-			PlayerID: c.Player.ID,
-		})
-		if err != nil {
-			return err
-		}
-
-		// Recupero la posizione del player e i pianeti sicuro
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.ID,
-		})
-		if err != nil {
-			return err
-		}
-
-		systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
-
-		var rGetSafePlanet *pb.GetSafePlanetsResponse
-		rGetSafePlanet, err = services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
-		if err != nil {
-			return err
-		}
-
-		var safePlanet *pb.Planet
-		for _, p := range rGetSafePlanet.GetSafePlanets() {
-			if p.GetPlanetSystemID() == systemID {
-				// Il pianeta sicuro è quello del sistema del player
-				safePlanet = p
-			}
-		}
-
-		_, err = services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
-			Integrity: 0,
-			Tank:      0,
-			PlanetID:  safePlanet.ID,
-			ShipID:    rGetShipEquipped.GetShip().GetID(),
-		})
-		if err != nil {
-			return err
-		}
+		// var rGetShipEquipped *pb.GetPlayerShipEquippedResponse
+		// rGetShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+		// 	PlayerID: c.Player.ID,
+		// })
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// // Recupero la posizione del player e i pianeti sicuro
+		// var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		// rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		// 	PlayerID: c.Player.ID,
+		// })
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// systemID := rGetPlayerCurrentPlanet.GetPlanet().GetPlanetSystemID()
+		//
+		// var rGetSafePlanet *pb.GetSafePlanetsResponse
+		// rGetSafePlanet, err = services.NnSDK.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
+		// if err != nil {
+		// 	return err
+		// }
+		//
+		// var safePlanet *pb.Planet
+		// for _, p := range rGetSafePlanet.GetSafePlanets() {
+		// 	if p.GetPlanetSystemID() == systemID {
+		// 		// Il pianeta sicuro è quello del sistema del player
+		// 		safePlanet = p
+		// 	}
+		// }
+		//
+		// _, err = services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
+		// 	PlayerID: c.Player.ID,
+		// 	// Integrity: 0,
+		// 	// Tank:      0,
+		// 	// PlanetID:  safePlanet.ID,
+		// 	// ShipID:    rGetShipEquipped.GetShip().GetID(),
+		// })
+		// if err != nil {
+		// 	return err
+		// }
 
 		firstSafeMessage := services.NewMessage(
 			c.Player.ChatID,

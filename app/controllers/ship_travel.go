@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -20,10 +19,7 @@ import (
 type ShipTravelController struct {
 	BaseController
 	Payload struct {
-		Ship               *pb.Ship
 		StarNearestMapName map[int]string
-		StarNearestMapInfo map[int]*pb.GetShipTravelInfo
-		StarIDChosen       int
 	}
 }
 
@@ -49,8 +45,10 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -65,7 +63,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -75,7 +73,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 // ====================================
 func (c *ShipTravelController) Validator() (hasErrors bool) {
 	var err error
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
 		return false
@@ -83,28 +81,8 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 	// In questo stage non faccio nulla di particolare, verifico solo se ha deciso
 	// di avviare una nuova esplorazione
 	case 1:
-		// A prescindere verifico se il player ha una missione o una caccia attiva
-		// tutte le attività di che si svolgono sui pianeti devono essere portati a termine
-		for _, state := range c.PlayerData.ActiveStates {
-			if helpers.StringInSlice(state.Controller, []string{"route.exploration", "route.hunting"}) {
-				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.travel.error.function_not_completed")
-				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-					tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(
-							helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-						),
-					),
-				)
-
-				return true
-			}
-		}
-
-		if !helpers.InArray(c.Update.Message.Text, []string{
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.start"),
-		}) {
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.travel.start") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
@@ -139,36 +117,30 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al completamento del viaggio
 	case 3:
-		var finishAt time.Time
-		finishAt, err = ptypes.Timestamp(c.PlayerData.CurrentState.FinishAt)
-		if err != nil {
+		var rCheckShipTravel *pb.CheckShipTravelResponse
+		if rCheckShipTravel, err = services.NnSDK.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			panic(err)
 		}
 
-		c.Validation.Message = helpers.Trans(
-			c.Player.Language.Slug,
-			"ship.travel.wait",
-			finishAt.Format("15:04:05 01/02"),
-		)
+		// Il crafter sta già portando a terminre un lavoro per questo player
+		if !rCheckShipTravel.GetFinishTraveling() {
+			var finishAt time.Time
+			if finishAt, err = ptypes.Timestamp(rCheckShipTravel.GetTravelingEndTime()); err != nil {
+				panic(err)
+			}
 
-		// Aggiungo anche abbandona
-		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
-				),
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
-				),
-			),
-		)
+			c.Validation.Message = helpers.Trans(
+				c.Player.Language.Slug,
+				"ship.travel.wait",
+				finishAt.Format("15:04:05"),
+			)
 
-		// Verifico se ha finito il crafting
-		if time.Now().After(finishAt) {
-			return false
+			return true
 		}
 
-		return true
+		return false
 	}
 
 	return true
@@ -178,7 +150,7 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *ShipTravelController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
@@ -187,10 +159,9 @@ func (c *ShipTravelController) Stage() (err error) {
 		// Recupero nave attiva de player
 		// ****************************
 		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
-		rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+		if rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			panic(err)
 		}
 
@@ -213,39 +184,27 @@ func (c *ShipTravelController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Avanzo di stato
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
-		// Recupero nave player equipaggiata
-		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
-		rGetPlayerShipEquipped, err = services.NnSDK.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
-			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			return err
-		}
-
 		// Recupero informazioni di esplorazione
 		var responseTravelInfo *pb.GetShipTravelInfoResponse
-		responseTravelInfo, err = services.NnSDK.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
-			Ship: rGetPlayerShipEquipped.GetShip(),
-		})
-		if err != nil {
+		if responseTravelInfo, err = services.NnSDK.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
 			return err
 		}
 
-		// It's for match with keyboard in validator and needed for next step
 		var starNearestMapName = make(map[int]string)
-		var starNearestMapInfo = make(map[int]*pb.GetShipTravelInfo)
-
+		var starNearestMapInfo = make(map[int]*pb.GetShipTravelInfoResponse_GetShipTravelInfo)
 		var msgNearestStars string
+
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
 		for _, explorationInfo := range responseTravelInfo.GetInfo() {
@@ -293,81 +252,51 @@ func (c *ShipTravelController) Stage() (err error) {
 			Keyboard:       keyboardRowStars,
 		}
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Update state
-		c.Payload.Ship = rGetPlayerShipEquipped.GetShip()
 		c.Payload.StarNearestMapName = starNearestMapName
-		c.Payload.StarNearestMapInfo = starNearestMapInfo
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 
 	// Verifico quale stella ha scelto il player e mando messaggio indicando il tempo
 	// necessario al suo raggiungimento
 	case 2:
-		// Filtro e recupero dati stella da raggiungere tramite il messaggio
-		var chosenStarID int
-		for key, name := range c.Payload.StarNearestMapName {
-			if name == c.Update.Message.Text {
-				chosenStarID = key
-				break
-			}
-		}
-
-		// Stella non trovata
-		if chosenStarID <= 0 {
-			err = errors.New("cant get chose star destination")
+		var rStartShipTravel *pb.StartShipTravelResponse
+		if rStartShipTravel, err = services.NnSDK.StartShipTravel(helpers.NewContext(1), &pb.StartShipTravelRequest{
+			PlayerID:   c.Player.GetID(),
+			PlanetName: c.Update.Message.Text,
+		}); err != nil {
 			return err
 		}
 
-		// Verifico se la nave del player ha abbastanza carburante per raggiungere la stella
-		if c.Payload.StarNearestMapInfo[chosenStarID].Fuel > c.Payload.Ship.ShipStats.Tank {
-			msg := services.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "ship.travel.not_enough_fuel"),
-			)
-
-			_, err = services.SendMessage(msg)
-			if err != nil {
-				return err
-			}
-
+		// Recupero orario fine viaggio
+		var finishAt time.Time
+		if finishAt, err = ptypes.Timestamp(rStartShipTravel.GetTravelingEndTime()); err != nil {
 			return
 		}
 
-		// Setto timer di ritorno
-		finishTime := helpers.GetEndTime(0, int(c.Payload.StarNearestMapInfo[chosenStarID].Time), 0)
-		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
-
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishTime.Format("15:04:05 01/02")),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishAt.Format("15:04:05 01/02")),
 		)
 		msg.ParseMode = "markdown"
-
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.ToNotify = true
-		c.PlayerData.CurrentState.Stage = 3
-		c.Payload.StarIDChosen = chosenStarID
+		c.CurrentState.Stage = 3
 		c.ForceBackTo = true
 
 	// Fine esplorazione
 	case 3:
 		// Costruisco chiamata per aggiornare posizione e scalare il quantitativo
 		// di carburante usato
-		_, err := services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
-			Integrity: c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Integrity,
-			Tank:      c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Fuel,
-			PlanetID:  c.Payload.StarNearestMapInfo[c.Payload.StarIDChosen].Planet.ID,
-			ShipID:    c.Payload.Ship.ID,
-		})
-		if err != nil {
+		if _, err := services.NnSDK.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			return err
 		}
 
@@ -379,13 +308,12 @@ func (c *ShipTravelController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return
