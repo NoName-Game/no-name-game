@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"math"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
@@ -18,9 +17,7 @@ import (
 // ====================================
 type ShipRestsController struct {
 	BaseController
-	Payload struct {
-		StartDateTime time.Time
-	}
+	Payload struct{}
 }
 
 // ====================================
@@ -45,8 +42,10 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -61,7 +60,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -70,7 +69,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 // Validator
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	case 0:
 		// Verifico se il player necessita davvero di dormire
 		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
@@ -100,22 +99,22 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 			return true
 		}
 
-		// Si vuole svegliare, ma non è passato ancora un minuto
-		var endDate = time.Now()
-
-		diffDate := endDate.Sub(c.Payload.StartDateTime)
-		diffMinutes := math.RoundToEven(diffDate.Minutes())
-		if diffMinutes <= 1 {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
-			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-					),
-				),
-			)
-			return true
-		}
+		// // Si vuole svegliare, ma non è passato ancora un minuto
+		// var endDate = time.Now()
+		//
+		// diffDate := endDate.Sub(c.Payload.StartDateTime)
+		// diffMinutes := math.RoundToEven(diffDate.Minutes())
+		// if diffMinutes <= 1 {
+		// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
+		// 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+		// 		tgbotapi.NewKeyboardButtonRow(
+		// 			tgbotapi.NewKeyboardButton(
+		// 				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+		// 			),
+		// 		),
+		// 	)
+		// 	return true
+		// }
 
 		return false
 	}
@@ -127,16 +126,16 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *ShipRestsController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
 		// Recupero informazioni per il recupero totale delle energie
-		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+		var restsInfo *pb.GetRestsInfoResponse
+		if restsInfo, err = services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			panic(err)
+		}); err != nil {
+			return
 		}
 
 		// Costruisco info per riposo
@@ -172,31 +171,32 @@ func (c *ShipRestsController) Stage() (err error) {
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
 		}
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.PlayerData.CurrentState.Stage = 1
+		c.CurrentState.Stage = 1
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
 		// Recupero informazioni per il recupero totale delle energie
-		restsInfo, err := services.NnSDK.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+		var rStartPlayerRest *pb.StartPlayerRestResponse
+		if rStartPlayerRest, err = services.NnSDK.StartPlayerRest(helpers.NewContext(1), &pb.StartPlayerRestRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
-			panic(err)
+		}); err != nil {
+			return
 		}
 
-		// Setto timer recuperato dalla chiamata delle info
-		finishTime := helpers.GetEndTime(0, int(restsInfo.GetRestsTime()), 0)
-		c.PlayerData.CurrentState.FinishAt, _ = ptypes.TimestampProto(finishTime)
+		// Recupero orario fine riposo
+		var finishAt time.Time
+		if finishAt, err = ptypes.Timestamp(rStartPlayerRest.GetRestEndTime()); err != nil {
+			return
+		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishTime.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05")),
 		)
 
 		msg.ParseMode = "markdown"
@@ -206,38 +206,24 @@ func (c *ShipRestsController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Aggiorno stato
-		c.Payload.StartDateTime = time.Now()
-		c.PlayerData.CurrentState.Stage = 2
+		c.CurrentState.Stage = 2
 	case 2:
-		// Calcolo differenza tra inizio e fine
-		var endDate time.Time
-		endDate = time.Now()
-
-		diffDate := endDate.Sub(c.Payload.StartDateTime)
-		diffMinutes := math.RoundToEven(diffDate.Minutes())
-
-		// Fine riparazione
-		_, err := services.NnSDK.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
-			PlayerID:  c.Player.GetID(),
-			RestsTime: uint32(diffMinutes),
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		if diffMinutes > 100 {
-			diffMinutes = 100
+		// Fine riposo
+		var rEndPlayerRest *pb.EndPlayerRestResponse
+		if rEndPlayerRest, err = services.NnSDK.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			return
 		}
 
 		// Invio messaggio
 		msg := services.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", diffMinutes),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered()),
 		)
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -248,13 +234,12 @@ func (c *ShipRestsController) Stage() (err error) {
 			),
 		)
 
-		_, err = services.SendMessage(msg)
-		if err != nil {
+		if _, err = services.SendMessage(msg); err != nil {
 			return err
 		}
 
 		// Completo lo stato
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 	}
 
 	return
