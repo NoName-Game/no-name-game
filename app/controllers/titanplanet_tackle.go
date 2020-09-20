@@ -62,8 +62,10 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 		return
 	}
 
-	// Set and load payload
-	helpers.UnmarshalPayload(c.PlayerData.CurrentState.Payload, &c.Payload)
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
+		panic(err)
+	}
 
 	// Validate
 	var hasError bool
@@ -78,16 +80,15 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if c.PlayerData.CurrentState.GetCompleted() {
+	if c.CurrentState.Completed {
 		// Cancello messaggio contentente la mappa
-		err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID)
-		if err != nil {
+		if err = services.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID); err != nil {
 			panic(err)
 		}
 	}
 
 	// Completo progressione
-	if err = c.Completing(c.Payload); err != nil {
+	if err = c.Completing(&c.Payload); err != nil {
 		panic(err)
 	}
 }
@@ -96,14 +97,6 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
-	// Il player deve avere sempre e perfoza un'arma equipaggiata
-	// Indipendentemente dallo stato in cui si trovi
-	if !helpers.CheckPlayerHaveOneEquippedWeapon(c.Player) {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.error.no_weapon_equipped")
-		c.PlayerData.CurrentState.Completed = true
-		return true
-	}
-
 	return false
 }
 
@@ -111,13 +104,13 @@ func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *TitanPlanetTackleController) Stage() (err error) {
-	switch c.PlayerData.CurrentState.Stage {
+	switch c.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
 		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.leave") {
-				c.PlayerData.CurrentState.Completed = true
+				c.CurrentState.Completed = true
 				return err
 			}
 		}
@@ -254,15 +247,15 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 			c.Player.GetChatID(),
 			c.Update.CallbackQuery.Message.MessageID,
 			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
-			)
+		)
 		var keyboardRow [][]tgbotapi.InlineKeyboardButton
 		for _, choice := range event.Choices {
 			keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), choice.GetTextCode()), choice.GetTextCode()),
-				))
+				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), choice.GetTextCode()), choice.GetTextCode()),
+			))
 		}
 
-		var ok = tgbotapi.InlineKeyboardMarkup{InlineKeyboard:keyboardRow}
+		var ok = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboardRow}
 		editMessage.ReplyMarkup = &ok
 	default:
 		// Teoricamente è una choice
@@ -496,11 +489,11 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 		}
 	case "player_die":
 		// Il player è morto
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 		return
 	case "titan_die":
 		// Il player è morto
-		c.PlayerData.CurrentState.Completed = true
+		c.CurrentState.Completed = true
 		// Drop Moment
 		err = c.Drop(titan)
 		return
