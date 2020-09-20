@@ -38,14 +38,8 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
-	}) {
+	}, &c.Payload) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate

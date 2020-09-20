@@ -38,13 +38,13 @@ type BaseController struct {
 	ControllerFather uint32
 	ForceBackTo      bool
 	Configuration    ControllerConfiguration
+	Payload          interface{}
 }
 
 type ControllerConfiguration struct {
 	ControllerBlocked []string
 	ControllerBack    ControllerBack
 	Controller        string
-	Payload           interface{}
 }
 
 type ControllerBack struct {
@@ -52,7 +52,7 @@ type ControllerBack struct {
 	FromStage int32
 }
 
-func (c *BaseController) InitController(configuration ControllerConfiguration) bool {
+func (c *BaseController) InitController(configuration ControllerConfiguration, payload interface{}) bool {
 	var err error
 
 	// Associo configurazione che tutti i controller dovrebbero avere
@@ -69,6 +69,11 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 
 	// Verifico lo stato della player
 	if c.CurrentState.Controller, c.CurrentState.Stage, err = helpers.CheckState(c.Player.ID, c.Configuration.Controller, c.CurrentState.Stage); err != nil {
+		panic(err)
+	}
+
+	// Carico payload
+	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, payload); err != nil {
 		panic(err)
 	}
 
@@ -210,12 +215,10 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 
 // Completing - Metodo per settare il completamento di uno stato
 func (c *BaseController) Completing(payload interface{}) (err error) {
-	// Controllo se posso aggiornare lo stato
-	// TODO: da vedere forse si può togliere il controllo
-	// Aggiorno cache state
+	// Aggiorno cache stato
 	helpers.SetCacheControllerStage(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage)
 
-	// TODO: da verifice
+	// Aggiorno stato controller
 	helpers.SetPayloadController(c.Player.ID, c.CurrentState.Controller, payload)
 
 	// Verifico se lo stato è completato chiudo

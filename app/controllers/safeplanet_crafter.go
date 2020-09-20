@@ -43,13 +43,8 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 			To:        &MenuController{},
 			FromStage: 0,
 		},
-	}) {
+	}, &c.Payload) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate

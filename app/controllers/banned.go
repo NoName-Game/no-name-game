@@ -29,7 +29,7 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 			To:        &MenuController{},
 			FromStage: 0,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 

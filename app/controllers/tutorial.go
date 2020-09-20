@@ -18,7 +18,6 @@ import (
 // ====================================
 type TutorialController struct {
 	BaseController
-	Payload struct{}
 }
 
 // ====================================
@@ -40,14 +39,8 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(ControllerConfiguration{
 		Controller: "route.tutorial",
-		Payload:    c.Payload,
-	}) {
+	}, nil) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate
@@ -63,7 +56,7 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
 }

@@ -41,8 +41,7 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 			To:        &ShipController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
-	}) {
+	}, &c.Payload) {
 		return
 	}
 

@@ -29,7 +29,7 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 			To:        &PlayerController{},
 			FromStage: 0,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 

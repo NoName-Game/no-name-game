@@ -15,7 +15,6 @@ import (
 // ====================================
 type SafePlanetMissionController struct {
 	BaseController
-	Payload struct{}
 }
 
 // ====================================
@@ -34,14 +33,8 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
-	}) {
+	}, nil) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate
@@ -57,7 +50,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
 }

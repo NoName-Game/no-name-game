@@ -32,25 +32,23 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 			To:        &MenuController{},
 			FromStage: 0,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 
 	// Recupero pianeta corrente del player
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+	if rGetPlayerCurrentPlanet, err = services.NnSDK.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 
 	// Recupero top 10 player per uccisioni in questo pianeta
 	var rGetConquerorsByPlanetID *pb.GetConquerorsByPlanetIDResponse
-	rGetConquerorsByPlanetID, err = services.NnSDK.GetConquerorsByPlanetID(helpers.NewContext(1), &pb.GetConquerorsByPlanetIDRequest{
+	if rGetConquerorsByPlanetID, err = services.NnSDK.GetConquerorsByPlanetID(helpers.NewContext(1), &pb.GetConquerorsByPlanetIDRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 

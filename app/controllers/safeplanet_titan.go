@@ -14,7 +14,6 @@ import (
 // SafePlanetTitanController
 // ====================================
 type SafePlanetTitanController struct {
-	Payload struct{}
 	BaseController
 }
 
@@ -34,14 +33,8 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 			To:        &SafePlanetCoalitionController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
-	}) {
+	}, nil) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate
@@ -57,7 +50,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
 }

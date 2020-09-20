@@ -33,7 +33,7 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 			To:        &InventoryController{},
 			FromStage: 0,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 
@@ -41,10 +41,9 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 	// Recupero risorse inventario
 	// *******************
 	var rGetPlayerResource *pb.GetPlayerResourcesResponse
-	rGetPlayerResource, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
+	if rGetPlayerResource, err = services.NnSDK.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 		PlayerID: player.GetID(),
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
 

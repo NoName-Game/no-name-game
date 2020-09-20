@@ -17,7 +17,6 @@ import (
 // ====================================
 type ShipRestsController struct {
 	BaseController
-	Payload struct{}
 }
 
 // ====================================
@@ -37,8 +36,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 			To:        &ShipController{},
 			FromStage: 1,
 		},
-		Payload: c.Payload,
-	}) {
+	}, nil) {
 		return
 	}
 
@@ -60,7 +58,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
+	if err = c.Completing(nil); err != nil {
 		panic(err)
 	}
 }

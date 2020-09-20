@@ -35,7 +35,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			To:        &MenuController{},
 			FromStage: 0,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 

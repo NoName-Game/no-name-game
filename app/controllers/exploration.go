@@ -39,7 +39,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 			To:        &MenuController{},
 			FromStage: 1,
 		},
-	}) {
+	}, nil) {
 		return
 	}
 

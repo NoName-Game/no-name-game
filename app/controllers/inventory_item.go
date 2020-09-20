@@ -41,13 +41,8 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 			To:        &InventoryController{},
 			FromStage: 1,
 		},
-	}) {
+	}, &c.Payload) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate
