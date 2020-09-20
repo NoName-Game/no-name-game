@@ -1,16 +1,10 @@
 package helpers
 
 import (
-	"encoding/json"
-	"errors"
 	"strconv"
-
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
-
-	"bitbucket.org/no-name-game/nn-telegram/services"
 )
 
-func CheckStateNew(playerID uint32, controller string, stage int32) (controllerCached string, stageCached int32, err error) {
+func CheckState(playerID uint32, controller string, stage int32) (controllerCached string, stageCached int32, err error) {
 	// Aggiorno sempre il controller in cui si trova il player
 	SetCacheState(playerID, controller)
 
@@ -33,56 +27,4 @@ func CheckStateNew(playerID uint32, controller string, stage int32) (controllerC
 	SetCacheControllerStage(playerID, controller, stage)
 
 	return controller, stage, err
-}
-
-// CheckState - Verifica ed effettua controlli sullo stato del player in un determinato controller
-func CheckState(player *pb.Player, activeStates []*pb.PlayerState, controller string, payload interface{}, father uint32) (playerState *pb.PlayerState, isNewState bool, err error) {
-	// Filtro gli stati del player recuperando lo stato appartente a questa specifica rotta
-	playerState, _ = GetPlayerStateByFunction(activeStates, controller)
-
-	// Non ho trovato nessuna corrispondenza creo una nuova
-	if playerState == nil {
-		jsonPayload, _ := json.Marshal(payload)
-
-		// Creo il nuovo stato
-		var rCreatePlayerState *pb.CreatePlayerStateResponse
-		rCreatePlayerState, err = services.NnSDK.CreatePlayerState(NewContext(1), &pb.CreatePlayerStateRequest{
-			PlayerState: &pb.PlayerState{
-				PlayerID:   player.GetID(),
-				Controller: controller,
-				Father:     father,
-				Payload:    string(jsonPayload),
-			},
-		})
-
-		// Ritoro errore se non riesco a creare lo stato
-		if err != nil {
-			return playerState, true, err
-		}
-
-		// Ritorno stato aggiornato
-		playerState = rCreatePlayerState.GetPlayerState()
-
-		// Ritorno indicando che si tratta di un nuovo stato, questo
-		// mi servirà per escludere il validator
-		isNewState = true
-	}
-
-	// Se tutto ok imposto e setto il nuovo stato in cache
-	SetCacheState(player.ID, controller)
-
-	return
-}
-
-// GetPlayerStateByFunction - Check if function exist in player states
-func GetPlayerStateByFunction(states []*pb.PlayerState, controller string) (playerState *pb.PlayerState, err error) {
-	for i, state := range states {
-		if state.Controller == controller {
-			playerState = states[i]
-			return playerState, nil
-		}
-	}
-
-	err = errors.New("state not found")
-	return playerState, err
 }

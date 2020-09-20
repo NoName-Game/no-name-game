@@ -188,7 +188,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		)
 
 		// Verifica eccedenza
-		if c.PlayerData.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
+		if c.Data.PlayerStats.GetLifePoint()+c.Payload.Item.Value > 100 {
 			text += helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning")
 		}
 

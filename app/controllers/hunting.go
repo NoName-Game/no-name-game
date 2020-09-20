@@ -652,8 +652,8 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
-				c.PlayerData.PlayerStats.GetLifePoint(),
-				100+c.PlayerData.PlayerStats.GetLevel()*10,
+				c.Data.PlayerStats.GetLifePoint(),
+				100+c.Data.PlayerStats.GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]),
 			),
 		)

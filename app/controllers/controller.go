@@ -11,11 +11,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var (
-	// UnClearables - Lista delle rotte che non devono subire gli effetti di abbandona anche se forzati a mano
-	UnClearables = []string{"route.hunting"}
-)
-
 // Controller - Intereffaccia base di tutti i controller
 type Controller interface {
 	Handle(*pb.Player, tgbotapi.Update)
@@ -31,15 +26,14 @@ type BaseController struct {
 		Message       string
 		ReplyKeyboard tgbotapi.ReplyKeyboardMarkup
 	}
-	PlayerData struct {
-		ActiveStates []*pb.PlayerState
-		PlayerStats  *pb.PlayerStats
-		CurrentState *pb.PlayerState
-	}
 	CurrentState struct {
 		Controller string
 		Stage      int32
 		Completed  bool
+	}
+	Data struct {
+		PlayerActiveStates []*pb.PlayerState
+		PlayerStats        *pb.PlayerStats
 	}
 	ControllerFather uint32
 	ForceBackTo      bool
@@ -65,30 +59,18 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 	c.Configuration = configuration
 
 	// Carico controller data
-	c.LoadControllerData() // TODO: Verificare
+	c.LoadControllerData()
 
 	// Verifico se il player si trova in determinati stati non consentiti
 	// e che quindi non permettano l'init del controller richiamato
-	var inStateBlocked = c.InStatesBlocker() // TODO: Verificare
-	if inStateBlocked {
+	if inStateBlocked := c.InStatesBlocker(); inStateBlocked {
 		return false
 	}
 
-	// TODO: test
-	if c.CurrentState.Controller, c.CurrentState.Stage, err = helpers.CheckStateNew(c.Player.ID, c.Configuration.Controller, c.CurrentState.Stage); err != nil {
+	// Verifico lo stato della player
+	if c.CurrentState.Controller, c.CurrentState.Stage, err = helpers.CheckState(c.Player.ID, c.Configuration.Controller, c.CurrentState.Stage); err != nil {
 		panic(err)
 	}
-
-	// Verifico lo stato della player
-	// if c.PlayerData.CurrentState, _, err = helpers.CheckState(
-	// 	c.Player,
-	// 	c.PlayerData.ActiveStates,
-	// 	c.Configuration.Controller,
-	// 	c.Configuration.Payload,
-	// 	c.ControllerFather,
-	// ); err != nil {
-	// 	panic(err)
-	// }
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
 	if c.BackTo(c.Configuration.ControllerBack.FromStage, c.Configuration.ControllerBack.To) {
@@ -100,14 +82,15 @@ func (c *BaseController) InitController(configuration ControllerConfiguration) b
 
 // Carico controller data
 func (c *BaseController) LoadControllerData() {
+	var err error
+
 	// Recupero stato utente
-	rGetActivePlayerStates, err := services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
+	var rGetActivePlayerStates *pb.GetActivePlayerStatesResponse
+	if rGetActivePlayerStates, err = services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
 		PlayerID: c.Player.ID,
-	})
-	if err != nil {
+	}); err != nil {
 		panic(err)
 	}
-	c.PlayerData.ActiveStates = rGetActivePlayerStates.GetStates()
 
 	// Recupero stats utente
 	var rGetPlayerStats *pb.GetPlayerStatsResponse
@@ -117,7 +100,8 @@ func (c *BaseController) LoadControllerData() {
 		panic(err)
 	}
 
-	c.PlayerData.PlayerStats = rGetPlayerStats.GetPlayerStats()
+	c.Data.PlayerActiveStates = rGetActivePlayerStates.GetStates()
+	c.Data.PlayerStats = rGetPlayerStats.GetPlayerStats()
 }
 
 // Validate - Metodo comune per mandare messaggio di validazione
@@ -144,8 +128,7 @@ func (c *BaseController) Validate() {
 		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 	}
 
-	_, err := services.SendMessage(validatorMsg)
-	if err != nil {
+	if _, err := services.SendMessage(validatorMsg); err != nil {
 		panic(err)
 	}
 }
@@ -175,8 +158,8 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 			// Cancello stato dalla memoria
 			helpers.DelCacheState(c.Player.ID)
 			helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
-
 			helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
+
 			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
@@ -185,11 +168,10 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 		// Abbandona - chiude definitivamente cancellando anche lo stato
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
 			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
-			if !c.PlayerData.PlayerStats.GetDead() && c.Clearable() {
+			if !c.Data.PlayerStats.GetDead() {
 				// Cancello stato da cache
 				helpers.DelCacheState(c.Player.ID)
 				helpers.DelCacheControllerStage(c.Player.ID, c.CurrentState.Controller)
-
 				helpers.DelPayloadController(c.Player.ID, c.CurrentState.Controller)
 
 				// Cancello stato da ws
@@ -224,22 +206,6 @@ func (c *BaseController) BackTo(canBackFromStage int32, controller Controller) (
 	}
 
 	return
-}
-
-// Clearable
-func (c *BaseController) Clearable() (clearable bool) {
-	// Certi controller non devono subire la cancellazione degli stati
-	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.PlayerData.ActiveStates {
-		for _, unclearable := range UnClearables {
-			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, unclearable) {
-				return false
-
-			}
-		}
-	}
-
-	return true
 }
 
 // Completing - Metodo per settare il completamento di uno stato
@@ -290,22 +256,17 @@ func (c *BaseController) Completing(payload interface{}) (err error) {
 func (c *BaseController) InStatesBlocker() (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
-	for _, state := range c.PlayerData.ActiveStates {
+	for _, state := range c.Data.PlayerActiveStates {
 		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
 		if !state.Completed {
-			if c.PlayerData.CurrentState != nil {
-				if state.Father == 0 || state.Father != c.PlayerData.CurrentState.GetFather() {
-					for _, blockState := range c.Configuration.ControllerBlocked {
-						if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-							msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
-							_, err := services.SendMessage(msg)
-							if err != nil {
-								panic(err)
-							}
-
-							return true
-						}
+			for _, blockState := range c.Configuration.ControllerBlocked {
+				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
+					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+					if _, err := services.SendMessage(msg); err != nil {
+						panic(err)
 					}
+
+					return true
 				}
 			}
 		}
@@ -316,15 +277,9 @@ func (c *BaseController) InStatesBlocker() (inStates bool) {
 
 // InTutorial - Metodo che semplifica il controllo se il player si trova dentro un tutorial
 func (c *BaseController) InTutorial() bool {
-	for _, state := range c.PlayerData.ActiveStates {
-		if !state.Completed {
-			if c.PlayerData.CurrentState != nil {
-				if state.Father == 0 || state.Father != c.PlayerData.CurrentState.GetFather() {
-					if state.Controller == "route.tutorial" {
-						return true
-					}
-				}
-			}
+	for _, state := range c.Data.PlayerActiveStates {
+		if state.Controller == "route.tutorial" {
+			return true
 		}
 	}
 
