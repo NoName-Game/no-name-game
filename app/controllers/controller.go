@@ -59,7 +59,9 @@ func (c *Controller) InitController(controller Controller) bool {
 	*c = controller
 
 	// Carico controller data
-	c.LoadControllerData()
+	if err = c.LoadControllerData(); err != nil {
+		panic(err)
+	}
 
 	// Verifico se il player si trova in determinati stati non consentiti
 	// e che quindi non permettano l'init del controller richiamato
@@ -70,7 +72,7 @@ func (c *Controller) InitController(controller Controller) bool {
 	// Setto controller corrente nella cache
 	helpers.SetCurrentControllerCache(c.Player.ID, c.CurrentState.Controller)
 
-	// Carico payload
+	// Carico payload e infomazioni controller
 	if c.CurrentState.Stage, err = helpers.GetControllerCacheData(c.Player.ID, c.CurrentState.Controller, &c.CurrentState.Payload); err != nil {
 		panic(err)
 	}
@@ -84,15 +86,13 @@ func (c *Controller) InitController(controller Controller) bool {
 }
 
 // Carico controller data
-func (c *Controller) LoadControllerData() {
-	var err error
-
+func (c *Controller) LoadControllerData() (err error) {
 	// Recupero stato utente
 	var rGetActivePlayerStates *pb.GetActivePlayerStatesResponse
 	if rGetActivePlayerStates, err = services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
 		PlayerID: c.Player.ID,
 	}); err != nil {
-		panic(err)
+		return err
 	}
 
 	// Recupero stats utente
@@ -100,11 +100,12 @@ func (c *Controller) LoadControllerData() {
 	if rGetPlayerStats, err = services.NnSDK.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
 		PlayerID: c.Player.ID,
 	}); err != nil {
-		panic(err)
+		return err
 	}
 
 	c.Data.PlayerActiveStates = rGetActivePlayerStates.GetStates()
 	c.Data.PlayerStats = rGetPlayerStats.GetPlayerStats()
+	return
 }
 
 // Validate - Metodo comune per mandare messaggio di validazione
