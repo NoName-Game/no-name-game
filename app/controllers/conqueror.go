@@ -14,7 +14,7 @@ import (
 // Conqueror
 // ====================================
 type ConquerorController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -22,17 +22,21 @@ type ConquerorController struct {
 // ====================================
 func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.conqueror",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.conqueror",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

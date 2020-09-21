@@ -14,7 +14,7 @@ import (
 // Planet
 // ====================================
 type PlanetController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -22,17 +22,21 @@ type PlanetController struct {
 // ====================================
 func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.planet",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.planet",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

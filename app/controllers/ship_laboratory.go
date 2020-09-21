@@ -21,7 +21,7 @@ import (
 // o per ripristinare determinate cose
 // ====================================
 type ShipLaboratoryController struct {
-	BaseController
+	Controller
 	Payload struct {
 		Item      *pb.Item         // Item da craftare
 		Resources map[uint32]int32 // Materiali necessari
@@ -34,17 +34,22 @@ type ShipLaboratoryController struct {
 func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.ship.laboratory",
-		ControllerBack: ControllerBack{
-			To:        &ShipController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.ship.laboratory",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &ShipController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
 	}
 

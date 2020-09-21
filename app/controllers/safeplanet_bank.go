@@ -18,7 +18,7 @@ type SafePlanetBankController struct {
 	Payload struct {
 		Type string
 	}
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -27,17 +27,22 @@ type SafePlanetBankController struct {
 func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.safeplanet.bank",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.safeplanet.bank",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

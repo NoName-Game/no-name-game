@@ -41,7 +41,6 @@ var (
 		// Safe Planet
 		"route.safeplanet.bank":                reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
 		"route.safeplanet.crafter":             reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
-		"route.menu.npc":                       reflect.TypeOf((*controllers.NpcMenuController)(nil)).Elem(), // TODO: da verificare
 		"route.safeplanet.coalition":           reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem(),
 		"route.safeplanet.mission":             reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem(),
 		"route.safeplanet.titan":               reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem(),

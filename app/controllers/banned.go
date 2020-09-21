@@ -11,7 +11,7 @@ import (
 // BannedController
 // ====================================
 type BannedController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -19,17 +19,21 @@ type BannedController struct {
 // ====================================
 func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.banned",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.banned",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

@@ -17,7 +17,7 @@ import (
 // TutorialController
 // ====================================
 type TutorialController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -26,20 +26,22 @@ type TutorialController struct {
 func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
+
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.tutorial",
+		},
+	}) {
+		return
+	}
 
 	// Se il player ha già finito il tutorial non può assolutamente entrare in questo controller
 	if c.Player.GetTutorial() {
 		c.ForceBackTo = true
-		_ = c.Completing(c.Payload)
-		return
-	}
-
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.tutorial",
-	}, nil) {
+		_ = c.Completing(nil)
 		return
 	}
 
@@ -342,7 +344,7 @@ func (c *TutorialController) Stage() (err error) {
 
 func (c *TutorialController) sendIntroMessage() (err error) {
 	// Recupero set di messaggi
-	textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.Configuration.Controller)
+	textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.CurrentState.Controller)
 
 	// Invio il primo messaggio per eliminare la tastiera
 	initMessage := services.NewMessage(c.Update.Message.Chat.ID, "...")

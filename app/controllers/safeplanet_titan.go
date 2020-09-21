@@ -14,7 +14,7 @@ import (
 // SafePlanetTitanController
 // ====================================
 type SafePlanetTitanController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -23,17 +23,21 @@ type SafePlanetTitanController struct {
 func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.safeplanet.titan",
-		ControllerBack: ControllerBack{
-			To:        &SafePlanetCoalitionController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.safeplanet.titan",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &SafePlanetCoalitionController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
 	}
 
@@ -170,7 +174,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 
 		// Completo lo stato
 		c.CurrentState.Completed = true
-		c.Configuration.ControllerBack.To = &MenuController{}
+		c.Configurations.ControllerBack.To = &MenuController{}
 	}
 
 	return

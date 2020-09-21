@@ -14,7 +14,7 @@ import (
 // SafePlanetMissionController
 // ====================================
 type SafePlanetMissionController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -23,17 +23,21 @@ type SafePlanetMissionController struct {
 func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.safeplanet.mission",
-		ControllerBack: ControllerBack{
-			To:        &SafePlanetCoalitionController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.safeplanet.mission",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &SafePlanetCoalitionController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
 	}
 

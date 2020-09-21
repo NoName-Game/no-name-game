@@ -15,7 +15,7 @@ import (
 // PlayerEquipmentController
 // ====================================
 type PlayerEquipmentController struct {
-	BaseController
+	Controller
 	Payload struct {
 		ItemType     string // Armor/Weapon
 		ItemCategory string // Head/Leg/Chest/Arms
@@ -29,17 +29,22 @@ type PlayerEquipmentController struct {
 func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.inventory.equip",
-		ControllerBack: ControllerBack{
-			To:        &PlayerController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.inventory.equip",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &PlayerController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
 	}
 
@@ -550,7 +555,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		// TUTORIAL - Solo il player si trova dentro il tutorial forzo di tornarare al menu
 		// ###################
 		if c.InTutorial() {
-			c.Configuration.ControllerBack.To = &MenuController{}
+			c.Configurations.ControllerBack.To = &MenuController{}
 		}
 	}
 

@@ -17,7 +17,7 @@ import (
 // TitanPlanetTackleController
 // ====================================
 type TitanPlanetTackleController struct {
-	BaseController
+	Controller
 	Payload struct {
 		CallbackChatID    int64
 		CallbackMessageID int
@@ -47,17 +47,22 @@ var (
 func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.titanplanet.tackle",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.titanplanet.tackle",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

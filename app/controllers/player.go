@@ -12,7 +12,7 @@ import (
 // Player
 // ====================================
 type PlayerController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -20,17 +20,21 @@ type PlayerController struct {
 // ====================================
 func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.player",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.player",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

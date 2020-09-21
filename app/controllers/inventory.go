@@ -11,7 +11,7 @@ import (
 // Inventory
 // ====================================
 type InventoryController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -19,17 +19,21 @@ type InventoryController struct {
 // ====================================
 func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.inventory",
-		ControllerBack: ControllerBack{
-			To:        &PlayerController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.inventor",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

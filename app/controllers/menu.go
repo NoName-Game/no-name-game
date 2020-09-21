@@ -21,7 +21,7 @@ import (
 // in base a dove si trova il player verranno mostrati tasti e action differenti.
 // ====================================
 type MenuController struct {
-	BaseController
+	Controller
 	SafePlanet  bool // Flag per verificare se il player si trova su un pianeta sicuro
 	TitanPlanet bool // Flag per verificare se il player si trova su un pianeta titano
 	TitanAlive  bool

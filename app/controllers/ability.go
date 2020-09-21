@@ -5,7 +5,7 @@ package controllers
 // ====================================
 type AbilityController struct {
 	Payload struct{}
-	BaseController
+	Controller
 }
 
 var (

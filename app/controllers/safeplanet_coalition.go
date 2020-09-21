@@ -11,7 +11,7 @@ import (
 // Coalition
 // ====================================
 type SafePlanetCoalitionController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -23,13 +23,19 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	c.Update = update
 
 	// Init Controller
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.safeplanet.coalition",
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.safeplanet.coalition",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

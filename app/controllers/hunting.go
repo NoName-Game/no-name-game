@@ -22,7 +22,7 @@ import (
 // ====================================
 
 type HuntingController struct {
-	BaseController
+	Controller
 	Payload struct {
 		CallbackMessageID int
 		MapID             uint32
@@ -85,18 +85,23 @@ var (
 func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller:        "route.hunting",
-		ControllerBlocked: []string{"mission"},
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 0,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.hunting",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"mission"},
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+		},
+	}) {
 		return
 	}
 

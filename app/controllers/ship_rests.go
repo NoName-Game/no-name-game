@@ -16,7 +16,7 @@ import (
 // ShipRestsController
 // ====================================
 type ShipRestsController struct {
-	BaseController
+	Controller
 }
 
 // ====================================
@@ -25,24 +25,23 @@ type ShipRestsController struct {
 func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller:        "route.ship.rests",
-		ControllerBlocked: []string{"hunting", "mission"},
-		ControllerBack: ControllerBack{
-			To:        &ShipController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.ship.rests",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"hunting", "mission"},
+			ControllerBack: ControllerBack{
+				To:        &ShipController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate

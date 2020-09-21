@@ -18,7 +18,7 @@ import (
 // ShipRepairsController
 // ====================================
 type ShipRepairsController struct {
-	BaseController
+	Controller
 	Payload struct {
 		ShipID     uint32
 		RepairType pb.StartShipRepairRequest_RapairTypeEnum
@@ -35,19 +35,21 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller: "route.ship.repairs",
-		ControllerBack: ControllerBack{
-			To:        &ShipController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.ship.repairs",
+			Payload:    &c.Payload,
 		},
-	}, &c.Payload) {
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &ShipController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
-	}
-
-	// Carico payload
-	if err = helpers.GetPayloadController(c.Player.ID, c.CurrentState.Controller, &c.Payload); err != nil {
-		panic(err)
 	}
 
 	// Validate

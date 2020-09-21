@@ -18,7 +18,7 @@ import (
 // ExplorationController
 // ====================================
 type ExplorationController struct {
-	BaseController
+	Controller
 	ExplorationTypeChoiched string // Esplorazione scelta dall'utente
 }
 
@@ -28,18 +28,22 @@ type ExplorationController struct {
 func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Inizializzo variabili del controler
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(ControllerConfiguration{
-		Controller:        "route.exploration",
-		ControllerBlocked: []string{"hunting", "ship"},
-		ControllerBack: ControllerBack{
-			To:        &MenuController{},
-			FromStage: 1,
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.exploration",
 		},
-	}, nil) {
+		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"hunting", "ship"},
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 1,
+			},
+		},
+	}) {
 		return
 	}
 
