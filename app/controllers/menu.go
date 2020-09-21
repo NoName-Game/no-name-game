@@ -191,38 +191,36 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
 		for _, state := range c.Data.PlayerActiveStates {
-			if !state.GetCompleted() {
-				finishAt, err := ptypes.Timestamp(state.FinishAt)
-				if err != nil {
-					panic(err)
-				}
 
-				// Se sono da notificare formatto con la data
-				if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
-					finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-					tasks += fmt.Sprintf("- %s %v\n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-						helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
-					)
-				} else {
-					if state.Controller == "route.tutorial" {
-						tasks += fmt.Sprintf("- %s \n",
-							helpers.Trans(c.Player.Language.Slug, state.Controller),
-						)
-					} else if state.Controller == "route.safeplanet.mission" {
-						tasks += fmt.Sprintf("- %s \n",
-							helpers.Trans(c.Player.Language.Slug, state.Controller),
-						)
-					} else {
-						tasks += fmt.Sprintf("- %s %s\n",
-							helpers.Trans(c.Player.Language.Slug, state.Controller),
-							helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
-						)
-					}
-
-				}
+			finishAt, err := ptypes.Timestamp(state.FinishAt)
+			if err != nil {
+				panic(err)
 			}
 
+			// Se sono da notificare formatto con la data
+			if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
+				finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
+				tasks += fmt.Sprintf("- %s %v\n",
+					helpers.Trans(c.Player.Language.Slug, state.Controller),
+					helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
+				)
+			} else {
+				if state.Controller == "route.tutorial" {
+					tasks += fmt.Sprintf("- %s \n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+					)
+				} else if state.Controller == "route.safeplanet.mission" {
+					tasks += fmt.Sprintf("- %s \n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+					)
+				} else {
+					tasks += fmt.Sprintf("- %s %s\n",
+						helpers.Trans(c.Player.Language.Slug, state.Controller),
+						helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
+					)
+				}
+
+			}
 		}
 	}
 
@@ -282,20 +280,18 @@ func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
 func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardButton) {
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.Data.PlayerActiveStates {
-		if !state.GetCompleted() {
-			var keyboardRow []tgbotapi.KeyboardButton
-			if state.Controller == "route.tutorial" {
-				keyboardRow = tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue")),
-				)
-			} else {
-				keyboardRow = tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
-				)
-			}
-
-			keyboardRows = append(keyboardRows, keyboardRow)
+		var keyboardRow []tgbotapi.KeyboardButton
+		if state.Controller == "route.tutorial" {
+			keyboardRow = tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue")),
+			)
+		} else {
+			keyboardRow = tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, state.Controller)),
+			)
 		}
+
+		keyboardRows = append(keyboardRows, keyboardRow)
 	}
 
 	return

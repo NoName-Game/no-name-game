@@ -28,7 +28,7 @@ type Controller struct {
 	}
 	CurrentState ControllerCurrentState
 	Data         struct {
-		PlayerActiveStates []*pb.PlayerState
+		PlayerActiveStates []*pb.PlayerActivity
 		PlayerStats        *pb.PlayerStats
 	}
 	ForceBackTo    bool
@@ -88,8 +88,8 @@ func (c *Controller) InitController(controller Controller) bool {
 // Carico controller data
 func (c *Controller) LoadControllerData() (err error) {
 	// Recupero stato utente
-	var rGetActivePlayerStates *pb.GetActivePlayerStatesResponse
-	if rGetActivePlayerStates, err = services.NnSDK.GetActivePlayerStates(helpers.NewContext(1), &pb.GetActivePlayerStatesRequest{
+	var rGetActivePlayerActivities *pb.GetActivePlayerActivitiesResponse
+	if rGetActivePlayerActivities, err = services.NnSDK.GetActivePlayerActivities(helpers.NewContext(1), &pb.GetActivePlayerActivitiesRequest{
 		PlayerID: c.Player.ID,
 	}); err != nil {
 		return err
@@ -103,7 +103,7 @@ func (c *Controller) LoadControllerData() (err error) {
 		return err
 	}
 
-	c.Data.PlayerActiveStates = rGetActivePlayerStates.GetStates()
+	c.Data.PlayerActiveStates = rGetActivePlayerActivities.GetActivities()
 	c.Data.PlayerStats = rGetPlayerStats.GetPlayerStats()
 	return
 }
@@ -177,7 +177,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 				// Cancello stato da ws
-				if _, err := services.NnSDK.DeletePlayerStateByController(helpers.NewContext(1), &pb.DeletePlayerStateByControllerRequest{
+				if _, err := services.NnSDK.DeletePlayerActivityByController(helpers.NewContext(1), &pb.DeletePlayerActivityByControllerRequest{
 					PlayerID:   c.Player.ID,
 					Controller: c.CurrentState.Controller,
 					Force:      true,
@@ -253,17 +253,14 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Data.PlayerActiveStates {
-		// Verifico se non fa parte dello stesso padre e che lo stato non sia completato
-		if !state.Completed {
-			for _, blockState := range c.Configurations.ControllerBlocked {
-				if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-					msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
-					if _, err := services.SendMessage(msg); err != nil {
-						panic(err)
-					}
-
-					return true
+		for _, blockState := range c.Configurations.ControllerBlocked {
+			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
+				msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+				if _, err := services.SendMessage(msg); err != nil {
+					panic(err)
 				}
+
+				return true
 			}
 		}
 	}
