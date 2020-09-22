@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/app"
+	"bitbucket.org/no-name-game/nn-telegram/cmd/client"
 )
 
 func main() {
 	// Avvio bot/client telegram
-	app.Run()
+	client.Run()
 }
