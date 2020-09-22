@@ -103,7 +103,7 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 			var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 			if rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 				PlayerID:    c.Player.ID,
-				EconomyType: "diamond",
+				EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
 			}); err != nil {
 				return
 			}

@@ -120,7 +120,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 		if rGetPlayerEconomy, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
-			EconomyType: "bank",
+			EconomyType: pb.GetPlayerEconomyRequest_BANK,
 		}); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
 		if rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 			PlayerID:    c.Player.GetID(),
-			EconomyType: "money",
+			EconomyType: pb.GetPlayerEconomyRequest_MONEY,
 		}); err != nil {
 			return err
 		}

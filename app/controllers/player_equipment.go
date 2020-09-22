@@ -487,22 +487,20 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Rimuovo equipaggiamento attuale
 			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
-				if _, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
-					Armor: &pb.Armor{
-						ID:       rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID(),
-						Equipped: false,
-					},
+				if _, err = services.NnSDK.EquipArmor(helpers.NewContext(1), &pb.EquipArmorRequest{
+					PlayerID: c.Player.ID,
+					ArmorID:  rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID(),
+					Equip:    false,
 				}); err != nil {
 					return
 				}
 			}
 
 			// Aggiorno con quello nuovo
-			if _, err = services.NnSDK.UpdateArmor(helpers.NewContext(1), &pb.UpdateArmorRequest{
-				Armor: &pb.Armor{
-					ID:       c.Payload.EquipID,
-					Equipped: true,
-				},
+			if _, err = services.NnSDK.EquipArmor(helpers.NewContext(1), &pb.EquipArmorRequest{
+				PlayerID: c.Player.ID,
+				ArmorID:  c.Payload.EquipID,
+				Equip:    false,
 			}); err != nil {
 				return
 			}
@@ -517,22 +515,20 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 			// Rimovo arma attualmente equipaggiata
 			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
-				if _, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
-					Weapon: &pb.Weapon{
-						ID:       rGetPlayerWeaponEquipped.GetWeapon().GetID(),
-						Equipped: false,
-					},
+				if _, err = services.NnSDK.EquipWeapon(helpers.NewContext(1), &pb.EquipWeaponRequest{
+					PlayerID: c.Player.ID,
+					WeaponID: rGetPlayerWeaponEquipped.GetWeapon().GetID(),
+					Equip:    false,
 				}); err != nil {
 					return
 				}
 			}
 
 			// Aggiorno equipped
-			if _, err = services.NnSDK.UpdateWeapon(helpers.NewContext(1), &pb.UpdateWeaponRequest{
-				Weapon: &pb.Weapon{
-					ID:       c.Payload.EquipID,
-					Equipped: true,
-				},
+			if _, err = services.NnSDK.EquipWeapon(helpers.NewContext(1), &pb.EquipWeaponRequest{
+				PlayerID: c.Player.ID,
+				WeaponID: c.Payload.EquipID,
+				Equip:    false,
 			}); err != nil {
 				return
 			}

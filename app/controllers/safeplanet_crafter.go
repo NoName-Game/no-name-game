@@ -117,7 +117,7 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 			var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
 			if rGetPlayerEconomyMoney, err = services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 				PlayerID:    c.Player.GetID(),
-				EconomyType: "money",
+				EconomyType: pb.GetPlayerEconomyRequest_MONEY,
 			}); err != nil {
 				panic(err)
 			}

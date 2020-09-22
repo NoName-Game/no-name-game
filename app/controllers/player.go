@@ -135,13 +135,13 @@ func (c *PlayerController) GetPlayerEconomy() (money int32, diamond int32, err e
 	// Calcolo monete del player
 	responseMoney, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
-		EconomyType: "money",
+		EconomyType: pb.GetPlayerEconomyRequest_MONEY,
 	})
 
 	// Calcolo diamanti del player
 	responseDiamond, _ := services.NnSDK.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
-		EconomyType: "diamond",
+		EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
 	})
 
 	return responseMoney.GetValue(), responseDiamond.GetValue(), nil
