@@ -41,14 +41,14 @@ func handleUpdate(update tgbotapi.Update) {
 	// Gestico panic
 	defer func() {
 		if err := recover(); err != nil {
+			// TODO: Eseguire qualcosa se esplode male
 			logrus.Errorf("[*] Recoverd Error: %v", err)
 		}
 	}()
 
 	// Gestisco utente
 	var player *pb.Player
-	player, err = helpers.HandleUser(update)
-	if err != nil {
+	if player, err = helpers.HandleUser(update); err != nil {
 		panic(err)
 	}
 

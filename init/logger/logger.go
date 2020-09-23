@@ -39,7 +39,13 @@ func (logger *Logger) Init() {
 			logrus.PanicLevel,
 			logrus.FatalLevel,
 			logrus.ErrorLevel,
+			logrus.WarnLevel,
 		}); err == nil {
+			hook.StacktraceConfiguration.Level = logrus.InfoLevel
+			// hook.StacktraceConfiguration.Skip
+			hook.StacktraceConfiguration.Context = 50
+			// hook.Stacktrace  Configuration.InAppPrefixes
+			hook.StacktraceConfiguration.IncludeErrorBreadcrumb = true
 			hook.StacktraceConfiguration.Enable = true
 			hook.Timeout = 10 * time.Second
 			logrus.AddHook(hook)

@@ -17,6 +17,7 @@ require (
 	github.com/labstack/gommon v0.3.0
 	github.com/nicksnyder/go-i18n/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	golang.org/x/text v0.3.3

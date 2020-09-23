@@ -166,7 +166,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		if rGetPlayerWeaponEquippedResponse, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			return fmt.Errorf("error rGetPlayerWeaponEquippedResponse: %s", err.Error())
 		}
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {

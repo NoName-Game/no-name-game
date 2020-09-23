@@ -41,8 +41,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Recupero messaggio principale
 	var recap string
-	recap, err = c.GetRecap()
-	if err != nil {
+	if recap, err = c.GetRecap(); err != nil {
 		panic(err)
 	}
 
@@ -85,9 +84,8 @@ func (c *MenuController) Stage() {
 func (c *MenuController) GetRecap() (message string, err error) {
 	// Recupero posizione player
 	var planet *pb.Planet
-	planet, err = c.GetPlayerPosition()
-	if err != nil {
-		return message, err
+	if planet, err = c.GetPlayerPosition(); err != nil {
+		return message, fmt.Errorf("error gettin player position: %s", err.Error())
 	}
 
 	// Costruisco messaggio di racap in base a dove si trova il player
@@ -99,11 +97,10 @@ func (c *MenuController) GetRecap() (message string, err error) {
 	} else if c.TitanPlanet {
 		// Recupero titano pianeta corrente
 		var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
-		rGetTitanByPlanetID, err = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
+		if rGetTitanByPlanetID, err = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
 			PlanetID: planet.GetID(),
-		})
-		if err != nil {
-			return
+		}); err != nil {
+			return message, fmt.Errorf("error rGetTitanByPlanetID: %s", err.Error())
 		}
 
 		message = helpers.Trans(c.Player.Language.Slug, "menu.titanplanet", planet.GetName(), rGetTitanByPlanetID.GetTitan().GetName())
@@ -118,19 +115,17 @@ func (c *MenuController) GetRecap() (message string, err error) {
 	} else {
 		// Recupero status vitale del player
 		var life string
-		life, err = c.GetPlayerLife()
-		if err != nil {
-			return message, err
+		if life, err = c.GetPlayerLife(); err != nil {
+			return message, fmt.Errorf("error getting player life: %s", err.Error())
 		}
 
 		// Recupero conquistatore attuale
 		var currentConqueror string
 		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
-		rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
 			PlanetID: planet.ID,
-		})
-		if err != nil {
-			return
+		}); err != nil {
+			return message, fmt.Errorf("error rGetCurrentConquerorByPlanetID: %s", err.Error())
 		}
 
 		if rGetCurrentConquerorByPlanetID.GetPlayer().GetID() > 0 {
@@ -156,18 +151,22 @@ func (c *MenuController) GetPlayerPosition() (result *pb.Planet, err error) {
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		panic(err)
+	}); err != nil {
+		return result, fmt.Errorf("error rGetPlayerCurrentPlanet: %s", err.Error())
+	}
+
+	// Verifico se il player si trova su un pianeta valido
+	if rGetPlayerCurrentPlanet.GetPlanet() == nil {
+		return result, fmt.Errorf("player %d position not valid, nil planet value", c.Player.GetID())
 	}
 
 	// Verifico se il player si trova su un pianeta sicuro
 	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
 	c.TitanPlanet = rGetPlayerCurrentPlanet.GetPlanet().GetTitan()
 
-	return rGetPlayerCurrentPlanet.GetPlanet(), err
+	return rGetPlayerCurrentPlanet.GetPlanet(), nil
 }
 
 // GetPlayerLife
