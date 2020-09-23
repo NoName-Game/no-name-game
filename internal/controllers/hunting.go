@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
-	"bitbucket.org/no-name-game/nn-telegram/init/logging"
-
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -456,10 +454,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 
 	msg.ParseMode = "HTML"
 	if _, err = helpers.SendMessage(msg); err != nil {
-		// Il bot crasha nel caso ci fossero bad request da parte di telegram,
-		// penso sia opportuno solo in questo caso non pensare agli errori delle api che potrebbero causare crash non dettati da noi
-		logging.ErrorHandler("Hunting TGBOTAPI Error", err)
-		return nil
+		return
 	}
 
 	return

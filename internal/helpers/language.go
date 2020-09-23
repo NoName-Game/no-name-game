@@ -3,19 +3,17 @@ package helpers
 import (
 	"strconv"
 
-	"bitbucket.org/no-name-game/nn-telegram/init/languages"
+	"bitbucket.org/no-name-game/nn-telegram/config"
 )
 
 // Trans - late shortCut
 func Trans(locale string, key string, args ...interface{}) (message string) {
 	var err error
 	if len(args) <= 0 {
-		message, err = languages.GetTranslation(key, locale, nil)
-	} else {
-		message, err = languages.GetTranslation(key, locale, args)
+		args = nil
 	}
 
-	if err != nil {
+	if message, err = config.App.Localization.GetTranslation(key, locale, args); err != nil {
 		panic(err)
 	}
 
@@ -41,7 +39,7 @@ func GenerateTextArray(locale string, common string) (texts []string) {
 		keyText := common + "_" + strconv.Itoa(counter)
 
 		var translatedText string
-		translatedText, _ = languages.GetTranslation(keyText, locale, nil)
+		translatedText, _ = config.App.Localization.GetTranslation(keyText, locale, nil)
 
 		if translatedText != "" {
 			texts = append(texts, translatedText)

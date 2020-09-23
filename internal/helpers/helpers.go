@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/init/logging"
+	"github.com/sirupsen/logrus"
 )
 
 // InArray - check if val exist in array
@@ -82,7 +82,7 @@ func UnmarshalPayload(payload string, funcInterface interface{}) {
 	if payload != "" {
 		err := json.Unmarshal([]byte(payload), &funcInterface)
 		if err != nil {
-			logging.ErrorHandler("Error unmarshal payload", err)
+			logrus.Errorf("error unmarshal paylaod: %s", err.Error())
 		}
 	}
 }

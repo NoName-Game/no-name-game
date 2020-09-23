@@ -24,7 +24,7 @@ func (redis *Redis) Init() {
 	}
 
 	log.Println("************************************************")
-	log.Println("Redis connection: OK!")
+	log.Println("Redis: OK!")
 	log.Println("************************************************")
 
 	return

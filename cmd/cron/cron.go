@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
-	"bitbucket.org/no-name-game/nn-telegram/init/languages"
-	"bitbucket.org/no-name-game/nn-telegram/init/logging"
+	"bitbucket.org/no-name-game/nn-telegram/init/localization"
+	"bitbucket.org/no-name-game/nn-telegram/init/logger"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 
@@ -41,7 +41,7 @@ func (c *Cron) Notify() {
 		// Nel caso in cui panicasse
 		if err := recover(); err != nil {
 			// Registro errore
-			logging.ErrorHandler("cron recovered", err.(error))
+			logger.ErrorHandler("cron recovered", err.(error))
 		}
 	}()
 
@@ -68,7 +68,7 @@ func (c *Cron) Notify() {
 			}
 
 			// Recupero testo da notificare, ogni controller ha la propria notifica
-			text, _ := languages.GetTranslation("cron."+state.Controller+"_alert", rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), nil)
+			text, _ := localization.GetTranslation("cron."+state.Controller+"_alert", rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), nil)
 
 			// Invio notifica
 			msg := helpers.NewMessage(rGetPlayerByID.GetPlayer().GetChatID(), text)

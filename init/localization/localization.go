@@ -1,4 +1,4 @@
-package languages
+package localization
 
 import (
 	"fmt"
@@ -11,8 +11,6 @@ import (
 )
 
 var (
-	bundle *i18n.Bundle
-
 	// Langs - Lingue attualmente disponibili per questo client
 	Langs = map[string]string{
 		"en": "English",
@@ -20,12 +18,18 @@ var (
 	}
 )
 
+// Localization
+type Localization struct {
+	bundle *i18n.Bundle
+}
+
 // LanguageUp - Servizio di gestione multilingua
-func LanguageUp() (err error) {
+func (lang *Localization) Init() {
+	var err error
+
 	// Creo bundle andando a caricare le diverse lingue
-	bundle, err = createLocalizerBundle()
-	if err != nil {
-		return err
+	if lang.bundle, err = lang.loadLocalizerBundle(); err != nil {
+		panic(err)
 	}
 
 	// Mostro a video stato servizio
@@ -37,7 +41,7 @@ func LanguageUp() (err error) {
 }
 
 // CreateLocalizerBundle - Legge tutte le varie traduzione nei vari file e registra
-func createLocalizerBundle() (bundle *i18n.Bundle, err error) {
+func (lang *Localization) loadLocalizerBundle() (bundle *i18n.Bundle, err error) {
 	// Istanzio bundle con lingua di default
 	bundle = i18n.NewBundle(language.English)
 
@@ -63,14 +67,14 @@ func createLocalizerBundle() (bundle *i18n.Bundle, err error) {
 //
 // You can use printf's placeholders!
 // Available locales: it-IT, en-US
-func GetTranslation(key, locale string, args []interface{}) (string, error) {
-	localizer := i18n.NewLocalizer(bundle, locale)
+func (lang *Localization) GetTranslation(key, locale string, args []interface{}) (string, error) {
+	localizer := i18n.NewLocalizer(lang.bundle, locale)
 	msg, err := localizer.Localize(
 		&i18n.LocalizeConfig{
 			MessageID: key,
 		},
 	)
-	msg = fmt.Sprintf(msg, args...)
 
+	msg = fmt.Sprintf(msg, args...)
 	return msg, err
 }

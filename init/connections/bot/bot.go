@@ -8,17 +8,12 @@ import (
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )
 
-// var (
-// 	// BotAPI - Telegram bot
-// 	botAPI *tgbotapi.BotAPI
-// )
-
 // Bot
 type Bot struct {
 	API *tgbotapi.BotAPI
 }
 
-// BotUp - Metodo per la connessione ai server telegram
+// Init - Metodo per la connessione ai server telegram
 func (bot *Bot) Init() {
 	var err error
 
