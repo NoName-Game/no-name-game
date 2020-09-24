@@ -28,9 +28,6 @@ type PlayerEquipmentController struct {
 // Handle
 // ====================================
 func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -57,14 +54,10 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -122,7 +115,8 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *PlayerEquipmentController) Stage() (err error) {
+func (c *PlayerEquipmentController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// In questo stage faccio un micro recap al player del suo equipaggiamento
 	// attuale e mostro a tastierino quale categoria vorrebbe equipaggiare
@@ -137,7 +131,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		if rGetPlayerArmors, err = config.App.Server.Connection.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// armatura base player
@@ -166,7 +160,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		if rGetPlayerWeaponEquippedResponse, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return fmt.Errorf("error rGetPlayerWeaponEquippedResponse: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
@@ -203,7 +197,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -240,16 +234,16 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			Keyboard:       keyboardRowCategories,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
 		c.CurrentState.Stage = 2
 	case 2:
 		var mainMessage string
+
 		// Costruisco keyboard risposta
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton
-
 		switch c.Payload.ItemType {
 		// **************************
 		// GESTIONE ARMATURE
@@ -262,7 +256,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetArmorCategoryBySlugRequest, err = config.App.Server.Connection.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
 				Slug: c.Payload.ItemCategory,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Recupero armature non equipaggiate filtrate per la categoria scelta
@@ -271,7 +265,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			if len(rGetPlayerArmorsByCategoryID.GetArmors()) > 0 {
@@ -302,16 +296,14 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			// Recupero nuovamente armi player, richiamando la rotta dedicata
 			// in questa maniera posso filtrare per quelle che non sono equipaggiate
 			var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
-			rGetPlayerWeapons, err = config.App.Server.Connection.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
+			if rGetPlayerWeapons, err = config.App.Server.Connection.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 				PlayerID: c.Player.GetID(),
-			})
-			if err != nil {
-				return err
+			}); err != nil {
+				c.Logger.Panic(err)
 			}
 
 			if len(rGetPlayerWeapons.GetWeapons()) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
-
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
@@ -343,7 +335,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			Keyboard:       keyboardRowCategories,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -365,7 +357,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetArmorByName, err = config.App.Server.Connection.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
 				Name: equipmentName,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Verifico se appartiene correttamente al player
@@ -380,7 +372,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorByName.GetArmor().GetArmorCategory().GetID(),
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Preparo messaggio di conferma
@@ -396,7 +388,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
 				Name: equipmentName,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Verifico se appartiene correttamente al player
@@ -411,7 +403,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetPlayerWeaponEquipped, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Preparo messaggio di conferma
@@ -427,11 +419,8 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 
 		if equipmentError {
 			// Invio messaggio error
-			msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"),
-			)
+			msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"))
 			msg.ParseMode = "markdown"
-
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
@@ -439,7 +428,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			)
 
 			if _, err = helpers.SendMessage(msg); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			return
@@ -458,7 +447,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -474,7 +463,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetArmorCategoryBySlugRequest, err = config.App.Server.Connection.GetArmorCategoryBySlug(helpers.NewContext(1), &pb.GetArmorCategoryBySlugRequest{
 				Slug: c.Payload.ItemCategory,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
@@ -483,7 +472,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			// Rimuovo equipaggiamento attuale
@@ -493,7 +482,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 					ArmorID:  rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID(),
 					Equip:    false,
 				}); err != nil {
-					return
+					c.Logger.Panic(err)
 				}
 			}
 
@@ -503,7 +492,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				ArmorID:  c.Payload.EquipID,
 				Equip:    false,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 		case "weapons":
 			// Recupero arma attualmente equipaggiata
@@ -511,7 +500,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 			if rGetPlayerWeaponEquipped, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			// Rimovo arma attualmente equipaggiata
@@ -521,7 +510,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 					WeaponID: rGetPlayerWeaponEquipped.GetWeapon().GetID(),
 					Equip:    false,
 				}); err != nil {
-					return
+					c.Logger.Panic(err)
 				}
 			}
 
@@ -531,7 +520,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 				WeaponID: c.Payload.EquipID,
 				Equip:    false,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 		}
 
@@ -542,7 +531,7 @@ func (c *PlayerEquipmentController) Stage() (err error) {
 		msg.ParseMode = "markdown"
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

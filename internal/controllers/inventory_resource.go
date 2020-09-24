@@ -49,7 +49,7 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 	if rGetPlayerResource, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 		PlayerID: player.GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	var recapResources string
@@ -72,6 +72,6 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, finalResource)
 	msg.ParseMode = "markdown"
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }

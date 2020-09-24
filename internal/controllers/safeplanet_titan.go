@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -22,9 +20,6 @@ type SafePlanetTitanController struct {
 // Handle
 // ====================================
 func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -50,14 +45,10 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
-		panic(err)
-	}
+	c.Completing(nil)
 }
 
 // ====================================
@@ -74,7 +65,7 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
 		if rTitanDiscovered, err = config.App.Server.Connection.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Verifico sei il player ha passato il nome di un titano valido
@@ -96,7 +87,8 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetTitanController) Stage() (err error) {
+func (c *SafePlanetTitanController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	case 0:
 		var restsRecap string
@@ -106,7 +98,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
 		if rTitanDiscovered, err = config.App.Server.Connection.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
-			return fmt.Errorf("cant get titan discovered: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		// Se sono stati trovati dei tiani costruisco keyboard
@@ -115,7 +107,6 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 			for _, titan := range rTitanDiscovered.GetTitans() {
 				newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						// helpers.Trans(c.Player.Language.Slug, "ship.rests.start"),
 						titan.GetName(),
 					),
 				)
@@ -138,7 +129,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 			Keyboard:       keyboardRow,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -151,16 +142,15 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 		if rGetTitanByName, err = config.App.Server.Connection.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
 			Name: c.Update.Message.Text,
 		}); err != nil {
-			return fmt.Errorf("cant get titan by name: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		// Aggiunto nuova posizione al player
-		_, err = config.App.Server.Connection.CreatePlayerPosition(helpers.NewContext(1), &pb.CreatePlayerPositionRequest{
+		if _, err = config.App.Server.Connection.CreatePlayerPosition(helpers.NewContext(1), &pb.CreatePlayerPositionRequest{
 			PlayerID: c.Player.ID,
 			PlanetID: rGetTitanByName.GetTitan().GetPlanetID(),
-		})
-		if err != nil {
-			return fmt.Errorf("cant create player position: %s", err.Error())
+		}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -170,7 +160,7 @@ func (c *SafePlanetTitanController) Stage() (err error) {
 
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

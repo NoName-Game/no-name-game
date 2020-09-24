@@ -46,7 +46,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Riceco pianeta per ID, in modo da ottenere maggior informazioni
@@ -54,7 +54,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Aggiunto informazioni principali pianeta
@@ -70,7 +70,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if rCountPlayerVisitedCurrentPlanet, err = config.App.Server.Connection.CountPlayerVisitedCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerVisitedCurrentPlanetRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Aggiunto informazioni aggiuntive
@@ -95,7 +95,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	)
 
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }
 

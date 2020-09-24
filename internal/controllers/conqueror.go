@@ -46,7 +46,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Recupero top 10 player per uccisioni in questo pianeta
@@ -54,7 +54,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	if rGetConquerorsByPlanetID, err = config.App.Server.Connection.GetConquerorsByPlanetID(helpers.NewContext(1), &pb.GetConquerorsByPlanetIDRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Intro msg
@@ -92,7 +92,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	)
 
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }
 

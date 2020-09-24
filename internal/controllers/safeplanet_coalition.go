@@ -18,8 +18,6 @@ type SafePlanetCoalitionController struct {
 // ====================================
 func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
-	c.Player = player
-	c.Update = update
 
 	// Init Controller
 	if !c.InitController(Controller{
@@ -56,7 +54,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 		),
 	)
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }
 

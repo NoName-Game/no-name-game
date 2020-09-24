@@ -3,6 +3,8 @@ package controllers
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
@@ -33,6 +35,7 @@ type Controller struct {
 	}
 	ForceBackTo    bool
 	Configurations ControllerConfigurations
+	Logger         *logrus.Entry
 }
 
 type ControllerCurrentState struct {
@@ -58,9 +61,12 @@ func (c *Controller) InitController(controller Controller) bool {
 	// Carico configurazione controller
 	*c = controller
 
+	// Carico infomazioni per logger
+	c.SetLoggerData()
+
 	// Carico controller data
 	if err = c.LoadControllerData(); err != nil {
-		panic(err)
+		c.Logger.Panicf("cant load controller data: %s", err.Error())
 	}
 
 	// Verifico se il player si trova in determinati stati non consentiti
@@ -74,7 +80,7 @@ func (c *Controller) InitController(controller Controller) bool {
 
 	// Carico payload e infomazioni controller
 	if c.CurrentState.Stage, err = helpers.GetControllerCacheData(c.Player.ID, c.CurrentState.Controller, &c.CurrentState.Payload); err != nil {
-		panic(err)
+		c.Logger.Panicf("cant get stage and paylaod controlelr data: %s", err.Error())
 	}
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
@@ -83,6 +89,15 @@ func (c *Controller) InitController(controller Controller) bool {
 	}
 
 	return true
+}
+
+func (c *Controller) SetLoggerData() {
+	c.Logger = logrus.WithFields(logrus.Fields{
+		"controller": c.CurrentState.Controller,
+		"stage":      c.CurrentState.Stage,
+		"player":     c.Player.ID,
+		"message":    c.Update.Message.Text,
+	})
 }
 
 // Carico controller data
@@ -214,6 +229,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 func (c *Controller) Completing(payload interface{}) (err error) {
 	// Aggiorno stato controller
 	if err = helpers.SetControllerCacheData(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage, payload); err != nil {
+		c.Logger.Panicf("cant set controller cache data: %s", err.Error())
 		return
 	}
 
@@ -221,7 +237,7 @@ func (c *Controller) Completing(payload interface{}) (err error) {
 	if c.CurrentState.Completed {
 		// Cancello stato dalla memoria
 		helpers.DelCurrentControllerCache(c.Player.ID)
-		helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+		_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 		// Call menu controller
 		if c.Configurations.ControllerBack.To != nil {

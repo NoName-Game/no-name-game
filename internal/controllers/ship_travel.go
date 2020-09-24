@@ -28,9 +28,6 @@ type ShipTravelController struct {
 // Handle
 // ====================================
 func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -58,14 +55,10 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -121,14 +114,14 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipTravel.GetFinishTraveling() {
 			var finishAt time.Time
 			if finishAt, err = ptypes.Timestamp(rCheckShipTravel.GetTravelingEndTime()); err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -149,9 +142,9 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *ShipTravelController) Stage() (err error) {
+func (c *ShipTravelController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
-
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
 	case 0:
@@ -162,7 +155,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio con recap
@@ -185,7 +178,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stato
@@ -198,7 +191,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		if responseTravelInfo, err = config.App.Server.Connection.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		var starNearestMapName = make(map[int]string)
@@ -253,7 +246,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Update state
@@ -268,13 +261,13 @@ func (c *ShipTravelController) Stage() (err error) {
 			PlayerID:   c.Player.GetID(),
 			PlanetName: c.Update.Message.Text,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero orario fine viaggio
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rStartShipTravel.GetTravelingEndTime()); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -283,7 +276,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -297,7 +290,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		if _, err := config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -309,7 +302,7 @@ func (c *ShipTravelController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

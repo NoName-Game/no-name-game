@@ -24,9 +24,6 @@ type TutorialController struct {
 // Handle
 // ====================================
 func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -53,14 +50,10 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
-		panic(err)
-	}
+	c.Completing(nil)
 }
 
 // ====================================
@@ -88,14 +81,14 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipTravel.GetFinishTraveling() {
 			var finishAt time.Time
 			if finishAt, err = ptypes.Timestamp(rCheckShipTravel.GetTravelingEndTime()); err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -111,16 +104,16 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 	return false
 }
 
-func (c *TutorialController) Stage() (err error) {
+func (c *TutorialController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// ============================================================================================================
 	// Settaggio lingua
 	case 0:
 		// Recupero lingue disponibili
 		var rGetLanguages *pb.GetAllLanguagesResponse
-		rGetLanguages, err = config.App.Server.Connection.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{})
-		if err != nil {
-			return err
+		if rGetLanguages, err = config.App.Server.Connection.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Aggiungo lingue alla tastiera
@@ -133,7 +126,7 @@ func (c *TutorialController) Stage() (err error) {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "select_language"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorna stato
@@ -146,12 +139,12 @@ func (c *TutorialController) Stage() (err error) {
 		if _, err = config.App.Server.Connection.PlayerStartTutorial(helpers.NewContext(1), &pb.PlayerStartTutorialRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio set di messaggi
 		// if err = c.sendIntroMessage(); err != nil {
-		// 	return err
+		// 	c.Logger.Panic(err)
 		// }
 
 		// Ultimo step apri gli occhi
@@ -180,7 +173,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstUseMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstUseMessage); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -199,7 +192,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstMissionMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstMissionMessage); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -217,7 +210,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstWeaponMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstWeaponMessage); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -235,7 +228,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstHuntingMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstHuntingMessage); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -254,7 +247,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstTravelMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstTravelMessage); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Player start travel
@@ -262,13 +255,13 @@ func (c *TutorialController) Stage() (err error) {
 		if rStartTravelTutorial, err = config.App.Server.Connection.StartTravelTutorial(helpers.NewContext(1), &pb.StartTravelTutorialRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero orario fine viaggio
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rStartTravelTutorial.GetTravelingEndTime()); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -277,7 +270,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -291,7 +284,7 @@ func (c *TutorialController) Stage() (err error) {
 		if _, err = config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		firstSafeMessage := helpers.NewMessage(c.Player.ChatID,
@@ -299,7 +292,7 @@ func (c *TutorialController) Stage() (err error) {
 		)
 		firstSafeMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(firstSafeMessage); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Forzo a mano l'aggiornamento dello stato del player
@@ -314,7 +307,7 @@ func (c *TutorialController) Stage() (err error) {
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed"),
 		),
 		); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Registro che il player ha completato il tutorial e recupero rewward
@@ -322,7 +315,7 @@ func (c *TutorialController) Stage() (err error) {
 		if rPlayerEndTutorial, err = config.App.Server.Connection.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		rewardMessage := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
@@ -332,7 +325,7 @@ func (c *TutorialController) Stage() (err error) {
 		))
 		rewardMessage.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(rewardMessage); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

@@ -42,7 +42,9 @@ func handleUpdate(update tgbotapi.Update) {
 	defer func() {
 		if err := recover(); err != nil {
 			// TODO: Eseguire qualcosa se esplode male
-			logrus.Errorf("[*] Recoverd Error: %v", err)
+			if err, ok := err.(error); ok {
+				logrus.Errorf("[*] Recoverd Error: %v", err)
+			}
 		}
 	}()
 

@@ -51,7 +51,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 		PlayerID: c.Player.GetID(),
 	}); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Invio messaggio
@@ -81,7 +81,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	)
 
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }
 

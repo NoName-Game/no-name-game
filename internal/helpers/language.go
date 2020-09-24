@@ -3,6 +3,8 @@ package helpers
 import (
 	"strconv"
 
+	"github.com/sirupsen/logrus"
+
 	"bitbucket.org/no-name-game/nn-telegram/config"
 )
 
@@ -14,7 +16,7 @@ func Trans(locale string, key string, args ...interface{}) (message string) {
 	}
 
 	if message, err = config.App.Localization.GetTranslation(key, locale, args); err != nil {
-		panic(err)
+		logrus.Panicf("error getting translation: %s", err.Error())
 	}
 
 	return

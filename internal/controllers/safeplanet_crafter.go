@@ -32,9 +32,6 @@ type SafePlanetCrafterController struct {
 // Handle
 // ====================================
 func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -61,14 +58,10 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -120,7 +113,7 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 				PlayerID:    c.Player.GetID(),
 				EconomyType: pb.GetPlayerEconomyRequest_MONEY,
 			}); err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			if rGetPlayerEconomyMoney.GetValue() < int32(c.Payload.Price) {
@@ -135,15 +128,14 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		if rCrafterCheck, err = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCrafterCheck.GetFinishCrafting() {
 			var finishAt time.Time
-			finishAt, err = ptypes.Timestamp(rCrafterCheck.GetCraftingEndTime())
-			if err != nil {
-				panic(err)
+			if finishAt, err = ptypes.Timestamp(rCrafterCheck.GetCraftingEndTime()); err != nil {
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -164,7 +156,8 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetCrafterController) Stage() (err error) {
+func (c *SafePlanetCrafterController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
@@ -189,7 +182,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 
 		// Invio messaggio
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -204,7 +197,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 
 			var rGetAllArmorCategory *pb.GetAllArmorCategoryResponse
 			if rGetAllArmorCategory, err = config.App.Server.Connection.GetAllArmorCategory(helpers.NewContext(1), &pb.GetAllArmorCategoryRequest{}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
@@ -226,7 +219,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 
 		// Invio messaggio
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -236,7 +229,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		if rGetPlayerResources, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Se l'inventario è vuoto allora concludi
@@ -251,7 +244,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			)
 
 			if _, err = helpers.SendMessage(message); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 			// Completo lo stato
 			c.CurrentState.Completed = true
@@ -293,7 +286,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			if rGetResourceByName, err = config.App.Server.Connection.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
 				Name: resourceName,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			// Recupero dettagli risorsa
@@ -325,7 +318,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			if !hasResource {
 				msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resource"))
 				if _, err = helpers.SendMessage(msg); err != nil {
-					return
+					c.Logger.Panic(err)
 				}
 			}
 		}
@@ -372,7 +365,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: resourceID,
 				}); err != nil {
-					return
+					c.Logger.Panic(err)
 				}
 
 				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
@@ -396,7 +389,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 
 		// Invio
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -412,7 +405,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 					ID: resourceID,
 				}); err != nil {
-					return
+					c.Logger.Panic(err)
 				}
 
 				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
@@ -437,9 +430,8 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
-		_, err = helpers.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -456,13 +448,13 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 			ItemType:     c.Payload.ItemType,
 			ItemCategory: c.Payload.ItemCategory,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rCrafterStart.GetCraftingEndTime()); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		var msg tgbotapi.MessageConfig
@@ -471,7 +463,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		c.CurrentState.Stage = 5
@@ -481,7 +473,7 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 		if rCrafterEnd, err = config.App.Server.Connection.CrafterEnd(helpers.NewContext(1), &pb.CrafterEndRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		var endCraftMessage string
@@ -493,9 +485,8 @@ func (c *SafePlanetCrafterController) Stage() (err error) {
 
 		msg := helpers.NewMessage(c.Player.ChatID, endCraftMessage)
 		msg.ParseMode = "markdown"
-		_, err = helpers.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

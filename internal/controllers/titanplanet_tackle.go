@@ -45,9 +45,6 @@ var (
 // Handle
 // ====================================
 func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -74,22 +71,18 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
 	if c.CurrentState.Completed {
 		// Cancello messaggio contentente la mappa
-		if err = helpers.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID); err != nil {
-			panic(err)
+		if err := helpers.DeleteMessage(c.Payload.CallbackChatID, c.Payload.CallbackMessageID); err != nil {
+			c.Logger.Panic(err)
 		}
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -102,7 +95,7 @@ func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *TitanPlanetTackleController) Stage() (err error) {
+func (c *TitanPlanetTackleController) Stage() {
 	switch c.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
@@ -110,36 +103,35 @@ func (c *TitanPlanetTackleController) Stage() (err error) {
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.leave") {
 				c.CurrentState.Completed = true
-				return err
+				return
 			}
 		}
 
 		// Avvio ufficialmente lo scontro!
-		err = c.Tackle()
-		if err != nil {
-			return err
-		}
+		c.Tackle()
 	}
 
 	return
 }
 
 // Tackle - Gestisco combattionmento con titano
-func (c *TitanPlanetTackleController) Tackle() (err error) {
+func (c *TitanPlanetTackleController) Tackle() {
+	var err error
 	// Recupero ultima posizione del player
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		return
+	}); err != nil {
+		c.Logger.Panic(err)
 	}
 
 	// Recupero titano in base alla posizione del player
 	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
-	rGetTitanByPlanetID, err = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
+	if rGetTitanByPlanetID, err = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
 		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-	})
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
 
 	// Se ricevo un messaggio normale probabilmente è un avvio o un abbandona
 	if c.Update.Message != nil {
@@ -157,9 +149,8 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 				),
 			),
 		)
-		_, err = helpers.SendMessage(initHunting)
-		if err != nil {
-			return
+		if _, err = helpers.SendMessage(initHunting); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Preparo messaggio con la cardi di combattimento
@@ -179,9 +170,8 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		msg.ParseMode = "markdown"
 
 		var tackleMessage tgbotapi.Message
-		tackleMessage, err = helpers.SendMessage(msg)
-		if err != nil {
-			return
+		if tackleMessage, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno lo stato e ritorno
@@ -197,26 +187,20 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 		if c.Payload.InEvent {
 			// evento in corso
 			var rGetEvent *pb.GetTitanEventByIDResponse
-			rGetEvent, err = config.App.Server.Connection.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
+			if rGetEvent, err = config.App.Server.Connection.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
 				ID: c.Payload.EventID,
-			})
-			if err != nil {
-				return
+			}); err != nil {
+				c.Logger.Panic(err)
 			}
-			err = c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
-			if err != nil {
-				return
-			}
+
+			c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
 		} else {
 			// Controllo tipo di callback data - fight
 			actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
 			// Verifica tipo di movimento e mi assicuro che non sia in combattimento
 			if actionType[2] == "fight" {
-				err = c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
-			}
-			if err != nil {
-				return
+				c.Fight(actionType[3], rGetTitanByPlanetID.GetTitan())
 			}
 
 			// Rimuove rotella di caricamento dal bottone
@@ -234,7 +218,7 @@ func (c *TitanPlanetTackleController) Tackle() (err error) {
 // ====================================
 // Event
 // ====================================
-func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, titan *pb.Titan) (err error) {
+func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, titan *pb.Titan) {
 	var editMessage tgbotapi.EditMessageTextConfig
 	// Standard message titanplanet.event.event1.choice1
 	// route.event.eventID.choiceID
@@ -262,23 +246,24 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 			// controllo che la choice faccia effettivamente parte dell'evento
 			choiceID, err := strconv.Atoi(strings.Split(actionType[3], "choice")[1])
 			if err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
+
 			exist := false
 			for _, choice := range event.Choices {
 				if choice.ID == uint32(choiceID) {
 					exist = true
 				}
 			}
+
 			if exist {
 				var rSubmitAnswer *pb.SubmitAnswerResponse
-				rSubmitAnswer, err = config.App.Server.Connection.SubmitAnswer(helpers.NewContext(1), &pb.SubmitAnswerRequest{
+				if rSubmitAnswer, err = config.App.Server.Connection.SubmitAnswer(helpers.NewContext(1), &pb.SubmitAnswerRequest{
 					TitanID:  titan.ID,
 					ChoiceID: uint32(choiceID),
 					PlayerID: c.Player.GetID(),
-				})
-				if err != nil {
-					return err
+				}); err != nil {
+					c.Logger.Panic(err)
 				}
 
 				if rSubmitAnswer.IsMalus {
@@ -335,7 +320,7 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 				c.Payload.InEvent = false
 			} else {
 				// Risposta non presente fra quelle predefinite dall'evento. ERRORE
-				return errors.New("choice choosen not in event choices")
+				c.Logger.Panic(errors.New("choice choosen not in event choices"))
 			}
 		}
 	}
@@ -351,7 +336,9 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 	}
 
 	// Invio messaggio modificato
-	_, err = helpers.SendMessage(editMessage)
+	if _, err := helpers.SendMessage(editMessage); err != nil {
+		c.Logger.Panic(err)
+	}
 
 	return
 }
@@ -359,7 +346,8 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 // ====================================
 // Fight
 // ====================================
-func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err error) {
+func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) {
+	var err error
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	switch action {
@@ -382,13 +370,12 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		var rHitTitan *pb.HitTitanResponse
-		rHitTitan, err = config.App.Server.Connection.HitTitan(helpers.NewContext(1), &pb.HitTitanRequest{
+		if rHitTitan, err = config.App.Server.Connection.HitTitan(helpers.NewContext(1), &pb.HitTitanRequest{
 			TitanID:       titan.GetID(),
 			PlayerID:      c.Player.ID,
 			BodySelection: c.Payload.Selection,
-		})
-		if err != nil {
-			return err
+		}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Verifico se il MOB è morto
@@ -415,12 +402,11 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			c.Payload.TitanID = 0
 
 			// Invio messaggio
-			_, err = helpers.SendMessage(editMessage)
-			if err != nil {
-				return err
+			if _, err = helpers.SendMessage(editMessage); err != nil {
+				c.Logger.Panic(err)
 			}
 
-			return err
+			return
 		}
 
 		// Verifico se il PLAYER è morto
@@ -443,12 +429,11 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			editMessage.ReplyMarkup = &ok
 
 			// Invio messaggio
-			_, err = helpers.SendMessage(editMessage)
-			if err != nil {
-				return err
+			if _, err = helpers.SendMessage(editMessage); err != nil {
+				c.Logger.Panic(err)
 			}
 
-			return err
+			return
 		}
 
 		// Se ne il player e ne il mob è morto, continua lo scontro
@@ -479,9 +464,8 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 			c.Payload.InEvent = true
 			// Recupero un evento random
 			var rEventRandom *pb.GetRandomEventResponse
-			rEventRandom, err = config.App.Server.Connection.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{})
-			if err != nil {
-				return
+			if rEventRandom, err = config.App.Server.Connection.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{}); err != nil {
+				c.Logger.Panic(err)
 			}
 			c.Payload.EventID = rEventRandom.GetEvent().GetID()
 
@@ -494,7 +478,7 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 		// Il player è morto
 		c.CurrentState.Completed = true
 		// Drop Moment
-		err = c.Drop(titan)
+		c.Drop(titan)
 		return
 	case "no_action":
 		//
@@ -521,21 +505,22 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) (err
 	}
 
 	// Invio messaggio modificato
-	_, err = helpers.SendMessage(editMessage)
+	if _, err = helpers.SendMessage(editMessage); err != nil {
+		c.Logger.Panic(err)
+	}
 
 	return
 }
 
-func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) (err error) {
-
+func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) {
+	var err error
 	// THIS FUNCTION TAKE ALL THE DAMAGES INFLICTED BY PLAYER AND GIVE HIM THE RIGHT DROP
 
 	var rTitanDamage *pb.GetTitanDamageByTitanIDResponse
-	rTitanDamage, err = config.App.Server.Connection.GetTitanDamageByTitanID(helpers.NewContext(1), &pb.GetTitanDamageByTitanIDRequest{
+	if rTitanDamage, err = config.App.Server.Connection.GetTitanDamageByTitanID(helpers.NewContext(1), &pb.GetTitanDamageByTitanIDRequest{
 		TitanID: titan.ID,
-	})
-	if err != nil {
-		return err
+	}); err != nil {
+		c.Logger.Panic(err)
 	}
 	for _, damage := range rTitanDamage.Damages {
 		var rGetPlayer *pb.GetPlayerByIDResponse
@@ -543,7 +528,7 @@ func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) (err error) {
 			ID: damage.PlayerID,
 		})
 		if err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 		// Parte calcolo drop
 		// TODO
@@ -555,7 +540,7 @@ func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) (err error) {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		_, err := helpers.SendMessage(msg)
 		if err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 	}
 

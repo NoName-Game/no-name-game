@@ -83,9 +83,6 @@ var (
 // Handle
 // ====================================
 func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -106,22 +103,18 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Verifico completamento aggiuntivo per cancellare il messaggio
 	if c.CurrentState.Completed {
 		// Cancello messaggio contentente la mappa
-		if err = helpers.DeleteMessage(c.Player.ChatID, c.Payload.CallbackMessageID); err != nil {
-			panic(err)
+		if err := helpers.DeleteMessage(c.Player.ChatID, c.Payload.CallbackMessageID); err != nil {
+			c.Logger.Panic(err)
 		}
 	}
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -134,7 +127,7 @@ func (c *HuntingController) Validator() (hasErrors bool) {
 // ====================================
 // Stage Map -> Drop -> Finish
 // ====================================
-func (c *HuntingController) Stage() (err error) {
+func (c *HuntingController) Stage() {
 	switch c.CurrentState.Stage {
 	// In questo stage faccio entrare il player nella mappa
 	case 0:
@@ -142,21 +135,21 @@ func (c *HuntingController) Stage() (err error) {
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "hunting.leave") {
 				c.CurrentState.Completed = true
-				return err
+				return
 			}
 		}
 
 		// Avvio ufficialmente la caccia!
-		if err = c.Hunting(); err != nil {
-			return err
-		}
+		c.Hunting()
 	}
 
 	return
 }
 
 // Hunting - in questo passo mi restituisco la mappa al player
-func (c *HuntingController) Hunting() (err error) {
+func (c *HuntingController) Hunting() {
+	var err error
+
 	// Se nel payload NON è presente un ID della mappa lo
 	// recupero dalla posizione del player e invio al player il messaggio
 	// principale contenente la mappa e il tastierino
@@ -179,7 +172,7 @@ func (c *HuntingController) Hunting() (err error) {
 			),
 		)
 		if _, err = helpers.SendMessage(initHunting); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero ultima posizione del player, dando per scontato che sia
@@ -189,7 +182,7 @@ func (c *HuntingController) Hunting() (err error) {
 		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
@@ -198,13 +191,13 @@ func (c *HuntingController) Hunting() (err error) {
 		if rGetMapByID, err = config.App.Server.Connection.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 			MapID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		var maps = rGetMapByID.GetMaps()
 
 		// Registro mappa e posizione iniziale del player
-		helpers.SetMapInCache(maps)
+		_ = helpers.SetMapInCache(maps)
 		c.Payload.PlayerPositionX = maps.GetStartPositionX()
 		c.Payload.PlayerPositionY = maps.GetStartPositionY()
 		// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
@@ -213,7 +206,7 @@ func (c *HuntingController) Hunting() (err error) {
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
 		if decodedMap, err = helpers.DecodeMapToDisplay(maps, maps.GetStartPositionX(), maps.GetStartPositionY()); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio quindi il mesaggio contenente mappa e azioni disponibili
@@ -223,7 +216,7 @@ func (c *HuntingController) Hunting() (err error) {
 
 		var huntingMessage tgbotapi.Message
 		if huntingMessage, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno lo stato e ritorno
@@ -234,7 +227,7 @@ func (c *HuntingController) Hunting() (err error) {
 		// 	MapID:             maps.ID,
 		// })
 
-		return err
+		return
 	}
 
 	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
@@ -242,7 +235,7 @@ func (c *HuntingController) Hunting() (err error) {
 	if c.Update.CallbackQuery != nil && c.Update.Message == nil {
 		var maps *pb.Maps
 		if maps, err = helpers.GetMapInCache(c.Payload.MapID); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero posizione player
@@ -266,7 +259,7 @@ func (c *HuntingController) Hunting() (err error) {
 		}
 
 		if err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Rimuove rotella di caricamento dal bottone
@@ -277,7 +270,7 @@ func (c *HuntingController) Hunting() (err error) {
 		return
 	}
 
-	return err
+	return
 }
 
 // ====================================
@@ -287,7 +280,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 	// Refresh della mappa
 	var cellGrid [][]bool
 	if err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid); err != nil {
-		return
+		c.Logger.Panic(err)
 	}
 
 	// Eseguo azione
@@ -335,7 +328,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 				TresureID: tresure.ID,
 				PlayerID:  c.Player.ID,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			// Verifico cosa è tornato e rispondo
@@ -380,7 +373,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 
 					// Invio messaggio
 					if _, err = helpers.SendMessage(editMessage); err != nil {
-						return
+						c.Logger.Panic(err)
 					}
 
 					return
@@ -409,12 +402,10 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 			editMessage.ParseMode = "markdown"
 
 			// Un tesoro è stato aperto, devo refreshare la mappa per cancellarlo
-			if err = c.RefreshMap(maps.ID); err != nil {
-				return
-			}
+			c.RefreshMap(maps.ID)
 
 			if _, err = helpers.SendMessage(editMessage); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			return
@@ -434,7 +425,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
 	if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
-		return
+		c.Logger.Panic(err)
 	}
 
 	// Se l'azione è valida e completa aggiorno risultato
@@ -454,7 +445,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 
 	msg.ParseMode = "HTML"
 	if _, err = helpers.SendMessage(msg); err != nil {
-		return
+		c.Logger.Panic(err)
 	}
 
 	return
@@ -474,7 +465,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 			EnemyID: enemy.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 		enemy = rGetEnemyByID.GetEnemy()
 	}
@@ -500,13 +491,12 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	case "hit":
 		// Effettuo chiamata al ws e recupero response dell'attacco
 		var rHitEnemy *pb.HitEnemyResponse
-		rHitEnemy, err = config.App.Server.Connection.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
+		if rHitEnemy, err = config.App.Server.Connection.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
 			EnemyID:       enemy.GetID(),
 			PlayerID:      c.Player.ID,
 			BodySelection: c.Payload.BodySelection,
-		})
-		if err != nil {
-			return err
+		}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Verifico se il MOB è morto
@@ -546,13 +536,11 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 			editMessage.ReplyMarkup = &ok
 
 			// Se il mob è morto è necessario aggiornare la mappa
-			if err = c.RefreshMap(maps.ID); err != nil {
-				return
-			}
+			c.RefreshMap(maps.ID)
 
 			// Invio messaggio
 			if _, err = helpers.SendMessage(editMessage); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			return
@@ -579,7 +567,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 
 			// Invio messaggio
 			if _, err = helpers.SendMessage(editMessage); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			return
@@ -616,9 +604,8 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	case "return_map":
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-		if err != nil {
-			return err
+		if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Forzo invio messaggio contenente la mappa
@@ -659,22 +646,28 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	}
 
 	// Invio messaggio modificato
-	_, err = helpers.SendMessage(editMessage)
+	if _, err = helpers.SendMessage(editMessage); err != nil {
+		c.Logger.Panic(err)
+	}
 	return
 }
 
 // RefreshMap - Necessario per refreshare la mappa in caso
 // di sconfitta di mob o apertura di tesori.
-func (c *HuntingController) RefreshMap(MapID uint32) (err error) {
+func (c *HuntingController) RefreshMap(MapID uint32) {
+	var err error
+
 	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
 	var rGetMapByID *pb.GetMapByIDResponse
 	if rGetMapByID, err = config.App.Server.Connection.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
 		MapID: MapID,
 	}); err != nil {
-		return
+		c.Logger.Panic(err)
 	}
 
 	// Registro mappa e posizione iniziale del player
-	helpers.SetMapInCache(rGetMapByID.GetMaps())
+	if err = helpers.SetMapInCache(rGetMapByID.GetMaps()); err != nil {
+		c.Logger.Panic(err)
+	}
 	return
 }

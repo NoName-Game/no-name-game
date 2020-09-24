@@ -17,8 +17,6 @@ type InventoryController struct {
 // Handle
 // ====================================
 func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
@@ -47,8 +45,8 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 		),
 	)
 
-	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+	if _, err := helpers.SendMessage(msg); err != nil {
+		c.Logger.Panic(err)
 	}
 }
 

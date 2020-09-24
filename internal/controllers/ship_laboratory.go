@@ -33,9 +33,6 @@ type ShipLaboratoryController struct {
 // Handle
 // ====================================
 func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -62,14 +59,10 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -100,7 +93,7 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 		// Recupero tutte gli items e ciclo per trovare quello voluta del player
 		var rGetAllItems *pb.GetAllItemsResponse
 		if rGetAllItems, err = config.App.Server.Connection.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{}); err != nil {
-			return true
+			c.Logger.Panic(err)
 		}
 
 		// Recupero nome item che il player vuole craftare
@@ -129,7 +122,7 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 				PlayerID: c.Player.ID,
 				ItemID:   c.Payload.Item.ID,
 			}); err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			if !rLaboratoryCheckHaveResourceForCrafting.GetHaveResources() {
@@ -148,15 +141,14 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 		if rLaboratoryCheckCrafting, err = config.App.Server.Connection.LaboratoryCheckCrafting(helpers.NewContext(1), &pb.LaboratoryCheckCraftingRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rLaboratoryCheckCrafting.GetFinishCrafting() {
 			var finishAt time.Time
-			finishAt, err = ptypes.Timestamp(rLaboratoryCheckCrafting.GetCraftingEndTime())
-			if err != nil {
-				panic(err)
+			if finishAt, err = ptypes.Timestamp(rLaboratoryCheckCrafting.GetCraftingEndTime()); err != nil {
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -177,14 +169,14 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 // ====================================
 // Stage  0 What -> 1 - Check Resources -> 2 - Confirm -> 3 - Craft
 // ====================================
-func (c *ShipLaboratoryController) Stage() (err error) {
+func (c *ShipLaboratoryController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
-
 	// In questo stage invio al player le tipologie di crafting possibili
 	case 0:
 		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
 		if rGetAllItemCategories, err = config.App.Server.Connection.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Creo messaggio
@@ -216,7 +208,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -228,7 +220,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
 		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
 		if rGetAllItemCategories, err = config.App.Server.Connection.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		var chosenCategory *pb.ItemCategory
@@ -243,7 +235,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		if rGetItemByCategoryID, err = config.App.Server.Connection.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero tutti gli items del player
@@ -251,7 +243,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Creo messaggio
@@ -292,7 +284,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -311,7 +303,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceID,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			itemsRecipeList += fmt.Sprintf("- *%v* x %s (%s)\n",
@@ -343,7 +335,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -357,7 +349,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			PlayerID: c.Player.GetID(),
 			ItemID:   c.Payload.Item.ID,
 		}); err != nil {
-			return fmt.Errorf("error start laboratory crafting: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		// Converto time
@@ -373,7 +365,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorna stato
@@ -387,7 +379,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 		if rLaboratoryEndCrafting, err = config.App.Server.Connection.LaboratoryEndCrafting(helpers.NewContext(1), &pb.LaboratoryEndCraftingRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return fmt.Errorf("error end laboratory crafting: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -405,7 +397,7 @@ func (c *ShipLaboratoryController) Stage() (err error) {
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

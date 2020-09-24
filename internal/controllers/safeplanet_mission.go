@@ -22,9 +22,6 @@ type SafePlanetMissionController struct {
 // Handle
 // ====================================
 func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -50,20 +47,17 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
-		panic(err)
-	}
+	c.Completing(nil)
 }
 
 // ====================================
 // Validator
 // ====================================
 func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
+	var err error
 	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
@@ -80,9 +74,11 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
 		var rCheckMission *pb.CheckMissionResponse
-		rCheckMission, _ = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
+		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
-		})
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		// Verifico se realmente il player è in missione
 		if !rCheckMission.GetInMission() {
@@ -138,7 +134,8 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetMissionController) Stage() (err error) {
+func (c *SafePlanetMissionController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// Primo avvio chiedo al player se vuole avviare una nuova mission
 	case 0:
@@ -162,7 +159,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			ResizeKeyboard: true,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -177,7 +174,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		if rGetMission, err = config.App.Server.Connection.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// In base alla categoria della missione costruisco il messaggio
@@ -198,7 +195,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: missionPayload.GetResourceID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			missionRecap += helpers.Trans(c.Player.Language.Slug,
@@ -215,7 +212,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
 				PlanetID: missionPayload.GetPlanetID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			missionRecap += helpers.Trans(c.Player.Language.Slug,
@@ -231,7 +228,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 				EnemyID: missionPayload.GetEnemyID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			// Recupero pianeta di dove si trova il mob
@@ -239,7 +236,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 			if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
 				MapID: rGetEnemyByID.GetEnemy().GetMapID(),
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			missionRecap += helpers.Trans(c.Player.Language.Slug,
@@ -253,7 +250,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		msg := helpers.NewMessage(c.Player.ChatID, missionRecap)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stato
@@ -265,7 +262,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		if rGetMissionReward, err = config.App.Server.Connection.GetMissionReward(helpers.NewContext(1), &pb.GetMissionRewardRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID,
@@ -278,7 +275,7 @@ func (c *SafePlanetMissionController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

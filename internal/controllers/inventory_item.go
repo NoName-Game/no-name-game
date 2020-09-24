@@ -30,9 +30,6 @@ type InventoryItemController struct {
 // Handle
 // ====================================
 func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -59,14 +56,10 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -85,7 +78,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool) {
 		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return false
+			c.Logger.Panic(err)
 		}
 
 		// Recupero nome item che il player vuole usare
@@ -124,9 +117,9 @@ func (c *InventoryItemController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *InventoryItemController) Stage() (err error) {
+func (c *InventoryItemController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
-
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
@@ -134,7 +127,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Ciclo items e li inserisco nella keyboard
@@ -170,7 +163,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -205,7 +198,7 @@ func (c *InventoryItemController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -218,7 +211,7 @@ func (c *InventoryItemController) Stage() (err error) {
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -228,9 +221,8 @@ func (c *InventoryItemController) Stage() (err error) {
 			),
 		)
 		msg.ParseMode = "markdown"
-		_, err = helpers.SendMessage(msg)
-		if err != nil {
-			return err
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

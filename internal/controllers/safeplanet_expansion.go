@@ -26,9 +26,6 @@ type SafePlanetExpansionController struct {
 // Handle
 // ====================================
 func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -55,14 +52,10 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -78,9 +71,8 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 	case 1:
 		// Verifico se il nome passato è quello di un pianeta sicuro
 		var rGetSafePlanets *pb.GetSafePlanetsResponse
-		rGetSafePlanets, err = config.App.Server.Connection.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{})
-		if err != nil {
-			return
+		if rGetSafePlanets, err = config.App.Server.Connection.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		planetName := strings.Split(c.Update.Message.Text, " -")[0]
@@ -105,7 +97,7 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 				PlayerID:    c.Player.ID,
 				EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			if rGetPlayerEconomy.GetValue() >= c.Payload.Price {
@@ -126,7 +118,8 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetExpansionController) Stage() (err error) {
+func (c *SafePlanetExpansionController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	case 0:
 		var expansionRecap string
@@ -136,7 +129,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		// Recupero quanti pianeti mancano per l'ampliamento del sistema
 		var rGetExpansionInfo *pb.GetExpansionInfoResponse
 		if rGetExpansionInfo, err = config.App.Server.Connection.GetExpansionInfo(helpers.NewContext(1), &pb.GetExpansionInfoRequest{}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.last_system",
@@ -157,7 +150,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Mostro la lista dei pianeti sicuri disponibili
@@ -165,7 +158,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		if len(rGetSafePlanets.GetSafePlanets()) > 0 {
@@ -193,7 +186,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 			Keyboard:       keyboardRow,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -208,14 +201,14 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Recupero costo finale
@@ -246,7 +239,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -260,7 +253,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 			PlanetID: c.Payload.PlanetID,
 			Price:    -c.Payload.Price,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -270,7 +263,7 @@ func (c *SafePlanetExpansionController) Stage() (err error) {
 
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

@@ -37,13 +37,12 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	c.Update = update
 
 	// Carico controller data
-	c.LoadControllerData()
+	if err = c.LoadControllerData(); err != nil {
+		c.Logger.Panic(err)
+	}
 
 	// Recupero messaggio principale
-	var recap string
-	if recap, err = c.GetRecap(); err != nil {
-		panic(err)
-	}
+	recap := c.GetRecap()
 
 	msg := helpers.NewMessage(c.Player.ChatID, recap)
 	msg.ParseMode = "markdown"
@@ -54,7 +53,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Send recap message
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
@@ -81,12 +80,12 @@ func (c *MenuController) Stage() {
 //
 // ⏱ Task in corso:
 // - LIST
-func (c *MenuController) GetRecap() (message string, err error) {
+func (c *MenuController) GetRecap() (message string) {
+	var err error
+
 	// Recupero posizione player
 	var planet *pb.Planet
-	if planet, err = c.GetPlayerPosition(); err != nil {
-		return message, fmt.Errorf("error gettin player position: %s", err.Error())
-	}
+	planet = c.GetPlayerPosition()
 
 	// Costruisco messaggio di racap in base a dove si trova il player
 	if c.SafePlanet {
@@ -100,7 +99,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		if rGetTitanByPlanetID, err = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
 			PlanetID: planet.GetID(),
 		}); err != nil {
-			return message, fmt.Errorf("error rGetTitanByPlanetID: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		message = helpers.Trans(c.Player.Language.Slug, "menu.titanplanet", planet.GetName(), rGetTitanByPlanetID.GetTitan().GetName())
@@ -114,10 +113,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		}
 	} else {
 		// Recupero status vitale del player
-		var life string
-		if life, err = c.GetPlayerLife(); err != nil {
-			return message, fmt.Errorf("error getting player life: %s", err.Error())
-		}
+		life := c.GetPlayerLife()
 
 		// Recupero conquistatore attuale
 		var currentConqueror string
@@ -125,7 +121,7 @@ func (c *MenuController) GetRecap() (message string, err error) {
 		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
 			PlanetID: planet.ID,
 		}); err != nil {
-			return message, fmt.Errorf("error rGetCurrentConquerorByPlanetID: %s", err.Error())
+			c.Logger.Panic(err)
 		}
 
 		if rGetCurrentConquerorByPlanetID.GetPlayer().GetID() > 0 {
@@ -147,31 +143,33 @@ func (c *MenuController) GetRecap() (message string, err error) {
 
 // GetPlayerPosition
 // Metodo didicato allo visualizione del nome del pianeta
-func (c *MenuController) GetPlayerPosition() (result *pb.Planet, err error) {
+func (c *MenuController) GetPlayerPosition() (result *pb.Planet) {
+	var err error
+
 	// Recupero ultima posizione del player, dando per scontato che sia
 	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
 	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 		PlayerID: c.Player.GetID(),
 	}); err != nil {
-		return result, fmt.Errorf("error rGetPlayerCurrentPlanet: %s", err.Error())
+		c.Logger.Panic(err)
 	}
 
 	// Verifico se il player si trova su un pianeta valido
 	if rGetPlayerCurrentPlanet.GetPlanet() == nil {
-		return result, fmt.Errorf("player %d position not valid, nil planet value", c.Player.GetID())
+		c.Logger.Panic(err)
 	}
 
 	// Verifico se il player si trova su un pianeta sicuro
 	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
 	c.TitanPlanet = rGetPlayerCurrentPlanet.GetPlanet().GetTitan()
 
-	return rGetPlayerCurrentPlanet.GetPlanet(), nil
+	return rGetPlayerCurrentPlanet.GetPlanet()
 }
 
 // GetPlayerLife
 // Metodo dedicato alla rappresentazione dello stato vitale del player
-func (c *MenuController) GetPlayerLife() (life string, err error) {
+func (c *MenuController) GetPlayerLife() (life string) {
 	// Calcolo stato vitale del player
 	status := "♥️"
 	if c.Data.PlayerStats.GetDead() {
@@ -186,14 +184,14 @@ func (c *MenuController) GetPlayerLife() (life string, err error) {
 // GetPlayerTask
 // Metodo dedicato alla rappresentazione dei task attivi del player
 func (c *MenuController) GetPlayerTasks() (tasks string) {
+	var err error
 	if len(c.Data.PlayerActiveStates) > 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 
 		for _, state := range c.Data.PlayerActiveStates {
-
-			finishAt, err := ptypes.Timestamp(state.FinishAt)
-			if err != nil {
-				panic(err)
+			var finishAt time.Time
+			if finishAt, err = ptypes.Timestamp(state.FinishAt); err != nil {
+				c.Logger.Panic(err)
 			}
 
 			// Se sono da notificare formatto con la data
@@ -218,7 +216,6 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 						helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
 					)
 				}
-
 			}
 		}
 	}

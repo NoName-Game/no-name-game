@@ -26,9 +26,6 @@ type SafePlanetBankController struct {
 // Handle
 // ====================================
 func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -55,14 +52,10 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(nil)
 }
 
 // ====================================
@@ -94,7 +87,8 @@ func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetBankController) Stage() (err error) {
+func (c *SafePlanetBankController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
@@ -114,7 +108,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 
 		msg.ParseMode = "HTML"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Bank
@@ -123,7 +117,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 			PlayerID:    c.Player.GetID(),
 			EconomyType: pb.GetPlayerEconomyRequest_BANK,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Money
@@ -132,7 +126,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 			PlayerID:    c.Player.GetID(),
 			EconomyType: pb.GetPlayerEconomyRequest_MONEY,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		msg = helpers.NewMessage(c.Player.ChatID,
@@ -145,7 +139,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		)
 		msg.ParseMode = "Markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -184,7 +178,7 @@ func (c *SafePlanetBankController) Stage() (err error) {
 			Keyboard:       keyboardRowQuantities,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -195,9 +189,9 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		// in base alla tipologia scelta
 
 		// Converto valore richiesto in int
-		value, err := strconv.Atoi(c.Update.Message.Text)
-		if err != nil {
-			return err
+		var value int
+		if value, err = strconv.Atoi(c.Update.Message.Text); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		var text string
@@ -222,9 +216,8 @@ func (c *SafePlanetBankController) Stage() (err error) {
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, text)
 		msg.ParseMode = "markdown"
-
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

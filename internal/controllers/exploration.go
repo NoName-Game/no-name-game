@@ -57,12 +57,12 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 
 	// Ok! Run!
 	if err = c.Stage(); err != nil {
-		panic(err)
+		return
 	}
 
 	// Completo progressione
 	if err = c.Completing(nil); err != nil {
-		panic(err)
+		return
 	}
 }
 
@@ -82,7 +82,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		// Recupero tutte le categorie di esplorazione possibili
 		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
 		if rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Controllo se il messaggio continene uno dei tipi di missione dichiarati
@@ -101,7 +101,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il Player deve terminare prima l'esplorazione in corso
@@ -109,7 +109,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 			var finishAt time.Time
 			finishAt, err = ptypes.Timestamp(rExplorationCheck.GetExplorationEndTime())
 			if err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -168,9 +168,8 @@ func (c *ExplorationController) Stage() (err error) {
 	case 0:
 		// Recupero tutte le categorie di esplorazione possibili
 		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
-		rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{})
-		if err != nil {
-			return err
+		if rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Creo messaggio con la lista delle missioni possibili
@@ -196,20 +195,18 @@ func (c *ExplorationController) Stage() (err error) {
 
 		// Recupero posizione player
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
 			PlayerID: c.Player.ID,
-		})
-		if err != nil {
-			return err
+		}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Verifico se sono conquistatore
 		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
-		rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
 			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
-		})
-		if err != nil {
-			return err
+		}); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Verifico se il player è un conquistatore
@@ -225,7 +222,7 @@ func (c *ExplorationController) Stage() (err error) {
 			ResizeKeyboard: true,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -240,13 +237,13 @@ func (c *ExplorationController) Stage() (err error) {
 			PlayerID:                c.Player.ID,
 			ExplorationCategorySlug: c.ExplorationTypeChoiched,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rExplorationStart.GetFinishAt()); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio di attesa
@@ -259,7 +256,7 @@ func (c *ExplorationController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Avanzo di stage
@@ -273,7 +270,7 @@ func (c *ExplorationController) Stage() (err error) {
 		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Recupero dattigli risorsa
@@ -281,7 +278,7 @@ func (c *ExplorationController) Stage() (err error) {
 		if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 			ID: rExplorationCheck.GetDropResult().GetResourceID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
@@ -304,7 +301,7 @@ func (c *ExplorationController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno lo stato
@@ -319,13 +316,13 @@ func (c *ExplorationController) Stage() (err error) {
 		if rExplorationContinue, err = config.App.Server.Connection.ExplorationContinue(helpers.NewContext(1), &pb.ExplorationContinueRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rExplorationContinue.GetFinishAt()); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Il player ha scelto di continuare la ricerca
@@ -338,7 +335,7 @@ func (c *ExplorationController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno lo stato
@@ -351,7 +348,7 @@ func (c *ExplorationController) Stage() (err error) {
 		if rExplorationEnd, err = config.App.Server.Connection.ExplorationEnd(helpers.NewContext(1), &pb.ExplorationEndRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recap delle risorse ricavate da questa missione
@@ -362,7 +359,7 @@ func (c *ExplorationController) Stage() (err error) {
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: drop.ResourceID,
 			}); err != nil {
-				return
+				c.Logger.Panic(err)
 			}
 
 			dropList += fmt.Sprintf(
@@ -383,7 +380,7 @@ func (c *ExplorationController) Stage() (err error) {
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

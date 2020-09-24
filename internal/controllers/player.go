@@ -42,9 +42,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Recupero economia player
 	// *************************
 	var money, diamond int32
-	if money, diamond, err = c.GetPlayerEconomy(); err != nil {
-		panic(err)
-	}
+	money, diamond = c.GetPlayerEconomy()
 
 	// *************************
 	// Recupero esperienza player
@@ -53,8 +51,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	if rGetPlayerExperience, err = config.App.Server.Connection.GetPlayerExperience(helpers.NewContext(1), &pb.GetPlayerExperienceRequest{
 		PlayerID: c.Player.GetID(),
 	}); err != nil {
-		// log.Fatalln(err)
-		panic(err)
+		c.Logger.Panic(err)
 	}
 
 	recapPlayer := helpers.Trans(
@@ -71,12 +68,10 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Recupero quanti pianeti ha visitato
 	// *************************
 	var rCountPlanetVisited *pb.CountPlanetVisitedResponse
-	rCountPlanetVisited, err = config.App.Server.Connection.CountPlanetVisited(helpers.NewContext(100), &pb.CountPlanetVisitedRequest{
+	if rCountPlanetVisited, err = config.App.Server.Connection.CountPlanetVisited(helpers.NewContext(100), &pb.CountPlanetVisitedRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		// log.Fatalln(err)
-		panic(err)
+	}); err != nil {
+		c.Logger.Panic(err)
 	}
 
 	recapPlayer += helpers.Trans(
@@ -89,12 +84,10 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Recupero quanti sistemi ha visitatao
 	// *************************
 	var rCountSystemVisited *pb.CountSystemVisitedResponse
-	rCountSystemVisited, err = config.App.Server.Connection.CountSystemVisited(helpers.NewContext(100), &pb.CountSystemVisitedRequest{
+	if rCountSystemVisited, err = config.App.Server.Connection.CountSystemVisited(helpers.NewContext(100), &pb.CountSystemVisitedRequest{
 		PlayerID: c.Player.GetID(),
-	})
-	if err != nil {
-		// log.Fatalln(err)
-		panic(err)
+	}); err != nil {
+		c.Logger.Panic(err)
 	}
 
 	recapPlayer += helpers.Trans(
@@ -117,7 +110,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	)
 
 	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+		c.Logger.Panic(err)
 	}
 }
 
@@ -131,18 +124,26 @@ func (c *PlayerController) Stage() {
 
 // GetPlayerTask
 // Metodo didicato alla reppresenteazione del risorse econimiche del player
-func (c *PlayerController) GetPlayerEconomy() (money int32, diamond int32, err error) {
+func (c *PlayerController) GetPlayerEconomy() (money int32, diamond int32) {
+	var err error
+
 	// Calcolo monete del player
-	responseMoney, _ := config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+	var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
+	if rGetPlayerEconomyMoney, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
 		EconomyType: pb.GetPlayerEconomyRequest_MONEY,
-	})
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
 
 	// Calcolo diamanti del player
-	responseDiamond, _ := config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+	var rGetPlayerEconomyDiamond *pb.GetPlayerEconomyResponse
+	if rGetPlayerEconomyDiamond, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 		PlayerID:    c.Player.GetID(),
 		EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
-	})
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
 
-	return responseMoney.GetValue(), responseDiamond.GetValue(), nil
+	return rGetPlayerEconomyMoney.GetValue(), rGetPlayerEconomyDiamond.GetValue()
 }

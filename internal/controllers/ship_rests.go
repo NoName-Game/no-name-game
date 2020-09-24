@@ -24,9 +24,6 @@ type ShipRestsController struct {
 // Handle
 // ====================================
 func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -53,14 +50,10 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
-		panic(err)
-	}
+	c.Completing(nil)
 }
 
 // ====================================
@@ -74,7 +67,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 			PlayerID: c.Player.GetID(),
 		})
 		if err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		if !restsInfo.NeedRests {
@@ -123,9 +116,9 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *ShipRestsController) Stage() (err error) {
+func (c *ShipRestsController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
-
 	// In questo riporto al player le tempistiche necesarie al riposo
 	case 0:
 		// Recupero informazioni per il recupero totale delle energie
@@ -133,7 +126,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		if restsInfo, err = config.App.Server.Connection.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Costruisco info per riposo
@@ -170,7 +163,7 @@ func (c *ShipRestsController) Stage() (err error) {
 			Keyboard:       keyboardRow,
 		}
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -183,13 +176,13 @@ func (c *ShipRestsController) Stage() (err error) {
 		if rStartPlayerRest, err = config.App.Server.Connection.StartPlayerRest(helpers.NewContext(1), &pb.StartPlayerRestRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Recupero orario fine riposo
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rStartPlayerRest.GetRestEndTime()); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -205,7 +198,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -216,7 +209,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		if rEndPlayerRest, err = config.App.Server.Connection.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -233,7 +226,7 @@ func (c *ShipRestsController) Stage() (err error) {
 		)
 
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato

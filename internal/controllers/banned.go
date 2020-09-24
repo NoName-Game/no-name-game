@@ -17,8 +17,6 @@ type BannedController struct {
 // Handle
 // ====================================
 func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
@@ -37,8 +35,8 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "banned.message"))
-	if _, err = helpers.SendMessage(msg); err != nil {
-		panic(err)
+	if _, err := helpers.SendMessage(msg); err != nil {
+		c.Logger.Panic(err)
 	}
 }
 

@@ -30,11 +30,6 @@ type ShipRepairsController struct {
 // Handle
 // ====================================
 func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-	c.Player = player
-	c.Update = update
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -61,14 +56,10 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		panic(err)
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(&c.Payload); err != nil {
-		panic(err)
-	}
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -84,7 +75,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Recupero informazioni nave da riparare
@@ -92,7 +83,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		if rGetShipRepairInfo, err = config.App.Server.Connection.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
 			ShipID: rGetPlayerShipEquipped.GetShip().GetID(),
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		if !rGetShipRepairInfo.GetNeedRepairs() {
@@ -126,14 +117,14 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			panic(err)
+			c.Logger.Panic(err)
 		}
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipRepair.GetFinishRepairing() {
 			var finishAt time.Time
 			if finishAt, err = ptypes.Timestamp(rCheckShipRepair.GetRepairingEndTime()); err != nil {
-				panic(err)
+				c.Logger.Panic(err)
 			}
 
 			c.Validation.Message = helpers.Trans(
@@ -154,9 +145,9 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *ShipRepairsController) Stage() (err error) {
+func (c *ShipRepairsController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
-
 	// In questo riporto al player le risorse e tempistiche necessarie alla riparazione della nave
 	case 0:
 		// Recupero nave player equipaggiata
@@ -164,7 +155,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Recupero informazioni nave da riparare
@@ -172,7 +163,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		if rGetShipRepairInfo, err = config.App.Server.Connection.GetShipRepairInfo(helpers.NewContext(1), &pb.GetShipRepairInfoRequest{
 			ShipID: rGetPlayerShipEquipped.GetShip().GetID(),
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		var shipRecap string
@@ -208,7 +199,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -229,10 +220,9 @@ func (c *ShipRepairsController) Stage() (err error) {
 				helpers.Trans(c.Player.Language.Slug, "ship.repairs.not_enough_resource"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
-
-			return err
+			return
 		}
 
 		// Se tutto ok mostro le risorse che vengono consumate per la riparazione
@@ -243,7 +233,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceUsed.ResourceID,
 			}); err != nil {
-				return err
+				c.Logger.Panic(err)
 			}
 
 			recapResourceUsed += fmt.Sprintf("\n- *%v* x %s (%s)",
@@ -255,7 +245,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		// Recupero orario fine riparazione
 		var finishAt time.Time
 		if finishAt, err = ptypes.Timestamp(rStartShipRepair.GetRepairingEndTime()); err != nil {
-			return
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -268,7 +258,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Aggiorno stato
@@ -279,7 +269,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 		if _, err := config.App.Server.Connection.EndShipRepair(helpers.NewContext(1), &pb.EndShipRepairRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Invio messaggio
@@ -287,7 +277,7 @@ func (c *ShipRepairsController) Stage() (err error) {
 			helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing.finish"),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {
-			return err
+			c.Logger.Panic(err)
 		}
 
 		// Completo lo stato
