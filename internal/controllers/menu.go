@@ -63,8 +63,8 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 }
 
-func (c *MenuController) Validator() {
-	//
+func (c *MenuController) Validator() bool {
+	return false
 }
 
 func (c *MenuController) Stage() {

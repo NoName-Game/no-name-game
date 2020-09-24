@@ -16,7 +16,7 @@ import (
 // Controller - Intereffaccia base di tutti i controller
 type ControllerInterface interface {
 	Handle(*pb.Player, tgbotapi.Update)
-	Validator()
+	Validator() bool
 	Stage()
 }
 

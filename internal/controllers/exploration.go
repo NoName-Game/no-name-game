@@ -27,9 +27,6 @@ type ExplorationController struct {
 // Handle
 // ====================================
 func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -56,14 +53,10 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Ok! Run!
-	if err = c.Stage(); err != nil {
-		return
-	}
+	c.Stage()
 
 	// Completo progressione
-	if err = c.Completing(nil); err != nil {
-		return
-	}
+	c.Completing(nil)
 }
 
 // ====================================
@@ -161,7 +154,8 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *ExplorationController) Stage() (err error) {
+func (c *ExplorationController) Stage() {
+	var err error
 	switch c.CurrentState.Stage {
 	// Primo avvio di missione, restituisco al player
 	// i vari tipi di missioni disponibili

@@ -58,8 +58,8 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	}
 }
 
-func (c *SafePlanetCoalitionController) Validator() {
-	//
+func (c *SafePlanetCoalitionController) Validator() bool {
+	return false
 }
 
 func (c *SafePlanetCoalitionController) Stage() {

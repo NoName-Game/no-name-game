@@ -1,7 +1,6 @@
 package router
 
 import (
-	"reflect"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/controllers"
@@ -13,55 +12,53 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 )
 
-var (
-	Routes = map[string]reflect.Type{
-		"route.menu":              reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
-		"route.tutorial":          reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
-		"route.tutorial.continue": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
+var routes = map[string]controllers.ControllerInterface{
+	"route.menu":              &controllers.MenuController{},
+	"route.tutorial":          &controllers.TutorialController{},
+	"route.tutorial.continue": &controllers.TutorialController{},
 
-		"route.exploration": reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
-		"route.hunting":     reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
+	"route.exploration": &controllers.ExplorationController{},
+	"route.hunting":     &controllers.HuntingController{},
 
-		// Ship
-		"route.ship":            reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
-		"route.ship.travel":     reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
-		"route.ship.repairs":    reflect.TypeOf((*controllers.ShipRepairsController)(nil)).Elem(),
-		"route.ship.rests":      reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
-		"route.ship.laboratory": reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
+	// Ship
+	"route.ship":            &controllers.ShipController{},
+	"route.ship.travel":     &controllers.ShipTravelController{},
+	"route.ship.repairs":    &controllers.ShipRepairsController{},
+	"route.ship.rests":      &controllers.ShipRestsController{},
+	"route.ship.laboratory": &controllers.ShipLaboratoryController{},
 
-		// Player
-		"route.player":              reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
-		"route.inventory":           reflect.TypeOf((*controllers.InventoryController)(nil)).Elem(),
-		"route.inventory.resources": reflect.TypeOf((*controllers.InventoryResourceController)(nil)).Elem(),
-		"route.inventory.items":     reflect.TypeOf((*controllers.InventoryItemController)(nil)).Elem(),
-		"route.inventory.equip":     reflect.TypeOf((*controllers.PlayerEquipmentController)(nil)).Elem(),
-		"route.banned":              reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
+	// Player
+	"route.player":              &controllers.PlayerController{},
+	"route.inventory":           &controllers.InventoryController{},
+	"route.inventory.resources": &controllers.InventoryResourceController{},
+	"route.inventory.items":     &controllers.InventoryItemController{},
+	"route.inventory.equip":     &controllers.PlayerEquipmentController{},
+	"route.banned":              &controllers.BannedController{},
 
-		// Planet
-		"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
+	// Planet
+	"route.planet": &controllers.PlanetController{},
 
-		// Safe Planet
-		"route.safeplanet.bank":                reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
-		"route.safeplanet.crafter":             reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
-		"route.safeplanet.coalition":           reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem(),
-		"route.safeplanet.mission":             reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem(),
-		"route.safeplanet.titan":               reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem(),
-		"route.safeplanet.coalition.expansion": reflect.TypeOf((*controllers.SafePlanetExpansionController)(nil)).Elem(),
+	// Safe Planet
+	"route.safeplanet.bank":                &controllers.SafePlanetBankController{},
+	"route.safeplanet.crafter":             &controllers.SafePlanetCrafterController{},
+	"route.safeplanet.coalition":           &controllers.SafePlanetCoalitionController{},
+	"route.safeplanet.mission":             &controllers.SafePlanetMissionController{},
+	"route.safeplanet.titan":               &controllers.SafePlanetTitanController{},
+	"route.safeplanet.coalition.expansion": &controllers.SafePlanetExpansionController{},
 
-		// Titan Planet
-		"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
+	// Titan Planet
+	"route.titanplanet.tackle": &controllers.TitanPlanetTackleController{},
 
-		// Conqueror
-		"route.conqueror": reflect.TypeOf((*controllers.ConquerorController)(nil)).Elem(),
-	}
-)
+	// Conqueror
+	"route.conqueror": &controllers.ConquerorController{},
+}
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing
 func Routing(player *pb.Player, update tgbotapi.Update) {
 	// A prescindere da tutto verifico se il player è stato bannato
 	// Se così fosse non gestisco nemmeno l'update.
 	if player.Banned {
-		invoke(Routes["route.banned"], "Handle", player, update)
+		invoke(routes["route.banned"], player, update)
 		return
 	}
 
@@ -74,26 +71,26 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Dirigo ad una rotta normale
-	isRoute, route := inRoutes(player.Language.Slug, callingRoute, Routes)
+	isRoute, route := inRoutes(player.Language.Slug, callingRoute, routes)
 	if isRoute {
-		invoke(Routes[route], "Handle", player, update)
+		invoke(routes[route], player, update)
 		return
 	}
 
 	// Verifico se in memorià è presente già una rotta e se quella richiamata non sia menu
 	// userò quella come main per gestire ulteriori sottostati
-	isCachedRoute, _ := helpers.GetCurrentControllerCache(player.ID)
-	if isCachedRoute != "" {
-		invoke(Routes[isCachedRoute], "Handle", player, update)
+	cachedRoute, _ := helpers.GetCurrentControllerCache(player.ID)
+	if cachedRoute != "" {
+		invoke(routes[cachedRoute], player, update)
 		return
 	}
 
 	// Se nulla di tutto questo dovesse andare ritorno il menu
-	invoke(Routes["route.menu"], "Handle", player, update)
+	invoke(routes["route.menu"], player, update)
 }
 
 // inRoutes - Verifica se esiste la rotta
-func inRoutes(lang string, messageRoute string, routeList map[string]reflect.Type) (isRoute bool, route string) {
+func inRoutes(lang string, messageRoute string, routeList map[string]controllers.ControllerInterface) (isRoute bool, route string) {
 	// Ciclo lista di rotte
 	for route := range routeList {
 		// Traduco le rotte in base alla lingua del player per trovare corrispondenza
@@ -106,14 +103,8 @@ func inRoutes(lang string, messageRoute string, routeList map[string]reflect.Typ
 }
 
 // invoke - Invoco dinamicamente un metodo di un controller
-func invoke(any reflect.Type, name string, args ...interface{}) {
-	// Recupero possibili input e li trasformo come argomenti da passare al metodo
-	inputs := make([]reflect.Value, len(args))
-	for i := range args {
-		inputs[i] = reflect.ValueOf(args[i])
-	}
-	v := reflect.New(any)
-	v.MethodByName(name).Call(inputs)
+func invoke(c controllers.ControllerInterface, player *pb.Player, update tgbotapi.Update) {
+	c.Handle(player, update)
 }
 
 // Metodo per il parsing del messaggio

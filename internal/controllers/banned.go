@@ -40,8 +40,8 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 }
 
-func (c *BannedController) Validator() {
-	//
+func (c *BannedController) Validator() bool {
+	return false
 }
 
 func (c *BannedController) Stage() {

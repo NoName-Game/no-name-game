@@ -85,8 +85,8 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 }
 
-func (c *ShipController) Validator() {
-	//
+func (c *ShipController) Validator() bool {
+	return false
 }
 
 func (c *ShipController) Stage() {

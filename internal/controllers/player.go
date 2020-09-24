@@ -114,8 +114,8 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 }
 
-func (c *PlayerController) Validator() {
-	//
+func (c *PlayerController) Validator() bool {
+	return false
 }
 
 func (c *PlayerController) Stage() {

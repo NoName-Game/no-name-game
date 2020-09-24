@@ -99,8 +99,8 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 }
 
-func (c *PlanetController) Validator() {
-	//
+func (c *PlanetController) Validator() bool {
+	return false
 }
 
 func (c *PlanetController) Stage() {

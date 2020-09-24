@@ -50,8 +50,8 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 }
 
-func (c *InventoryController) Validator() {
-	//
+func (c *InventoryController) Validator() bool {
+	return false
 }
 
 func (c *InventoryController) Stage() {

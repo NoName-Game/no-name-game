@@ -96,8 +96,8 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 }
 
-func (c *ConquerorController) Validator() {
-	//
+func (c *ConquerorController) Validator() bool {
+	return false
 }
 
 func (c *ConquerorController) Stage() {

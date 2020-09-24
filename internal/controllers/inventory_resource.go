@@ -75,3 +75,11 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 		c.Logger.Panic(err)
 	}
 }
+
+func (c *InventoryResourceController) Validator() bool {
+	return false
+}
+
+func (c *InventoryResourceController) Stage() {
+	//
+}
