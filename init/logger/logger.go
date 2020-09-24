@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -17,6 +16,7 @@ func (logger *Logger) Init() {
 	enviroment := os.Getenv("ENV")
 
 	// Message Formatter
+	logrus.SetOutput(os.Stdout)
 	logrus.WithFields(logrus.Fields{
 		"service": "nn-telegram-client",
 		"env":     enviroment,
@@ -28,34 +28,26 @@ func (logger *Logger) Init() {
 
 	// Imposto livello di log
 	logrus.SetLevel(logrus.InfoLevel)
-	logrus.SetOutput(os.Stdout)
-
-	// Verifico integrazione con sentry
 	if enviroment == "production" || enviroment == "staging" {
-		// Escludo info message
 		logrus.SetLevel(logrus.WarnLevel)
-
-		if hook, err := logrus_sentry.NewSentryHook(os.Getenv("SENTRY_DSN"), []logrus.Level{
-			logrus.PanicLevel,
-			logrus.FatalLevel,
-			logrus.ErrorLevel,
-			logrus.WarnLevel,
-		}); err == nil {
-			hook.StacktraceConfiguration.Level = logrus.InfoLevel
-			// hook.StacktraceConfiguration.Skip
-			hook.StacktraceConfiguration.Context = 50
-			// hook.Stacktrace  Configuration.InAppPrefixes
-			hook.StacktraceConfiguration.IncludeErrorBreadcrumb = true
-			hook.StacktraceConfiguration.Enable = true
-			hook.Timeout = 10 * time.Second
-			logrus.AddHook(hook)
-		}
 	}
 
-	// Riporto a viodeo stato servizio
-	log.Println("************************************************")
-	log.Println("Logger: OK!")
-	log.Println("************************************************")
+	if hook, err := logrus_sentry.NewSentryHook(os.Getenv("SENTRY_DSN"), []logrus.Level{
+		logrus.PanicLevel,
+		logrus.FatalLevel,
+		logrus.ErrorLevel,
+		logrus.WarnLevel,
+	}); err == nil {
+		hook.StacktraceConfiguration.Level = logrus.InfoLevel
+		// hook.StacktraceConfiguration.Skip
+		hook.StacktraceConfiguration.Context = 50
+		// hook.Stacktrace  Configuration.InAppPrefixes
+		hook.StacktraceConfiguration.IncludeErrorBreadcrumb = true
+		hook.StacktraceConfiguration.Enable = true
+		hook.Timeout = 10 * time.Second
+		logrus.AddHook(hook)
+	}
 
+	logrus.Info("[*] Logger: OK!")
 	return
 }

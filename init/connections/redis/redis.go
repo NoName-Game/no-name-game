@@ -1,9 +1,8 @@
 package redis
 
 import (
-	"log"
-
 	goredis "github.com/go-redis/redis"
+	"github.com/sirupsen/logrus"
 )
 
 // Redis
@@ -11,7 +10,7 @@ type Redis struct {
 	Connection *goredis.Client
 }
 
-// RedisUp
+// Redis Init
 func (redis *Redis) Init() {
 	redis.Connection = goredis.NewClient(&goredis.Options{
 		Addr:     "localhost:6379",
@@ -20,12 +19,9 @@ func (redis *Redis) Init() {
 	})
 
 	if _, err := redis.Connection.Ping().Result(); err != nil {
-		panic(err)
+		logrus.WithField("error", err).Fatal("[*] Redis: KO!")
 	}
 
-	log.Println("************************************************")
-	log.Println("Redis: OK!")
-	log.Println("************************************************")
-
+	logrus.Info("[*] Redis: OK!")
 	return
 }

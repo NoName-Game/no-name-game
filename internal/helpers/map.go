@@ -14,8 +14,7 @@ func DecodeMapToDisplay(maps *pb.Maps, playerPositionX int32, playerPositionY in
 
 	// Recupero mappa
 	var cellGrid [][]bool
-	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
-	if err != nil {
+	if err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid); err != nil {
 		return result, err
 	}
 
@@ -93,33 +92,4 @@ func CheckForTresure(maps *pb.Maps, x int32, y int32) (tresure *pb.Tresure, resu
 	}
 
 	return
-}
-
-// ChooseMob - viene richiamato principalmente dalla mappa, la sua funzione è
-// quella di ritornare un mob dalla mappa tra quelli vicini al player
-func ChooseEnemyInMap(maps *pb.Maps, playerPositionX int32, playerPositionY int32) (enemyID int32, err error) {
-	// Recupero mappa
-	var cellGrid [][]bool
-	err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid)
-	if err != nil {
-		return enemyID, err
-	}
-
-	for x := playerPositionX - 5; x < playerPositionX+5; x++ {
-		// Conto quanto è lunga la mappa
-		mapWith := int32(len(cellGrid[0]))
-		for y := playerPositionY - 10; y < playerPositionY+11; y++ {
-			// Conto quanto è alta la mappa
-			mapHeight := int32(len(cellGrid[0]))
-			if (x >= 0 && x < mapWith) && (y >= 0 && y < mapHeight) { // In bounds
-				for i := 0; i < len(maps.Enemies); i++ {
-					if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
-						return int32(i), nil
-					}
-				}
-
-			}
-		}
-	}
-	return -1, err
 }

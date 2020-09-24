@@ -3,9 +3,9 @@ package localization
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
@@ -29,14 +29,10 @@ func (lang *Localization) Init() {
 
 	// Creo bundle andando a caricare le diverse lingue
 	if lang.bundle, err = lang.loadLocalizerBundle(); err != nil {
-		panic(err)
+		logrus.WithField("error", err).Fatal("[*] Languages: KO!")
 	}
 
-	// Mostro a video stato servizio
-	log.Println("************************************************")
-	log.Println("Languages: OK!")
-	log.Println("************************************************")
-
+	logrus.Info("[*] Languages: OK!")
 	return
 }
 

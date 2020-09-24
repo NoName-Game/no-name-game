@@ -16,22 +16,14 @@ func Trans(locale string, key string, args ...interface{}) (message string) {
 	}
 
 	if message, err = config.App.Localization.GetTranslation(key, locale, args); err != nil {
-		logrus.Panicf("error getting translation: %s", err.Error())
+		// Falback versione inglese
+		if message, err = config.App.Localization.GetTranslation(key, "en", args); err != nil {
+			logrus.Panicf("error getting translation: %s", err.Error())
+		}
 	}
 
 	return
 }
-
-// GetAllTranslatedSlugCategories - return weapon and armor slug category translated
-// func GetAllTranslatedSlugCategoriesByLocale() (results []string) {
-// 	categories := GetAllSlugCategories()
-// 	for _, category := range categories {
-// 		results = append(results, Trans(category))
-// 	}
-//
-// 	return
-// }
-//
 
 // GenerateTextArray - Recupero un serie di testi definiti dalla stessa chiave e numerati
 func GenerateTextArray(locale string, common string) (texts []string) {

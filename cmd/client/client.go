@@ -28,9 +28,7 @@ func main() {
 
 	// Gestisco update ricevuti
 	for update := range updates {
-		// Gestisco singolo update in worker dedicato
 		go handleUpdate(update)
-		// handleUpdate(update)
 	}
 }
 
@@ -39,21 +37,23 @@ func handleUpdate(update tgbotapi.Update) {
 	var err error
 
 	// Gestico panic
-	defer func() {
-		if err := recover(); err != nil {
-			// TODO: Eseguire qualcosa se esplode male
-			if err, ok := err.(error); ok {
-				logrus.Errorf("[*] Recoverd Error: %v", err)
-			}
-		}
-	}()
+	defer recoverUpdate()
 
 	// Gestisco utente
 	var player *pb.Player
 	if player, err = helpers.HandleUser(update); err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	// Gestisco update
 	router.Routing(player, update)
+}
+
+func recoverUpdate() {
+	if err := recover(); err != nil {
+		// TODO: Eseguire qualcosa se esplode male
+		if err, ok := err.(error); ok {
+			logrus.Errorf("[*] Recoverd Error: %v", err)
+		}
+	}
 }

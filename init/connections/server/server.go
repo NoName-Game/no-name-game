@@ -2,8 +2,9 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"github.com/sirupsen/logrus"
 
 	"google.golang.org/grpc"
 
@@ -17,27 +18,22 @@ type Server struct {
 	Connection pb.NoNameClient
 }
 
-// NnSDKUp - Metodo di verfica e connessione al WS principale di NoName
+// Init - Metodo di verfica e connessione al WS principale di NoName
 func (server *Server) Init() {
 	var err error
 
 	// Set up a connection to the server.
 	var conn *grpc.ClientConn
-	conn, err = grpc.Dial(
+	if conn, err = grpc.Dial(
 		fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT")),
 		grpc.WithInsecure(),
 		grpc.WithBlock(),
-	)
-	if err != nil {
-		log.Panicf("did not connect: %v", err)
+	); err != nil {
+		logrus.WithField("error", err).Fatal("[*] Server connections: KO!")
 	}
 
 	server.Connection = pb.NewNoNameClient(conn)
 
-	// Riporto a video stato servizio
-	log.Println("************************************************")
-	log.Println("NoName WS connection: OK!")
-	log.Println("************************************************")
-
+	logrus.Info("[*] Server connections: OK!")
 	return
 }
