@@ -33,8 +33,8 @@ route.conqueror: "🚩 Conquistatore"
 
 # SETUP ( questi messaggi non devono esser tradotti )
 setup.intro: "Hello 👨🏼‍🚀 *%s* and welcome to 🕹 *NoName* Game!"
-setup.select_language: "⚙️ Setup 1/2 - For a better comunication!\nChoose your favourite 💬 language:"
-setup.select_timezone: "⚙️ Setup 1/2 - For a better experience!\nChoose your current 🕘️ timezone:"
+setup.select_language: "⚙️ Setup 1 of 2: *comunication*\nChoose your favourite 💬 language:"
+setup.select_timezone: "⚙️ Setup 2 of 2: *experience*\nChoose your current 🕘️ timezone:"
 setup.end: "✅ Setup completed successfully! Good Game!"
 
 # ROUTES - Safe planet
@@ -258,14 +258,14 @@ route.tutorial_27: "..."
 route.tutorial.explosion: "<code>\t\t\t\t\t\t\t\t--_--\n\t\t\t\t\t(\t\t-_\t\t\t\t_).\n\t\t\t(\t~\t\t\t\t\t\t\t)\t\t\t)\n\t((\t)\t\t(\t\t\t\t)\t\t()\t\t)\n\t\t(.\t\t\t))\t(\t\t\t\t\t\t\t)\n\t\t\t\t``..\t\t\t\t\t..``\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t\t\t(=|\t|=)\n\t\t\t\t\t\t\t\t\t|\t|\n\t\t\t\t\t(../(\t)\\.))\n</code>"
 route.tutorial.open_eye: "Apri gli occhi..."
 route.tutorial.first_use_item: "💭: Ti ritrovi su un pianeta sconosciuto, piuttosto malconcio.\nVerifichi immediatamente se nel tuo *inventario* sia presente qualcosa per recuperare un po' di energie...\n\n📖 *Oggetti:*\nAccedendo al tuo inventario avrai la possibilità di usare gli item da te craftati o trovati. Questi oggetti si dividono in diverse catergorie, sta a solo a te decidere di cosa beneficiare."
-route.tutorial.first_exploration: "💭: Sei riuscito a recuperare un po' di forze per continuare...\nTi rialzi in piedi e guardando verso la nave (non del tutto integra) decidi di tentare un'esplorazione di ricerca nella zona.\n\n📖 *Esplorazione:*\nÈ una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
+route.tutorial.first_exploration: "💭: Ti rialzi in piedi e guardando verso la nave (non del tutto integra) valuti se tentare un'esplorazione di ricerca nella zona.\n\n📖 *Esplorazione:*\nÈ una delle maniere più veloci per trovare risorse da crafting e upgrade per te ed il tuo equipaggiamento. Scendi sulla superficie di un pianeta per recuperare materiali di vario genere a seconda del tipo di ambiente che il pianeta presenta."
 route.tutorial.first_crafting: "💭: Recuperate le risorse pensi a un modo per poter ripistinare parte dell'integrità della nave.\n\n📖 *Crafting:*\nAssembla, costruisci e crea cose utili alla crescita del tuo personaggio nell'area crafting della tua nave! Ricorda però! Non potrai subito craftare qualsiasi cosa ti venga in mente, l'esperienza aprono molte strade. (SKIPPABILE)"
-route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante. Decidi quindi di equipaggiarla.\n\n📖 *Equipaggiamento:*\nArmi e armature. Migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
+route.tutorial.first_weapon_equipped: "💭: Ti guardi intorno, non ti senti al sicuro, verificando meglio nel tuo inventario ti sei accorto di avere con te una piccola arma, necessaria a contrastare possibili nemici che pattugliano l'area circostante.\n\n📖 *Equipaggiamento:*\nArmi e armature. Migliorare sempre il tuo equpiaggiamento potrebbe aiurarti a superare e sconfiggere mob di alto livello, permettendoti di accedere a tesori ancora più grandi."
 route.tutorial.first_hunting: "💭: Equipaggi l'arma e ti fai coraggio, decidi quindi di esplorare l'area intorno a te.\n\n📖 *Caccia:*\nÈ una attività redditizia che ti permette di affrontare diversi nemici per raccimolare esperienza e monete!\nOvviamente se muori...beh muori.. fai attenzione!."
 route.tutorial.first_travel: "💭: Ritorni dalla caccia ancora malconcio a causa degli scontri ma soddisfatto.\nDecidi di rientrare nella nave e noti che lo *Scanner* ha rilevato un *Pianeta Sicuro*.\nDecidi dunque di impostare le coordinate e di accendere i motori per scappare dall'ostile ambiente dei pianeti non civilizzati.\n\n📖 *Viaggi:*\nViaggia e esplora i diversi pianeti che l'universo ti mette a disposizione.\n\nMa fa attenzione al carburante e alla tua nave...potresti ritrovarti bloccato su un pianeta ostile.\n"
 route.tutorial.first_safeplanet: "💭: Raggiungi l'orbita del pianeta definito *Sicuro* dallo scanner e subito una comunicazione radio viene avviata.\nNon comprendi il significato dei suoni che arrivano, dunque decidi di far uso del tuo traduttore incorporato nella tuta spaziale e immediamente ti rendi conto di essere in contatto con un'altra forma di vita!\nEsegui tutte le noiose pratiche burocratiche e attracchi all'hangar della base...\n\n📖 *Pianeti Sicuri:*\nDopo mesi passati tra viaggi spaziali interminabili, mostri ripugnanti su pianeti remoti e scomodi letti è sempre bello far ritorno in un pianeta con della civiltà..\nI Pianeti Sicuri sono pianeti controllati dalla *Coalizione* dove è vietato effettuare le solite attività di esplorazione, ma è possibile parlare con varie persone per usufruire di servizi! Buona Permanenza!"
 
-route.tutorial.error.function_not_completed: "💭: Per continuare il tutorial devi prima portare a termine l'obbiettivo in corso."
+route.tutorial.error.function_not_completed: "💭: Per continuare il tutorial devi prima portare a termine l'attività in corso."
 route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirai a trovare delle risposte."
 route.tutorial.completed.reward: "🎉 Complimenti esploratore, hai completato il tutorial con successo!\n Ecco la tua ricompensa:\n -💰*%d*\n- 🏵*%d* Exp"
 
@@ -298,6 +298,7 @@ ship.travel.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli del 
 ship.travel.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna più tardi."
 route.travel.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
+ship.travel.complete_fast: "💎 Concludi rapidatamente 💎"
 
 # SHIP - Repairs
 ship.repairs.info: "Vuoi riparare la tua nave?\n\n"

@@ -172,6 +172,10 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 				}
 			}
 
+			// Cancello stato dalla memoria
+			helpers.DelCurrentControllerCache(c.Player.ID)
+			// helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
 			// se è stato settato un controller esco
 			if controller != nil {
 				// Rimuovo testo messaggio
@@ -181,9 +185,23 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 				return
 			}
 
+			new(MenuController).Handle(c.Player, c.Update)
+			backed = true
+			return
+		}
+
+		// Torna al menu - Cancella solo il current controller cache
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
-			helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
+			if controller != nil {
+				// Rimuovo testo messaggio
+				c.Update.Message.Text = ""
+				controller.Handle(c.Player, c.Update)
+				backed = true
+				return
+			}
 
 			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
@@ -191,8 +209,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 		}
 
 		// Abbandona - chiude definitivamente cancellando anche lo stato
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") ||
-			c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") {
 			if !c.Data.PlayerStats.GetDead() {
 				// Cancello stato da cache
 				helpers.DelCurrentControllerCache(c.Player.ID)

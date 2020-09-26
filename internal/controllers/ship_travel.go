@@ -35,7 +35,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
-			ControllerBlocked: []string{"mission", "hunting"},
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &ShipController{},
 				FromStage: 1,
@@ -65,8 +65,19 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 func (c *ShipTravelController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
 	case 0:
+		// Verifico se è già in atto un viaggio
+		var rCheckShipTravel *pb.CheckShipTravelResponse
+		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		if rCheckShipTravel.GetTravelInProgress() {
+
+		}
+
 		return false
 
 	// In questo stage non faccio nulla di particolare, verifico solo se ha deciso
@@ -122,10 +133,25 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 				c.Logger.Panic(err)
 			}
 
+			// Invio messaggio recap fine viaggio
 			c.Validation.Message = helpers.Trans(
 				c.Player.Language.Slug,
 				"ship.travel.wait",
 				finishAt.Format("15:04:05"),
+			)
+
+			// Aggiungi possibilità di velocizzare
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_fast"),
+					),
+				),
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+					),
+				),
 			)
 
 			return true

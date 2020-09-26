@@ -58,7 +58,6 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 // Validator
 // ====================================
 func (c *TutorialController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
 	case 1:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
@@ -66,28 +65,21 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true
 		}
-	case 6:
-		var rCheckShipTravel *pb.CheckShipTravelResponse
-		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Il crafter sta già portando a terminre un lavoro per questo player
-		if !rCheckShipTravel.GetFinishTraveling() {
-			var finishAt time.Time
-			if finishAt, err = helpers.GetEndTime(rCheckShipTravel.GetTravelingEndTime(), c.Player); err != nil {
-				c.Logger.Panic(err)
+	case 3:
+		// Verifico se il player ha compleato le attività
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.Controller != "route.tutorial" {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
+				return true
 			}
-
-			c.Validation.Message = helpers.Trans(
-				c.Player.Language.Slug,
-				"ship.travel.wait",
-				finishAt.Format("15:04:05"),
-			)
-
-			return true
+		}
+	case 6:
+		// Verifico se il player ha compleato le attività
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.Controller != "route.tutorial" {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
+				return true
+			}
 		}
 	}
 
@@ -226,6 +218,11 @@ func (c *TutorialController) Stage() {
 		// Recupero orario fine viaggio
 		var finishAt time.Time
 		if finishAt, err = helpers.GetEndTime(rStartTravelTutorial.GetTravelingEndTime(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Creo cache per lo stato di viaggio
+		if err = helpers.SetControllerCacheData(c.Player.ID, "route.ship.travel", 3, nil); err != nil {
 			c.Logger.Panic(err)
 		}
 
