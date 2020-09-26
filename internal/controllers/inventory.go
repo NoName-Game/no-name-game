@@ -22,7 +22,7 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.inventor",
+			Controller: "route.inventory",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{

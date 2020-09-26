@@ -92,11 +92,18 @@ func (c *Controller) InitController(controller Controller) bool {
 }
 
 func (c *Controller) SetLoggerData() {
+	var message string
+	if c.Update.Message != nil {
+		message = c.Update.Message.Text
+	} else if c.Update.CallbackQuery != nil {
+		message = c.Update.CallbackQuery.Data
+	}
+
 	c.Logger = logrus.WithFields(logrus.Fields{
 		"controller": c.CurrentState.Controller,
 		"stage":      c.CurrentState.Stage,
 		"player":     c.Player.ID,
-		"message":    c.Update.Message.Text,
+		"message":    message,
 	})
 }
 

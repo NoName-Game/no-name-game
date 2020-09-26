@@ -3,6 +3,8 @@ package router
 import (
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"bitbucket.org/no-name-game/nn-telegram/internal/controllers"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -79,10 +81,16 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 
 	// Verifico se in memorià è presente già una rotta e se quella richiamata non sia menu
 	// userò quella come main per gestire ulteriori sottostati
-	cachedRoute, _ := helpers.GetCurrentControllerCache(player.ID)
+	var cachedRoute string
+	// Non è necessario verificare l'errore perchè non per forza deve eserci una rotta in cache
+	cachedRoute, _ = helpers.GetCurrentControllerCache(player.ID)
 	if cachedRoute != "" {
-		invoke(routes[cachedRoute], player, update)
-		return
+		if _, ok := routes[cachedRoute]; ok {
+			invoke(routes[cachedRoute], player, update)
+			return
+		}
+
+		logrus.Errorf("invalid cached route value: %s", cachedRoute)
 	}
 
 	// Se nulla di tutto questo dovesse andare ritorno il menu
