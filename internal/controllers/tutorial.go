@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -87,7 +85,7 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipTravel.GetFinishTraveling() {
 			var finishAt time.Time
-			if finishAt, err = ptypes.Timestamp(rCheckShipTravel.GetTravelingEndTime()); err != nil {
+			if finishAt, err = helpers.GetEndTime(rCheckShipTravel.GetTravelingEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
 
@@ -260,7 +258,7 @@ func (c *TutorialController) Stage() {
 
 		// Recupero orario fine viaggio
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rStartTravelTutorial.GetTravelingEndTime()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rStartTravelTutorial.GetTravelingEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 

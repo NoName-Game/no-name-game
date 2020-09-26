@@ -5,8 +5,6 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -181,7 +179,7 @@ func (c *ShipRestsController) Stage() {
 
 		// Recupero orario fine riposo
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rStartPlayerRest.GetRestEndTime()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rStartPlayerRest.GetRestEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 

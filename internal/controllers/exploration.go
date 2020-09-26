@@ -7,8 +7,6 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -100,8 +98,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		// Il Player deve terminare prima l'esplorazione in corso
 		if !rExplorationCheck.GetFinishExploration() {
 			var finishAt time.Time
-			finishAt, err = ptypes.Timestamp(rExplorationCheck.GetExplorationEndTime())
-			if err != nil {
+			if finishAt, err = helpers.GetEndTime(rExplorationCheck.GetExplorationEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
 
@@ -236,7 +233,7 @@ func (c *ExplorationController) Stage() {
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rExplorationStart.GetFinishAt()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rExplorationStart.GetFinishAt(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -315,7 +312,7 @@ func (c *ExplorationController) Stage() {
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rExplorationContinue.GetFinishAt()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rExplorationContinue.GetFinishAt(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 

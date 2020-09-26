@@ -7,8 +7,6 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -190,7 +188,7 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 
 		for _, state := range c.Data.PlayerActiveStates {
 			var finishAt time.Time
-			if finishAt, err = ptypes.Timestamp(state.FinishAt); err != nil {
+			if finishAt, err = helpers.GetEndTime(state.FinishAt, c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
 

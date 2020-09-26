@@ -7,8 +7,6 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -123,7 +121,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipRepair.GetFinishRepairing() {
 			var finishAt time.Time
-			if finishAt, err = ptypes.Timestamp(rCheckShipRepair.GetRepairingEndTime()); err != nil {
+			if finishAt, err = helpers.GetEndTime(rCheckShipRepair.GetRepairingEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
 
@@ -244,7 +242,7 @@ func (c *ShipRepairsController) Stage() {
 
 		// Recupero orario fine riparazione
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rStartShipRepair.GetRepairingEndTime()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rStartShipRepair.GetRepairingEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 

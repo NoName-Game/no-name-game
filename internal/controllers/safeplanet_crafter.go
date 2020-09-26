@@ -7,8 +7,6 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	"github.com/golang/protobuf/ptypes"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -134,7 +132,7 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCrafterCheck.GetFinishCrafting() {
 			var finishAt time.Time
-			if finishAt, err = ptypes.Timestamp(rCrafterCheck.GetCraftingEndTime()); err != nil {
+			if finishAt, err = helpers.GetEndTime(rCrafterCheck.GetCraftingEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
 
@@ -453,7 +451,7 @@ func (c *SafePlanetCrafterController) Stage() {
 
 		// Converto finishAt in formato Time
 		var finishAt time.Time
-		if finishAt, err = ptypes.Timestamp(rCrafterStart.GetCraftingEndTime()); err != nil {
+		if finishAt, err = helpers.GetEndTime(rCrafterStart.GetCraftingEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
 

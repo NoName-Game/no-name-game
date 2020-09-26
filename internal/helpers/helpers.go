@@ -57,12 +57,6 @@ func StringInSlice(v string, a []string) bool {
 	return false
 }
 
-// GetEndTime - Aggiunge un tempo di durata T.
-func GetEndTime(hours, minutes, seconds int) (t time.Time) {
-	t = time.Now().Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds) + time.Second)
-	return
-}
-
 // NewContext - Recupero nuovo context per effettuare le chiamate
 func NewContext(seconds time.Duration) context.Context {
 	TTLRPC, err := strconv.Atoi(os.Getenv("TTL_RPC"))
