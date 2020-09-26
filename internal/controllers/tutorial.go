@@ -61,20 +61,12 @@ func (c *TutorialController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
 	case 1:
-		// Recupero lingue disponibili
-		if _, err = config.App.Server.Connection.GetLanguageByName(helpers.NewContext(1), &pb.GetLanguageByNameRequest{
-			Name: c.Update.Message.Text,
-		}); err != nil {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true
-		}
-	case 2:
 		// Verifico che l'azione passata sia quella di aprire gli occhi
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true
 		}
-	case 7:
+	case 6:
 		var rCheckShipTravel *pb.CheckShipTravelResponse
 		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
 			PlayerID: c.Player.ID,
@@ -106,33 +98,8 @@ func (c *TutorialController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ============================================================================================================
-	// Settaggio lingua
-	case 0:
-		// Recupero lingue disponibili
-		var rGetLanguages *pb.GetAllLanguagesResponse
-		if rGetLanguages, err = config.App.Server.Connection.GetAllLanguages(helpers.NewContext(1), &pb.GetAllLanguagesRequest{}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiungo lingue alla tastiera
-		keyboard := make([]tgbotapi.KeyboardButton, len(rGetLanguages.GetLanguages()))
-		for i, lang := range rGetLanguages.GetLanguages() {
-			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
-		}
-
-		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "select_language"))
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiorna stato
-		c.CurrentState.Stage = 1
-
-	// ============================================================================================================
 	// Intro
-	case 1:
+	case 0:
 		// Imposto start tutorial
 		if _, err = config.App.Server.Connection.PlayerStartTutorial(helpers.NewContext(1), &pb.PlayerStartTutorialRequest{
 			PlayerID: c.Player.ID,
@@ -160,11 +127,11 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorna stato
-		c.CurrentState.Stage = 2
+		c.CurrentState.Stage = 1
 
 	// ============================================================================================================
 	// Primo uso item
-	case 2:
+	case 1:
 		// Invio messagio dove gli spiego come usare gli item
 		firstUseMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_use_item"),
@@ -175,7 +142,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 3
+		c.CurrentState.Stage = 2
 
 		// Richiamo inventario come sottoprocesso di questo controller
 		useItemController := new(InventoryItemController)
@@ -183,7 +150,7 @@ func (c *TutorialController) Stage() {
 
 	// ============================================================================================================
 	// Prima esplorazione
-	case 3:
+	case 2:
 		// Invio messagio dove gli spiego che deve effettuare una nuova esplorazione
 		firstMissionMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
@@ -194,7 +161,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 4
+		c.CurrentState.Stage = 3
 
 		// Richiamo esplorazione come sottoprocesso di questo controller
 		missionController := new(ExplorationController)
@@ -202,7 +169,7 @@ func (c *TutorialController) Stage() {
 
 	// ============================================================================================================
 	// Equipaggiamento arma
-	case 4:
+	case 3:
 		firstWeaponMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
 		)
@@ -212,7 +179,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 5
+		c.CurrentState.Stage = 4
 
 		// Richiamo equipment come sottoprocesso di questo controller
 		inventoryController := new(PlayerEquipmentController)
@@ -220,7 +187,7 @@ func (c *TutorialController) Stage() {
 
 	// ============================================================================================================
 	// Hunting
-	case 5:
+	case 4:
 		firstHuntingMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
 		)
@@ -230,7 +197,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 6
+		c.CurrentState.Stage = 5
 
 		// Richiamo huting come sottoprocesso di questo controller
 		huntingController := new(HuntingController)
@@ -238,7 +205,7 @@ func (c *TutorialController) Stage() {
 
 	// ============================================================================================================
 	// Primo viaggio verso pianeta sicuro
-	case 6:
+	case 5:
 		// Questo stage fa viaggiare il player forzatamente verso un pianeta sicuro
 		firstTravelMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_travel"),
@@ -272,12 +239,12 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 7
+		c.CurrentState.Stage = 6
 		c.ForceBackTo = true
 
 	// ============================================================================================================
 	// Fine viaggio
-	case 7:
+	case 6:
 		// Richiamo fine viaggio
 		if _, err = config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
 			PlayerID: c.Player.ID,
@@ -295,12 +262,12 @@ func (c *TutorialController) Stage() {
 
 		// Forzo a mano l'aggiornamento dello stato del player
 		// in quanto adesso devo richiamare un'altro controller
-		c.CurrentState.Stage = 8
+		c.CurrentState.Stage = 7
 		c.ForceBackTo = true
 
 	// ============================================================================================================
 	// Tutorial completato
-	case 8:
+	case 7:
 		if _, err = helpers.SendMessage(helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed"),
 		),

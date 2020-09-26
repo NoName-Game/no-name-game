@@ -6,10 +6,8 @@ start_game: "Inizia a giocare!"
 text_with_placeholders: "Ciao, %s"
 timed-quest: "Timed Quest Terminata!"
 
-# CONFIG
-select_language: "⚙️ For a better experience choose your favourite language:"
-
 # ROUTES
+route.setup: "⚙️ Setup"
 route.tutorial: "📖 Tutorial"
 route.tutorial.continue: "📖 Continua tutorial"
 route.exploration: "⭕️ Esplorazione"
@@ -32,6 +30,12 @@ route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Pianeta"
 route.conqueror: "🚩 Conquistatore"
+
+# SETUP ( questi messaggi non devono esser tradotti )
+setup.intro: "Hello 👨🏼‍🚀 *%s* and welcome to 🕹 *NoName* Game!"
+setup.select_language: "⚙️ Setup 1/2 - For a better comunication!\nChoose your favourite 💬 language:"
+setup.select_timezone: "⚙️ Setup 1/2 - For a better experience!\nChoose your current 🕘️ timezone:"
+setup.end: "✅ Setup completed successfully! Good Game!"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
@@ -332,6 +336,7 @@ ship.laboratory.you_need: "Per realizzare *%s* verranno consumante le seguneti r
 ship.laboratory.craft_completed: "Il tuo oggetto è stato realizzato correttamente.\nHai ottenuto *%s*!"
 ship.laboratory.no_resource_to_craft: "Purtroppo ti mancano alcune risorse per completare il tuo oggetto, riprova quando avrai tutte le risorse."
 ship.laboratory.wait: "Produzione *avviata*!\nil termine per la realizzazione del tuo oggetto è previsto alle *%s*, torna più tardi."
+ship.laboratory.wait_validator: "Il termine per la realizzazione del tuo oggetto è previsto alle *%s*, torna più tardi."
 ship.laboratory.item_does_not_exist: "L'item scelto non esiste!"
 
 # SAFE PLANET
@@ -354,6 +359,7 @@ safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possia
 # SAFE PLANET - MISSION
 safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
 safeplanet.mission.start: "Avvia Missione"
+safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
 safeplanet.mission.check: "Non hai completato la tua missione ancora in corso.\nCosa vuoi fare?"
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n"
 safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la missione, guadagnando così:\n +*%v*💰\n+*%v*💎\n+*%v* Exp.\nLa coalizione ti rigrazia!"
@@ -413,6 +419,10 @@ titanplanet.tackle.init: "Il titano si mostra alla tua presenza."
 titanplanet.tackle.leave: "⬅️ Abbandona"
 titanplanet.tackle.combat.card: "👁 %s\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
 titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."
+titanplanet.tackle.reward: "Congratulazioni per aver sconfitto il titano!\n\nLa *Coalizione* ti premia per aver inflitto *%d danni*!\n\nResoconto premi:\n%s"
+titanplanet.event.correct: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
+titanplanet.event.wrong: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci un'ingente quantità di danni. Ti rimane solo 1 HP!"
+titanplanet.tackle.no_action: "Continua!"
 
 # PLAYER
 player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
@@ -424,3 +434,8 @@ player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore di questa pianeta sconfingendo nemici in esplorazione.\n\n📖: Scala la classifica, questo ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
 conqueror.planet_free: "🚩 Nessun Conquistatore"
 conqueror.list.intro: "Ecco i miglior 10 conquistatori:\n"
+
+# EVENTS
+titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
+titanplanet.event.event1.choice1: "SCELTA UNO"
+titanplanet.event.event1.choice2: "SCELTA UNO"

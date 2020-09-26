@@ -16,6 +16,7 @@ import (
 
 var routes = map[string]controllers.ControllerInterface{
 	"route.menu":              &controllers.MenuController{},
+	"route.setup":             &controllers.SetupController{},
 	"route.tutorial":          &controllers.TutorialController{},
 	"route.tutorial.continue": &controllers.TutorialController{},
 
@@ -122,7 +123,7 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 		parsed = message.Command()
 		// Se è un comando ed è start lo parso come tutorial
 		if parsed == "start" {
-			parsed = "📖 Tutorial"
+			parsed = "⚙️ Setup"
 		}
 	}
 

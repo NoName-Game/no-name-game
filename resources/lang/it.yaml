@@ -6,10 +6,8 @@ start_game: "Inizia a giocare!"
 text_with_placeholders: "Ciao, %s"
 timed-quest: "Timed Quest Terminata!"
 
-# CONFIG
-select_language: "⚙️ For a better experience choose your favourite language:"
-
 # ROUTES
+route.setup: "⚙️ Setup"
 route.tutorial: "📖 Tutorial"
 route.tutorial.continue: "📖 Continua tutorial"
 route.exploration: "⭕️ Esplorazione"
@@ -32,6 +30,12 @@ route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Pianeta"
 route.conqueror: "🚩 Conquistatore"
+
+# SETUP ( questi messaggi non devono esser tradotti )
+setup.intro: "Hello 👨🏼‍🚀 *%s* and welcome to 🕹 *NoName* Game!"
+setup.select_language: "⚙️ Setup 1/2 - For a better comunication!\nChoose your favourite 💬 language:"
+setup.select_timezone: "⚙️ Setup 1/2 - For a better experience!\nChoose your current 🕘️ timezone:"
+setup.end: "✅ Setup completed successfully! Good Game!"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"
