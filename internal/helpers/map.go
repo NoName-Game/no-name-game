@@ -3,7 +3,7 @@ package helpers
 import (
 	"encoding/json"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 )
 
 // DecodeMapToDisplay - Converte la logica della mappa in qualcosa di visibilie

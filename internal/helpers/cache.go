@@ -8,7 +8,7 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 )
 
 // =================

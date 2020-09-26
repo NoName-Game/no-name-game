@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 )
 

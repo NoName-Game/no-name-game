@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"

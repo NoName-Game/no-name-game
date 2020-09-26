@@ -5,7 +5,7 @@ import (
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/controllers"
 
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 

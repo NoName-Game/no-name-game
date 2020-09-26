@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	pb "bitbucket.org/no-name-game/nn-grpc/build/proto"
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
