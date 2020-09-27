@@ -194,6 +194,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
+			helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 			if controller != nil {
 				// Rimuovo testo messaggio
