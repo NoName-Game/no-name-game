@@ -18,7 +18,8 @@ import (
 type ShipTravelController struct {
 	Controller
 	Payload struct {
-		StarNearestMapName map[int]string
+		StarNearestMapName  map[int]string
+		CompleteWithDiamond bool
 	}
 }
 
@@ -66,18 +67,6 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
 	case 0:
-		// Verifico se è già in atto un viaggio
-		var rCheckShipTravel *pb.CheckShipTravelResponse
-		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		if rCheckShipTravel.GetTravelInProgress() {
-
-		}
-
 		return false
 
 	// In questo stage non faccio nulla di particolare, verifico solo se ha deciso
@@ -128,8 +117,22 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipTravel.GetFinishTraveling() {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond") {
+				c.Payload.CompleteWithDiamond = true
+				return false
+			}
+
 			var finishAt time.Time
 			if finishAt, err = helpers.GetEndTime(rCheckShipTravel.GetTravelingEndTime(), c.Player); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			// Calcolo diamanti del player
+			var rGetPlayerEconomyDiamond *pb.GetPlayerEconomyResponse
+			if rGetPlayerEconomyDiamond, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+				PlayerID:    c.Player.GetID(),
+				EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
+			}); err != nil {
 				c.Logger.Panic(err)
 			}
 
@@ -138,13 +141,14 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 				c.Player.Language.Slug,
 				"ship.travel.wait",
 				finishAt.Format("15:04:05"),
+				rGetPlayerEconomyDiamond.GetValue(),
 			)
 
 			// Aggiungi possibilità di velocizzare
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_fast"),
+						helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond"),
 					),
 				),
 				tgbotapi.NewKeyboardButtonRow(
@@ -309,12 +313,34 @@ func (c *ShipTravelController) Stage() {
 
 	// Fine esplorazione
 	case 3:
-		// Costruisco chiamata per aggiornare posizione e scalare il quantitativo
-		// di carburante usato
-		if _, err := config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
+		// Verifico se ha gemmato
+		if c.Payload.CompleteWithDiamond {
+			if _, err := config.App.Server.Connection.EndShipTravelDiamond(helpers.NewContext(1), &pb.EndShipTravelRequest{
+				PlayerID: c.Player.ID,
+			}); err != nil {
+				// Messaggio errore completamento
+				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
+				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+					),
+				)
+
+				if _, err = helpers.SendMessage(msg); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				// Fondamentale, esco senza chiudere
+				c.ForceBackTo = true
+				return
+			}
+		} else {
+			// Costruisco chiamata per aggiornare posizione e scalare il quantitativo di carburante usato
+			if _, err := config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
+				PlayerID: c.Player.ID,
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
 		}
 
 		// Invio messaggio

@@ -295,10 +295,11 @@ ship.travel.fuel_needed: "Carburante necessario"
 ship.travel.time_needed: "Tempo necessario"
 ship.travel.exploring: "🚀 Motori accesi, buon viaggio!\nIl tuo arrivo è previsto per le *%s*"
 ship.travel.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli del viaggio."
-ship.travel.wait: "Il termine per del tuo viaggio è previsto alle *%s*, torna più tardi."
+ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
 route.travel.error.function_not_completed: "Puoi accedere a questa funzionalità solo dopo ever terminato quelle attualmente in corso sul pianeta."
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
-ship.travel.complete_fast: "💎 Concludi rapidatamente 💎"
+ship.travel.complete_diamond: "💎 Concludi Rapidatamente 💎"
+ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
 # SHIP - Repairs
 ship.repairs.info: "Vuoi riparare la tua nave?\n\n"

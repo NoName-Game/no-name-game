@@ -242,13 +242,6 @@ func (c *TutorialController) Stage() {
 	// ============================================================================================================
 	// Fine viaggio
 	case 6:
-		// Richiamo fine viaggio
-		if _, err = config.App.Server.Connection.EndShipTravel(helpers.NewContext(1), &pb.EndShipTravelRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
 		firstSafeMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
 		)
