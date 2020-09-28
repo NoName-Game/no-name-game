@@ -17,6 +17,7 @@ import (
 
 var routes = map[string]reflect.Type{
 	"route.menu":              reflect.TypeOf((*controllers.MenuController)(nil)).Elem(),
+	"route.setup":             reflect.TypeOf((*controllers.SetupController)(nil)).Elem(),
 	"route.tutorial":          reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 	"route.tutorial.continue": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
