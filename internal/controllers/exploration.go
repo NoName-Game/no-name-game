@@ -44,8 +44,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -63,14 +62,10 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 func (c *ExplorationController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
-
-	// In questo stage è necessario controllare che venga scelto
-	// un tipo di missione tra quelli disponibili
+	// ##################################################################################################
+	// Verifico se il player ha passato una tipoligia di esplorazione valida
+	// ##################################################################################################
 	case 1:
-		// Recupero tutte le categorie di esplorazione possibili
 		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
 		if rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
 			c.Logger.Panic(err)
@@ -85,8 +80,9 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		}
 
 		return true
-
-	// In questo stage andremo a verificare lo stato della missione
+	// ##################################################################################################
+	// Verifica stato esplorazione
+	// ##################################################################################################
 	case 2:
 		var rExplorationCheck *pb.ExplorationCheckResponse
 		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
@@ -122,30 +118,21 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
-	// In questo stage verifico l'azione che vuole intraprendere l'utente
+	// ##################################################################################################
+	// Verifico se il player vuole continuare o terminare l'esplorazione
+	// ##################################################################################################
 	case 3:
-		// Se l'utente decide di continuare/ripetere il ciclo, questo stage si ripete
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
 			return false
-
-			// Se l'utente invence decide di rientrare e concludere la missione, concludo!
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
 			c.CurrentState.Stage = 4
-
 			return false
 		}
 
 		return true
-
-	default:
-		// Stato non riconosciuto ritorno errore
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
 	}
 
-	// Ritorno errore generico
-	return true
+	return false
 }
 
 // ====================================

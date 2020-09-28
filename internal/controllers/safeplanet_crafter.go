@@ -49,8 +49,7 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -66,8 +65,10 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Verifico tipologia item che il player vuole craftare
+	// ##################################################################################################
 	case 0:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armor") {
 			c.Payload.ItemType = "armor"
@@ -78,11 +79,16 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 			c.Payload.ItemType = "weapon"
 			c.CurrentState.Stage = 2
 		}
+	// ##################################################################################################
+	// Verifico che il player abbia scelto una tipologia valida
+	// ##################################################################################################
 	case 2:
 		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory == "" {
 			return true
 		}
-
+	// ##################################################################################################
+	// Verifico se il player ha deciso di inserire un nuovo elemento al craft, o di concludere l'operazione
+	// ##################################################################################################
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")) {
 			// Il player ha aggiunto una nuova risorsa
@@ -94,10 +100,12 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 				return true
 			}
 		}
+	// ##################################################################################################
+	// Se il player ha dato conferma verifico se ha il denaro necessario per proseguire
+	// ##################################################################################################
 	case 4:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			// TODO: da spostare su ws
-			// Verifico se il player ha i soldi per pagare il lavoro
+			var err error
 			var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
 			if rGetPlayerEconomyMoney, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 				PlayerID:    c.Player.GetID(),
@@ -106,12 +114,17 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 				c.Logger.Panic(err)
 			}
 
+			// TODO: da spostare su ws
 			if rGetPlayerEconomyMoney.GetValue() < int32(c.Payload.Price) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money")
 				return true
 			}
 		}
+	// ##################################################################################################
+	// Verifico stato crafting
+	// ##################################################################################################
 	case 5:
+		var err error
 		var rCrafterCheck *pb.CrafterCheckResponse
 		if rCrafterCheck, err = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
 			PlayerID: c.Player.ID,

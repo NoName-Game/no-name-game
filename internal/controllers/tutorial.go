@@ -41,8 +41,7 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -59,22 +58,28 @@ func (c *TutorialController) Handle(player *pb.Player, update tgbotapi.Update) {
 // ====================================
 func (c *TutorialController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Verifico che l'azione passata sia quella di aprire gli occhi
+	// ##################################################################################################
 	case 1:
-		// Verifico che l'azione passata sia quella di aprire gli occhi
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.open_eye") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			return true
 		}
+	// ##################################################################################################
+	// Verifico se il player ha compleato le attività
+	// ##################################################################################################
 	case 3:
-		// Verifico se il player ha compleato le attività
 		for _, state := range c.Data.PlayerActiveStates {
 			if state.Controller != "route.tutorial" {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")
 				return true
 			}
 		}
+	// ##################################################################################################
+	// Verifico se il player ha compleato le attività
+	// ##################################################################################################
 	case 6:
-		// Verifico se il player ha compleato le attività
 		for _, state := range c.Data.PlayerActiveStates {
 			if state.Controller != "route.tutorial" {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.tutorial.error.function_not_completed")

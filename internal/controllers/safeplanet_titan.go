@@ -38,8 +38,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -55,20 +54,17 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 // Validator
 // ====================================
 func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
-
+	// ##################################################################################################
+	// Verifico sei il player ha passato il nome di un titano valido
+	// ##################################################################################################
 	case 1:
-		// Recupero quali titani sono stati scoperti e quindi raggiungibili
+		var err error
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
 		if rTitanDiscovered, err = config.App.Server.Connection.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		// Verifico sei il player ha passato il nome di un titano valido
 		if len(rTitanDiscovered.GetTitans()) > 0 {
 			for _, titan := range rTitanDiscovered.GetTitans() {
 				if c.Update.Message.Text == titan.GetName() {
@@ -77,11 +73,10 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 			}
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
 	}
 
-	return true
+	return false
 }
 
 // ====================================

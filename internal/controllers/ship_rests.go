@@ -41,8 +41,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -59,56 +58,43 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Verifico se il player necessita davvero di dormire
+	// ##################################################################################################
 	case 0:
-		// Verifico se il player necessita davvero di dormire
-		restsInfo, err := config.App.Server.Connection.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
+		var err error
+		var rGetRestsInfo *pb.GetRestsInfoResponse
+		if rGetRestsInfo, err = config.App.Server.Connection.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
 			PlayerID: c.Player.GetID(),
-		})
-		if err != nil {
+		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		if !restsInfo.NeedRests {
+		if !rGetRestsInfo.GetNeedRests() {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.dont_need")
 			return true
 		}
 
-		return false
+	// ##################################################################################################
+	// Verifico se il player vuole dormire
+	// ##################################################################################################
 	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.start") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
 			return true
 		}
 
-		return false
+	// ##################################################################################################
+	// Verifico se il player vuole svegliarsi
+	// ##################################################################################################
 	case 2:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup")
 			return true
 		}
-
-		// // Si vuole svegliare, ma non è passato ancora un minuto
-		// var endDate = time.Now()
-		//
-		// diffDate := endDate.Sub(c.Payload.StartDateTime)
-		// diffMinutes := math.RoundToEven(diffDate.Minutes())
-		// if diffMinutes <= 1 {
-		// 	c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
-		// 	c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-		// 		tgbotapi.NewKeyboardButtonRow(
-		// 			tgbotapi.NewKeyboardButton(
-		// 				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-		// 			),
-		// 		),
-		// 	)
-		// 	return true
-		// }
-
-		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================

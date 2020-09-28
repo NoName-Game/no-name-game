@@ -45,8 +45,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -63,7 +62,9 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 // ====================================
 func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
+	// ##################################################################################################
+	// Verifico tipologia di transazione
+	// ##################################################################################################
 	case 0:
 		if helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"),

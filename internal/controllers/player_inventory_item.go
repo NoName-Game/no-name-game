@@ -49,8 +49,7 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -66,14 +65,12 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 // Validator
 // ====================================
 func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
-
+	// ##################################################################################################
 	// Verifico quale item ha scelto di usare e controllo se il player possiede realmente l'item indicato
+	// ##################################################################################################
 	case 1:
+		var err error
 		var rGetPlayerItems *pb.GetPlayerItemsResponse
 		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
 			PlayerID: c.Player.GetID(),
@@ -98,20 +95,18 @@ func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
 			}
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "inventory.items.not_found")
 		return true
 
+	// ##################################################################################################
 	// Verifico la conferma dell'uso
+	// ##################################################################################################
 	case 2:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			return false
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return true
 		}
-
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true
 	}
 
-	return true
+	return false
 }
 
 // ====================================

@@ -47,8 +47,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -65,9 +64,9 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 // ====================================
 func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
+	// ##################################################################################################
+	// Verifico quale tipologia di equipaggiamento si vuole gestire
+	// ##################################################################################################
 	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armors") {
 			c.Payload.ItemType = "armors"
@@ -80,36 +79,34 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 			return false
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
+	// ##################################################################################################
 	// Verifico che la tipologia di equip che vuole il player esista
+	// ##################################################################################################
 	case 2:
-		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory != "" {
-			return false
+		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory == "" {
+			return true
 		}
-
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true
-	// Verifico che il player voglia continuare con l'equip
+	// ##################################################################################################
+	// Verifico conferma equipaggiamento player
+	// ##################################################################################################
 	case 3:
 		if strings.Contains(c.Update.Message.Text, "🩸") || strings.Contains(c.Update.Message.Text, "🛡") {
 			return false
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
-
-	// Verifico la conferma dell'equip
+	// ##################################################################################################
+	// Verifico conferma equipaggiamento player
+	// ##################################################################################################
 	case 4:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			return false
+		// Verifico la conferma dell'equip
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return true
 		}
-
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true
 	}
 
-	return true
+	return false
 }
 
 // ====================================

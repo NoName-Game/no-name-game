@@ -64,8 +64,7 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -97,9 +96,10 @@ func (c *TitanPlanetTackleController) Validator() (hasErrors bool) {
 // ====================================
 func (c *TitanPlanetTackleController) Stage() {
 	switch c.CurrentState.Stage {
-	// In questo stage faccio entrare il player nella mappa
+	// ##################################################################################################
+	// Verifico se il player vuole uscire dalla caccia
+	// ##################################################################################################
 	case 0:
-		// Verifico se il player vuole uscire dalla caccia
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.leave") {
 				c.CurrentState.Completed = true

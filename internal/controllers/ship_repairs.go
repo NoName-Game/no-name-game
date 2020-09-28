@@ -47,8 +47,7 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -64,11 +63,12 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 // Validator
 // ====================================
 func (c *ShipRepairsController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
+	// ##################################################################################################
+	// Verifico se la nave attualmente equipaggiata dal player necessita di riparazioni
+	// ##################################################################################################
 	case 0:
-		// Recupero nave player equipaggiata
+		var err error
 		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
@@ -88,8 +88,9 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.repairs.dont_need")
 			return true
 		}
-
-		return false
+	// ##################################################################################################
+	// Verifico quale tipologia di riparazione vuuole effettuare il player
+	// ##################################################################################################
 	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_partial") {
 			c.Payload.RepairType = pb.StartShipRepairRequest_PARTIAL
@@ -110,7 +111,11 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 
 		return true
 
+	// ##################################################################################################
+	// Verifico stato riparazione
+	// ##################################################################################################
 	case 2:
+		var err error
 		var rCheckShipRepair *pb.CheckShipRepairResponse
 		if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
 			PlayerID: c.Player.ID,
@@ -133,11 +138,9 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================

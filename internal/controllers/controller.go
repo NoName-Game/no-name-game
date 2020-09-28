@@ -134,7 +134,7 @@ func (c *Controller) LoadControllerData() (err error) {
 func (c *Controller) Validate() {
 	// Se non ha un messaggio particolare allora setto configurazione di default
 	if c.Validation.Message == "" {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.general")
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 	}
 
 	// if c.Validation.ReplyKeyboard.Keyboard == nil {

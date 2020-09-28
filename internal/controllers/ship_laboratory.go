@@ -50,8 +50,7 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -67,15 +66,11 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 // Validator
 // ====================================
 func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
-
+	// ##################################################################################################
 	// In questo stage verifico se mi è stata passata una categoria che esiste realmente
+	// ##################################################################################################
 	case 1:
-		// category, err = providers.FindItemCategoryByName()
 		if !helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.medical"),
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.ship_support"),
@@ -85,10 +80,11 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 			return true
 		}
 
-		return false
-	// In questo stage è necessario verificare se il player ha passato un item che eiste realmente
+	// ##################################################################################################
+	// Recupero tutte gli items e ciclo per trovare quello voluta del player
+	// ##################################################################################################
 	case 2:
-		// Recupero tutte gli items e ciclo per trovare quello voluta del player
+		var err error
 		var rGetAllItems *pb.GetAllItemsResponse
 		if rGetAllItems, err = config.App.Server.Connection.GetAllItems(helpers.NewContext(1), &pb.GetAllItemsRequest{}); err != nil {
 			c.Logger.Panic(err)
@@ -104,17 +100,19 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 			}
 		}
 
+		// Se l'item non esiste ritorno errore
 		if !itemExists {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.item_does_not_exist")
-
 			return true
 		}
 
-		return false
+	// ##################################################################################################
 	// In questo stage è necessario che venga validato se il player ha tutti i
 	// materiali necessario al crafting dell'item da lui scelto
+	// ##################################################################################################
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "yep") {
+			var err error
 			var rLaboratoryCheckHaveResourceForCrafting *pb.LaboratoryCheckHaveResourceForCraftingResponse
 			if rLaboratoryCheckHaveResourceForCrafting, err = config.App.Server.Connection.LaboratoryCheckHaveResourceForCrafting(helpers.NewContext(1), &pb.LaboratoryCheckHaveResourceForCraftingRequest{
 				PlayerID: c.Player.ID,
@@ -127,14 +125,18 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.no_resource_to_craft")
 				return true
 			}
+
 			return false
 		}
 
 		return true
 
+	// ##################################################################################################
 	// In questo stage verificho che l'utente abbia effettivamente aspettato
 	// il tempo di attesa necessario al craft
+	// ##################################################################################################
 	case 4:
+		var err error
 		var rLaboratoryCheckCrafting *pb.LaboratoryCheckCraftingResponse
 		if rLaboratoryCheckCrafting, err = config.App.Server.Connection.LaboratoryCheckCrafting(helpers.NewContext(1), &pb.LaboratoryCheckCraftingRequest{
 			PlayerID: c.Player.ID,
@@ -157,11 +159,9 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================

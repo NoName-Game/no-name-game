@@ -40,8 +40,7 @@ func (c *SetupController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -59,8 +58,10 @@ func (c *SetupController) Handle(player *pb.Player, update tgbotapi.Update) {
 func (c *SetupController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Verifico se la lingua scelta esiste
+	// ##################################################################################################
 	case 1:
-		// Verifico se la lingua scelta esiste
 		var rGetLanguageByName *pb.GetLanguageByNameResponse
 		if rGetLanguageByName, err = config.App.Server.Connection.GetLanguageByName(helpers.NewContext(1), &pb.GetLanguageByNameRequest{
 			Name: c.Update.Message.Text,
@@ -71,8 +72,10 @@ func (c *SetupController) Validator() (hasErrors bool) {
 
 		// Ho trovato la lingua
 		c.Paylaod.LanguageID = rGetLanguageByName.GetLanguage().GetID()
+	// ##################################################################################################
+	// Verifica timezone
+	// ##################################################################################################
 	case 2:
-		// Recupero lista timezones
 		var rGetTimezoneByName *pb.GetTimezoneByNameResponse
 		if rGetTimezoneByName, err = config.App.Server.Connection.GetTimezoneByName(helpers.NewContext(1), &pb.GetTimezoneByNameRequest{
 			Name: c.Update.Message.Text,

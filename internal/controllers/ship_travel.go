@@ -47,8 +47,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -64,13 +63,10 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 // Validator
 // ====================================
 func (c *ShipTravelController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	case 0:
-		return false
-
-	// In questo stage non faccio nulla di particolare, verifico solo se ha deciso
-	// di avviare una nuova esplorazione
+	// ##################################################################################################
+	// Verifico se si vuole avviare un nuovo viaggio
+	// ##################################################################################################
 	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.travel.start") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
@@ -84,14 +80,12 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
-
+	// ##################################################################################################
 	// In questo stage verifico che il player abbia pasasto la stella vicina
+	// ##################################################################################################
 	case 2:
 		if !helpers.InArray(c.Update.Message.Text, c.Payload.StarNearestMapName) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
@@ -103,11 +97,11 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 			return true
 		}
 
-		return false
-
-	// In questo stage verificho che l'utente abbia effettivamente aspettato
-	// il tempo di attesa necessario al completamento del viaggio
+	// ##################################################################################################
+	// Verifica stato viaggio
+	// ##################################################################################################
 	case 3:
+		var err error
 		var rCheckShipTravel *pb.CheckShipTravelResponse
 		if rCheckShipTravel, err = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
 			PlayerID: c.Player.ID,
@@ -160,11 +154,9 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================

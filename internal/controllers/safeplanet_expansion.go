@@ -45,8 +45,7 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -62,14 +61,12 @@ func (c *SafePlanetExpansionController) Handle(player *pb.Player, update tgbotap
 // Validator
 // ====================================
 func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
-	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
-	case 0:
-		return false
-
+	// ##################################################################################################
+	// Verifico se il nome passato è quello di un pianeta sicuro
+	// ##################################################################################################
 	case 1:
-		// Verifico se il nome passato è quello di un pianeta sicuro
+		var err error
 		var rGetSafePlanets *pb.GetSafePlanetsResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetSafePlanets(helpers.NewContext(1), &pb.GetSafePlanetsRequest{}); err != nil {
 			c.Logger.Panic(err)
@@ -86,12 +83,14 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 			}
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
-		// Verifico la conferma dell'uso
+
+	// ##################################################################################################
+	// Verifico la conferma dell'uso
+	// ##################################################################################################
 	case 2:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			// Verifico che il player ha abbastanza soldi
+			var err error
 			var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 			if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
 				PlayerID:    c.Player.ID,
@@ -100,6 +99,7 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 				c.Logger.Panic(err)
 			}
 
+			// Verifico che il player ha abbastanza soldi
 			if rGetPlayerEconomy.GetValue() >= c.Payload.Price {
 				return false
 			}
@@ -108,11 +108,10 @@ func (c *SafePlanetExpansionController) Validator() (hasErrors bool) {
 			return true
 		}
 
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 		return true
 	}
 
-	return true
+	return false
 }
 
 // ====================================

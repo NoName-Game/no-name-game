@@ -40,8 +40,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Validate
-	var hasError bool
-	if hasError = c.Validator(); hasError {
+	if c.Validator() {
 		c.Validate()
 		return
 	}
@@ -59,13 +58,17 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
-	// È il primo stato non c'è nessun controllo
+	// ##################################################################################################
+	// Verifico avvio missione
+	// ##################################################################################################
 	case 0:
 		if helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start") == c.Update.Message.Text {
 			c.CurrentState.Stage = 1
 		}
 
+	// ##################################################################################################
 	// In questo stage andremo a verificare lo stato della missione
+	// ##################################################################################################
 	case 2:
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
