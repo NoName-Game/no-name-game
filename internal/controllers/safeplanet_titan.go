@@ -92,7 +92,7 @@ func (c *SafePlanetTitanController) Stage() {
 	switch c.CurrentState.Stage {
 	case 0:
 		var restsRecap string
-		restsRecap = helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.info")
+		restsRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.info")
 		var keyboardRow [][]tgbotapi.KeyboardButton
 
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
@@ -103,7 +103,7 @@ func (c *SafePlanetTitanController) Stage() {
 
 		// Se sono stati trovati dei tiani costruisco keyboard
 		if len(rTitanDiscovered.GetTitans()) > 0 {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.choice")
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.choice")
 			for _, titan := range rTitanDiscovered.GetTitans() {
 				newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
@@ -113,7 +113,7 @@ func (c *SafePlanetTitanController) Stage() {
 				keyboardRow = append(keyboardRow, newKeyboardRow)
 			}
 		} else {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.no_titans_founded")
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.no_titans_founded")
 		}
 
 		// Aggiungo torna indietro
@@ -155,7 +155,7 @@ func (c *SafePlanetTitanController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "route.safeplanet.titan.teleport"),
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.teleport"),
 		)
 
 		msg.ParseMode = "markdown"
