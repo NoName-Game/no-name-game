@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
@@ -163,8 +161,6 @@ func (c *SafePlanetExpansionController) Stage() {
 			} else {
 				expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap_planets_done")
 			}
-
-			logrus.Info(rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter())
 
 			// Recap titano
 			if rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter() > 0 {
