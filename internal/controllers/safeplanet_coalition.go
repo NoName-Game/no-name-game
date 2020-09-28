@@ -50,7 +50,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.research")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 	if _, err = helpers.SendMessage(msg); err != nil {

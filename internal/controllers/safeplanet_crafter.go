@@ -69,37 +69,29 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
 	case 0:
-		return false
-	case 1:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armor") {
 			c.Payload.ItemType = "armor"
-			return false
+			c.CurrentState.Stage = 1
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapon") {
 			// Se viene richiesto di craftare un'arma passo direttamente alla lista delle risorse
 			// in quanto le armi non hanno una categoria
-			c.CurrentState.Stage = 2
 			c.Payload.ItemType = "weapon"
-
-			return false
+			c.CurrentState.Stage = 2
 		}
-
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-		return true
 	case 2:
-		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory != "" {
-			return false
+		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory == "" {
+			return true
 		}
-		return true
+
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")) {
 			// Il player ha aggiunto una nuova risorsa
 			c.CurrentState.Stage = 2
 			c.Payload.AddResource = true
-
-			return false
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
-			if len(c.Payload.Resources) > 0 {
-				return false
+			// Non è possibile iniziare il craft senza risorse
+			if len(c.Payload.Resources) < 0 {
+				return true
 			}
 		}
 	case 4:
@@ -118,8 +110,6 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money")
 				return true
 			}
-
-			return false
 		}
 	case 5:
 		var rCrafterCheck *pb.CrafterCheckResponse
@@ -144,11 +134,9 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================
@@ -183,8 +171,6 @@ func (c *SafePlanetCrafterController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Avanzo di stage
-		c.CurrentState.Stage = 1
 	case 1:
 		var message string
 		var keyboardRowCategories [][]tgbotapi.KeyboardButton

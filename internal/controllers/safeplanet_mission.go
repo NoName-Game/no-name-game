@@ -61,15 +61,9 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false
-
-	// Verifico se ha scelto di avviare una nuova missione
-	case 1:
 		if helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.start") == c.Update.Message.Text {
-			return false
+			c.CurrentState.Stage = 1
 		}
-
-		return true
 
 	// In questo stage andremo a verificare lo stato della missione
 	case 2:
@@ -120,15 +114,9 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 
 			return true
 		}
-
-		return false
-	default:
-		// Stato non riconosciuto ritorno errore
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.state")
 	}
 
-	// Ritorno errore generico
-	return true
+	return false
 }
 
 // ====================================
@@ -161,9 +149,6 @@ func (c *SafePlanetMissionController) Stage() {
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
-
-		// Avanzo di stage
-		c.CurrentState.Stage = 1
 
 	// In questo stage verrà recuperato il tempo di attesa per il
 	// completamnto della missione e notificato al player

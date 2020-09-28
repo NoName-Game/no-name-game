@@ -177,6 +177,7 @@ func (c *SetupController) Stage() {
 
 		// Mando messaggio fine confiurazione
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.end"))
+		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

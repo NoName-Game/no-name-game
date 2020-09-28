@@ -33,9 +33,9 @@ route.conqueror: "🚩 Conquistatore"
 
 # SETUP ( questi messaggi non devono esser tradotti )
 setup.intro: "Hello 👨🏼‍🚀 *%s* and welcome to 🕹 *NoName* Game!"
-setup.select_language: "⚙️ Setup 1 of 2: *comunication*\nChoose your favourite 💬 language:"
-setup.select_timezone: "⚙️ Setup 2 of 2: *experience*\nChoose your current 🕘️ timezone:"
-setup.end: "✅ Setup completed successfully! Good Game!"
+setup.select_language: "⚙️ Setup 1 of 2: *comunication*.\n\nChoose your favourite 💬 language:"
+setup.select_timezone: "⚙️ Setup 2 of 2: *experience*.\n\nChoose your current 🕘️ timezone:"
+setup.end: "✅ Setup completed successfully! *Good Game!*"
 
 # ROUTES - Safe planet
 route.safeplanet.bank: "🏦 Banca"

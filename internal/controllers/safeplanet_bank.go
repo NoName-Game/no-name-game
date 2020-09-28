@@ -55,7 +55,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 	c.Stage()
 
 	// Completo progressione
-	c.Completing(nil)
+	c.Completing(&c.Payload)
 }
 
 // ====================================
@@ -65,23 +65,18 @@ func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
 	case 0:
-		return false
-	case 1:
 		if helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"),
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"),
 		}) {
-			return false
+			c.CurrentState.Stage = 1
 		}
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
-		return true
 	case 2:
 		// TODO: Verificare importo
 		return false
 	}
 
-	return true
+	return false
 }
 
 // ====================================
@@ -142,19 +137,18 @@ func (c *SafePlanetBankController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Avanzo di stage
-		c.CurrentState.Stage = 1
 	case 1:
 		var mainMessage string
 		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
-		c.Payload.Type = c.Update.Message.Text
-
-		switch c.Payload.Type {
+		switch c.Update.Message.Text {
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit_message")
 
+			c.Payload.Type = "deposit"
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
 			mainMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws_message")
+
+			c.Payload.Type = "withdraws"
 		}
 
 		// Inserisco le quantità di default per il prelievo/deposito
@@ -196,15 +190,16 @@ func (c *SafePlanetBankController) Stage() {
 
 		var text string
 		text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
+
 		switch c.Payload.Type {
-		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
+		case "deposit":
 			if _, err = config.App.Server.Connection.BankDeposit(helpers.NewContext(1), &pb.BankDepositRequest{
 				PlayerID: c.Player.ID,
 				Amount:   int32(value),
 			}); err != nil {
 				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.transaction_error")
 			}
-		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
+		case "withdraws":
 			if _, err = config.App.Server.Connection.BankWithdraw(helpers.NewContext(1), &pb.BankWithdrawRequest{
 				PlayerID: c.Player.ID,
 				Amount:   int32(value),
