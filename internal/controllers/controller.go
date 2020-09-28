@@ -255,7 +255,9 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 }
 
 // Completing - Metodo per settare il completamento di uno stato
-func (c *Controller) Completing(payload interface{}) (err error) {
+func (c *Controller) Completing(payload interface{}) {
+	var err error
+
 	// Aggiorno stato controller
 	if err = helpers.SetControllerCacheData(c.Player.ID, c.CurrentState.Controller, c.CurrentState.Stage, payload); err != nil {
 		c.Logger.Panicf("cant set controller cache data: %s", err.Error())
