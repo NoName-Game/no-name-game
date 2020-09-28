@@ -7,16 +7,16 @@ import (
 )
 
 // ====================================
-// Inventory
+// PlayerInventoryController
 // ====================================
-type InventoryController struct {
+type PlayerInventoryController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
@@ -41,7 +41,7 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.items")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
 	)
 
@@ -50,10 +50,10 @@ func (c *InventoryController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 }
 
-func (c *InventoryController) Validator() bool {
+func (c *PlayerInventoryController) Validator() bool {
 	return false
 }
 
-func (c *InventoryController) Stage() {
+func (c *PlayerInventoryController) Stage() {
 	//
 }

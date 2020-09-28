@@ -103,7 +103,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 				),
 			),
 		)

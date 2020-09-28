@@ -153,7 +153,7 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 				),
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 					),
 				),
 			)

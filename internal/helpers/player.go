@@ -73,15 +73,13 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	return
 }
 
-// CheckPlayerHaveOneEquippedWeapon
-// Verifica se il player ha almeno un'arma equipaggiata
-func CheckPlayerHaveOneEquippedWeapon(player *pb.Player) bool {
-	rGetPlayerWeapons, _ := config.App.Server.Connection.GetPlayerWeaponEquipped(NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
-		PlayerID: player.GetID(),
-	})
-
-	if rGetPlayerWeapons.GetWeapon() != nil && rGetPlayerWeapons.GetWeapon().GetID() > 0 {
-		return true
+// CheckPlayerHaveActiveActivity
+// Verifica se il player ha in corso una determinata attività
+func CheckPlayerHaveActiveActivity(activities []*pb.PlayerActivity, controller string) bool {
+	for _, state := range activities {
+		if state.Controller == controller {
+			return true
+		}
 	}
 
 	return false

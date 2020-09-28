@@ -137,7 +137,7 @@ func (c *TutorialController) Stage() {
 		c.CurrentState.Stage = 2
 
 		// Richiamo inventario come sottoprocesso di questo controller
-		useItemController := new(InventoryItemController)
+		useItemController := new(PlayerInventoryItemController)
 		useItemController.Handle(c.Player, c.Update)
 
 	// ============================================================================================================

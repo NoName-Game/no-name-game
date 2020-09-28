@@ -193,7 +193,12 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
-			// helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
+			// Se non è presente un'attività in corso NON cancello il controller cache data
+			// in quel caso se si vuoi forzare la cancellazione usare clears
+			if !helpers.CheckPlayerHaveActiveActivity(c.Data.PlayerActiveStates, c.CurrentState.Controller) {
+				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+			}
 
 			if controller != nil {
 				// Rimuovo testo messaggio

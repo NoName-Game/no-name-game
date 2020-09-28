@@ -13,16 +13,16 @@ import (
 )
 
 // ====================================
-// InventoryResource
+// PlayerInventoryResource
 // ====================================
-type InventoryResourceController struct {
+type PlayerInventoryResourceController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Init Controller
@@ -34,7 +34,7 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &InventoryController{},
+				To:        &PlayerInventoryController{},
 				FromStage: 0,
 			},
 		},
@@ -76,10 +76,10 @@ func (c *InventoryResourceController) Handle(player *pb.Player, update tgbotapi.
 	}
 }
 
-func (c *InventoryResourceController) Validator() bool {
+func (c *PlayerInventoryResourceController) Validator() bool {
 	return false
 }
 
-func (c *InventoryResourceController) Stage() {
+func (c *PlayerInventoryResourceController) Stage() {
 	//
 }

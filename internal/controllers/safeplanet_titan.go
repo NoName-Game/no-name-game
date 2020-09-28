@@ -118,7 +118,7 @@ func (c *SafePlanetTitanController) Stage() {
 
 		// Aggiungo torna indietro
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
 		// Invio messaggio

@@ -13,13 +13,13 @@ import (
 )
 
 // ====================================
-// InventoryItemController
+// PlayerInventoryItemController
 // ====================================
 // Con questo controller il player avrà la possibilità di usare gli item
 // da lui craftati e non. Quindi di beneficiare dei potenziamenti.
 // ====================================
 
-type InventoryItemController struct {
+type PlayerInventoryItemController struct {
 	Controller
 	Payload struct {
 		Item *pb.Item
@@ -29,7 +29,7 @@ type InventoryItemController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
@@ -40,7 +40,7 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &InventoryController{},
+				To:        &PlayerInventoryController{},
 				FromStage: 1,
 			},
 		},
@@ -65,7 +65,7 @@ func (c *InventoryItemController) Handle(player *pb.Player, update tgbotapi.Upda
 // ====================================
 // Validator
 // ====================================
-func (c *InventoryItemController) Validator() (hasErrors bool) {
+func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
 	// È il primo stato non c'è nessun controllo
@@ -117,7 +117,7 @@ func (c *InventoryItemController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *InventoryItemController) Stage() {
+func (c *PlayerInventoryItemController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
@@ -148,7 +148,7 @@ func (c *InventoryItemController) Stage() {
 		}
 
 		keyboardRowItems = append(keyboardRowItems, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
 		// Invio messagio con recap e con selettore categoria

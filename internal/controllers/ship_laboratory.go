@@ -196,7 +196,7 @@ func (c *ShipLaboratoryController) Stage() {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 			),
 		))
 
