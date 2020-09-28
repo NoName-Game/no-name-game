@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
@@ -131,18 +133,56 @@ func (c *SafePlanetExpansionController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Messaggio titanto non ancora sconfitto
+		var rGetTitanByPlanetSystemID *pb.GetTitanByPlanetSystemIDResponse
+		if rGetTitanByPlanetSystemID, err = config.App.Server.Connection.GetTitanByPlanetSystemID(helpers.NewContext(1), &pb.GetTitanByPlanetSystemIDRequest{
+			PlanetSystemID: rGetExpansionInfo.GetLastSystemDiscovered().GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// #######################
+		// Recap messaggi
+		// #######################
+
+		// Messaggio ultimo sistema scoperto
 		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.last_system",
 			rGetExpansionInfo.GetLastSystemDiscovered().GetName(),
 		)
 
-		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 {
+		// Messaggio pianeti che mancano da esplorare
+		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 && rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter() > 0 {
 			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.done")
 		} else {
-			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap",
-				rGetExpansionInfo.GetMissPlanetsCounter(),
-				rGetExpansionInfo.GetTotalPlanetsCounter(),
-			)
+			// Recap pianeti
+			if rGetExpansionInfo.GetMissPlanetsCounter() > 0 {
+				expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap_planets",
+					rGetExpansionInfo.GetMissPlanetsCounter(),
+					rGetExpansionInfo.GetTotalPlanetsCounter(),
+				)
+			} else {
+				expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.recap_planets_done")
+			}
+
+			logrus.Info(rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter())
+
+			// Recap titano
+			if rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter() > 0 {
+				expansionRecap += helpers.Trans(c.Player.Language.Slug,
+					"safeplanet.coalition.expansion.recap_titan_done",
+					rGetTitanByPlanetSystemID.GetTitan().GetName(),
+				)
+			} else {
+				expansionRecap += helpers.Trans(c.Player.Language.Slug,
+					"safeplanet.coalition.expansion.recap_titan",
+					rGetTitanByPlanetSystemID.GetTitan().GetName(),
+				)
+			}
 		}
+
+		// #######################
+		// Lista pianeti sicuri raggiungibili
+		// #######################
 
 		// Recupero ultima posizione del player
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
