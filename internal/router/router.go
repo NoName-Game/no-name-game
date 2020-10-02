@@ -43,13 +43,14 @@ var routes = map[string]reflect.Type{
 	"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 
 	// Safe Planet
-	"route.safeplanet.bank":                reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
-	"route.safeplanet.crafter":             reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
-	"route.safeplanet.coalition":           reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem(),
-	"route.safeplanet.mission":             reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem(),
-	"route.safeplanet.titan":               reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem(),
-	"route.safeplanet.coalition.expansion": reflect.TypeOf((*controllers.SafePlanetExpansionController)(nil)).Elem(),
-	"route.safeplanet.coalition.research":  reflect.TypeOf((*controllers.SafePlanetResearchController)(nil)).Elem(),
+	"route.safeplanet.bank":                        reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
+	"route.safeplanet.crafter":                     reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
+	"route.safeplanet.coalition":                   reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem(),
+	"route.safeplanet.mission":                     reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem(),
+	"route.safeplanet.titan":                       reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem(),
+	"route.safeplanet.coalition.expansion":         reflect.TypeOf((*controllers.SafePlanetExpansionController)(nil)).Elem(),
+	"route.safeplanet.coalition.research":          reflect.TypeOf((*controllers.SafePlanetResearchController)(nil)).Elem(),
+	"route.safeplanet.coalition.research.donation": reflect.TypeOf((*controllers.SafePlanetResearchDonationController)(nil)).Elem(),
 
 	// Titan Planet
 	"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),

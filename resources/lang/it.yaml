@@ -347,7 +347,9 @@ safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necess
 
 # Research - Donations
 safeplanet.coalition.research.donation.choose_reseource: "Quale risorsa vuoi donare?"
-
+safeplanet.coalition.research.donation.choose_quantity: "Quante risorsa vuoi donare?"
+safeplanet.coalition.research.donation.confirmation: "Stai per donare *%v* risorse di, *%s*, sicuro di voler continuare?"
+safeplanet.coalition.research.donation.completed: "La tua donazione è stata registrata correttamente!"
 # Crafter
 safeplanet.crafting.start: "⚒️ Inizia!"
 safeplanet.crafting.what: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa vorresti realizzare?\n\n"
