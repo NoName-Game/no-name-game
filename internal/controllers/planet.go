@@ -62,8 +62,8 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		helpers.Trans(player.Language.Slug, "planet.intro"),
 		helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName()),
 		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlanetByID.GetPlanet().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlanetByID.GetPlanet().GetBiome().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlanetByID.GetPlanet().GetAtmosphere().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlanetByID.GetPlanet().GetPlanetBiome().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlanetByID.GetPlanet().GetPlanetAtmosphere().GetName()),
 	)
 
 	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse

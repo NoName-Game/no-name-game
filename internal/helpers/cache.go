@@ -90,7 +90,7 @@ func DelControllerCacheData(playerID uint32, controller string) (err error) {
 // =================
 
 // SetMapInCache - Salvo mappa in cache per non appesantire le chiamate a DB
-func SetMapInCache(maps *pb.Maps) (err error) {
+func SetMapInCache(maps *pb.PlanetMap) (err error) {
 	var jsonValue []byte
 	jsonValue, _ = json.Marshal(maps)
 
@@ -101,12 +101,12 @@ func SetMapInCache(maps *pb.Maps) (err error) {
 }
 
 // GetMapInCache - Recupera mappa in memoria
-func GetMapInCache(MapID uint32) (maps *pb.Maps, err error) {
+func GetMapInCache(MapID uint32) (planetMap *pb.PlanetMap, err error) {
 	var result string
 	if result, err = config.App.Redis.Connection.Get(fmt.Sprintf("hunting_map_%v", MapID)).Result(); err != nil {
-		return maps, fmt.Errorf("cant get map in cache: %s", err.Error())
+		return planetMap, fmt.Errorf("cant get map in cache: %s", err.Error())
 	}
 
-	err = json.Unmarshal([]byte(result), &maps)
+	err = json.Unmarshal([]byte(result), &planetMap)
 	return
 }

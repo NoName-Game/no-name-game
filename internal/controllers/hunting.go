@@ -187,25 +187,23 @@ func (c *HuntingController) Hunting() {
 
 		// Recupero dettagli della mappa e per non appesantire le chiamate
 		// al DB registro il tutto sula cache
-		var rGetMapByID *pb.GetMapByIDResponse
-		if rGetMapByID, err = config.App.Server.Connection.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-			MapID: rGetPlayerCurrentPlanet.GetPlanet().GetMapID(),
+		var rGetPlanetMapByID *pb.GetPlanetMapByIDResponse
+		if rGetPlanetMapByID, err = config.App.Server.Connection.GetPlanetMapByID(helpers.NewContext(1), &pb.GetPlanetMapByIDRequest{
+			PlanetMapID: rGetPlayerCurrentPlanet.GetPlanet().GetPlanetMapID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		var maps = rGetMapByID.GetMaps()
+		var planetMap = rGetPlanetMapByID.GetPlanetMap()
 
 		// Registro mappa e posizione iniziale del player
-		_ = helpers.SetMapInCache(maps)
-		c.Payload.PlayerPositionX = maps.GetStartPositionX()
-		c.Payload.PlayerPositionY = maps.GetStartPositionY()
-		// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", maps.GetStartPositionX())
-		// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", maps.GetStartPositionY())
+		_ = helpers.SetMapInCache(planetMap)
+		c.Payload.PlayerPositionX = planetMap.GetStartPositionX()
+		c.Payload.PlayerPositionY = planetMap.GetStartPositionY()
 
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		if decodedMap, err = helpers.DecodeMapToDisplay(maps, maps.GetStartPositionX(), maps.GetStartPositionY()); err != nil {
+		if decodedMap, err = helpers.DecodeMapToDisplay(planetMap, planetMap.GetStartPositionX(), planetMap.GetStartPositionY()); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -221,11 +219,7 @@ func (c *HuntingController) Hunting() {
 
 		// Aggiorno lo stato e ritorno
 		c.Payload.CallbackMessageID = huntingMessage.MessageID
-		c.Payload.MapID = maps.ID
-		// helpers.SetHuntingCacheData(c.Player.ID, &HuntingCacheData{
-		// 	CallbackMessageID: huntingMessage.MessageID,
-		// 	MapID:             maps.ID,
-		// })
+		c.Payload.MapID = planetMap.ID
 
 		return
 	}
@@ -233,29 +227,19 @@ func (c *HuntingController) Hunting() {
 	// Se il messaggio è di tipo callback ed esiste una mappa associato al payload
 	// potrebbe essere un messaggio lanciato da tasiterino, quindi acconsento allo spostamento
 	if c.Update.CallbackQuery != nil && c.Update.Message == nil {
-		var maps *pb.Maps
-		if maps, err = helpers.GetMapInCache(c.Payload.MapID); err != nil {
+		var planetMap *pb.PlanetMap
+		if planetMap, err = helpers.GetMapInCache(c.Payload.MapID); err != nil {
 			c.Logger.Panic(err)
 		}
-
-		// Recupero posizione player
-		// var playerPositionX, playerPositionY int
-		// if c.PlayerPositionX, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "X"); err != nil {
-		// 	return err
-		// }
-		//
-		// if c.PlayerPositionY, err = helpers.GetCachedPlayerPositionInMap(maps, c.Player, "Y"); err != nil {
-		// 	return err
-		// }
 
 		// Controllo tipo di callback data - move / fight
 		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
 
 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
 		if actionType[1] == "move" {
-			err = c.movements(actionType[2], maps)
+			err = c.movements(actionType[2], planetMap)
 		} else if actionType[1] == "fight" {
-			err = c.fight(actionType[2], maps)
+			err = c.fight(actionType[2], planetMap)
 		}
 
 		if err != nil {
@@ -276,10 +260,10 @@ func (c *HuntingController) Hunting() {
 // ====================================
 // Movements
 // ====================================
-func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) {
+func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (err error) {
 	// Refresh della mappa
 	var cellGrid [][]bool
-	if err = json.Unmarshal([]byte(maps.CellGrid), &cellGrid); err != nil {
+	if err = json.Unmarshal([]byte(planetMap.CellGrid), &cellGrid); err != nil {
 		c.Logger.Panic(err)
 	}
 
@@ -319,7 +303,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 		// chiamata per verificare il drop
 		var nearTresure bool
 		var tresure *pb.Tresure
-		tresure, nearTresure = helpers.CheckForTresure(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
+		tresure, nearTresure = helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 		if nearTresure {
 			// random per definire se è un tesoro o una trappola :D
 			// Chiamo WS e recupero tesoro
@@ -402,7 +386,7 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 			editMessage.ParseMode = "markdown"
 
 			// Un tesoro è stato aperto, devo refreshare la mappa per cancellarlo
-			c.RefreshMap(maps.ID)
+			c.RefreshMap(planetMap.ID)
 
 			if _, err = helpers.SendMessage(editMessage); err != nil {
 				c.Logger.Panic(err)
@@ -418,13 +402,9 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 		return errors.New("action not recognized")
 	}
 
-	// Aggiorno nuova posizione del player
-	// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "X", c.PlayerPositionX)
-	// helpers.SetCachedPlayerPositionInMap(maps, c.Player, "Y", c.PlayerPositionY)
-
 	// Trasformo la mappa in qualcosa di più leggibile su telegram
 	var decodedMap string
-	if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
+	if decodedMap, err = helpers.DecodeMapToDisplay(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
 		c.Logger.Panic(err)
 	}
 
@@ -433,8 +413,8 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 
 	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
 	var nearMob, nearTresure bool
-	_, nearMob = helpers.CheckForMob(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-	_, nearTresure = helpers.CheckForTresure(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
+	_, nearMob = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
+	_, nearTresure = helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	if nearMob {
 		msg.ReplyMarkup = &fightKeyboard
 	} else if nearTresure {
@@ -454,12 +434,12 @@ func (c *HuntingController) movements(action string, maps *pb.Maps) (err error) 
 // ====================================
 // Fight
 // ====================================
-func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
+func (c *HuntingController) fight(action string, planetMap *pb.PlanetMap) (err error) {
 	var enemy *pb.Enemy
 	var editMessage tgbotapi.EditMessageTextConfig
 
 	// Recupero dettagli aggiornati enemy
-	enemy, _ = helpers.CheckForMob(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
+	enemy, _ = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	if enemy != nil {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
 		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
@@ -536,7 +516,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 			editMessage.ReplyMarkup = &ok
 
 			// Se il mob è morto è necessario aggiornare la mappa
-			c.RefreshMap(maps.ID)
+			c.RefreshMap(planetMap.ID)
 
 			// Invio messaggio
 			if _, err = helpers.SendMessage(editMessage); err != nil {
@@ -604,7 +584,7 @@ func (c *HuntingController) fight(action string, maps *pb.Maps) (err error) {
 	case "return_map":
 		// Trasformo la mappa in qualcosa di più leggibile su telegram
 		var decodedMap string
-		if decodedMap, err = helpers.DecodeMapToDisplay(maps, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
+		if decodedMap, err = helpers.DecodeMapToDisplay(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -658,15 +638,15 @@ func (c *HuntingController) RefreshMap(MapID uint32) {
 	var err error
 
 	// Un mob è stato scofinto riaggiorno mappa e riaggiorno record cache
-	var rGetMapByID *pb.GetMapByIDResponse
-	if rGetMapByID, err = config.App.Server.Connection.GetMapByID(helpers.NewContext(1), &pb.GetMapByIDRequest{
-		MapID: MapID,
+	var rGetPlanetMapByID *pb.GetPlanetMapByIDResponse
+	if rGetPlanetMapByID, err = config.App.Server.Connection.GetPlanetMapByID(helpers.NewContext(1), &pb.GetPlanetMapByIDRequest{
+		PlanetMapID: MapID,
 	}); err != nil {
 		c.Logger.Panic(err)
 	}
 
 	// Registro mappa e posizione iniziale del player
-	if err = helpers.SetMapInCache(rGetMapByID.GetMaps()); err != nil {
+	if err = helpers.SetMapInCache(rGetPlanetMapByID.GetPlanetMap()); err != nil {
 		c.Logger.Panic(err)
 	}
 	return

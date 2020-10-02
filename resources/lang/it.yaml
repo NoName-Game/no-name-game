@@ -332,7 +332,7 @@ safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\
 safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
 safeplanet.coalition.expansion.recap_planets: "\n❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
 safeplanet.coalition.expansion.recap_planets_done: "\n✅ Tutti i 🌏 pianeti, del sistema sono stati esplorati"
-safeplanet.coalition.expansion.recap_titan: "\n❌ È necessario sconfiggere il titano 👁 *%s*, difensore di questo sistema."
+safeplanet.coalition.expansion.recap_titan: "\n❌ Sconfiggere 👁 *%s*, difensore di questo sistema."
 safeplanet.coalition.expansion.recap_titan_done: "\n✅ Il titano 👁 *%s*, è stato sconfitto!"
 safeplanet.coalition.expansion.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTorna a breve per scoprire i progressi."
 safeplanet.coalition.expansion.choice: "\n\nLa coalizione ti offre la possibilità ti teletrasportati istantaneamente su altri pianeti sicuri scoperti. Quale vuoi raggiungere?"

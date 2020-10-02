@@ -160,7 +160,17 @@ func (c *MenuController) GetPlayerPosition() (result *pb.Planet) {
 
 	// Verifico se il player si trova su un pianeta sicuro
 	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
-	c.TitanPlanet = rGetPlayerCurrentPlanet.GetPlanet().GetTitan()
+
+	// Verifico se il pianeta corrente è occupato da un titano
+	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
+	rGetTitanByPlanetID, _ = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
+		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+	})
+
+	c.TitanPlanet = false
+	if rGetTitanByPlanetID.GetTitan().GetID() > 0 {
+		c.TitanPlanet = true
+	}
 
 	return rGetPlayerCurrentPlanet.GetPlanet()
 }

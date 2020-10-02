@@ -8,7 +8,7 @@ import (
 
 // DecodeMapToDisplay - Converte la logica della mappa in qualcosa di visibilie
 // per il client mostrando con diversi caratteri le superfici, mob e player
-func DecodeMapToDisplay(maps *pb.Maps, playerPositionX int32, playerPositionY int32) (result string, err error) {
+func DecodeMapToDisplay(maps *pb.PlanetMap, playerPositionX int32, playerPositionY int32) (result string, err error) {
 	// Setto cornice di apertura
 	result = "<code>+---------------------+\n"
 
@@ -73,7 +73,7 @@ func DecodeMapToDisplay(maps *pb.Maps, playerPositionX int32, playerPositionY in
 }
 
 // CheckForMob - Verifica posizione dei mob
-func CheckForMob(maps *pb.Maps, x int32, y int32) (enemy *pb.Enemy, result bool) {
+func CheckForMob(maps *pb.PlanetMap, x int32, y int32) (enemy *pb.Enemy, result bool) {
 	for i := 0; i < len(maps.Enemies); i++ {
 		if x == maps.Enemies[i].PositionX && y == maps.Enemies[i].PositionY {
 			return maps.Enemies[i], true
@@ -84,7 +84,7 @@ func CheckForMob(maps *pb.Maps, x int32, y int32) (enemy *pb.Enemy, result bool)
 }
 
 // CheckForTresure - Verifica posizione dei tesori
-func CheckForTresure(maps *pb.Maps, x int32, y int32) (tresure *pb.Tresure, result bool) {
+func CheckForTresure(maps *pb.PlanetMap, x int32, y int32) (tresure *pb.Tresure, result bool) {
 	for i := 0; i < len(maps.Tresures); i++ {
 		if x == maps.Tresures[i].PositionX && y == maps.Tresures[i].PositionY {
 			return maps.Tresures[i], true

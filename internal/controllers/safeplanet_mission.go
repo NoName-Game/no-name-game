@@ -222,7 +222,7 @@ func (c *SafePlanetMissionController) Stage() {
 			// Recupero pianeta di dove si trova il mob
 			var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
 			if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
-				MapID: rGetEnemyByID.GetEnemy().GetMapID(),
+				MapID: rGetEnemyByID.GetEnemy().GetPlanetMapID(),
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
