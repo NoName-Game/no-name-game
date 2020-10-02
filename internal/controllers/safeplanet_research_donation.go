@@ -83,7 +83,6 @@ func (c *SafePlanetResearchDonationController) Validator() (hasErrors bool) {
 	// Verifico quantità di item
 	// ##################################################################################################
 	case 2:
-		// TODO: verifico se il player possiede quella quantità
 		quantity, _ := strconv.Atoi(c.Update.Message.Text)
 		if quantity <= 0 {
 			return true
@@ -219,13 +218,24 @@ func (c *SafePlanetResearchDonationController) Stage() {
 		// Aggiorno stato
 		c.CurrentState.Stage = 3
 	case 3:
-		// Concludo teletrasporto
-		if _, err = config.App.Server.Connection.ResearchDonation(helpers.NewContext(1), &pb.ResearchDonationRequest{
+		// Concludo donazione
+		_, err = config.App.Server.Connection.ResearchDonation(helpers.NewContext(1), &pb.ResearchDonationRequest{
 			PlayerID:   c.Player.ID,
 			ResourceID: c.Payload.ResourceID,
 			Quantity:   c.Payload.Quantity,
-		}); err != nil {
-			c.Logger.Panic(err)
+		})
+
+		if err != nil && strings.Contains(err.Error(), "player dont have enough resource quantity") {
+			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
+			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.not_enough_resource"),
+			)
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
 		}
 
 		// Invio messaggio

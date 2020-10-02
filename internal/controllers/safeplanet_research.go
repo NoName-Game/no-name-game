@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -46,24 +44,37 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 		c.Logger.Panic(err)
 	}
 
-	message := fmt.Sprintf("%s\n\n%s",
-		helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.info"),
-		helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.recap",
+	// Messaggi
+	var message string
+	message = helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.info")
+	if rGetRecapActiveResearch.GetMissingResourcesCounter() > 0 {
+		message += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.recap",
 			rGetRecapActiveResearch.GetMissingResourcesCounter(),
 			rGetRecapActiveResearch.GetResearch().GetRarity().GetName(),
-		),
-	)
+		)
+	} else {
+		message += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.done")
+	}
+
+	// Keyboard
+	var keyboardRow [][]tgbotapi.KeyboardButton
+	if rGetRecapActiveResearch.GetMissingResourcesCounter() > 0 {
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.research.donation")),
+		))
+	}
+
+	// Aggiungo tasti back and clears
+	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+	))
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, message)
 	msg.ParseMode = "markdown"
-	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.research.donation")),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
-		),
-	)
+	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+		ResizeKeyboard: true,
+		Keyboard:       keyboardRow,
+	}
 
 	if _, err := helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
