@@ -27,7 +27,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.mission",
+			Controller: "route.safeplanet.coalition.mission",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{

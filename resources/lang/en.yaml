@@ -63,8 +63,8 @@ route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.research: "🔍️ Ricerca"
 route.safeplanet.coalition: "💈 Coalizione"
-route.safeplanet.mission: "🏢 Centro Missioni"
-route.safeplanet.titan: "👁 Titani"
+route.safeplanet.coalition.mission: "🏢 Centro Missioni"
+route.safeplanet.coalition.titan: "👁 Titani"
 route.safeplanet.coalition.expansion: "💫 Espansione"
 
 # Titan planet

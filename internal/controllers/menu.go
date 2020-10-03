@@ -214,7 +214,7 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 					tasks += fmt.Sprintf("- %s \n",
 						helpers.Trans(c.Player.Language.Slug, state.Controller),
 					)
-				} else if state.Controller == "route.safeplanet.mission" {
+				} else if state.Controller == "route.safeplanet.coalition.mission" {
 					tasks += fmt.Sprintf("- %s \n",
 						helpers.Trans(c.Player.Language.Slug, state.Controller),
 					)

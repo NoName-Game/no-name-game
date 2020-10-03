@@ -62,11 +62,12 @@ route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.coalition: "💈 Coalizione"
-route.safeplanet.mission: "🏢 Centro Missioni"
-route.safeplanet.titan: "👁 Titani"
+route.safeplanet.coalition.mission: "🏢 Centro Missioni"
+route.safeplanet.coalition.titan: "👁 Titani"
 route.safeplanet.coalition.expansion: "💫 Espansione"
-route.safeplanet.coalition.research: "🔍️ Ricerca"
+route.safeplanet.coalition.research: "🔬 Ricerca"
 route.safeplanet.coalition.research.donation: "🎗 Dona risorse"
+route.safeplanet.coalition.guild: "💢 Protettori (Gilda)"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -342,7 +343,7 @@ safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
 safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
 
 # Research
-safeplanet.coalition.research.info: "Benventuo nel centro 🔍️ *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque.\n"
+safeplanet.coalition.research.info: "Benventuo nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque.\n"
 safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita di 💠*%d* per esser completata. Di rarità %s."
 safeplanet.coalition.research.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare nuove risorse.\nTorna a breve per scoprire i progressi."
 
