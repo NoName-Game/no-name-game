@@ -36,7 +36,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &SafePlanetBankController{},
 				FromStage: 0,
 			},
 		},
