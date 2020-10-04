@@ -14,6 +14,9 @@ import (
 // SafePlanetTempleController
 // ====================================
 type SafePlanetTempleController struct {
+	Payload struct {
+		AbilityCategoryID uint32
+	}
 	Controller
 }
 
@@ -60,7 +63,22 @@ func (c *SafePlanetTempleController) Validator() (hasErrors bool) {
 	// Verifio se è stato passata una categorie tra quelle indicate
 	// ##################################################################################################
 	case 1:
-		return false
+		var err error
+
+		// Recupero categorie abilità
+		var rGetAllAbilityCategory *pb.GetAllAbilityCategoryResponse
+		if rGetAllAbilityCategory, err = config.App.Server.Connection.GetAllAbilityCategory(helpers.NewContext(1), &pb.GetAllAbilityCategoryRequest{}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		for _, category := range rGetAllAbilityCategory.GetAbilityCategories() {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.temple.%s", category.GetSlug())) {
+				c.Payload.AbilityCategoryID = category.GetID()
+				return false
+			}
+		}
+
+		return true
 	// ##################################################################################################
 	//
 	// ##################################################################################################
@@ -115,7 +133,7 @@ func (c *SafePlanetTempleController) Stage() {
 		var rGetAbilityForPlayerByCategory *pb.GetAbilityForPlayerByCategoryResponse
 		if rGetAbilityForPlayerByCategory, err = config.App.Server.Connection.GetAbilityForPlayerByCategory(helpers.NewContext(1), &pb.GetAbilityForPlayerByCategoryRequest{
 			PlayerID:          c.Player.ID,
-			AbilityCategoryID: 1,
+			AbilityCategoryID: c.Payload.AbilityCategoryID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
