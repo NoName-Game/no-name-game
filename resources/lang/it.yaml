@@ -61,6 +61,7 @@ route.conqueror: "🚩 Conquistatore"
 route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.dealer: "⚖️ Mercante"
+route.safeplanet.temple: "⛩ Tempio"
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.coalition.mission: "🏢 Centro Missioni"
 route.safeplanet.coalition.titan: "👁 Titani"
@@ -368,6 +369,14 @@ safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine! Spero ti possa pi
 safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
 safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
+
+# Temple
+safeplanet.temple.info: "Benvenuto qui protrare regolare le tue abilità. Quale percorso vorresti apprendere?"
+safeplanet.temple.striker: "⚔️ Attaccante"
+safeplanet.temple.defender: "🛡 Difensore"
+safeplanet.temple.explorer: "🚀 Esploratore"
+
+safeplanet.temple.ability_details: "L'abilità da te scelta è: %s"
 ################################################################################################################
 ################################################################################################################
 # PLANET
