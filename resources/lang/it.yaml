@@ -43,6 +43,7 @@ route.inventory.resources: "💠 Risorse"
 route.inventory.items: "🔩 Oggetti"
 route.inventory.equip: "🛡 Equipaggiamento"
 route.player: "👨🏼‍🚀 Player"
+route.player.guild: "💢 Gilda"
 route.ability: "🧬 Abilità"
 route.hunting: "⚔️ Caccia"
 route.ship: "🚀 Nave"
@@ -454,6 +455,12 @@ titanplanet.tackle.no_action: "Continua!"
 player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
 player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
+
+# Guild
+player.guild.members: "Lista Membri:\n"
+player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢*Gilda*.\n\nVisita la 💈*Coalizione* per trovare nuovi gruppi."
+player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Totali: %v\n👑 Fondatore: *%s*"
+player.guild.player_details: "👨🏼‍🚀 *%s* 🌏 %s\n"
 
 # Inventory
 inventory.intro: "Cosa vuoi gestire del tuo 🎒*inventario*?"

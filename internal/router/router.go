@@ -33,6 +33,7 @@ var routes = map[string]reflect.Type{
 
 	// Player
 	"route.player":              reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
+	"route.player.guild":        reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
 	"route.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
 	"route.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
 	"route.inventory.items":     reflect.TypeOf((*controllers.PlayerInventoryItemController)(nil)).Elem(),

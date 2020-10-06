@@ -44,6 +44,25 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		c.Logger.Panic(err)
 	}
 
+	var keyboardRows [][]tgbotapi.KeyboardButton
+	if !rGetPlayerGuild.GetInGuild() {
+		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.create")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.join")),
+		))
+	} else {
+		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.leave")),
+		))
+	}
+
+	// Aggiungo anche abbandona
+	keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(
+			helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+		),
+	))
+
 	// Message
 	var protectorsMessage string
 	protectorsMessage = helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.info")
@@ -52,28 +71,12 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 	}
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, protectorsMessage)
-	if !rGetPlayerGuild.GetInGuild() {
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.create")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.join")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
-			),
-		)
-	} else {
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.leave")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
-			),
-		)
+	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+		Keyboard:       keyboardRows,
+		ResizeKeyboard: true,
 	}
 
-	msg.ParseMode = "markdown"
 	if _, err := helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}
