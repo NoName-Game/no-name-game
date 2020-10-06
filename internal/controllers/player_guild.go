@@ -67,7 +67,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// #####################################
-	// Aggiungo dettagli owner gilda
+	// Recupero owner gilda
 	// #####################################
 	var rGetPlayerByID *pb.GetPlayerByIDResponse
 	if rGetPlayerByID, err = config.App.Server.Connection.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
@@ -76,10 +76,20 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 		c.Logger.Panic(err)
 	}
 
+	// #####################################
+	// Recupero punti gilda
+	// #####################################
+	var rGetGuildPoints *pb.GetGuildPointsResponse
+	if rGetGuildPoints, err = config.App.Server.Connection.GetGuildPoints(helpers.NewContext(1), &pb.GetGuildPointsRequest{
+		GuildID: rGetPlayerGuild.GetGuild().GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
 	// Recap messagi
 	guildDetails := helpers.Trans(player.Language.Slug, "player.guild.guild_details",
 		rGetPlayerGuild.GetGuild().GetName(),     // Nome
-		"??",                                     // Punti
+		rGetGuildPoints.GetResult(),              // Punti
 		rGetPlayerByID.GetPlayer().GetUsername(), // Fondatore
 	)
 
@@ -104,8 +114,18 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 			c.Logger.Panic(err)
 		}
 
+		// Recupero punti player
+		var rGetPlayerGuildPoints *pb.GetPlayerGuildPointsResponse
+		if rGetPlayerGuildPoints, err = config.App.Server.Connection.GetPlayerGuildPoints(helpers.NewContext(1), &pb.GetPlayerGuildPointsRequest{
+			GuildID:  rGetPlayerGuild.GetGuild().GetID(),
+			PlayerID: playerDetails.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		playersList += helpers.Trans(player.Language.Slug, "player.guild.player_details",
 			playerDetails.GetUsername(),
+			rGetPlayerGuildPoints.GetResult(),
 			rGetPlayerCurrentPlanet.GetPlanet().GetName(),
 		)
 	}

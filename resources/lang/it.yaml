@@ -459,8 +459,8 @@ player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 # Guild
 player.guild.members: "Lista Membri:\n"
 player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢*Gilda*.\n\nVisita la 💈*Coalizione* per trovare nuovi gruppi."
-player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Totali: %v\n👑 Fondatore: *%s*"
-player.guild.player_details: "👨🏼‍🚀 *%s* 🌏 %s\n"
+player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Gilda: *%v*\n👑 Fondatore: *%s*"
+player.guild.player_details: "👨🏼‍🚀 *%s* - 🎓 *%v*\n🌏 %s"
 
 # Inventory
 inventory.intro: "Cosa vuoi gestire del tuo 🎒*inventario*?"
