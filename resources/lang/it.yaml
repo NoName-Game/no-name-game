@@ -72,6 +72,7 @@ route.safeplanet.coalition.research.donation: "🎗 Dona risorse"
 route.safeplanet.coalition.guild: "💢 Protettori (Gilda)"
 route.safeplanet.coalition.guild.create: "➕ Crea"
 route.safeplanet.coalition.guild.join: "🔍 Cerca"
+route.safeplanet.coalition.guild.leave: "🏃‍♂️ Abbandona Gilda"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -409,6 +410,7 @@ safeplanet.coalition.guild.guild_name_already_taken: "Il nome da te scelto è gi
 safeplanet.coalition.guild.player_already_in_one_guild: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
 safeplanet.coalition.guild.guild_name_not_exists: "La gilda da te indicata non sembra esser corretta."
 safeplanet.coalition.guild.info: "Benvenuto in gilda. Cosa vuoi fare?"
+safeplanet.coalition.guild.player_guild_details: "\n\nAttualmente appartieni alla gilda: *%s*"
 
 safeplanet.coalition.guild.create_start: "Inserisci il nome della gilda che vuoi creare"
 safeplanet.coalition.guild.create_accessibility: "Come vorresti che la tua gilda fosse?"
@@ -420,8 +422,8 @@ safeplanet.coalition.guild.join_start: "Inserisci il nome della gilda al quale v
 safeplanet.coalition.guild.join_confirm: "Sicuro di voler entrare nella gilda %s?"
 safeplanet.coalition.guild.join_completed_ok: "Da questo momento fai parte della gilda!"
 
-
-
+safeplanet.coalition.guild.leave_confirm: "Attualmente appartieni alla gilda: *%s*. Sei sicuro di voler abbandonare?"
+safeplanet.coalition.guild.leave_completed_ok: "Hai abbandonato correttamente la gilda"
 ################################################################################################################
 ################################################################################################################
 # PLANET
