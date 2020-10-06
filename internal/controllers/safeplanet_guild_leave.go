@@ -8,26 +8,26 @@ import (
 )
 
 // ====================================
-// SafePlanetGuildLeaveController
+// SafePlanetProtectorsLeaveController
 // ====================================
-type SafePlanetGuildLeaveController struct {
+type SafePlanetProtectorsLeaveController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetGuildLeaveController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsLeaveController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.guild.leave",
+			Controller: "route.safeplanet.coalition.protectors.leave",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &SafePlanetGuildController{},
+				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
 		},
@@ -51,7 +51,7 @@ func (c *SafePlanetGuildLeaveController) Handle(player *pb.Player, update tgbota
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetGuildLeaveController) Validator() bool {
+func (c *SafePlanetProtectorsLeaveController) Validator() bool {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico Conferma
@@ -68,7 +68,7 @@ func (c *SafePlanetGuildLeaveController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetGuildLeaveController) Stage() {
+func (c *SafePlanetProtectorsLeaveController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -84,7 +84,7 @@ func (c *SafePlanetGuildLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.leave_confirm",
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_confirm",
 			rGetPlayerGuild.GetGuild().GetName(),
 		))
 		msg.ParseMode = "markdown"
@@ -112,7 +112,7 @@ func (c *SafePlanetGuildLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.leave_completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_completed_ok"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

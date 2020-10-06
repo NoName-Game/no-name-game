@@ -10,9 +10,9 @@ import (
 )
 
 // ====================================
-// SafePlanetGuildCreateController
+// SafePlanetProtectorsCreateController
 // ====================================
-type SafePlanetGuildCreateController struct {
+type SafePlanetProtectorsCreateController struct {
 	Payload struct {
 		Name          string
 		Accessibility bool // Pubblico o privato
@@ -23,18 +23,18 @@ type SafePlanetGuildCreateController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetGuildCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.guild.create",
+			Controller: "route.safeplanet.coalition.protectors.create",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &SafePlanetGuildController{},
+				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
 		},
@@ -58,7 +58,7 @@ func (c *SafePlanetGuildCreateController) Handle(player *pb.Player, update tgbot
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetGuildCreateController) Validator() bool {
+func (c *SafePlanetProtectorsCreateController) Validator() bool {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il nome della gida scelta è già stato scelto
@@ -73,7 +73,7 @@ func (c *SafePlanetGuildCreateController) Validator() bool {
 		}
 
 		if !rCheckGuildName.GetGuildNameFree() || c.Update.Message.Text == "" {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.guild_name_already_taken")
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_name_already_taken")
 			return true
 		}
 
@@ -82,10 +82,10 @@ func (c *SafePlanetGuildCreateController) Validator() bool {
 	// Verifico tipologia di gilda pubblica o privata
 	// ##################################################################################################
 	case 2:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_accessibility.public") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.public") {
 			c.Payload.Accessibility = false
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_accessibility.private") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.private") {
 			c.Payload.Accessibility = true
 			return false
 		}
@@ -99,14 +99,14 @@ func (c *SafePlanetGuildCreateController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetGuildCreateController) Stage() {
+func (c *SafePlanetProtectorsCreateController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Chiedo al player di inserire il nome della gilda
 	// ##################################################################################################
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_start"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_start"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -123,12 +123,12 @@ func (c *SafePlanetGuildCreateController) Stage() {
 	// Chiedo al player di inserire di decidere se al gilda deve esser pubblica i privata
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_accessibility"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_accessibility.public")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.create_accessibility.private")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.public")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.private")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
@@ -150,10 +150,10 @@ func (c *SafePlanetGuildCreateController) Stage() {
 			GuildType: c.Payload.Accessibility,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
+		if err != nil && strings.Contains(err.Error(), "player already in one protectors") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.player_already_in_one_guild"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -163,7 +163,7 @@ func (c *SafePlanetGuildCreateController) Stage() {
 			return
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.creation_completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.creation_completed_ok"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

@@ -10,9 +10,9 @@ import (
 )
 
 // ====================================
-// SafePlanetGuildJoinController
+// SafePlanetProtectorsJoinController
 // ====================================
-type SafePlanetGuildJoinController struct {
+type SafePlanetProtectorsJoinController struct {
 	Payload struct {
 		Name string
 	}
@@ -22,18 +22,18 @@ type SafePlanetGuildJoinController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetGuildJoinController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.guild.join",
+			Controller: "route.safeplanet.coalition.protectors.join",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &SafePlanetGuildController{},
+				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
 		},
@@ -57,7 +57,7 @@ func (c *SafePlanetGuildJoinController) Handle(player *pb.Player, update tgbotap
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetGuildJoinController) Validator() bool {
+func (c *SafePlanetProtectorsJoinController) Validator() bool {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il nome della gida scelta esiste
@@ -72,7 +72,7 @@ func (c *SafePlanetGuildJoinController) Validator() bool {
 		}
 
 		if rCheckGuildName.GetGuildNameFree() || c.Update.Message.Text == "" {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.guild_name_not_exists")
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_name_not_exists")
 			return true
 		}
 
@@ -92,7 +92,7 @@ func (c *SafePlanetGuildJoinController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetGuildJoinController) Stage() {
+func (c *SafePlanetProtectorsJoinController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -105,25 +105,25 @@ func (c *SafePlanetGuildJoinController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		var guildKeyboard [][]tgbotapi.KeyboardButton
-		for _, guild := range rGetJoinGuildsList.GetGuildsList() {
-			guildKeyboard = append(guildKeyboard, tgbotapi.NewKeyboardButtonRow(
+		var protectorsKeyboard [][]tgbotapi.KeyboardButton
+		for _, protectors := range rGetJoinGuildsList.GetGuildsList() {
+			protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					guild.GetName(),
+					protectors.GetName(),
 				),
 			))
 		}
 
 		// Aggiungo torna al menu
-		guildKeyboard = append(guildKeyboard, tgbotapi.NewKeyboardButtonRow(
+		protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.join_start"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_start"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
-			Keyboard:       guildKeyboard,
+			Keyboard:       protectorsKeyboard,
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
@@ -135,7 +135,7 @@ func (c *SafePlanetGuildJoinController) Stage() {
 	// Chiedo Conferma al player se vuole entrare nella gilda indicata
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.join_confirm", c.Payload.Name))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_confirm", c.Payload.Name))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -160,10 +160,10 @@ func (c *SafePlanetGuildJoinController) Stage() {
 			GuildName: c.Payload.Name,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
+		if err != nil && strings.Contains(err.Error(), "player already in one protectors") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.player_already_in_one_guild"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -173,7 +173,7 @@ func (c *SafePlanetGuildJoinController) Stage() {
 			return
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.guild.join_completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_completed_ok"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

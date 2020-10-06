@@ -69,10 +69,10 @@ route.safeplanet.coalition.titan: "👁 Titani"
 route.safeplanet.coalition.expansion: "💫 Espansione"
 route.safeplanet.coalition.research: "🔬 Ricerca"
 route.safeplanet.coalition.research.donation: "🎗 Dona risorse"
-route.safeplanet.coalition.guild: "💢 Protettori (Gilda)"
-route.safeplanet.coalition.guild.create: "➕ Crea"
-route.safeplanet.coalition.guild.join: "🔍 Cerca"
-route.safeplanet.coalition.guild.leave: "🏃‍♂️ Abbandona Gilda"
+route.safeplanet.coalition.protectors: "💢 Protettori"
+route.safeplanet.coalition.protectors.create: "➕ Crea"
+route.safeplanet.coalition.protectors.join: "🔍 Cerca"
+route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Abbandona Gilda"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -406,24 +406,24 @@ safeplanet.accademy.ability.doctor.details: "Abilità attiva: Ti curi di 5HP ma 
 safeplanet.accademy.ability.express.details: "Abilità attiva: Il tempo di esplorazione viene dimezzato, ma ridici anche la qanità di risorse trovate"
 
 # Guild
-safeplanet.coalition.guild.guild_name_already_taken: "Il nome da te scelto è già stato scelto"
-safeplanet.coalition.guild.player_already_in_one_guild: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
-safeplanet.coalition.guild.guild_name_not_exists: "La gilda da te indicata non sembra esser corretta."
-safeplanet.coalition.guild.info: "Benvenuto in gilda. Cosa vuoi fare?"
-safeplanet.coalition.guild.player_guild_details: "\n\nAttualmente appartieni alla gilda: *%s*"
+safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto"
+safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
+safeplanet.coalition.protectors.protectors_name_not_exists: "La gilda da te indicata non sembra esser corretta."
+safeplanet.coalition.protectors.info: "Benvenuto in gilda. Cosa vuoi fare?"
+safeplanet.coalition.protectors.player_protectors_details: "\n\nAttualmente appartieni alla gilda: *%s*"
 
-safeplanet.coalition.guild.create_start: "Inserisci il nome della gilda che vuoi creare"
-safeplanet.coalition.guild.create_accessibility: "Come vorresti che la tua gilda fosse?"
-safeplanet.coalition.guild.create_accessibility.public: "Pubblica"
-safeplanet.coalition.guild.create_accessibility.private: "Privata"
-safeplanet.coalition.guild.creation_completed_ok: "Gilda creata con successo!"
+safeplanet.coalition.protectors.create_start: "Inserisci il nome della gilda che vuoi creare"
+safeplanet.coalition.protectors.create_accessibility: "Come vorresti che la tua gilda fosse?"
+safeplanet.coalition.protectors.create_accessibility.public: "Pubblica"
+safeplanet.coalition.protectors.create_accessibility.private: "Privata"
+safeplanet.coalition.protectors.creation_completed_ok: "Gilda creata con successo!"
 
-safeplanet.coalition.guild.join_start: "Inserisci il nome della gilda al quale vuoi unirti o selezionane uno dalla lista qui sotto"
-safeplanet.coalition.guild.join_confirm: "Sicuro di voler entrare nella gilda %s?"
-safeplanet.coalition.guild.join_completed_ok: "Da questo momento fai parte della gilda!"
+safeplanet.coalition.protectors.join_start: "Inserisci il nome della gilda al quale vuoi unirti o selezionane uno dalla lista qui sotto"
+safeplanet.coalition.protectors.join_confirm: "Sicuro di voler entrare nella gilda %s?"
+safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte della gilda!"
 
-safeplanet.coalition.guild.leave_confirm: "Attualmente appartieni alla gilda: *%s*. Sei sicuro di voler abbandonare?"
-safeplanet.coalition.guild.leave_completed_ok: "Hai abbandonato correttamente la gilda"
+safeplanet.coalition.protectors.leave_confirm: "Attualmente appartieni alla gilda: *%s*. Sei sicuro di voler abbandonare?"
+safeplanet.coalition.protectors.leave_completed_ok: "Hai abbandonato correttamente la gilda"
 ################################################################################################################
 ################################################################################################################
 # PLANET

@@ -8,22 +8,22 @@ import (
 )
 
 // ====================================
-// SafePlanetGuildController
+// SafePlanetProtectorsController
 // ====================================
-type SafePlanetGuildController struct {
+type SafePlanetProtectorsController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetGuildController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.guild",
+			Controller: "route.safeplanet.coalition.protectors",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
@@ -45,18 +45,18 @@ func (c *SafePlanetGuildController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Message
-	var guildMessage string
-	guildMessage = helpers.Trans(player.Language.Slug, "safeplanet.coalition.guild.info")
+	var protectorsMessage string
+	protectorsMessage = helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.info")
 	if rGetPlayerGuild.GetInGuild() {
-		guildMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.guild.player_guild_details", rGetPlayerGuild.GetGuild().GetName())
+		protectorsMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.player_protectors_details", rGetPlayerGuild.GetGuild().GetName())
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, guildMessage)
+	msg := helpers.NewMessage(c.Update.Message.Chat.ID, protectorsMessage)
 	if !rGetPlayerGuild.GetInGuild() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.guild.create")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.guild.join")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.create")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.join")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
@@ -65,7 +65,7 @@ func (c *SafePlanetGuildController) Handle(player *pb.Player, update tgbotapi.Up
 	} else {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.guild.leave")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.leave")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
@@ -79,10 +79,10 @@ func (c *SafePlanetGuildController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 }
 
-func (c *SafePlanetGuildController) Validator() bool {
+func (c *SafePlanetProtectorsController) Validator() bool {
 	return false
 }
 
-func (c *SafePlanetGuildController) Stage() {
+func (c *SafePlanetProtectorsController) Stage() {
 	//
 }
