@@ -407,24 +407,24 @@ safeplanet.accademy.ability.doctor.details: "Abilità attiva: Ti curi di 5HP ma 
 safeplanet.accademy.ability.express.details: "Abilità attiva: Il tempo di esplorazione viene dimezzato, ma ridici anche la qanità di risorse trovate"
 
 # Guild
-safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto"
-safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
+safeplanet.coalition.protectors.info: "Benvenuto nella sala dei 💢 *Protettori*.\n\nOgni giorno incontriamo nuovi 👨🏼‍🚀*esploratori* che cercano una casa o un gruppo con cui stare, qui hai la possibilità di farlo."
+safeplanet.coalition.protectors.player_protectors_details: "\n\nLa tua gilda attuale: *%s*"
+safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto."
 safeplanet.coalition.protectors.protectors_name_not_exists: "La gilda da te indicata non sembra esser corretta."
-safeplanet.coalition.protectors.info: "Benvenuto in gilda. Cosa vuoi fare?"
-safeplanet.coalition.protectors.player_protectors_details: "\n\nAttualmente appartieni alla gilda: *%s*"
+safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
 
-safeplanet.coalition.protectors.create_start: "Inserisci il nome della gilda che vuoi creare"
-safeplanet.coalition.protectors.create_accessibility: "Come vorresti che la tua gilda fosse?"
+safeplanet.coalition.protectors.create_start: "Inserisci il nome della 💢*Gilda* che vuoi creare"
+safeplanet.coalition.protectors.create_accessibility: "Indicaci il tipo di visibilità che vuoi dare al tuo gruppo?\n\n*Pubblica*: tutti potranno accedere alla tua gilda.\n*Privata*: gli esploratori potranno accedere al gruppo solo tramite invito."
 safeplanet.coalition.protectors.create_accessibility.public: "Pubblica"
 safeplanet.coalition.protectors.create_accessibility.private: "Privata"
-safeplanet.coalition.protectors.creation_completed_ok: "Gilda creata con successo!"
+safeplanet.coalition.protectors.creation_completed_ok: "Gilda registrata con successo. Buona fortuna!"
 
-safeplanet.coalition.protectors.join_start: "Inserisci il nome della gilda al quale vuoi unirti o selezionane uno dalla lista qui sotto"
-safeplanet.coalition.protectors.join_confirm: "Sicuro di voler entrare nella gilda %s?"
+safeplanet.coalition.protectors.join_start: "Inserisci il nome della 💢*Gilda* alla quale vuoi unirti o selezionane una dalla lista qui sotto:"
+safeplanet.coalition.protectors.join_confirm: "Confermi di voler entrare nella gilda *%s*?"
 safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte della gilda!"
 
-safeplanet.coalition.protectors.leave_confirm: "Attualmente appartieni alla gilda: *%s*. Sei sicuro di voler abbandonare?"
-safeplanet.coalition.protectors.leave_completed_ok: "Hai abbandonato correttamente la gilda"
+safeplanet.coalition.protectors.leave_confirm: "Sei sicuro di voler abbandonare i *%s*?"
+safeplanet.coalition.protectors.leave_completed_ok: "Ora non appartieni più a nessun gruppo."
 ################################################################################################################
 ################################################################################################################
 # PLANET
