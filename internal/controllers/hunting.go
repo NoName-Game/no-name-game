@@ -616,8 +616,8 @@ func (c *HuntingController) fight(action string, planetMap *pb.PlanetMap) (err e
 				enemy.LifePoint,
 				enemy.LifeMax,
 				c.Player.Username,
-				c.Data.PlayerStats.GetLifePoint(),
-				100+c.Data.PlayerStats.GetLevel()*10,
+				c.Player.GetLifePoint(),
+				100+c.Player.GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]),
 			),
 		)

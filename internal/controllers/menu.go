@@ -55,7 +55,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Se il player è morto non può fare altro che riposare o azioni che richiedono riposo
-	if c.Data.PlayerStats.GetDead() {
+	if c.Player.GetDead() {
 		restsController := new(ShipRestsController)
 		restsController.Handle(c.Player, c.Update)
 	}
@@ -180,11 +180,11 @@ func (c *MenuController) GetPlayerPosition() (result *pb.Planet) {
 func (c *MenuController) GetPlayerLife() (life string) {
 	// Calcolo stato vitale del player
 	status := "♥️"
-	if c.Data.PlayerStats.GetDead() {
+	if c.Player.GetDead() {
 		status = "☠️"
 	}
 
-	life = fmt.Sprintf("%s️ %v/%v HP", status, c.Data.PlayerStats.GetLifePoint(), 100)
+	life = fmt.Sprintf("%s️ %v/%v HP", status, c.Player.GetLifePoint(), 100)
 
 	return
 }

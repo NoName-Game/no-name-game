@@ -58,9 +58,9 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Player.Language.Slug,
 		"player.datails.card",
 		c.Player.GetUsername(),
-		c.Data.PlayerStats.GetLifePoint(),
+		c.Player.GetLifePoint(),
 		rGetPlayerExperience.GetValue(),
-		c.Data.PlayerStats.GetLevel(),
+		c.Player.GetLevel(),
 		money, diamond,
 	)
 

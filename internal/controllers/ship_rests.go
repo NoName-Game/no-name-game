@@ -133,7 +133,7 @@ func (c *ShipRestsController) Stage() {
 		}
 
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !c.Data.PlayerStats.GetDead() {
+		if !c.Player.GetDead() {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			))

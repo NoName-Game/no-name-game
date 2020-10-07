@@ -31,7 +31,7 @@ type Controller struct {
 	CurrentState ControllerCurrentState
 	Data         struct {
 		PlayerActiveStates []*pb.PlayerActivity
-		PlayerStats        *pb.PlayerStats
+		// PlayerStats        *pb.PlayerStats
 	}
 	ForceBackTo    bool
 	Configurations ControllerConfigurations
@@ -117,16 +117,7 @@ func (c *Controller) LoadControllerData() (err error) {
 		return err
 	}
 
-	// Recupero stats utente
-	var rGetPlayerStats *pb.GetPlayerStatsResponse
-	if rGetPlayerStats, err = config.App.Server.Connection.GetPlayerStats(helpers.NewContext(1), &pb.GetPlayerStatsRequest{
-		PlayerID: c.Player.ID,
-	}); err != nil {
-		return err
-	}
-
 	c.Data.PlayerActiveStates = rGetActivePlayerActivities.GetActivities()
-	c.Data.PlayerStats = rGetPlayerStats.GetPlayerStats()
 	return
 }
 
@@ -215,7 +206,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 
 		// Abbandona - chiude definitivamente cancellando anche lo stato
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") {
-			if !c.Data.PlayerStats.GetDead() {
+			if !c.Player.GetDead() {
 				// Cancello stato da cache
 				helpers.DelCurrentControllerCache(c.Player.ID)
 				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)

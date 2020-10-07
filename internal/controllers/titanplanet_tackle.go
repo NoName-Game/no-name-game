@@ -159,8 +159,8 @@ func (c *TitanPlanetTackleController) Tackle() {
 			rGetTitanByPlanetID.GetTitan().GetLifePoint(),
 			rGetTitanByPlanetID.GetTitan().GetLifeMax(),
 			c.Player.Username,
-			c.Data.PlayerStats.GetLifePoint(),
-			100+c.Data.PlayerStats.GetLevel()*10,
+			c.Player.GetLifePoint(),
+			100+c.Player.GetLevel()*10,
 			helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 		)
 
@@ -495,8 +495,8 @@ func (c *TitanPlanetTackleController) Fight(action string, titan *pb.Titan) {
 				titan.GetLifePoint(),
 				titan.GetLifeMax(),
 				c.Player.Username,
-				c.Data.PlayerStats.GetLifePoint(),
-				100+c.Data.PlayerStats.GetLevel()*10,
+				c.Player.GetLifePoint(),
+				100+c.Player.GetLevel()*10,
 				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.Selection]),
 			),
 		)
