@@ -1,12 +1,39 @@
 package helpers
 
 import (
+	"encoding/json"
+
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/sirupsen/logrus"
 )
 
+type InlineDataStruct struct {
+	C  string // Controller
+	AT string // ActionType Es. fight|movements
+	A  string // Action     Es. hit
+	SA string // SubAction  Es ability
+	D  uint32 // Data       Es 1, 2, 3 ecc
+}
+
+func (d *InlineDataStruct) GetDataString() string {
+	marshalData, err := json.Marshal(d)
+	if err != nil {
+		logrus.Errorf("error marshal hunting data: %s", err.Error())
+	}
+
+	return string(marshalData)
+}
+
+func (d InlineDataStruct) GetDataValue(stringData string) (data InlineDataStruct) {
+	if err := json.Unmarshal([]byte(stringData), &data); err != nil {
+		logrus.Errorf("error unmarshal hunting data: %s", err.Error())
+	}
+
+	return
+}
+
 // NewMessage creates a new Message.
-//
 // chatID is where to send it, text is the message text.
 func NewMessage(chatID int64, text string) tgbotapi.MessageConfig {
 	return tgbotapi.MessageConfig{

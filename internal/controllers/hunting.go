@@ -39,44 +39,118 @@ var (
 	// Parti di corpo disponibili per l'attacco
 	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
 
+	// Hunting Move Actions
+	moveDown = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "down",
+	}
+
+	moveUp = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "up",
+	}
+
+	moveLeft = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "left",
+	}
+
+	moveRight = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "right",
+	}
+
+	moveAction = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "action",
+	}
+
+	// Hunting Fight Actions
+	fightStart = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "start_fight",
+	}
+
+	fightUp = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "up",
+	}
+
+	fightDown = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "down",
+	}
+
+	fightReturnMap = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "return_map",
+	}
+
+	fightPlayerDie = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "player_die",
+	}
+
+	fightHit = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "hit",
+	}
+
+	fightNoAction = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "no_action",
+	}
+
 	// Keyboard inline di esplorazione
 	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
 	)
 
 	tresureKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
-			tgbotapi.NewInlineKeyboardButtonData("❓️", "hunting.move.action"),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("❓️", moveAction.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
 	)
 
-	fightKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", "hunting.move.up")),
+	enemyKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", "hunting.move.left"),
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.start"),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", "hunting.move.right"),
+			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightStart.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", "hunting.move.down")),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
 	)
 
-	mobKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", "hunting.fight.up")),
+	fightKeyboard = [][]tgbotapi.InlineKeyboardButton{
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", fightUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🗾", "hunting.fight.return_map"),
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", "hunting.fight.hit"),
+			tgbotapi.NewInlineKeyboardButtonData("🗾", fightReturnMap.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightHit.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", "hunting.fight.down")),
-	)
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", fightDown.GetDataString())),
+	}
 )
 
 // ====================================
@@ -233,13 +307,16 @@ func (c *HuntingController) Hunting() {
 		}
 
 		// Controllo tipo di callback data - move / fight
-		actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+		// actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
+
+		var inlineData helpers.InlineDataStruct
+		inlineData = inlineData.GetDataValue(c.Update.CallbackQuery.Data)
 
 		// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-		if actionType[1] == "move" {
-			err = c.movements(actionType[2], planetMap)
-		} else if actionType[1] == "fight" {
-			err = c.fight(actionType[2], planetMap)
+		if inlineData.AT == "move" {
+			err = c.movements(inlineData, planetMap)
+		} else if inlineData.AT == "fight" {
+			err = c.fight(inlineData, planetMap)
 		}
 
 		if err != nil {
@@ -260,7 +337,7 @@ func (c *HuntingController) Hunting() {
 // ====================================
 // Movements
 // ====================================
-func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (err error) {
+func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, planetMap *pb.PlanetMap) (err error) {
 	// Refresh della mappa
 	var cellGrid [][]bool
 	if err = json.Unmarshal([]byte(planetMap.CellGrid), &cellGrid); err != nil {
@@ -268,7 +345,7 @@ func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (e
 	}
 
 	// Eseguo azione
-	switch action {
+	switch inlineData.A {
 	case "up":
 		if c.Payload.PlayerPositionX > 0 && !cellGrid[c.Payload.PlayerPositionX-1][c.Payload.PlayerPositionY] {
 			c.Payload.PlayerPositionX--
@@ -379,7 +456,7 @@ func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (e
 
 			ok := tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.move.no-action"),
+					tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
 				),
 			)
 			editMessage.ReplyMarkup = &ok
@@ -396,7 +473,7 @@ func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (e
 		}
 
 		return
-	case "no-action":
+	case "no_action":
 		// No action
 	default:
 		return errors.New("action not recognized")
@@ -416,7 +493,7 @@ func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (e
 	_, nearMob = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	_, nearTresure = helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
 	if nearMob {
-		msg.ReplyMarkup = &fightKeyboard
+		msg.ReplyMarkup = &enemyKeyboard
 	} else if nearTresure {
 		msg.ReplyMarkup = &tresureKeyboard
 	} else {
@@ -434,13 +511,11 @@ func (c *HuntingController) movements(action string, planetMap *pb.PlanetMap) (e
 // ====================================
 // Fight
 // ====================================
-func (c *HuntingController) fight(action string, planetMap *pb.PlanetMap) (err error) {
-	var enemy *pb.Enemy
-	var editMessage tgbotapi.EditMessageTextConfig
-
+func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap *pb.PlanetMap) (err error) {
 	// Recupero dettagli aggiornati enemy
+	var enemy *pb.Enemy
 	enemy, _ = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-	if enemy != nil {
+	if &enemy != nil {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
 		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 			EnemyID: enemy.ID,
@@ -450,9 +525,9 @@ func (c *HuntingController) fight(action string, planetMap *pb.PlanetMap) (err e
 		enemy = rGetEnemyByID.GetEnemy()
 	}
 
-	switch action {
+	switch inlineData.A {
 	// Avvio di un nuovo combattimento
-	case "start":
+	case "start_fight":
 		// In questo metodo non c'è niente da fare procedo con il stampare la card del combattimento
 	case "up":
 		// Setto nuova parte del corpo da colpire
@@ -468,168 +543,227 @@ func (c *HuntingController) fight(action string, planetMap *pb.PlanetMap) (err e
 		} else {
 			c.Payload.BodySelection = 0
 		}
+	case "no_action":
+		//
 	case "hit":
-		// Effettuo chiamata al ws e recupero response dell'attacco
-		var rHitEnemy *pb.HitEnemyResponse
-		if rHitEnemy, err = config.App.Server.Connection.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
-			EnemyID:       enemy.GetID(),
-			PlayerID:      c.Player.ID,
-			BodySelection: c.Payload.BodySelection,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Verifico se il MOB è morto
-		if rHitEnemy.GetEnemyDie() {
-			// Costruisco messaggio di recap del drop
-			var dropRecap string
-
-			if rHitEnemy.GetEnemyDrop().GetResource() != nil {
-				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
-			} else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
-				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
-				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
-			} else if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
-				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
-			} else {
-				dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
-			}
-
-			// Aggiungo anche esperinza recuperata
-			dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", rHitEnemy.GetPlayerExperience()))
-
-			// Aggiorno modifica del messaggio
-			editMessage = helpers.NewEditMessage(
-				c.Player.ChatID,
-				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", enemy.Name, dropRecap),
-			)
-
-			var ok = tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.return_map",
-					),
-				),
-			)
-			editMessage.ParseMode = "markdown"
-			editMessage.ReplyMarkup = &ok
-
-			// Se il mob è morto è necessario aggiornare la mappa
-			c.RefreshMap(planetMap.ID)
-
-			// Invio messaggio
-			if _, err = helpers.SendMessage(editMessage); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			return
-		}
-
-		// Verifico se il PLAYER è morto
-		if rHitEnemy.GetPlayerDie() {
-			// Aggiorno messaggio notificando al player che è morto
-			editMessage = helpers.NewEditMessage(
-				c.Player.ChatID,
-				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
-			)
-
-			var ok = tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData(
-						helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
-					),
-				),
-			)
-
-			editMessage.ReplyMarkup = &ok
-
-			// Invio messaggio
-			if _, err = helpers.SendMessage(editMessage); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			return
-		}
-
-		// Se ne il player e ne il mob è morto, continua lo scontro
-		// Messagio di notifica per vedere risultato attacco
-		if rHitEnemy.GetEnemyDodge() {
-			editMessage = helpers.NewEditMessage(
-				c.Player.ChatID,
-				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.miss", rHitEnemy.GetEnemyDamage()),
-			)
-		} else if rHitEnemy.GetPlayerDodge() {
-			editMessage = helpers.NewEditMessage(
-				c.Player.ChatID,
-				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.mob_miss", rHitEnemy.GetPlayerDamage()),
-			)
-		} else {
-			editMessage = helpers.NewEditMessage(
-				c.Player.ChatID,
-				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "combat.damage", rHitEnemy.GetPlayerDamage(), rHitEnemy.GetEnemyDamage()),
-			)
-		}
-
-		ok := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Ok!", "hunting.fight.no-action"),
-			),
-		)
-		editMessage.ReplyMarkup = &ok
+		c.Hit(enemy, planetMap, inlineData)
+		return
 	case "return_map":
-		// Trasformo la mappa in qualcosa di più leggibile su telegram
-		var decodedMap string
-		if decodedMap, err = helpers.DecodeMapToDisplay(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Forzo invio messaggio contenente la mappa
-		editMessage = helpers.NewEditMessage(
-			c.Player.ChatID,
-			c.Update.CallbackQuery.Message.MessageID,
-			decodedMap,
-		)
-
-		editMessage.ParseMode = "HTML"
-		editMessage.ReplyMarkup = &mapKeyboard
-	case "player-die":
+		c.ReturnToMap(planetMap)
+		return
+	case "player_die":
 		// Il player è morto
 		c.CurrentState.Completed = true
-
 		return
-	case "no-action":
-		//
 	}
 
-	// Edit message viene passato vuoto solo se non si tratta di hit o bodyselection
-	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-		editMessage = helpers.NewEditMessage(
-			c.Player.ChatID,
-			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "combat.card",
-				enemy.Name, strings.ToUpper(enemy.Rarity.Slug),
-				enemy.LifePoint,
-				enemy.LifeMax,
-				c.Player.Username,
-				c.Player.GetLifePoint(),
-				100+c.Player.GetLevel()*10,
-				helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]),
-			),
-		)
-		editMessage.ParseMode = "markdown"
-		editMessage.ReplyMarkup = &mobKeyboard
-	}
+	combactStatusMessage := helpers.NewEditMessage(
+		c.Player.ChatID,
+		c.Update.CallbackQuery.Message.MessageID,
+		helpers.Trans(c.Player.Language.Slug, "combat.card",
+			enemy.Name, strings.ToUpper(enemy.Rarity.Slug),
+			enemy.LifePoint,
+			enemy.LifeMax,
+			c.Player.Username,
+			c.Player.GetLifePoint(),
+			100+c.Player.GetLevel()*10,
+			helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]),
+		),
+	)
 
-	// Invio messaggio modificato
-	if _, err = helpers.SendMessage(editMessage); err != nil {
+	combactStatusMessage.ParseMode = "markdown"
+	combactStatusMessage.ReplyMarkup = c.PlayerFightKeyboard()
+	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}
+
 	return
+}
+
+func (c *HuntingController) PlayerFightKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	var err error
+	newfightKeyboard := new(tgbotapi.InlineKeyboardMarkup)
+	newfightKeyboard.InlineKeyboard = fightKeyboard
+
+	// Verifico se il player possiede abilità di comattimento o difesa
+	var rCheckIfPlayerHaveAbility *pb.CheckIfPlayerHaveAbilityResponse
+	if rCheckIfPlayerHaveAbility, err = config.App.Server.Connection.CheckIfPlayerHaveAbility(helpers.NewContext(1), &pb.CheckIfPlayerHaveAbilityRequest{
+		PlayerID:  c.Player.ID,
+		AbilityID: 7, // Attacco pesante
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	if rCheckIfPlayerHaveAbility.GetHaveAbility() {
+		// Appendo abilità player
+		var dataAbilityStruct = helpers.InlineDataStruct{C: "hunting", AT: "fight", A: "hit", SA: "ability", D: 7}
+		newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.accademy.ability.%s", rCheckIfPlayerHaveAbility.GetAbility().GetSlug())),
+				dataAbilityStruct.GetDataString(),
+			),
+		))
+	}
+
+	return newfightKeyboard
+}
+
+func (c *HuntingController) ReturnToMap(planetMap *pb.PlanetMap) {
+	var err error
+
+	// Trasformo la mappa in qualcosa di più leggibile su telegram
+	var decodedMap string
+	if decodedMap, err = helpers.DecodeMapToDisplay(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Forzo invio messaggio contenente la mappa
+	returnMessage := helpers.NewEditMessage(
+		c.Player.ChatID,
+		c.Update.CallbackQuery.Message.MessageID,
+		decodedMap,
+	)
+
+	returnMessage.ParseMode = "HTML"
+	returnMessage.ReplyMarkup = &mapKeyboard
+	if _, err = helpers.SendMessage(returnMessage); err != nil {
+		c.Logger.Panic(err)
+	}
+}
+
+func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inlineData helpers.InlineDataStruct) {
+	var err error
+
+	// Verifico se il player vuole usare un'abilità
+	var abilityID uint32
+	if inlineData.SA == "ability" {
+		abilityID = inlineData.D
+	}
+
+	// Effettuo chiamata al ws e recupero response dell'attacco
+	var rHitEnemy *pb.HitEnemyResponse
+	if rHitEnemy, err = config.App.Server.Connection.HitEnemy(helpers.NewContext(1), &pb.HitEnemyRequest{
+		EnemyID:       enemy.GetID(),
+		PlayerID:      c.Player.ID,
+		BodySelection: c.Payload.BodySelection,
+		AbilityID:     abilityID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Verifico se il MOB è morto
+	if rHitEnemy.GetEnemyDie() {
+		c.EnemyDie(rHitEnemy, enemy, planetMap)
+		return
+	}
+
+	// Verifico se il PLAYER è morto
+	if rHitEnemy.GetPlayerDie() {
+		c.PlayerDie()
+		return
+	}
+
+	var combactMessage tgbotapi.EditMessageTextConfig
+	if rHitEnemy.GetEnemyDodge() {
+		combactMessage = helpers.NewEditMessage(
+			c.Player.ChatID,
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.Language.Slug, "combat.miss", rHitEnemy.GetEnemyDamage()),
+		)
+	} else if rHitEnemy.GetPlayerDodge() {
+		combactMessage = helpers.NewEditMessage(
+			c.Player.ChatID,
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.Language.Slug, "combat.mob_miss", rHitEnemy.GetPlayerDamage()),
+		)
+	} else {
+		combactMessage = helpers.NewEditMessage(
+			c.Player.ChatID,
+			c.Update.CallbackQuery.Message.MessageID,
+			helpers.Trans(c.Player.Language.Slug, "combat.damage", rHitEnemy.GetPlayerDamage(), rHitEnemy.GetEnemyDamage()),
+		)
+	}
+
+	// Aggiungo dettagli abilità
+	if abilityID == 7 {
+		combactMessage.Text += "\n A causa della tua abilità hai perso ulteriri 5HP"
+	}
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
+		),
+	)
+
+	combactMessage.ReplyMarkup = &keyboard
+	if _, err = helpers.SendMessage(combactMessage); err != nil {
+		c.Logger.Panic(err)
+	}
+}
+
+func (c *HuntingController) PlayerDie() {
+	// Aggiorno messaggio notificando al player che è morto
+	playerDieMessage := helpers.NewEditMessage(
+		c.Player.ChatID,
+		c.Update.CallbackQuery.Message.MessageID,
+		helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+	)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				helpers.Trans(c.Player.Language.Slug, "continue"), fightPlayerDie.GetDataString(),
+			),
+		),
+	)
+
+	playerDieMessage.ReplyMarkup = &keyboard
+	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
+		c.Logger.Panic(err)
+	}
+}
+
+func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, enemy *pb.Enemy, planetMap *pb.PlanetMap) {
+	// Costruisco messaggio di recap del drop
+	var dropRecap string
+
+	if rHitEnemy.GetEnemyDrop().GetResource() != nil {
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
+	} else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
+		itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
+	} else if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
+	} else {
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
+	}
+
+	// Aggiungo anche esperinza recuperata
+	dropRecap += fmt.Sprintf("\n\n%s", helpers.Trans(c.Player.Language.Slug, "combat.experience", rHitEnemy.GetPlayerExperience()))
+
+	// Aggiorno modifica del messaggio
+	enemyDieMessage := helpers.NewEditMessage(
+		c.Player.ChatID,
+		c.Update.CallbackQuery.Message.MessageID,
+		helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", enemy.Name, dropRecap),
+	)
+
+	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				helpers.Trans(c.Player.Language.Slug, "continue"), fightReturnMap.GetDataString(),
+			),
+		),
+	)
+
+	enemyDieMessage.ParseMode = "markdown"
+	enemyDieMessage.ReplyMarkup = &keyboard
+	if _, err := helpers.SendMessage(enemyDieMessage); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Se il mob è morto è necessario aggiornare la mappa
+	c.RefreshMap(planetMap.ID)
 }
 
 // RefreshMap - Necessario per refreshare la mappa in caso

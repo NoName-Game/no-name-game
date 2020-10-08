@@ -148,8 +148,9 @@ func parseMessage(message *tgbotapi.Message) (parsed string) {
 
 // Metodo per il parsing della callback
 func parseCallback(callback *tgbotapi.CallbackQuery) (parsed string) {
-	// Prendo la prima parte del callback che contiene la rotta
-	parsed = strings.Split(callback.Data, ".")[0]
+	// Recupero infomazioni callback
+	var inlineData helpers.InlineDataStruct
+	inlineData = inlineData.GetDataValue(callback.Data)
 
-	return strings.ToLower(parsed)
+	return strings.ToLower(inlineData.C)
 }
