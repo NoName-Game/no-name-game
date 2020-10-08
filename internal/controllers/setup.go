@@ -49,7 +49,7 @@ func (c *SetupController) Handle(player *pb.Player, update tgbotapi.Update) {
 	c.Stage()
 
 	// Completo progressione
-	c.Completing(nil)
+	c.Completing(&c.Paylaod)
 }
 
 // ====================================
@@ -59,9 +59,23 @@ func (c *SetupController) Validator() (hasErrors bool) {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Verifico se la lingua scelta esiste
+	// Verifica timezone
 	// ##################################################################################################
 	case 1:
+		var rGetTimezoneByDescription *pb.GetTimezoneByDescriptionResponse
+		if rGetTimezoneByDescription, err = config.App.Server.Connection.GetTimezoneByDescription(helpers.NewContext(1), &pb.GetTimezoneByDescriptionRequest{
+			Description: c.Update.Message.Text,
+		}); err != nil {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+			return true
+		}
+
+		// Ho trovato il timezone
+		c.Paylaod.TimezoneID = rGetTimezoneByDescription.GetTimezone().GetID()
+	// ##################################################################################################
+	// Verifico se la lingua scelta esiste
+	// ##################################################################################################
+	case 2:
 		var rGetLanguageByName *pb.GetLanguageByNameResponse
 		if rGetLanguageByName, err = config.App.Server.Connection.GetLanguageByName(helpers.NewContext(1), &pb.GetLanguageByNameRequest{
 			Name: c.Update.Message.Text,
@@ -72,20 +86,7 @@ func (c *SetupController) Validator() (hasErrors bool) {
 
 		// Ho trovato la lingua
 		c.Paylaod.LanguageID = rGetLanguageByName.GetLanguage().GetID()
-	// ##################################################################################################
-	// Verifica timezone
-	// ##################################################################################################
-	case 2:
-		var rGetTimezoneByName *pb.GetTimezoneByNameResponse
-		if rGetTimezoneByName, err = config.App.Server.Connection.GetTimezoneByName(helpers.NewContext(1), &pb.GetTimezoneByNameRequest{
-			Name: c.Update.Message.Text,
-		}); err != nil {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true
-		}
 
-		// Ho trovato il timezone
-		c.Paylaod.TimezoneID = rGetTimezoneByName.GetTimezone().GetID()
 	}
 
 	return false
@@ -101,6 +102,46 @@ func (c *SetupController) Stage() {
 		msgIntro := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.intro", c.Player.Username))
 		msgIntro.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msgIntro); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero lista timezones
+		var rGetAllTimezones *pb.GetAllTimezonesResponse
+		if rGetAllTimezones, err = config.App.Server.Connection.GetAllTimezones(helpers.NewContext(1), &pb.GetAllTimezonesRequest{}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Keyboard con riassunto risorse necessarie
+		var keyboard [][]tgbotapi.KeyboardButton
+		for _, timezone := range rGetAllTimezones.GetTimezones() {
+			keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+				timezone.GetDescription(),
+			)))
+		}
+
+		// Invio messaggio
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.select_timezone"))
+		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboard,
+		}
+
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Aggiorna stato
+		c.CurrentState.Stage = 1
+
+	// ============================================================================================================
+	// Salvo lingua e chiedo timezone
+	case 1:
+		// Aggiorno timezone scelto dal player
+		if _, err = config.App.Server.Connection.PlayerSetTimezone(helpers.NewContext(1), &pb.PlayerSetTimezoneRequest{
+			PlayerID:   c.Player.ID,
+			TimezoneID: c.Paylaod.TimezoneID,
+		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -125,55 +166,15 @@ func (c *SetupController) Stage() {
 		}
 
 		// Aggiorna stato
-		c.CurrentState.Stage = 1
-
-	// ============================================================================================================
-	// Salvo lingua e chiedo timezone
-	case 1:
-		// Aggiorno lingua scelta dal player
-		if _, err = config.App.Server.Connection.PlayerSetLanguage(helpers.NewContext(1), &pb.PlayerSetLanguageRequest{
-			PlayerID:   c.Player.ID,
-			LanguageID: c.Paylaod.LanguageID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Recupero lista timezones
-		var rGetAllTimezones *pb.GetAllTimezonesResponse
-		if rGetAllTimezones, err = config.App.Server.Connection.GetAllTimezones(helpers.NewContext(1), &pb.GetAllTimezonesRequest{}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Keyboard con riassunto risorse necessarie
-		var keyboard [][]tgbotapi.KeyboardButton
-		for _, timezone := range rGetAllTimezones.GetTimezones() {
-			keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-				timezone.GetName(),
-			)))
-		}
-
-		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.select_timezone"))
-		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			ResizeKeyboard: true,
-			Keyboard:       keyboard,
-		}
-
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiorna stato
 		c.CurrentState.Stage = 2
 
 	// ============================================================================================================
 	// Completo configurazione
 	case 2:
-		// Aggiorno timezone scelto dal player
-		if _, err = config.App.Server.Connection.PlayerSetTimezone(helpers.NewContext(1), &pb.PlayerSetTimezoneRequest{
+		// Aggiorno lingua scelta dal player
+		if _, err = config.App.Server.Connection.PlayerSetLanguage(helpers.NewContext(1), &pb.PlayerSetLanguageRequest{
 			PlayerID:   c.Player.ID,
-			TimezoneID: c.Paylaod.TimezoneID,
+			LanguageID: c.Paylaod.LanguageID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
