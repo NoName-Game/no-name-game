@@ -248,8 +248,8 @@ func (c *ExplorationController) Stage() {
 	// In questo stage recupero quali risorse il player ha recuperato
 	// dalla missione e glielo notifico
 	case 2:
-		var rExplorationCheck *pb.ExplorationCheckResponse
-		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
+		var rExplorationDropResources *pb.ExplorationDropResourcesResponse
+		if rExplorationDropResources, err = config.App.Server.Connection.ExplorationDropResources(helpers.NewContext(1), &pb.ExplorationDropResourcesRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
@@ -257,7 +257,7 @@ func (c *ExplorationController) Stage() {
 
 		// Ciclo risorse recuperate
 		var resourcesListMessage string
-		for _, dropResult := range rExplorationCheck.GetDropResults() {
+		for _, dropResult := range rExplorationDropResources.GetDropResults() {
 			// Recupero dettagli risorse
 			var rGetResourceByID *pb.GetResourceByIDResponse
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
