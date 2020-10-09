@@ -101,7 +101,7 @@ valodator.controller.blocked: "Per procedere porta a termine prima gli altri obb
 banned.message: "Sei stato bannato, contatta un amministratore per maggior informazioni"
 ################################################################################################################
 # MENU
-menu: "*BoardSystem v0.1*\n🌏 %s \n%s \n%s \n\n%s"
+menu: "*BoardSystem v0.1*\n🌏 %s \n%s \n\n%s"
 
 # Task
 menu.tasks: "⏱ *Attività in corso:*\n"

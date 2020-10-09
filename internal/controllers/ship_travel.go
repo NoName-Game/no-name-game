@@ -347,6 +347,9 @@ func (c *ShipTravelController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Forzo cancellazione posizione player in cache
+		_ = helpers.DelPlayerPlanetPositionInCache(c.Player.GetID())
+
 		// Completo lo stato
 		c.CurrentState.Completed = true
 	}

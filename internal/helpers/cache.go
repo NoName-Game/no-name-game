@@ -110,3 +110,35 @@ func GetMapInCache(MapID uint32) (planetMap *pb.PlanetMap, err error) {
 	err = json.Unmarshal([]byte(result), &planetMap)
 	return
 }
+
+// =================
+// Cache Player Position
+// =================
+// SetPlayerPlanetPositionInCache - Salvo posizione player in cache per non appesantire le chiamate a DB
+func SetPlayerPlanetPositionInCache(playerID uint32, planet *pb.Planet) (err error) {
+	var jsonValue []byte
+	jsonValue, _ = json.Marshal(planet)
+
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_current_planet", playerID), string(jsonValue), 10*time.Minute).Err(); err != nil {
+		return fmt.Errorf("cant set player position in cache: %s", err.Error())
+	}
+	return
+}
+
+// GetPlayerPlanetPositionInCache - Recupera mappa in memoria
+func GetPlayerPlanetPositionInCache(playerID uint32) (planet *pb.Planet, err error) {
+	var result string
+	if result, err = config.App.Redis.Connection.Get(fmt.Sprintf("player_%v_current_planet", playerID)).Result(); err != nil {
+		return planet, fmt.Errorf("cant get player position in cache: %s", err.Error())
+	}
+
+	err = json.Unmarshal([]byte(result), &planet)
+	return
+}
+
+func DelPlayerPlanetPositionInCache(playerID uint32) (err error) {
+	if err := config.App.Redis.Connection.Del(fmt.Sprintf("player_%v_current_planet", playerID)).Err(); err != nil {
+		return fmt.Errorf("cant delete player position in cache data: %s", err.Error())
+	}
+	return
+}

@@ -113,24 +113,8 @@ func (c *MenuController) GetRecap() (message string) {
 		// Recupero status vitale del player
 		life := c.GetPlayerLife()
 
-		// Recupero conquistatore attuale
-		var currentConqueror string
-		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
-		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
-			PlanetID: planet.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		if rGetCurrentConquerorByPlanetID.GetPlayer().GetID() > 0 {
-			currentConqueror = fmt.Sprintf("🚩 %s", rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername())
-		} else {
-			currentConqueror = helpers.Trans(c.Player.Language.Slug, "conqueror.planet_free")
-		}
-
 		message = helpers.Trans(c.Player.Language.Slug, "menu",
 			planet.GetName(),
-			currentConqueror,
 			life,
 			c.GetPlayerTasks(),
 		)
@@ -141,30 +125,39 @@ func (c *MenuController) GetRecap() (message string) {
 
 // GetPlayerPosition
 // Metodo didicato allo visualizione del nome del pianeta
-func (c *MenuController) GetPlayerPosition() (result *pb.Planet) {
+func (c *MenuController) GetPlayerPosition() (position *pb.Planet) {
 	var err error
 
-	// Recupero ultima posizione del player, dando per scontato che sia
-	// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
-	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-		PlayerID: c.Player.GetID(),
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
+	// Tento di recuperare posizione da cache
+	if position, err = helpers.GetPlayerPlanetPositionInCache(c.Player.GetID()); err != nil {
+		// Recupero ultima posizione nota del player
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
 
-	// Verifico se il player si trova su un pianeta valido
-	if rGetPlayerCurrentPlanet.GetPlanet() == nil {
-		c.Logger.Panic(err)
+		// Verifico se il player si trova su un pianeta valido
+		if rGetPlayerCurrentPlanet.GetPlanet() == nil {
+			c.Logger.Panic(err)
+		}
+
+		position = rGetPlayerCurrentPlanet.GetPlanet()
+
+		// Creo cache posizione
+		if err = helpers.SetPlayerPlanetPositionInCache(c.Player.GetID(), position); err != nil {
+			c.Logger.Panicf("error creating player position cache: %s", err.Error())
+		}
 	}
 
 	// Verifico se il player si trova su un pianeta sicuro
-	c.SafePlanet = rGetPlayerCurrentPlanet.GetPlanet().GetSafe()
+	c.SafePlanet = position.GetSafe()
 
 	// Verifico se il pianeta corrente è occupato da un titano
 	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
 	rGetTitanByPlanetID, _ = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
-		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+		PlanetID: position.GetID(),
 	})
 
 	c.TitanPlanet = false
@@ -172,7 +165,7 @@ func (c *MenuController) GetPlayerPosition() (result *pb.Planet) {
 		c.TitanPlanet = true
 	}
 
-	return rGetPlayerCurrentPlanet.GetPlanet()
+	return position
 }
 
 // GetPlayerLife
