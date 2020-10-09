@@ -46,6 +46,7 @@ type ControllerCurrentState struct {
 }
 
 type ControllerConfigurations struct {
+	CustomBreaker     []string
 	ControllerBlocked []string
 	ControllerBack    ControllerBack
 }
@@ -156,11 +157,9 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 	// Verifico se è effetivamente un messaggio di testo e non una callback
 	if c.Update.Message != nil {
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
-			if c.CurrentState.Controller != "" {
-				if c.CurrentState.Stage > canBackFromStage {
-					c.CurrentState.Stage = 0
-					return
-				}
+			if c.CurrentState.Stage > canBackFromStage {
+				c.CurrentState.Stage = 0
+				return
 			}
 
 			// Cancello stato dalla memoria
@@ -230,7 +229,8 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 
 		// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
 		// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.continue") {
+		c.Configurations.CustomBreaker = append(c.Configurations.CustomBreaker, "route.breaker.continue")
+		if helpers.MessageInCustomBreakers(c.Update.Message.Text, c.Player.Language.Slug, c.Configurations.CustomBreaker) {
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
 

@@ -143,17 +143,19 @@ combat.mob_miss: "Hai schivato il colpo, ma hai comunque inflitto %d danni."
 ################################################################################################################
 ################################################################################################################
 # MISSION
-exploration.exploration: "Seleziona campo di ricerca:"
-exploration.underground: "Sottosuolo"
-exploration.surface: "Superfice"
-exploration.atmosphere: "Atmosfera"
+exploration.tips: "📖: Esegui delle esplorazioni per recupero materiale unico per ogni pianeta.*Ogni* esplorazione ha una durata iniziale di *10* minuti, questa durata *aumenterà* ripetendo più volte lo stesso ciclo, così come i materiali da te recuperabili."
+exploration.exploration: "Seleziona campo di esplorazione:"
+exploration.underground: "🔥 Sottosuolo"
+exploration.surface: "🌱 Superfice"
+exploration.atmosphere: "☁️ Atmosfera"
 exploration.extraction_recap: "Hai estratto 💠 *%s* di rarità *%s (%s)* per una quantità pari a *%d* unità, vuoi continuare l'esplorazione?"
 exploration.extraction_ended: "Sei rientrato con le tue nuove risorse!\n\n💠 *Rapporto Esplorazione:*\n"
-exploration.continue: "Continua ad esplorare"
-exploration.comeback: "Concludi"
-exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*"
-exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle *%s*"
-exploration.conqueror_bonus: "\n\n🚩*Bouns Conquistatore! (x2)*\nSembra che tu conosca molto bene questo pianeta! Grazie a questa tua esperienza ogni ricerca ti fornirà il doppio di 💠 Risorse!"
+exploration.comeback: "🏃‍♂️ Torna alla base"
+exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*."
+exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle *%s*."
+exploration.conqueror_bonus: "\n\n🚩*Bouns Conquistatore! (x2)*\nSembra che tu conosca molto bene questo pianeta! Grazie a questo bonus ogni ricerca ti fornirà il *doppio* di 💠 *Risorse*!"
+exploration.continue: "Ripeti esplorazione"
+exploration.breaker.continue: "Continua esplorazione"
 ################################################################################################################
 ################################################################################################################
 # ITEMS

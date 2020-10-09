@@ -57,6 +57,16 @@ func StringInSlice(v string, a []string) bool {
 	return false
 }
 
+func MessageInCustomBreakers(message string, lang string, breakers []string) bool {
+	for _, breaker := range breakers {
+		if message == Trans(lang, breaker) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // NewContext - Recupero nuovo context per effettuare le chiamate
 func NewContext(seconds time.Duration) context.Context {
 	TTLRPC, err := strconv.Atoi(os.Getenv("TTL_RPC"))

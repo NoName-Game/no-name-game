@@ -26,7 +26,7 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &PlayerController{},
 				FromStage: 0,
 			},
 		},

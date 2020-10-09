@@ -33,6 +33,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 			Controller: "route.exploration",
 		},
 		Configurations: ControllerConfigurations{
+			CustomBreaker:     []string{"exploration.breaker.continue"},
 			ControllerBlocked: []string{"hunting", "ship"},
 			ControllerBack: ControllerBack{
 				To:        &MenuController{},
@@ -108,7 +109,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+						helpers.Trans(c.Player.Language.Slug, "exploration.breaker.continue"),
 					),
 					tgbotapi.NewKeyboardButton(
 						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
@@ -193,7 +194,10 @@ func (c *ExplorationController) Stage() {
 		}
 
 		// Invio messaggi con il tipo di missioni come tastierino
-		msg := helpers.NewMessage(c.Player.ChatID, messageExploration)
+		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s",
+			messageExploration,
+			helpers.Trans(c.Player.Language.Slug, "exploration.tips"),
+		))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,

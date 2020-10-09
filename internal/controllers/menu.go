@@ -239,9 +239,9 @@ func (c *MenuController) GetKeyboard() [][]tgbotapi.KeyboardButton {
 		if state.Controller == "route.tutorial" {
 			return c.TutorialKeyboard()
 		} else if state.Controller == "route.ship.travel" {
-			return c.ExplorationKeyboard()
+			return c.TravelKeyboard()
 		} else if state.Controller == "route.exploration" {
-			return c.MissionKeyboard()
+			return c.ExplorationKeyboard()
 		}
 	}
 
@@ -301,8 +301,8 @@ func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardB
 	return
 }
 
-// ExplorationKeyboard
-func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
+// TravelKeyboard
+func (c *MenuController) TravelKeyboard() [][]tgbotapi.KeyboardButton {
 	return [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.inventory")),
@@ -317,18 +317,18 @@ func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
 	}
 }
 
-// MissionKeyboard
-func (c *MenuController) MissionKeyboard() [][]tgbotapi.KeyboardButton {
+// ExplorationKeyboard
+func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
 	return [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.exploration")),
 		},
 		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.inventory")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
 		},
 		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.laboratory")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ability")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 		},
 	}
 }
