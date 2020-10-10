@@ -742,15 +742,21 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *
 	// Costruisco messaggio di recap del drop
 	var dropRecap string
 
+	// Aggiungo risorse o item trovati
 	if rHitEnemy.GetEnemyDrop().GetResource() != nil {
+		c.Logger.Info("resource", rHitEnemy.GetEnemyDrop().GetResource())
 		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
 	} else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
+		c.Logger.Info("item", rHitEnemy.GetEnemyDrop().GetItem())
 		itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
 		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
-	} else if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
-		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
 	} else {
 		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.nothing")
+	}
+
+	// Aggiungo dettaglio monete recuperate
+	if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.transaction", rHitEnemy.GetEnemyDrop().GetTransaction().GetValue())
 	}
 
 	// Aggiungo anche esperinza recuperata
