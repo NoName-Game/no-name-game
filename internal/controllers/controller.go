@@ -263,9 +263,11 @@ func (c *Controller) Completing(payload interface{}) {
 
 		// Call menu controller
 		if c.Configurations.ControllerBack.To != nil {
-			c.Update.Message.Text = ""
-			c.Configurations.ControllerBack.To.Handle(c.Player, c.Update)
-			return
+			if c.Update.Message != nil {
+				c.Update.Message.Text = ""
+				c.Configurations.ControllerBack.To.Handle(c.Player, c.Update)
+				return
+			}
 		}
 
 		new(MenuController).Handle(c.Player, c.Update)

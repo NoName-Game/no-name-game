@@ -129,17 +129,17 @@ tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
 tresure.found.trap: "AH! Sei inciampato in una trappola e hai perso *%v*HP!"
 
 # Combat
-combat.damage: "Hai inflitto %d danni!\nHai subito però %d danni."
+combat.damage: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico infliggendo *%d* danni!\nIl nemico è riuscito comunque a colpirti e infliggerti *%d* danni!"
+combat.enemy_dodge: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico ma è riuscito a *schivare* il colpo, si gira di scatto riuscendo ad infliggerti *%d* danni!"
+combat.player_dodge: "⚔️ Rapporto scontro ⚔️\n\nSei riuscito a *schivare* il colpo nemico, con un colpo deciso riesci a infligergli *%d* danni!"
+combat.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico è riuscito a *sconfiggerti* in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
 combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %d/%d\n\nStai mirando a: *%s*"
-combat.mob_killed: "Sei riuscito a sconfiggere *%s*! %s"
-combat.player_killed: "Sei stato ucciso! Torni alla base in fin di vita, ci vorrà un po' per recuperare le energie."
-combat.miss: "Hai mancato il mostro, ma hai subito %d danni."
+combat.mob_killed: "Sei riuscito a *sconfiggere* il nemico! %s"
+combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
 combat.found.resource: "\nTrovando: 💠*%s*"
 combat.found.item: "\nTrovando: 🔩*%s*"
 combat.found.transaction: "\nTrovando: *%v*💰"
-combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
-combat.experience: "Ottenendo anche *%v* di esperienza nel combattimento!"
-combat.mob_miss: "Hai schivato il colpo, ma hai comunque inflitto %d danni."
+combat.experience: "Ottenendo anche 🏵 *%v* esperienza!"
 ################################################################################################################
 ################################################################################################################
 # MISSION

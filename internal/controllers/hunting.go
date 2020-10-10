@@ -30,6 +30,7 @@ type HuntingController struct {
 		PlayerPositionY   int32
 		BodySelection     int32
 	}
+	Enemy *pb.Enemy
 }
 
 // ====================================
@@ -146,7 +147,7 @@ var (
 	fightKeyboard = [][]tgbotapi.InlineKeyboardButton{
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", fightUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🗾", fightReturnMap.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("🏃‍♂️💨", fightReturnMap.GetDataString()),
 			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightHit.GetDataString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", fightDown.GetDataString())),
@@ -512,6 +513,16 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 // Fight
 // ====================================
 func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap *pb.PlanetMap) (err error) {
+	// Verifico immediatamente se il player vuole tornare alla mappa o è morto
+	switch inlineData.A {
+	case "return_map":
+		c.ReturnToMap(planetMap)
+		return
+	case "player_die":
+		c.CurrentState.Completed = true
+		return
+	}
+
 	// Recupero dettagli aggiornati enemy
 	var enemy *pb.Enemy
 	enemy, _ = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
@@ -547,13 +558,6 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 		//
 	case "hit":
 		c.Hit(enemy, planetMap, inlineData)
-		return
-	case "return_map":
-		c.ReturnToMap(planetMap)
-		return
-	case "player_die":
-		// Il player è morto
-		c.CurrentState.Completed = true
 		return
 	}
 
@@ -653,7 +657,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 
 	// Verifico se il MOB è morto
 	if rHitEnemy.GetEnemyDie() {
-		c.EnemyDie(rHitEnemy, enemy, planetMap)
+		c.EnemyDie(rHitEnemy, planetMap)
 		return
 	}
 
@@ -668,13 +672,13 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 		combactMessage = helpers.NewEditMessage(
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "combat.miss", rHitEnemy.GetEnemyDamage()),
+			helpers.Trans(c.Player.Language.Slug, "combat.enemy_dodge", rHitEnemy.GetEnemyDamage()),
 		)
 	} else if rHitEnemy.GetPlayerDodge() {
 		combactMessage = helpers.NewEditMessage(
 			c.Player.ChatID,
 			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.Language.Slug, "combat.mob_miss", rHitEnemy.GetPlayerDamage()),
+			helpers.Trans(c.Player.Language.Slug, "combat.player_dodge", rHitEnemy.GetPlayerDamage()),
 		)
 	} else {
 		combactMessage = helpers.NewEditMessage(
@@ -696,6 +700,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 	)
 
 	combactMessage.ReplyMarkup = &keyboard
+	combactMessage.ParseMode = "markdown"
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -718,12 +723,13 @@ func (c *HuntingController) PlayerDie() {
 	)
 
 	playerDieMessage.ReplyMarkup = &keyboard
+	playerDieMessage.ParseMode = "markdown"
 	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
 		c.Logger.Panic(err)
 	}
 }
 
-func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, enemy *pb.Enemy, planetMap *pb.PlanetMap) {
+func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *pb.PlanetMap) {
 	// Costruisco messaggio di recap del drop
 	var dropRecap string
 
@@ -745,7 +751,7 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, enemy *pb.E
 	enemyDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", enemy.Name, dropRecap),
+		helpers.Trans(c.Player.Language.Slug, "combat.mob_killed", dropRecap),
 	)
 
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
