@@ -71,6 +71,12 @@ var (
 		A:  "action",
 	}
 
+	moveNoAction = helpers.InlineDataStruct{
+		C:  "hunting",
+		AT: "move",
+		A:  "no_action",
+	}
+
 	// Hunting Fight Actions
 	fightStart = helpers.InlineDataStruct{
 		C:  "hunting",
@@ -377,102 +383,7 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 
 		return
 	case "action":
-		// Verifico se si trova sopra un tesoro se così fosse lancio
-		// chiamata per verificare il drop
-		var nearTresure bool
-		var tresure *pb.Tresure
-		tresure, nearTresure = helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-		if nearTresure {
-			// random per definire se è un tesoro o una trappola :D
-			// Chiamo WS e recupero tesoro
-			var rDropTresure *pb.DropTresureResponse
-			if rDropTresure, err = config.App.Server.Connection.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
-				TresureID: tresure.ID,
-				PlayerID:  c.Player.ID,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Verifico cosa è tornato e rispondo
-			var editMessage tgbotapi.EditMessageTextConfig
-			if rDropTresure.GetResource().GetID() > 0 {
-				editMessage = helpers.NewEditMessage(
-					c.Player.ChatID,
-					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", rDropTresure.GetResource().GetName()),
-				)
-			} else if rDropTresure.GetItem().GetID() > 0 {
-				itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rDropTresure.GetItem().GetSlug()))
-				editMessage = helpers.NewEditMessage(
-					c.Player.ChatID,
-					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.item", itemFound),
-				)
-			} else if rDropTresure.GetTransaction().GetID() > 0 {
-				editMessage = helpers.NewEditMessage(
-					c.Player.ChatID,
-					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", rDropTresure.GetTransaction().GetValue()),
-				)
-			} else if rDropTresure.GetTrap().GetID() > 0 {
-				if rDropTresure.GetTrap().GetPlayerDie() {
-					// Aggiorno messaggio notificando al player che è morto
-					editMessage = helpers.NewEditMessage(
-						c.Player.ChatID,
-						c.Update.CallbackQuery.Message.MessageID,
-						helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
-					)
-
-					var ok = tgbotapi.NewInlineKeyboardMarkup(
-						tgbotapi.NewInlineKeyboardRow(
-							tgbotapi.NewInlineKeyboardButtonData(
-								helpers.Trans(c.Player.Language.Slug, "continue"), "hunting.fight.player-die",
-							),
-						),
-					)
-
-					editMessage.ReplyMarkup = &ok
-
-					// Invio messaggio
-					if _, err = helpers.SendMessage(editMessage); err != nil {
-						c.Logger.Panic(err)
-					}
-
-					return
-				}
-				// Player sopravvive...
-				editMessage = helpers.NewEditMessage(
-					c.Player.ChatID,
-					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage()),
-				)
-			} else {
-				// Non hai trovato nulla
-				editMessage = helpers.NewEditMessage(
-					c.Player.ChatID,
-					c.Update.CallbackQuery.Message.MessageID,
-					helpers.Trans(c.Player.Language.Slug, "tresure.found.nothing"),
-				)
-			}
-
-			ok := tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
-				),
-			)
-			editMessage.ReplyMarkup = &ok
-			editMessage.ParseMode = "markdown"
-
-			// Un tesoro è stato aperto, devo refreshare la mappa per cancellarlo
-			c.RefreshMap(planetMap.ID)
-
-			if _, err = helpers.SendMessage(editMessage); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			return
-		}
-
+		c.action(planetMap)
 		return
 	case "no_action":
 		// No action
@@ -488,17 +399,15 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 
 	// Se l'azione è valida e completa aggiorno risultato
 	msg := helpers.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
+	msg.ReplyMarkup = &mapKeyboard
 
 	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
-	var nearMob, nearTresure bool
-	_, nearMob = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-	_, nearTresure = helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-	if nearMob {
+	if _, nearMob := helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); nearMob {
 		msg.ReplyMarkup = &enemyKeyboard
-	} else if nearTresure {
+	}
+
+	if _, nearTresure := helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); nearTresure {
 		msg.ReplyMarkup = &tresureKeyboard
-	} else {
-		msg.ReplyMarkup = &mapKeyboard
 	}
 
 	msg.ParseMode = "HTML"
@@ -507,6 +416,106 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 	}
 
 	return
+}
+
+// ====================================
+// Aciton
+// ====================================
+func (c *HuntingController) action(planetMap *pb.PlanetMap) {
+	var err error
+
+	// Verifico se si trova sopra un tesoro o una trappola
+	if tresure, nearTresure := helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); nearTresure {
+		// Chiamo WS e recupero tesoro
+		var rDropTresure *pb.DropTresureResponse
+		if rDropTresure, err = config.App.Server.Connection.DropTresure(helpers.NewContext(1), &pb.DropTresureRequest{
+			TresureID: tresure.ID,
+			PlayerID:  c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Verifico cosa è tornato e rispondo
+		var tresureMessage tgbotapi.EditMessageTextConfig
+		if rDropTresure.GetResource().GetID() > 0 {
+			tresureMessage = helpers.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.resource", rDropTresure.GetResource().GetName()),
+			)
+		} else if rDropTresure.GetItem().GetID() > 0 {
+			itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rDropTresure.GetItem().GetSlug()))
+			tresureMessage = helpers.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.item", itemFound),
+			)
+		} else if rDropTresure.GetTransaction().GetID() > 0 {
+			tresureMessage = helpers.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.transaction", rDropTresure.GetTransaction().GetValue()),
+			)
+		} else if rDropTresure.GetTrap().GetID() > 0 {
+			// Se è una trappola e il player è morto
+			if rDropTresure.GetTrap().GetPlayerDie() {
+				// Aggiorno messaggio notificando al player che è morto
+				tresureMessage = helpers.NewEditMessage(
+					c.Player.ChatID,
+					c.Update.CallbackQuery.Message.MessageID,
+					helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+				)
+
+				var ok = tgbotapi.NewInlineKeyboardMarkup(
+					tgbotapi.NewInlineKeyboardRow(
+						tgbotapi.NewInlineKeyboardButtonData(
+							helpers.Trans(c.Player.Language.Slug, "continue"), fightPlayerDie.GetDataString(),
+						),
+					),
+				)
+
+				tresureMessage.ReplyMarkup = &ok
+
+				// Invio messaggio
+				if _, err = helpers.SendMessage(tresureMessage); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				return
+			}
+
+			// Player sopravvive...
+			tresureMessage = helpers.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage()),
+			)
+		} else {
+			// Non hai trovato nulla
+			tresureMessage = helpers.NewEditMessage(
+				c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.nothing"),
+			)
+		}
+
+		// Refresh della mappa per rimuovere il tosoro dalla memoria
+		c.RefreshMap(planetMap.ID)
+
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Ok!", moveNoAction.GetDataString()),
+			),
+		)
+
+		tresureMessage.ReplyMarkup = &keyboard
+		tresureMessage.ParseMode = "markdown"
+		if _, err = helpers.SendMessage(tresureMessage); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		return
+	}
 }
 
 // ====================================
