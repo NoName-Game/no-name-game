@@ -162,12 +162,11 @@ func (c *PlayerEquipmentController) Stage() {
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
 			currentWeaponsEquipment += fmt.Sprintf(
-				"\n*%s* (*%s*)\nDMG:*%.2v* | PCS: *%.2v* | PNT: *%.2v*",
+				"\n*%s* (*%s*)\nDamage: *%v* | Precision: *%v*",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetPrecision(),
-				rGetPlayerWeaponEquippedResponse.GetWeapon().GetPenetration(),
 			)
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
@@ -487,7 +486,7 @@ func (c *PlayerEquipmentController) Stage() {
 			if _, err = config.App.Server.Connection.EquipArmor(helpers.NewContext(1), &pb.EquipArmorRequest{
 				PlayerID: c.Player.ID,
 				ArmorID:  c.Payload.EquipID,
-				Equip:    false,
+				Equip:    true,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
@@ -515,7 +514,7 @@ func (c *PlayerEquipmentController) Stage() {
 			if _, err = config.App.Server.Connection.EquipWeapon(helpers.NewContext(1), &pb.EquipWeaponRequest{
 				PlayerID: c.Player.ID,
 				WeaponID: c.Payload.EquipID,
-				Equip:    false,
+				Equip:    true,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}

@@ -58,12 +58,10 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Aggiunto informazioni principali pianeta
-	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n%s \n%s \n%s \n\n",
+	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n%s\n\n",
 		helpers.Trans(player.Language.Slug, "planet.intro"),
 		helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName()),
 		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlanetByID.GetPlanet().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.biome", rGetPlanetByID.GetPlanet().GetPlanetBiome().GetName()),
-		helpers.Trans(player.Language.Slug, "planet.details.atmosphere", rGetPlanetByID.GetPlanet().GetPlanetAtmosphere().GetName()),
 	)
 
 	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse

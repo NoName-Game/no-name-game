@@ -65,14 +65,15 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
 	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
 		if i < 1 {
-			conquerorsListMsg += fmt.Sprintf("- 👨🏼‍🚀 *%s* ⚔️ *%d* 🚩\n",
+			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 *%s* ⚔️ *%d* \n",
 				conquerors.GetPlayer().GetUsername(),
 				conquerors.GetNKills(),
 			)
 			continue
 		}
 
-		conquerorsListMsg += fmt.Sprintf("- 👨🏼‍🚀 %s ⚔️ %d\n",
+		conquerorsListMsg += fmt.Sprintf("%d - 👨🏼‍🚀 %s ⚔️ %d\n",
+			i+1,
 			conquerors.GetPlayer().GetUsername(),
 			conquerors.GetNKills(),
 		)

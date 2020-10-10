@@ -479,10 +479,10 @@ inventory.intro: "Cosa vuoi gestire del tuo 🎒*inventario*?"
 inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
-inventory.armors.what: "Quale tra le tue 🛡*armature* vorresti equipaggiare?"
+inventory.armors.what: "Quale tra le tue 🛡*Armature* vorresti equipaggiare?"
 inventory.armors.zero_equipment: "\n❌ Nessuna\n"
 inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
-inventory.weapons.what: "Quale tra le tue 🗡*armi* vorresti equipaggiare?"
+inventory.weapons.what: "Quale tra le tue 🗡*Armi* vorresti equipaggiare?"
 inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 
 # Equip
@@ -502,9 +502,9 @@ inventory.items.completed: "Hai usato *%s* beneficiando delle sue caratteristich
 ################################################################################################################
 ################################################################################################################
 # CONQUEROR
-conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore di questa pianeta sconfingendo nemici in esplorazione.\n\n📖: Scala la classifica, questo ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
-conqueror.planet_free: "🚩 Nessun Conquistatore"
-conqueror.list.intro: "Ecco i miglior 10 conquistatori:\n"
+conqueror.intro: "🚩*Conquista il Pianeta!*\nDimostra di essere il migliore sconfingendo nemici in esplorazione.\n\n📖: Scalare la classifica ti permetterà di ricervere dei bonus dalle attività in questo pianeta.\n\n"
+conqueror.planet_free: "Nessun esploratore ha combattuto ancora per questo pianeta."
+conqueror.list.intro: "Ecco i miglior esploratiori di questo pianeta:\n"
 ################################################################################################################
 # EVENTS
 titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
