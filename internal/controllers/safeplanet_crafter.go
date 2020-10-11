@@ -142,7 +142,7 @@ func (c *SafePlanetCrafterController) Validator() (hasErrors bool) {
 			c.Validation.Message = helpers.Trans(
 				c.Player.Language.Slug,
 				"safeplanet.crafting.wait_validation",
-				finishAt.Format("15:04:05"),
+				finishAt.Format("15:04"),
 			)
 
 			return true
@@ -160,7 +160,7 @@ func (c *SafePlanetCrafterController) Stage() {
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
-		startMsg := fmt.Sprintf("%s %s",
+		startMsg := fmt.Sprintf("%s\n\n%s",
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.what"),
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.info"),
 		)
@@ -456,7 +456,7 @@ func (c *SafePlanetCrafterController) Stage() {
 
 		var msg tgbotapi.MessageConfig
 		msg = helpers.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.wait", finishAt.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.wait", finishAt.Format("15:04")),
 		)
 		msg.ParseMode = "markdown"
 		if _, err = helpers.SendMessage(msg); err != nil {
