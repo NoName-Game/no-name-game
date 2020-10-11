@@ -74,6 +74,8 @@ route.safeplanet.coalition.protectors: "💢 Protettori"
 route.safeplanet.coalition.protectors.create: "➕ Crea"
 route.safeplanet.coalition.protectors.join: "🔍 Cerca"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Abbandona Gilda"
+route.safeplanet.coalition.protectors.add_player: "➕ Aggiungi esploratore"
+route.safeplanet.coalition.protectors.remove_player: "➖ Rimuovi esploratore"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -427,9 +429,11 @@ safeplanet.coalition.protectors.player_protectors_details: "\n\nLa tua gilda att
 safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto."
 safeplanet.coalition.protectors.protectors_name_not_exists: "La gilda da te indicata non sembra esser corretta."
 safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
+safeplanet.coalition.protectors.adding_player_already_in_one_protectors: "Il player da te indicato è già in una gilda."
+safeplanet.coalition.protectors.protectors_player_not_exists: "Non è stato trovato nessun esploratore con quel nome."
 
 safeplanet.coalition.protectors.create_start: "Inserisci il nome della 💢*Gilda* che vuoi creare"
-safeplanet.coalition.protectors.create_accessibility: "Indicaci il tipo di visibilità che vuoi dare al tuo gruppo?\n\n*Pubblica*: tutti potranno accedere alla tua gilda.\n*Privata*: gli esploratori potranno accedere al gruppo solo tramite invito."
+safeplanet.coalition.protectors.create_accessibility: "Indicaci il tipo di visibilità che vuoi dare al tuo gruppo?\n\n*Pubblica*: tutti potranno accedere alla tua gilda.\n*Privata*: solo il fondatore potrà aggiungere player alla gida."
 safeplanet.coalition.protectors.create_accessibility.public: "Pubblica"
 safeplanet.coalition.protectors.create_accessibility.private: "Privata"
 safeplanet.coalition.protectors.creation_completed_ok: "Gilda registrata con successo. Buona fortuna!"
@@ -440,6 +444,15 @@ safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte 
 
 safeplanet.coalition.protectors.leave_confirm: "Sei sicuro di voler abbandonare i *%s*?"
 safeplanet.coalition.protectors.leave_completed_ok: "Ora non appartieni più a nessun gruppo."
+
+safeplanet.coalition.protectors.add_player_start: "Inserisci l'username dell'esploratore che vuoi aggiungere:"
+safeplanet.coalition.protectors.add_player_confirm: "Sei sicuro di voler aggiungere %s alla tua gilda?"
+safeplanet.coalition.protectors.add_completed_ok: "L'esploratore è stato aggiunto alla tua gilda!"
+
+safeplanet.coalition.protectors.remove_player_start: "Inserisci l'username dell'esploratore che vuoi rimuovere o selezionalo dalla lista qui sotto:"
+safeplanet.coalition.protectors.remove_player_confirm: "Sei sicuro di voler rimuovere %s alla tua gilda?"
+safeplanet.coalition.protectors.remove_completed_ok: "L'esploratore è stato rimosso dalla tua gilda!"
+safeplanet.coalition.protectors.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dalla tua gilda."
 ################################################################################################################
 ################################################################################################################
 # PLANET
@@ -475,7 +488,7 @@ player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 player.guild.members: "Lista Membri:\n"
 player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢*Gilda*.\n\nVisita la 💈*Coalizione* per trovare nuovi gruppi."
 player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Gilda: *%v*\n👑 Fondatore: *%s*"
-player.guild.player_details: "👨🏼‍🚀 *%s* - 🎓 *%v*\n🌏 %s"
+player.guild.player_details: "👨🏼‍🚀 *%s* - 🎓 *%v*\n🌏 %s\n\n"
 
 # Inventory
 inventory.intro: "Cosa vuoi gestire del tuo 🎒*inventario*?"

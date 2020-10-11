@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strings"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -10,11 +8,11 @@ import (
 )
 
 // ====================================
-// SafePlanetProtectorsJoinController
+// SafePlanetProtectorsRemovePlayerController
 // ====================================
-type SafePlanetProtectorsJoinController struct {
+type SafePlanetProtectorsRemovePlayerController struct {
 	Payload struct {
-		Name string
+		Username string
 	}
 	Controller
 }
@@ -22,13 +20,13 @@ type SafePlanetProtectorsJoinController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.protectors.join",
+			Controller: "route.safeplanet.coalition.protectors.remove_player",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
@@ -57,26 +55,23 @@ func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tg
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetProtectorsJoinController) Validator() bool {
+func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Verifico se il nome della gida scelta esiste
+	// Verifico se il player scelto esisteo
 	// ##################################################################################################
 	case 1:
-		var err error
-		var rCheckGuildName *pb.CheckGuildNameResponse
-		if rCheckGuildName, err = config.App.Server.Connection.CheckGuildName(helpers.NewContext(1), &pb.CheckGuildNameRequest{
-			Name: c.Update.Message.Text,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
+		var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+		rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+			Username: c.Update.Message.Text,
+		})
 
-		if rCheckGuildName.GetGuildNameFree() || c.Update.Message.Text == "" {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_name_not_exists")
+		if rGetPlayerByUsername.GetPlayer().GetID() <= 0 || c.Update.Message.Text == "" {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_player_not_exists")
 			return true
 		}
 
-		c.Payload.Name = c.Update.Message.Text
+		c.Payload.Username = c.Update.Message.Text
 	// ##################################################################################################
 	// Verifico Conferma
 	// ##################################################################################################
@@ -92,26 +87,38 @@ func (c *SafePlanetProtectorsJoinController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetProtectorsJoinController) Stage() {
+func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Chiedo al player a quale gilda vuole unirsi
+	// Chiedo al player di indicare quale player vuole aggiungere alla sua gilda
 	// ##################################################################################################
 	case 0:
-		// Recupero lista di gilde
-		var rGetJoinGuildsList *pb.GetJoinGuildsListResponse
-		if rGetJoinGuildsList, err = config.App.Server.Connection.GetJoinGuildsList(helpers.NewContext(1), &pb.GetJoinGuildsListRequest{}); err != nil {
+		// Verifico/Recupero Gilda player
+		var err error
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var protectorsKeyboard [][]tgbotapi.KeyboardButton
-		for _, protectors := range rGetJoinGuildsList.GetGuildsList() {
-			protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					protectors.GetName(),
-				),
-			))
+
+		// Ciclo tutta la lista degli esploratori nella gilda
+		var rGetPlayersGuild *pb.GetPlayersGuildResponse
+		if rGetPlayersGuild, err = config.App.Server.Connection.GetPlayersGuild(helpers.NewContext(1), &pb.GetPlayersGuildRequest{
+			GuildID: rGetPlayerGuild.GetGuild().GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		for _, player := range rGetPlayersGuild.GetPlayers() {
+			if player.GetID() != c.Player.GetID() {
+				protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(player.GetUsername()),
+				))
+			}
 		}
 
 		// Aggiungo torna al menu
@@ -119,7 +126,7 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_start"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_player_start"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -132,10 +139,10 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 
 		c.CurrentState.Stage = 1
 	// ##################################################################################################
-	// Chiedo Conferma al player se vuole entrare nella gilda indicata
+	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_confirm", c.Payload.Name))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_player_confirm", c.Payload.Username))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -155,15 +162,23 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 	// Salvo e associo player alla gilda
 	// ##################################################################################################
 	case 2:
-		_, err = config.App.Server.Connection.JoinGuild(helpers.NewContext(1), &pb.JoinGuildRequest{
-			PlayerID:  c.Player.ID,
-			GuildName: c.Payload.Name,
-		})
+		// Recuero gilda corrente
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
 
-		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
+		if _, err = config.App.Server.Connection.RemovePlayerToGuild(helpers.NewContext(1), &pb.RemovePlayerToGuildRequest{
+			PlayerUsername: c.Payload.Username,
+			GuildID:        rGetPlayerGuild.GetGuild().GetID(),
+		}); err != nil {
+			c.Logger.Warning(err)
+
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -173,7 +188,7 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 			return
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.join_completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_completed_ok"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

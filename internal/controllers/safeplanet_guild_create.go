@@ -150,7 +150,7 @@ func (c *SafePlanetProtectorsCreateController) Stage() {
 			GuildType: c.Payload.Accessibility,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one protectors") {
+		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
