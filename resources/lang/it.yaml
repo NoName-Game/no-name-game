@@ -315,13 +315,13 @@ safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
 
 # Bank
 safeplanet.bank.info: "💰 Benvenuto alla succursale della banca Dipper&Co."
-safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰"
+safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰\n\n📖: Ricorda, depositare in banca ti assicurerà di mettere al sicuro i tuoi risparmi *gratuitamente*, al ritiro invece verrà applicata un commissione del *20%%* sulla transazione."
 safeplanet.bank.deposit: "🔽 Deposito"
 safeplanet.bank.deposit_message: "Quanto desidera depositare?\n\nPuo indicare anche manualmente l'importo che desidera depositare."
 
 safeplanet.bank.withdraws: "🔼 Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desidera prelevare?\n\nPuo indicare anche manualmente l'importo che desidera prelevare."
-safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con *successo*!\n\nI nostri servizi sono sempre a sua disposizione.\nTorni pure quando vuole."
+safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con *successo*!\n\nI nostri servizi sono sempre a sua disposizione."
 safeplanet.bank.transaction_error: "Non è stato possibile completare la transazione! Riprovi più tardi."
 
 # Coalition
@@ -394,7 +394,7 @@ safeplanet.accademy.which: "Quale tipologia di abilità vorresti apprendere?"
 safeplanet.accademy.striker: "⚔️ Attaccante"
 safeplanet.accademy.defender: "🛡 Difensore"
 safeplanet.accademy.explorer: "🚀 Esploratore"
-safeplanet.accademy.done: "Abilità appresa correttamente"
+safeplanet.accademy.done: "Nuova abilità appresa correttamente!"
 safeplanet.accademy.no_more_abilities: "Attulamente non ci sono altre abilità per questa tipologia."
 safeplanet.accademy.not_enough_amulets: "Non hai abbastanza amuleti per apprender l'abilità"
 
