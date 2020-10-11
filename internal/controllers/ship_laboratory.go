@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -22,8 +23,9 @@ import (
 type ShipLaboratoryController struct {
 	Controller
 	Payload struct {
-		Item      *pb.Item         // Item da craftare
-		Resources map[uint32]int32 // Materiali necessari
+		CategoryID uint32
+		ItemID     uint32
+		// Resources  map[uint32]int32 // Materiali necessari
 	}
 }
 
@@ -71,14 +73,22 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 	// In questo stage verifico se mi è stata passata una categoria che esiste realmente
 	// ##################################################################################################
 	case 1:
-		if !helpers.InArray(c.Update.Message.Text, []string{
-			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.medical"),
-			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.categories.ship_support"),
-		}) {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+		var err error
 
-			return true
+		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
+		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
+		if rGetAllItemCategories, err = config.App.Server.Connection.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
+			c.Logger.Panic(err)
 		}
+
+		for _, category := range rGetAllItemCategories.GetItemCategories() {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)) {
+				c.Payload.CategoryID = category.GetID()
+				return false
+			}
+		}
+
+		return true
 
 	// ##################################################################################################
 	// Recupero tutte gli items e ciclo per trovare quello voluta del player
@@ -96,7 +106,7 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 		for _, item := range rGetAllItems.GetItems() {
 			if playerChoiche == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", item.Slug)) {
 				itemExists = true
-				c.Payload.Item = item
+				c.Payload.ItemID = item.GetID()
 			}
 		}
 
@@ -116,13 +126,21 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 			var rLaboratoryCheckHaveResourceForCrafting *pb.LaboratoryCheckHaveResourceForCraftingResponse
 			if rLaboratoryCheckHaveResourceForCrafting, err = config.App.Server.Connection.LaboratoryCheckHaveResourceForCrafting(helpers.NewContext(1), &pb.LaboratoryCheckHaveResourceForCraftingRequest{
 				PlayerID: c.Player.ID,
-				ItemID:   c.Payload.Item.ID,
+				ItemID:   c.Payload.ItemID,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
 
 			if !rLaboratoryCheckHaveResourceForCrafting.GetHaveResources() {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.laboratory.no_resource_to_craft")
+				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(
+							helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+						),
+					),
+				)
+
 				return true
 			}
 
@@ -212,34 +230,13 @@ func (c *ShipLaboratoryController) Stage() {
 		// Avanzo di stage
 		c.CurrentState.Stage = 1
 
-	// In questo stage recuperiamo la lista dei ITEMS, appartenenti alla categoria scelta
-	// che possono essere anche craftati dal player
+	// ##################################################################################################
+	// Recuerpero Lista oggetti craftabili in base alla categoria scelta dal player
+	// ##################################################################################################
 	case 1:
-		// Recupero tutte le categorie degli items e ciclo per trovare quella voluta del player
-		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
-		if rGetAllItemCategories, err = config.App.Server.Connection.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		var chosenCategory *pb.ItemCategory
-		for _, category := range rGetAllItemCategories.GetItemCategories() {
-			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)) {
-				chosenCategory = category
-			}
-		}
-
-		// Lista oggetti craftabili
 		var rGetCraftableItemsByCategoryID *pb.GetCraftableItemsByCategoryIDResponse
 		if rGetCraftableItemsByCategoryID, err = config.App.Server.Connection.GetCraftableItemsByCategoryID(helpers.NewContext(1), &pb.GetCraftableItemsByCategoryIDRequest{
-			CategoryID: chosenCategory.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Recupero tutti gli items del player
-		var rGetPlayerItems *pb.GetPlayerItemsResponse
-		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
-			PlayerID: c.Player.GetID(),
+			CategoryID: c.Payload.CategoryID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -250,11 +247,12 @@ func (c *ShipLaboratoryController) Stage() {
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, item := range rGetCraftableItemsByCategoryID.GetItems() {
 			// Recupero quantità del player per quest'item
-			var playerQuantity int32
-			for _, playerItem := range rGetPlayerItems.GetPlayerInventory() {
-				if playerItem.Item.ID == item.ID {
-					playerQuantity = playerItem.Quantity
-				}
+			var rGetPlayerItemByID *pb.GetPlayerItemByIDResponse
+			if rGetPlayerItemByID, err = config.App.Server.Connection.GetPlayerItemByID(helpers.NewContext(1), &pb.GetPlayerItemByIDRequest{
+				PlayerID: c.Player.ID,
+				ItemID:   item.GetID(),
+			}); err != nil {
+				c.Logger.Panic(err)
 			}
 
 			row := tgbotapi.NewKeyboardButtonRow(
@@ -262,7 +260,7 @@ func (c *ShipLaboratoryController) Stage() {
 					fmt.Sprintf(
 						"%s (%v)",
 						helpers.Trans(c.Player.Language.Slug, "items."+item.Slug),
-						playerQuantity,
+						rGetPlayerItemByID.GetPlayerInventory().GetQuantity(),
 					),
 				),
 			)
@@ -288,15 +286,27 @@ func (c *ShipLaboratoryController) Stage() {
 		// Avanzo di stage
 		c.CurrentState.Stage = 2
 
-	// In questo stage riepilogo le risorse necessarie e
-	// chiedo al conferma al player se continuare il crafting dell'item
+	// ##################################################################################################
+	// Riepilogo risorse necessarie e chiedo conferma
+	// ##################################################################################################
 	case 2:
-		// Inserisco nel payload la recipelist per avere accesso più facile ad essa
-		helpers.UnmarshalPayload(c.Payload.Item.Recipe.RecipeList, &c.Payload.Resources)
+		// Recupero ricetta item scelta
+		var rGetItemByID *pb.GetItemByIDResponse
+		if rGetItemByID, err = config.App.Server.Connection.GetItemByID(helpers.NewContext(1), &pb.GetItemByIDRequest{
+			ItemID: c.Payload.ItemID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero dettaglio ricetta
+		var recipe map[uint32]int32
+		if err = json.Unmarshal([]byte(rGetItemByID.GetItem().GetItemRecipe().GetRecipeList()), &recipe); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		// Genero string contenente le risorse richieste per il craft
 		var itemsRecipeList string
-		for resourceID, value := range c.Payload.Resources {
+		for resourceID, value := range recipe {
 			var rGetResourceByID *pb.GetResourceByIDResponse
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
 				ID: resourceID,
@@ -313,15 +323,22 @@ func (c *ShipLaboratoryController) Stage() {
 				c.Logger.Panic(err)
 			}
 
+			// Risultato verifica quantità
 			haveQuantity := "❌"
 			if rGetPlayerResourceByID.GetPlayerInventory().GetQuantity() >= value {
 				haveQuantity = "✅"
 			}
 
-			itemsRecipeList += fmt.Sprintf("%s *%v* x %s (%s)\n",
+			// Se la risorsa non è stata ancora scoperta mostro ???
+			resourceName := rGetResourceByID.GetResource().GetName()
+			if !rGetResourceByID.GetResource().GetEnabled() {
+				resourceName = "*???*"
+			}
+
+			itemsRecipeList += fmt.Sprintf("%s %v/*%v* x %s (%s)\n",
 				haveQuantity,
-				value,
-				rGetResourceByID.GetResource().GetName(),
+				rGetPlayerResourceByID.GetPlayerInventory().GetQuantity(), value,
+				resourceName,
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
 			)
 		}
@@ -330,10 +347,11 @@ func (c *ShipLaboratoryController) Stage() {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"ship.laboratory.you_need",
-				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
 				itemsRecipeList,
 			),
 		)
+
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -343,7 +361,7 @@ func (c *ShipLaboratoryController) Stage() {
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
 				),
 			),
 		)
@@ -354,13 +372,14 @@ func (c *ShipLaboratoryController) Stage() {
 		// Aggiorno stato
 		c.CurrentState.Stage = 3
 
-	// In questo stage mi aspetto che l'utente abbia confermato e se così fosse
-	// procedo con il rimuovere le risorse associate e notificargli l'attesa per il crafting
+	// ##################################################################################################
+	// Avvio crafting
+	// ##################################################################################################
 	case 3:
 		var rLaboratoryStartCrafting *pb.LaboratoryStartCraftingResponse
 		if rLaboratoryStartCrafting, err = config.App.Server.Connection.LaboratoryStartCrafting(helpers.NewContext(1), &pb.LaboratoryStartCraftingRequest{
 			PlayerID: c.Player.GetID(),
-			ItemID:   c.Payload.Item.ID,
+			ItemID:   c.Payload.ItemID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -384,8 +403,9 @@ func (c *ShipLaboratoryController) Stage() {
 		c.CurrentState.Stage = 4
 		c.ForceBackTo = true
 
-	// In questo stage il player ha completato correttamente il crafting, quindi
-	// proseguo con l'assegnarli l'item e concludo
+	// ##################################################################################################
+	// Concludo Crafting
+	// ##################################################################################################
 	case 4:
 		var rLaboratoryEndCrafting *pb.LaboratoryEndCraftingResponse
 		if rLaboratoryEndCrafting, err = config.App.Server.Connection.LaboratoryEndCrafting(helpers.NewContext(1), &pb.LaboratoryEndCraftingRequest{
