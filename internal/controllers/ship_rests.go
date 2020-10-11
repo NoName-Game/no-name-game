@@ -103,7 +103,9 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 func (c *ShipRestsController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
-	// In questo riporto al player le tempistiche necesarie al riposo
+	// ##################################################################################################
+	// Dettaglio riposo
+	// ##################################################################################################
 	case 0:
 		// Recupero informazioni per il recupero totale delle energie
 		var restsInfo *pb.GetRestsInfoResponse
@@ -153,9 +155,10 @@ func (c *ShipRestsController) Stage() {
 		// Aggiorno stato
 		c.CurrentState.Stage = 1
 
-	// In questo stage avvio effettivamente il riposo
+	// ##################################################################################################
+	// Avvio riposo
+	// ##################################################################################################
 	case 1:
-		// Recupero informazioni per il recupero totale delle energie
 		var rStartPlayerRest *pb.StartPlayerRestResponse
 		if rStartPlayerRest, err = config.App.Server.Connection.StartPlayerRest(helpers.NewContext(1), &pb.StartPlayerRestRequest{
 			PlayerID: c.Player.GetID(),
@@ -187,8 +190,10 @@ func (c *ShipRestsController) Stage() {
 
 		// Aggiorno stato
 		c.CurrentState.Stage = 2
+	// ##################################################################################################
+	// Fine riposo
+	// ##################################################################################################
 	case 2:
-		// Fine riposo
 		var rEndPlayerRest *pb.EndPlayerRestResponse
 		if rEndPlayerRest, err = config.App.Server.Connection.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
 			PlayerID: c.Player.GetID(),

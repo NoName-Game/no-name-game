@@ -188,7 +188,9 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 func (c *ShipLaboratoryController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
-	// In questo stage invio al player le tipologie di crafting possibili
+	// ##################################################################################################
+	// Lista di categorie item craftabili
+	// ##################################################################################################
 	case 0:
 		var rGetAllItemCategories *pb.GetAllItemCategoriesResponse
 		if rGetAllItemCategories, err = config.App.Server.Connection.GetAllItemCategories(helpers.NewContext(1), &pb.GetAllItemCategoriesRequest{}); err != nil {
