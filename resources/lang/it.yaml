@@ -352,7 +352,7 @@ safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coali
 safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\nEsplorando tutti i pianeti al momento conosciuti, aiuterai la coalizione ad espandare i nostri confini.\n\n"
 safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
 safeplanet.coalition.expansion.recap_planets: "\n❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
-safeplanet.coalition.expansion.recap_planets_done: "\n✅ Tutti i 🌏 pianeti, del sistema sono stati esplorati"
+safeplanet.coalition.expansion.recap_planets_done: "\n✅ Tutti i 🌏 pianeti del sistema sono stati esplorati"
 safeplanet.coalition.expansion.recap_titan: "\n❌ Sconfiggere 👁 *%s*, difensore di questo sistema."
 safeplanet.coalition.expansion.recap_titan_done: "\n✅ Il titano 👁 *%s*, è stato sconfitto!"
 safeplanet.coalition.expansion.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTorna a breve per scoprire i progressi."
@@ -362,8 +362,8 @@ safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
 safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
 
 # Research
-safeplanet.coalition.research.info: "Benventuo nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque.\n"
-safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita di 💠*%d* per esser completata. Di rarità %s."
+safeplanet.coalition.research.info: "Benventuo nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque."
+safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita ancora di 💠*%d* (*%s*) per esser completata."
 safeplanet.coalition.research.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare nuove risorse.\nTorna a breve per scoprire i progressi."
 
 # Research - Donations
@@ -383,7 +383,7 @@ safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nI
 safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Bene!* Mi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta.\nDovrei riuscire a termininare la lavorazione alle *%s*, torna più tardi."
-safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine! Spero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
+safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine!\nSpero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
 safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
 safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"

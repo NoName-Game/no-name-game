@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -45,15 +47,16 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 	}
 
 	// Messaggi
-	var message string
-	message = helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.info")
+	introMessage := helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.info")
+
+	var recapMessage string
 	if rGetRecapActiveResearch.GetMissingResourcesCounter() > 0 {
-		message += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.recap",
+		recapMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.recap",
 			rGetRecapActiveResearch.GetMissingResourcesCounter(),
-			rGetRecapActiveResearch.GetResearch().GetRarity().GetName(),
+			rGetRecapActiveResearch.GetResearch().GetRarity().GetSlug(),
 		)
 	} else {
-		message += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.done")
+		recapMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.research.done")
 	}
 
 	// Keyboard
@@ -69,7 +72,7 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 	))
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, message)
+	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s", introMessage, recapMessage))
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		ResizeKeyboard: true,

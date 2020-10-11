@@ -364,15 +364,15 @@ func (c *PlayerEquipmentController) Stage() {
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
-			if rGetPlayerArmorEquippedByCategoryID, err = config.App.Server.Connection.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+			rGetPlayerArmorEquippedByCategoryID, _ = config.App.Server.Connection.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorByName.GetArmor().GetArmorCategory().GetID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+			})
 
 			// Preparo messaggio di conferma
 			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rGetArmorByName.GetArmor().GetName())
+
+			// Se ha un'armaatura equipaggiata chiedo switch
 			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
 				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_armor",
 					rGetArmorByName.GetArmor().GetName(),
@@ -396,14 +396,14 @@ func (c *PlayerEquipmentController) Stage() {
 
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
-			if rGetPlayerWeaponEquipped, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+			rGetPlayerWeaponEquipped, _ = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+			})
 
 			// Preparo messaggio di conferma
 			confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm", rGetWeaponByName.GetWeapon().GetName())
+
+			// Se ha un'arma equipaggiata chiedo switch
 			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
 				confirmMessage = helpers.Trans(c.Player.Language.Slug, "inventory.equip.confirm_weapon",
 					rGetWeaponByName.GetWeapon().GetName(),
@@ -464,12 +464,10 @@ func (c *PlayerEquipmentController) Stage() {
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
-			if rGetPlayerArmorEquippedByCategoryID, err = config.App.Server.Connection.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
+			rGetPlayerArmorEquippedByCategoryID, _ = config.App.Server.Connection.GetPlayerArmorEquippedByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorEquippedByCategoryIDRequest{
 				PlayerID:   c.Player.GetID(),
 				CategoryID: rGetArmorCategoryBySlugRequest.GetArmorCategory().GetID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+			})
 
 			// Rimuovo equipaggiamento attuale
 			if rGetPlayerArmorEquippedByCategoryID.GetArmor().GetID() > 0 {
@@ -493,11 +491,9 @@ func (c *PlayerEquipmentController) Stage() {
 		case "weapons":
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
-			if rGetPlayerWeaponEquipped, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
+			rGetPlayerWeaponEquipped, _ = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
 				PlayerID: c.Player.GetID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+			})
 
 			// Rimovo arma attualmente equipaggiata
 			if rGetPlayerWeaponEquipped.GetWeapon().GetID() > 0 {
