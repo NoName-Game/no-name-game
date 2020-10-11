@@ -181,7 +181,10 @@ items.refined_fuel: "Carburante raffinato"
 items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
 items.final_fuel: "Carburante finale"
 items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
-
+items.basic_repair_component: "Componente riparatore base"
+items.description.basic_repair_component: "Componente buona qualità, permetterà di riparare immediatamente la tua nave di *%v*"
+items.advanced_repair_component: "Componente riparatore avanzato"
+items.description.advanced_repair_component: "Componente di ottima qualità, permetterà di riparare immediatamente la tua nave di *%v*"
 
 ################################################################################################################
 ################################################################################################################

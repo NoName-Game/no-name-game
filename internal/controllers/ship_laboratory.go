@@ -229,8 +229,8 @@ func (c *ShipLaboratoryController) Stage() {
 		}
 
 		// Lista oggetti craftabili
-		var rGetItemByCategoryID *pb.GetItemsByCategoryIDResponse
-		if rGetItemByCategoryID, err = config.App.Server.Connection.GetItemsByCategoryID(helpers.NewContext(1), &pb.GetItemsByCategoryIDRequest{
+		var rGetCraftableItemsByCategoryID *pb.GetCraftableItemsByCategoryIDResponse
+		if rGetCraftableItemsByCategoryID, err = config.App.Server.Connection.GetCraftableItemsByCategoryID(helpers.NewContext(1), &pb.GetCraftableItemsByCategoryIDRequest{
 			CategoryID: chosenCategory.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
@@ -248,7 +248,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.laboratory.what"))
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
-		for _, item := range rGetItemByCategoryID.GetItems() {
+		for _, item := range rGetCraftableItemsByCategoryID.GetItems() {
 			// Recupero quantità del player per quest'item
 			var playerQuantity int32
 			for _, playerItem := range rGetPlayerItems.GetPlayerInventory() {
@@ -304,7 +304,22 @@ func (c *ShipLaboratoryController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemsRecipeList += fmt.Sprintf("- *%v* x %s (%s)\n",
+			// Verifico se il player possiede il quantitativo e la risorsa richiesta
+			var rGetPlayerResourceByID *pb.GetPlayerResourceByIDResponse
+			if rGetPlayerResourceByID, err = config.App.Server.Connection.GetPlayerResourceByID(helpers.NewContext(1), &pb.GetPlayerResourceByIDRequest{
+				PlayerID:   c.Player.ID,
+				ResourceID: rGetResourceByID.GetResource().GetID(),
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			haveQuantity := "❌"
+			if rGetPlayerResourceByID.GetPlayerInventory().GetQuantity() >= value {
+				haveQuantity = "✅"
+			}
+
+			itemsRecipeList += fmt.Sprintf("%s *%v* x %s (%s)\n",
+				haveQuantity,
 				value,
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
@@ -328,7 +343,7 @@ func (c *ShipLaboratoryController) Stage() {
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
 				),
 			),
 		)
