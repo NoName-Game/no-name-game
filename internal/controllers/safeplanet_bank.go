@@ -88,25 +88,6 @@ func (c *SafePlanetBankController) Stage() {
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
-		var infoBank string
-		infoBank = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.info")
-
-		msg := helpers.NewMessage(c.Player.ChatID, infoBank)
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
-			),
-		)
-
-		msg.ParseMode = "HTML"
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-
 		// Bank
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
 		if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
@@ -125,15 +106,25 @@ func (c *SafePlanetBankController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg = helpers.NewMessage(c.Player.ChatID,
+		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s",
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.info"),
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"safeplanet.bank.account_details",
 				rGetPlayerEconomyMoney.GetValue(),
 				rGetPlayerEconomy.GetValue(),
 			),
-		)
+		))
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			),
+		)
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
