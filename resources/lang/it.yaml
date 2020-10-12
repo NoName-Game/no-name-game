@@ -301,6 +301,7 @@ ship.rests.validator.need_to_wakeup: "Stai dormendo, dovresti svegliarti prima d
 # Laboratory
 ship.laboratory.categories.medical: "💊 Curative"
 ship.laboratory.categories.ship_support: "⚙️ Supporto nave"
+ship.laboratory.categories.stuff: "🔩 Altro"
 ship.laboratory.info: "📖: Nel laboratorio della tua nave puoi realizzare tramite l'impiego di alcune risorse degli oggetti, necessari per affrontare il tuo viaggio."
 ship.laboratory.type: "Quale categoria di oggetti ti interessa realizzare?"
 ship.laboratory.what: "Quale oggetto vorresti realizzare?"
