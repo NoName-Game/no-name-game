@@ -62,6 +62,8 @@ route.conqueror: "🚩 Conquistatore"
 # Safe planet
 route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
+route.safeplanet.crafter.create: "⚒️ Realizza"
+route.safeplanet.crafter.repair: "✨ Ripara"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.accademy: "⛩ Accademia"
 route.safeplanet.coalition: "💈 Coalizione"
@@ -386,8 +388,12 @@ safeplanet.coalition.research.donation.completed: "La tua donazione è stata reg
 safeplanet.coalition.research.donation.not_enough_resource: "Non hai abbastanza risorse per poter procedere alla donazione."
 
 # Crafter
+safeplanet.crafting.intro: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa dobbiamo fare oggi?"
+safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
+
+# Crafter - Create
 safeplanet.crafting.start: "⚒️ Inizia!"
-safeplanet.crafting.what: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa vorresti realizzare?"
+safeplanet.crafting.what: "Cosa vorresti realizzare?"
 safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
 safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
 safeplanet.crafting.add: "Aggiungi"
@@ -398,7 +404,12 @@ safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta.\n
 safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine!\nSpero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
 safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
-safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
+
+
+# Crafter - Repair
+safeplanet.crafting.repair.what: "Qualte tra le tua armi danneggiate vorresti riparare?"
+safeplanet.crafting.repair.confirm: "Posso ripararti *%s* immediatamente!\nSei sicuro di vole riparare al costo di 💰*%v*?"
+safeplanet.crafting.repair.completed: "Ecco a te ora è come nuova, fanne buon uso!"
 
 # Accademy
 safeplanet.accademy.info: "Benvenuto in ⛩*Accademia* esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 *Amuleti* davvero importanti per noi..."
