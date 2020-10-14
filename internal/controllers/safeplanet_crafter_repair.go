@@ -107,9 +107,12 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 		})
 
 		for _, weapon := range rGetPlayerWeapons.GetWeapons() {
-			weaponsKeyboard = append(weaponsKeyboard, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(weapon.GetName()),
-			))
+			// Mostro solo armi danneggiate
+			if weapon.Durability < weapon.DurabilityCap {
+				weaponsKeyboard = append(weaponsKeyboard, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(weapon.GetName()),
+				))
+			}
 		}
 
 		weaponsKeyboard = append(weaponsKeyboard, tgbotapi.NewKeyboardButtonRow(
