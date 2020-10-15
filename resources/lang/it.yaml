@@ -31,6 +31,21 @@ armor: "🛡 Armatura"
 armors: "🛡 Armature"
 weapon: "🗡 Arma"
 weapons: "🗡 Armi"
+
+# Ship Category
+ship.category.light: "Leggera"
+ship.category.normal: "Normale"
+ship.category.heavy: "Pesante"
+
+# Rarities
+rarity.VC: "Molto comune"
+rarity.C: "Comune"
+rarity.U: "Non Comune"
+rarity.R: "Raro"
+rarity.UR: "Ultra Raro"
+rarity.L: "Leggendario"
+rarity.X: "Sperimentale"
+
 ################################################################################################################
 ################################################################################################################
 # ROUTES
@@ -49,7 +64,6 @@ route.hunting: "⚔️ Caccia"
 route.ship: "🚀 Nave"
 route.ship.travel: "🔭 Viaggio"
 route.ship.warehouse: "Deposito"
-route.ship.repairs: "🔧 Ripara nave"
 route.ship.rests: "💤 Riposa"
 route.ship.laboratory: "🧪 Laboratorio"
 route.menu: "BoardSystem"
@@ -63,9 +77,13 @@ route.conqueror: "🚩 Conquistatore"
 route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.crafter.create: "⚒️ Realizza"
-route.safeplanet.crafter.repair: "✨ Ripara"
+route.safeplanet.crafter.repair: "✨ Ripara Arma"
 route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.accademy: "⛩ Accademia"
+route.safeplanet.hangar: "🏗 Hangar"
+route.safeplanet.hangar.ship_list: "🚀 Il tuo deposito"
+route.safeplanet.hangar.repair: "✨ Ripara Nave"
+route.safeplanet.hangar.create: "💸 Compra"
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.coalition.mission: "🏢 Centro Missioni"
 route.safeplanet.coalition.titan: "👁 Titani"
@@ -275,21 +293,6 @@ ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il vi
 ship.travel.complete_diamond: "💎 Concludi Rapidatamente 💎"
 ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
-# Repairs
-ship.repairs.info: "Vuoi riparare la tua nave?\n\n"
-ship.repairs.partial: "Riparazione *Parziale*:"
-ship.repairs.full: "Riparazione *Completa*:"
-ship.repairs.time: "⏱ Tempo necessario: *%v* (minuti)"
-ship.repairs.quantity_resources: "💠 Risorse necessarie: *%v*"
-ship.repairs.used_resources: "💠 Risorse impiegate per la riparazione:\n"
-ship.repairs.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave."
-ship.repairs.dont_need: "La tua nave non necessita di riparazioni."
-ship.repairs.start_partial: "Riparazione parziale"
-ship.repairs.start_full: "Riparazione completa"
-ship.repairs.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
-ship.repairs.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
-ship.repairs.reparing.finish: "La tua nave è stata riparata con successo."
-
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare un po' di enerigie?"
 ship.rests.time: "\n\n⏱: Necessari *%v* minuti al recupero *totale* delle forze."
@@ -337,6 +340,26 @@ safeplanet.dealer.quantity: "Quante quantità ne vorresti acquistare?"
 safeplanet.dealer.confirm: "Perfetto! Allora dimmi, sei sicuro di voler comprare *%v* quantità di *%s* al costo di 💰*%v*?"
 safeplanet.dealer.completed: "Ed ecco a te! Buona giornata esploratore, torna pure quando vuoi!"
 safeplanet.dealer.not_enough_money: "Sembra tu non abbia abbastanza soldi per continuare."
+
+# Hangar
+safeplanet.hangar.intro: "Benvenuto nell'hangar, cosa vuoi fare?"
+
+safeplanet.hangar.info: "Vuoi riparare la tua nave?\n\n"
+safeplanet.hangar.partial: "Riparazione *Parziale*:"
+safeplanet.hangar.full: "Riparazione *Completa*:"
+safeplanet.hangar.time: "⏱ Tempo necessario: *%v* (minuti)"
+safeplanet.hangar.quantity_resources: "💠 Risorse necessarie: *%v*"
+safeplanet.hangar.used_resources: "💠 Risorse impiegate per la riparazione:\n"
+safeplanet.hangar.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave."
+safeplanet.hangar.dont_need: "La tua nave non necessita di riparazioni."
+safeplanet.hangar.start_partial: "Riparazione parziale"
+safeplanet.hangar.start_full: "Riparazione completa"
+safeplanet.hangar.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
+safeplanet.hangar.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
+safeplanet.hangar.reparing.finish: "La tua nave è stata riparata con successo."
+
+safeplanet.hangar.create.intro: "Posso mettermi al lavoro per te e provare a relizzare la nave che desideri"
+safeplanet.hangar.create.chose_rarity: "Quale rarità?"
 
 # Coalition
 safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"

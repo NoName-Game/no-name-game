@@ -14,9 +14,9 @@ import (
 )
 
 // ====================================
-// ShipRepairsController
+// SafePlanetHangarRepairController
 // ====================================
-type ShipRepairsController struct {
+type SafePlanetHangarRepairController struct {
 	Controller
 	Payload struct {
 		ShipID     uint32
@@ -27,18 +27,18 @@ type ShipRepairsController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetHangarRepairController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.ship.repairs",
+			Controller: "route.safeplanet.hangar.repair",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &ShipController{},
+				To:        &SafePlanetHangarController{},
 				FromStage: 1,
 			},
 		},
@@ -62,7 +62,7 @@ func (c *ShipRepairsController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 // Validator
 // ====================================
-func (c *ShipRepairsController) Validator() (hasErrors bool) {
+func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se la nave attualmente equipaggiata dal player necessita di riparazioni
@@ -85,17 +85,17 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 		}
 
 		if !rGetShipRepairInfo.GetNeedRepairs() {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.repairs.dont_need")
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.dont_need")
 			return true
 		}
 	// ##################################################################################################
 	// Verifico quale tipologia di riparazione vuuole effettuare il player
 	// ##################################################################################################
 	case 1:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_partial") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_partial") {
 			c.Payload.RepairType = pb.StartShipRepairRequest_PARTIAL
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_full") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_full") {
 			c.Payload.RepairType = pb.StartShipRepairRequest_FULL
 			return false
 		}
@@ -132,7 +132,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 
 			c.Validation.Message = helpers.Trans(
 				c.Player.Language.Slug,
-				"ship.repairs.wait",
+				"safeplanet.hangar.wait",
 				finishAt.Format("15:04:05"),
 			)
 
@@ -146,7 +146,7 @@ func (c *ShipRepairsController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *ShipRepairsController) Stage() {
+func (c *SafePlanetHangarRepairController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// In questo riporto al player le risorse e tempistiche necessarie alla riparazione della nave
@@ -168,22 +168,22 @@ func (c *ShipRepairsController) Stage() {
 		}
 
 		var shipRecap string
-		shipRecap = helpers.Trans(c.Player.Language.Slug, "ship.repairs.info")
+		shipRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.info")
 		if rGetShipRepairInfo.GetNeedRepairs() {
 			// Mostro Partial
 			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ *%v%%* (%s)\n%s\n%s\n\n",
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.partial"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.partial"),
 				rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), rGetShipRepairInfo.GetPartial().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.time", rGetShipRepairInfo.GetPartial().GetRepairTime()),
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.quantity_resources", rGetShipRepairInfo.GetPartial().GetQuantityResources()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetPartial().GetRepairTime()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetPartial().GetQuantityResources()),
 			)
 
 			// Mostro Full
 			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ *100%%* (%s)\n%s\n%s ",
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.full"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.full"),
 				rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.time", rGetShipRepairInfo.GetFull().GetRepairTime()),
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.quantity_resources", rGetShipRepairInfo.GetFull().GetQuantityResources()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetFull().GetRepairTime()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetFull().GetQuantityResources()),
 			)
 		}
 
@@ -192,8 +192,8 @@ func (c *ShipRepairsController) Stage() {
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_partial")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.repairs.start_full")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_partial")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_full")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
@@ -218,7 +218,7 @@ func (c *ShipRepairsController) Stage() {
 		if err != nil && strings.Contains(err.Error(), "not enough resource quantities") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.not_enough_resource"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.not_enough_resource"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -228,7 +228,7 @@ func (c *ShipRepairsController) Stage() {
 
 		// Se tutto ok mostro le risorse che vengono consumate per la riparazione
 		var recapResourceUsed string
-		recapResourceUsed = helpers.Trans(c.Player.Language.Slug, "ship.repairs.used_resources")
+		recapResourceUsed = helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.used_resources")
 		for _, resourceUsed := range rStartShipRepair.GetStartShipRepair() {
 			var rGetResourceByID *pb.GetResourceByIDResponse
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
@@ -253,7 +253,7 @@ func (c *ShipRepairsController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s \n\n%s",
-				helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing", finishAt.Format("15:04:05")),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.reparing", finishAt.Format("15:04:05")),
 				recapResourceUsed,
 			),
 		)
@@ -275,7 +275,7 @@ func (c *ShipRepairsController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.repairs.reparing.finish"),
+			helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.reparing.finish"),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
