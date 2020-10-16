@@ -44,7 +44,7 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.hangar.repair")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.hangar.buy")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.hangar.create")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),

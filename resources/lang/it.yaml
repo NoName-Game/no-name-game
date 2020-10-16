@@ -46,6 +46,8 @@ rarity.UR: "Ultra Raro"
 rarity.L: "Leggendario"
 rarity.X: "Sperimentale"
 
+complete_with_diamond: "💎 Concludi Rapidatamente 💎"
+
 ################################################################################################################
 ################################################################################################################
 # ROUTES
@@ -267,6 +269,7 @@ cron.route.exploration_alert: "Sei rientrato dall'esplorazione, scopri quali ris
 cron.route.ship.laboratory_alert: "La realizzazione del tuo craft è stata ultimata!"
 cron.route.hunting_alert: "Informazioni ritornate con successo!"
 cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
+cron.route.safeplanet.hangar.create_alert: "Crezione nave completata"
 cron.route.ship.travel_alert: "Nuovo pianeta raggiunto!"
 cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 cron.route.death: "Hai recuperato le energie!"
@@ -290,7 +293,6 @@ ship.travel.exploring: "🚀 Motori accesi, buon viaggio!\nIl tuo arrivo è prev
 ship.travel.end: "Hai raggiunto il nuovo pianeta, qui di seguito i dettagli del viaggio."
 ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
-ship.travel.complete_diamond: "💎 Concludi Rapidatamente 💎"
 ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
 # Rests
@@ -360,6 +362,10 @@ safeplanet.hangar.reparing.finish: "La tua nave è stata riparata con successo."
 
 safeplanet.hangar.create.intro: "Posso mettermi al lavoro per te e provare a relizzare la nave che desideri"
 safeplanet.hangar.create.chose_rarity: "Quale rarità?"
+safeplanet.hangar.create.wait: "Stiamo lavorando ancora alla tua nave, dovremmo concludere i lavori per le *%s*\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
+safeplanet.hangar.create.start: "Richiesta presa in carico *%s*"
+safeplanet.hangar.create.end: "Fine lavorazione: %s"
+safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
 # Coalition
 safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"

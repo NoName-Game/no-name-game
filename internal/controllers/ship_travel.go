@@ -111,7 +111,7 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipTravel.GetFinishTraveling() {
-			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond") {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "complete_with_diamond") {
 				c.Payload.CompleteWithDiamond = true
 				return false
 			}
@@ -142,7 +142,7 @@ func (c *ShipTravelController) Validator() (hasErrors bool) {
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond"),
+						helpers.Trans(c.Player.Language.Slug, "complete_with_diamond"),
 					),
 				),
 				tgbotapi.NewKeyboardButtonRow(
