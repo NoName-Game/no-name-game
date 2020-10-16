@@ -43,6 +43,7 @@ var routes = map[string]reflect.Type{
 	"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 
 	// Safe Planet
+	"route.safeplanet.coalition.daily_reward":             reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),
 	"route.safeplanet.bank":                               reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
 	"route.safeplanet.crafter":                            reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
 	"route.safeplanet.crafter.create":                     reflect.TypeOf((*controllers.SafePlanetCrafterCreateController)(nil)).Elem(),

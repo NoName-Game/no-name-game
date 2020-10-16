@@ -76,6 +76,7 @@ route.planet: "🌍 Pianeta"
 route.conqueror: "🚩 Conquistatore"
 
 # Safe planet
+route.safeplanet.coalition.daily_reward: "📦 Ricompensa giornaliera"
 route.safeplanet.bank: "🏦 Banca"
 route.safeplanet.crafter: "⚒️ Armaiolo"
 route.safeplanet.crafter.create: "⚒️ Realizza"
@@ -375,6 +376,10 @@ safeplanet.hangar.ships.equip_ok: "Nave equipaggiata"
 
 # Coalition
 safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
+
+# Daily Reward
+safeplanet.coalition.daily_reward: "Ecco la tua ricompensa giornaliera:\n🏵 *%v* \n💰 *%v*\n💎 *%v*"
+safeplanet.coalition.daily_reward_already_taken: "Sembra tu abbia già recuperato la tua ricompensa giornaliera, torna domani."
 
 # Mission
 safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
