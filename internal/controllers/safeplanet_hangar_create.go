@@ -102,9 +102,16 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 		return true
 
 	// ##################################################################################################
-	// Verifico completamento costruzione nave
+	// Verifico conferma acquisto
 	// ##################################################################################################
 	case 3:
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return true
+		}
+	// ##################################################################################################
+	// Verifico completamento costruzione nave
+	// ##################################################################################################
+	case 4:
 		var err error
 		var rCheckCreateShip *pb.CheckCreateShipResponse
 		if rCheckCreateShip, err = config.App.Server.Connection.CheckCreateShip(helpers.NewContext(1), &pb.CheckCreateShipRequest{
@@ -225,7 +232,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Invio messaggio
@@ -244,9 +251,60 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		c.CurrentState.Stage = 2
 
 	// ##################################################################################################
-	// Avvio costruzione nave
+	// Chiedo conferma
 	// ##################################################################################################
 	case 2:
+		// Recupero informazioni costruzione
+		var rGetCreateShipInfo *pb.GetCreateShipInfoResponse
+		if rGetCreateShipInfo, err = config.App.Server.Connection.GetCreateShipInfo(helpers.NewContext(1), &pb.GetCreateShipInfoRequest{
+			RarityID:   c.Payload.RarityID,
+			CategoryID: c.Payload.CategoryID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero dettagli rarità richiesta
+		var rGetRarityByID *pb.GetRarityByIDResponse
+		if rGetRarityByID, err = config.App.Server.Connection.GetRarityByID(helpers.NewContext(1), &pb.GetRarityByIDRequest{
+			RarityID: c.Payload.RarityID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero dettagli categoria richiesta
+		var rGetShipCategoryByID *pb.GetShipCategoryByIDResponse
+		if rGetShipCategoryByID, err = config.App.Server.Connection.GetShipCategoryByID(helpers.NewContext(1), &pb.GetShipCategoryByIDRequest{
+			ShipCategoryID: c.Payload.CategoryID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.confirm",
+			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", rGetShipCategoryByID.GetShipCategory().GetSlug())), // rarity
+			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rGetRarityByID.GetRarity().GetSlug())),                    // rarity
+			rGetCreateShipInfo.GetPrice(),
+		))
+		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			),
+		)
+
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Aggiorno stato
+		c.CurrentState.Stage = 3
+
+	// ##################################################################################################
+	// Avvio costruzione nave
+	// ##################################################################################################
+	case 3:
 		var rStartCreateShip *pb.StartCreateShipResponse
 		if rStartCreateShip, err = config.App.Server.Connection.StartCreateShip(helpers.NewContext(1), &pb.StartCreateShipRequest{
 			RarityID:   c.Payload.RarityID,
@@ -272,13 +330,13 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 3
+		c.CurrentState.Stage = 4
 		c.ForceBackTo = true
 
 	// ##################################################################################################
 	// Fine costruzione nave
 	// ##################################################################################################
-	case 3:
+	case 4:
 		var ship *pb.Ship
 		// Verifico se ha gemmato
 		if c.Payload.CompleteWithDiamond {
