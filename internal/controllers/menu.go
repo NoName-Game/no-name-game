@@ -69,15 +69,7 @@ func (c *MenuController) Stage() {
 	//
 }
 
-// GetRecap
-// BoardSystem v0.1
-// 🌏 Nomepianeta
-// 👨🏼‍🚀 Casteponters
-// ♥️ life/max-life
-// 💰 XXXX 💎 XXXX
-//
-// ⏱ Task in corso:
-// - LIST
+// GetRecap - Recap principale
 func (c *MenuController) GetRecap() (message string) {
 	var err error
 
@@ -177,7 +169,7 @@ func (c *MenuController) GetPlayerLife() (life string) {
 		status = "☠️"
 	}
 
-	life = fmt.Sprintf("%s️ %v/%v HP", status, c.Player.GetLifePoint(), 100)
+	life = fmt.Sprintf("%s️ %v/%v HP", status, c.Player.GetLifePoint(), c.Player.GetLevel().GetPlayerMaxLife())
 
 	return
 }
