@@ -595,7 +595,7 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 			enemy.LifeMax,
 			c.Player.Username,
 			c.Player.GetLifePoint(),
-			100+c.Player.GetLevel()*10,
+			100+c.Player.GetLevel().GetID()*10,
 			helpers.Trans(c.Player.Language.Slug, bodyParts[c.Payload.BodySelection]), // Parte del corpo selezionata
 			weaponEquipped, weaponDurability, // Arma equipaggiata e durabilità
 		),

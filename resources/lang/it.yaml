@@ -541,7 +541,7 @@ titanplanet.tackle.no_action: "Continua!"
 ################################################################################################################
 ################################################################################################################
 # PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/100 HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
 player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 
