@@ -31,13 +31,13 @@ var routes = map[string]reflect.Type{
 	"route.ship.laboratory": reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
 
 	// Player
-	"route.player":              reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
-	"route.player.guild":        reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
-	"route.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
-	"route.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
-	"route.inventory.items":     reflect.TypeOf((*controllers.PlayerInventoryItemController)(nil)).Elem(),
-	"route.inventory.equip":     reflect.TypeOf((*controllers.PlayerEquipmentController)(nil)).Elem(),
-	"route.banned":              reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
+	"route.player":                     reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
+	"route.player.guild":               reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
+	"route.player.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
+	"route.player.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
+	"route.player.inventory.items":     reflect.TypeOf((*controllers.PlayerInventoryItemController)(nil)).Elem(),
+	"route.player.inventory.equip":     reflect.TypeOf((*controllers.PlayerEquipmentController)(nil)).Elem(),
+	"route.banned":                     reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
 
 	// Planet
 	"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),

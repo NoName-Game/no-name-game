@@ -55,12 +55,13 @@ route.setup: "⚙️ Setup"
 route.tutorial: "📖 Tutorial"
 route.tutorial.continue: "📖 Continua tutorial"
 route.exploration: "⭕️ Esplorazione"
-route.inventory: "🎒 Inventario"
-route.inventory.resources: "💠 Risorse"
-route.inventory.items: "🔩 Oggetti"
-route.inventory.equip: "🛡 Equipaggiamento"
 route.player: "👨🏼‍🚀 Player"
 route.player.guild: "💢 Gilda"
+route.player.inventory: "🎒 Inventario"
+route.player.inventory.resources: "💠 Risorse"
+route.player.inventory.items: "🔩 Oggetti"
+route.player.inventory.equip: "🛡 Equipaggiamento"
+route.player.achievements: "🎯 Achievements"
 route.ability: "🧬 Abilità"
 route.hunting: "⚔️ Caccia"
 route.ship: "🚀 Nave"
@@ -262,18 +263,20 @@ route.tutorial.first_safeplanet: "💭: Raggiungi l'orbita del pianeta definito 
 
 route.tutorial.error.function_not_completed: "💭: Per continuare il tutorial devi prima portare a termine l'attività in corso."
 route.tutorial.completed: "💭: Vai avanti nel tuo percorso con molte domande, ma di sicuro riuscirai a trovare delle risposte."
-route.tutorial.completed.reward: "🎉 Complimenti esploratore, hai completato il tutorial con successo!\n Ecco la tua ricompensa:\n -💰*%d*\n- 🏵*%d* Exp"
 ################################################################################################################
 ################################################################################################################
 # NOTIFICATIONS
-cron.route.exploration_alert: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
-cron.route.ship.laboratory_alert: "La realizzazione del tuo craft è stata ultimata!"
-cron.route.hunting_alert: "Informazioni ritornate con successo!"
-cron.route.ship.repairs_alert: "Riparazione della nave ultimata!"
-cron.route.safeplanet.hangar.create_alert: "Crezione nave completata"
-cron.route.ship.travel_alert: "Nuovo pianeta raggiunto!"
-cron.route.safeplanet.crafter_alert: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
-cron.route.death: "Hai recuperato le energie!"
+notification.activity.route.exploration: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
+notification.activity.route.ship.laboratory: "La realizzazione del tuo craft è stata ultimata!"
+notification.activity.route.hunting: "Informazioni ritornate con successo!"
+notification.activity.route.ship.repairs: "Riparazione della nave ultimata!"
+notification.activity.route.safeplanet.hangar.create: "Crezione nave completata"
+notification.activity.route.ship.travel: "Nuovo pianeta raggiunto!"
+notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
+notification.activity.route.death: "Hai recuperato le energie!"
+
+notification.achievement.message: "🎯 Achievement *completato*!\nHai portato a termine *%s* ottenendo così:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
+achievement.tutorial: "Tutorial"
 ################################################################################################################
 ################################################################################################################
 # SHIP

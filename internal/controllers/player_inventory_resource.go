@@ -30,7 +30,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.inventory.resources",
+			Controller: "route.player.inventory.resources",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{

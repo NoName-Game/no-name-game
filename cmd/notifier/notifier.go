@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -32,15 +33,26 @@ func main() {
 
 		logrus.Info("[*] Start new loop...")
 
-		// Recupero tutto gli stati da notificare
+		// Recupero tutto le attività da notificare
 		var rGetPlayerActivityToNotify *pb.GetPlayerActivityToNotifyResponse
 		if rGetPlayerActivityToNotify, err = config.App.Server.Connection.GetPlayerActivityToNotify(helpers.NewContext(1), &pb.GetPlayerActivityToNotifyRequest{}); err != nil {
 			logrus.Panic(err)
 		}
 
-		logrus.Infof("[*] Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
+		logrus.Infof("[*] Player Activity Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
 		for _, activity := range rGetPlayerActivityToNotify.GetPlayerActivities() {
-			go handleNotification(activity)
+			go handleActivityNotification(activity)
+		}
+
+		// Recupero tutti gli achievement da notificare
+		var rGetPlayerAchievementToNotify *pb.GetPlayerAchievementToNotifyResponse
+		if rGetPlayerAchievementToNotify, err = config.App.Server.Connection.GetPlayerAchievementToNotify(helpers.NewContext(1), &pb.GetPlayerAchievementToNotifyRequest{}); err != nil {
+			logrus.Panic(err)
+		}
+
+		logrus.Infof("[*] Player Achievement Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
+		for _, playerAchievement := range rGetPlayerAchievementToNotify.GetPlayerAchievements() {
+			go handleAchievementNotification(playerAchievement)
 		}
 
 		// Sleep for minute
@@ -48,9 +60,49 @@ func main() {
 	}
 }
 
-func handleNotification(activity *pb.PlayerActivity) {
+func handleAchievementNotification(playerAchievement *pb.PlayerAchievement) {
 	var err error
-	logrus.Infof("[*] Handle Activity: %d", activity.ID)
+	logrus.Infof("[*] Handle Achievement Notification: %d", playerAchievement.ID)
+
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Info("[*] Achievement %d recovered", playerAchievement.ID)
+		}
+	}()
+
+	// Recupero testo da notificare
+	// text, _ := config.App.Localization.GetTranslation("notificaton.achievement.message", playerAchievement.GetPlayer().GetLanguage().GetSlug(),
+	// 	helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", playerAchievement.GetAchievement().GetSlug())), // Achievement
+	// 	playerAchievement.GetAchievement().GetGoldReward(),
+	// 	playerAchievement.GetAchievement().GetDiamondReward(),
+	// 	playerAchievement.GetAchievement().GetExperienceReward(),
+	// 	)
+
+	text := helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), "notification.achievement.message",
+		helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", playerAchievement.GetAchievement().GetSlug())), // Achievement
+		playerAchievement.GetAchievement().GetGoldReward(),
+		playerAchievement.GetAchievement().GetDiamondReward(),
+		playerAchievement.GetAchievement().GetExperienceReward(),
+	)
+
+	// Invio notifica
+	msg := helpers.NewMessage(playerAchievement.GetPlayer().GetChatID(), text)
+	msg.ParseMode = "markdown"
+	if _, err = helpers.SendMessage(msg); err != nil {
+		logrus.Panic(err)
+	}
+
+	// Aggiorno lo stato levando la notifica
+	if _, err = config.App.Server.Connection.SetPlayerAchievementNotified(helpers.NewContext(1), &pb.SetPlayerAchievementNotifiedRequest{
+		AchievementID: playerAchievement.ID,
+	}); err != nil {
+		logrus.Panic(err)
+	}
+}
+
+func handleActivityNotification(activity *pb.PlayerActivity) {
+	var err error
+	logrus.Infof("[*] Handle Activity Activity: %d", activity.ID)
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -66,14 +118,10 @@ func handleNotification(activity *pb.PlayerActivity) {
 	}
 
 	// Recupero testo da notificare, ogni controller ha la propria notifica
-	text, _ := config.App.Localization.GetTranslation("cron."+activity.Controller+"_alert", rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), nil)
+	text := helpers.Trans(rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("notification.activity.%s", activity.Controller))
 
-	// Invio notifica
 	msg := helpers.NewMessage(rGetPlayerByID.GetPlayer().GetChatID(), text)
-
-	// Al momento non associo nessun bottone potrebbe andare in conflitto con la mappa
-	// continueButton, _ := services.GetTranslation(state.Function, player.Language.Slug, nil)
-	// msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(continueButton)))
+	msg.ParseMode = "markdown"
 	if _, err = helpers.SendMessage(msg); err != nil {
 		logrus.Panic(err)
 	}

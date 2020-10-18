@@ -33,7 +33,7 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.inventory.equip",
+			Controller: "route.player.inventory.equip",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{

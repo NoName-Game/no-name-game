@@ -22,7 +22,7 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.inventory",
+			Controller: "route.player.inventory",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
@@ -38,8 +38,8 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.resources")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.inventory.items")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory.resources")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory.items")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),

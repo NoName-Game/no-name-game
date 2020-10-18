@@ -35,7 +35,7 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.inventory.items",
+			Controller: "route.player.inventory.items",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{

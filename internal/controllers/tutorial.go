@@ -263,28 +263,17 @@ func (c *TutorialController) Stage() {
 	// ============================================================================================================
 	// Tutorial completato
 	case 7:
-		if _, err = helpers.SendMessage(helpers.NewMessage(c.Player.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed"),
-		),
-		); err != nil {
-			c.Logger.Panic(err)
-		}
-
 		// Registro che il player ha completato il tutorial e recupero rewward
-		var rPlayerEndTutorial *pb.PlayerEndTutorialResponse
-		if rPlayerEndTutorial, err = config.App.Server.Connection.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
+		if _, err = config.App.Server.Connection.PlayerEndTutorial(helpers.NewContext(1), &pb.PlayerEndTutorialRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		rewardMessage := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
-			"route.tutorial.completed.reward",
-			rPlayerEndTutorial.GetMoney(),
-			rPlayerEndTutorial.GetExp(),
-		))
-		rewardMessage.ParseMode = "markdown"
-		if _, err = helpers.SendMessage(rewardMessage); err != nil {
+		if _, err = helpers.SendMessage(helpers.NewMessage(c.Player.ChatID,
+			helpers.Trans(c.Player.Language.Slug, "route.tutorial.completed"),
+		),
+		); err != nil {
 			c.Logger.Panic(err)
 		}
 
