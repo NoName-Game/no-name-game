@@ -13,7 +13,7 @@ import (
 var (
 	// Langs - Lingue attualmente disponibili per questo client
 	Langs = map[string]string{
-		"en": "English",
+		// "en": "English",
 		"it": "Italian",
 	}
 )
@@ -45,15 +45,25 @@ func (lang *Localization) loadLocalizerBundle() (bundle *i18n.Bundle, err error)
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
 	// Ciclo traduzioni
-	var translations []byte
-	for file := range Langs {
-		translations, err = ioutil.ReadFile("resources/lang/" + file + ".yaml")
+	for lang := range Langs {
+		// Recupero tutti i file di una specifica lingua
+		files, err := ioutil.ReadDir(fmt.Sprintf("resources/lang/%s", lang))
 		if err != nil {
 			return bundle, err
 		}
 
-		// Parso il file
-		bundle.MustParseMessageFileBytes(translations, "resources/lang/"+file+".yaml")
+		for _, file := range files {
+			// Carico schema
+			var message *i18n.MessageFile
+			if message, err = bundle.LoadMessageFile(fmt.Sprintf("resources/lang/%s/%s", lang, file.Name())); err != nil {
+				return bundle, err
+			}
+
+			// Registro schema
+			if err = bundle.AddMessages(language.English, message.Messages...); err != nil {
+				return bundle, err
+			}
+		}
 	}
 
 	return

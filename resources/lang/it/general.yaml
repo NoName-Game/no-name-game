@@ -1,0 +1,55 @@
+################################################################################################################
+# GENERAL
+complete: "Fatto!"
+continue: "Continua"
+exit: "Esci"
+wait: "Sei in attesa fino alle %s"
+minutes: "Minuti"
+add: "Aggiungi"
+yep: "Si!"
+nope: "No!"
+confirm: "Confermo!"
+learn: "Apprendi!"
+resources: "💠 Risorse"
+items: "🔩 Oggetti"
+equip: "Equipaggia"
+destroy: "Distruggi"
+playerDie: "<b>Sei morto...</b>\nRecupererai le forze alle %s."
+name: "Nome"
+category: "Categoria"
+rarity: "Rarità"
+integrity: "Integrità"
+use: "Usa"
+fuel: "Carburante"
+hours: "Ore"
+coordinate: "Coordinate"
+head: "Testa"
+gauntlets: "Braccia"
+chest: "Petto"
+leg: "Gambe"
+armor: "🛡 Armatura"
+armors: "🛡 Armature"
+weapon: "🗡 Arma"
+weapons: "🗡 Armi"
+complete_with_diamond: "💎 Concludi Rapidatamente 💎"
+
+# Ship Category
+ship.category.light: "Leggera"
+ship.category.normal: "Normale"
+ship.category.heavy: "Pesante"
+
+# Rarities
+rarity.VC: "Molto comune"
+rarity.C: "Comune"
+rarity.U: "Non Comune"
+rarity.R: "Raro"
+rarity.UR: "Ultra Raro"
+rarity.L: "Leggendario"
+rarity.X: "Sperimentale"
+
+################################################################################################################
+# EVENTS
+titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
+titanplanet.event.event1.choice1: "SCELTA UNO"
+titanplanet.event.event1.choice2: "SCELTA UNO"
+################################################################################################################

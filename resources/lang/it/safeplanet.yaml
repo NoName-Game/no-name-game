@@ -1,0 +1,191 @@
+# SAFE PLANET
+safeplanet.welcome: "Benvenuto nell'accampamento principale!\nCosa vuoi fare?"
+
+# Bank
+safeplanet.bank.info: "💰 Benvenuto alla succursale della banca Dipper&Co."
+safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰\n\n📖: Ricorda, depositare in banca ti assicurerà di mettere al sicuro i tuoi risparmi *gratuitamente*, al ritiro invece verrà applicata un commissione del *20%%* sulla transazione."
+safeplanet.bank.deposit: "🔽 Deposito"
+safeplanet.bank.deposit_message: "Quanto desidera depositare?\n\nPuo indicare anche manualmente l'importo che desidera depositare."
+
+safeplanet.bank.withdraws: "🔼 Prelievo"
+safeplanet.bank.withdraws_message: "Quanto desidera prelevare?\n\nPuo indicare anche manualmente l'importo che desidera prelevare."
+safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con *successo*!\n\nI nostri servizi sono sempre a sua disposizione."
+safeplanet.bank.transaction_error: "Non è stato possibile completare la transazione! Riprovi più tardi."
+
+# Dealer
+safeplanet.dealer.intro: "Benvenuto nel mio negozio esploratore!\n\nDa me trovarai prodotti di *ottima* qualità!\nDesideri comprare qualcosa?\n\n Il tuo budget: 💰*%v*"
+safeplanet.dealer.quantity: "Quante quantità ne vorresti acquistare?"
+safeplanet.dealer.confirm: "Perfetto! Allora dimmi, sei sicuro di voler comprare *%v* quantità di *%s* al costo di 💰*%v*?"
+safeplanet.dealer.completed: "Ed ecco a te! Buona giornata esploratore, torna pure quando vuoi!"
+safeplanet.dealer.not_enough_money: "Sembra tu non abbia abbastanza soldi per continuare."
+
+# Hangar
+safeplanet.hangar.intro: "Benvenuto nell'hangar, cosa vuoi fare?"
+
+safeplanet.hangar.info: "Vuoi riparare la tua nave?\n\n"
+safeplanet.hangar.partial: "Riparazione *Parziale*:"
+safeplanet.hangar.full: "Riparazione *Completa*:"
+safeplanet.hangar.time: "⏱ Tempo necessario: *%v* (minuti)"
+safeplanet.hangar.quantity_resources: "💠 Risorse necessarie: *%v*"
+safeplanet.hangar.used_resources: "💠 Risorse impiegate per la riparazione:\n"
+safeplanet.hangar.not_enough_resource: "Non hai abbastanza risorse per riparare la tua nave."
+safeplanet.hangar.dont_need: "La tua nave non necessita di riparazioni."
+safeplanet.hangar.start_partial: "Riparazione parziale"
+safeplanet.hangar.start_full: "Riparazione completa"
+safeplanet.hangar.wait: "Il termine per la riparazione della tua nave è previsto alle *%s*, torna più tardi."
+safeplanet.hangar.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
+safeplanet.hangar.reparing.finish: "La tua nave è stata riparata con successo."
+
+safeplanet.hangar.create.intro: "Posso mettermi al lavoro per te e provare a relizzare la nave che desideri"
+safeplanet.hangar.create.chose_rarity: "Quale rarità?"
+safeplanet.hangar.create.wait: "Stiamo lavorando ancora alla tua nave, dovremmo concludere i lavori per le *%s*\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
+safeplanet.hangar.create.start: "Richiesta presa in carico *%s*"
+safeplanet.hangar.create.end: "Fine lavorazione: %s"
+safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rairtà *%s* al costo di 💰*%v*?"
+safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
+
+safeplanet.hangar.ships.list: "Ecco la lista delle tue navi per la categoria scelta"
+safeplanet.hangar.ships.confirm_equip: "Sei sicuro di volere sostituire la tua attuale nave con questa?"
+safeplanet.hangar.ships.confirm: "Equipaggia nave"
+safeplanet.hangar.ships.equip_ok: "Nave equipaggiata"
+
+# Coalition
+safeplanet.coalition.info: "La 💈*Coalizione* ti da il benvenuto!\nCome possiamo aiutarti?"
+
+# Daily Reward
+safeplanet.coalition.daily_reward: "Ecco la tua ricompensa giornaliera:\n🏵 *%v* \n💰 *%v*\n💎 *%v*"
+safeplanet.coalition.daily_reward_already_taken: "Sembra tu abbia già recuperato la tua ricompensa giornaliera, torna domani."
+
+# Mission
+safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
+safeplanet.mission.start: "Avvia Missione"
+safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
+safeplanet.mission.check: "Non hai completato la tua missione ancora in corso.\nCosa vuoi fare?"
+safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n"
+safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la missione, guadagnando così:\n +*%v*💰\n+*%v*💎\n+*%v* Exp.\nLa coalizione ti rigrazia!"
+
+safeplanet.mission.type.planet_finding: "Trova il pianeta"
+safeplanet.mission.type.planet_finding.description: "La tua missione è quella di trovare e raggiungere il pianeta 🌏*%s*.\nBuona fortuna."
+safeplanet.mission.type.kill_mob: "Uccidi il nemico"
+safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare 🐺 *%s* avvistato sul pianeta 🌏*%s* e annientarlo.\nBuona fortuna."
+safeplanet.mission.type.resources_finding: "Recupero risorse"
+safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di recuperare *%v* quantità di 💠*%v*.\nBuona fortuna."
+
+# Titan
+safeplanet.titan.info: "Benventuo nel centro 👁 *Titani*.\n\nLa colazione chiede il tuo aiuto per sconfiggere dei nemici davvero potenti!\nAffrontarli da solo è davvero impossibile, ma combattendo assieme e rimanendo uniti possiamo riuscirci!\n\n"
+safeplanet.titan.choice: "Se vuoi esser dei nostri scegli un titano dalla lista qui sotto e penseremo noi a trasportarti immediatamente da lui."
+safeplanet.titan.no_titans_founded: "Sembra che attualmente non sia stato trovato nessun titano.\nEsplora lo spazio per trovarne qualcuno o torna più tardi."
+safeplanet.titan.teleport: "Teletrasporto immediato in avviamento...\n\nLa coalizione ti rigrazia.\nBuona fortuna."
+
+# Expansion
+safeplanet.coalition.expansion.info: "Benventuo nel centro 💫 *Espansione*.\n\nEsplorando tutti i pianeti al momento conosciuti, aiuterai la coalizione ad espandare i nostri confini.\n\n"
+safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
+safeplanet.coalition.expansion.recap_planets: "\n❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
+safeplanet.coalition.expansion.recap_planets_done: "\n✅ Tutti i 🌏 pianeti del sistema sono stati esplorati"
+safeplanet.coalition.expansion.recap_titan: "\n❌ Sconfiggere 👁 *%s*, difensore di questo sistema."
+safeplanet.coalition.expansion.recap_titan_done: "\n✅ Il titano 👁 *%s*, è stato sconfitto!"
+safeplanet.coalition.expansion.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare un nuovo sistema.\nTorna a breve per scoprire i progressi."
+safeplanet.coalition.expansion.choice: "\n\nLa coalizione ti offre la possibilità ti teletrasportati istantaneamente su altri pianeti sicuri scoperti. Quale vuoi raggiungere?"
+safeplanet.coalition.expansion.confirmation: "Stai per essere trasportato sul pianeta sicuro 🏟*%s*, il costo per questa operazione è di 💎*%v*, sicuro di voler continuare?"
+safeplanet.coalition.expansion.teleport_ok: "Teleport avviato, buon viaggio!"
+safeplanet.coalition.expansion.teleport_ko: "Non hai abbastanza 💎 per effetture il vaggio. Torna più tardi."
+
+# Research
+safeplanet.coalition.research.info: "Benventuo nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque."
+safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita ancora di 💠*%d* (*%s*) per esser completata."
+safeplanet.coalition.research.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare nuove risorse.\nTorna a breve per scoprire i progressi."
+
+# Research - Donations
+safeplanet.coalition.research.donation.choose_reseource: "Quale risorsa vuoi donare?"
+safeplanet.coalition.research.donation.choose_quantity: "Quante risorsa vuoi donare?"
+safeplanet.coalition.research.donation.confirmation: "Stai per donare *%v* risorse di, *%s*, sicuro di voler continuare?"
+safeplanet.coalition.research.donation.completed: "La tua donazione è stata registrata correttamente!"
+safeplanet.coalition.research.donation.not_enough_resource: "Non hai abbastanza risorse per poter procedere alla donazione."
+
+# Crafter
+safeplanet.crafting.intro: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa dobbiamo fare oggi?"
+safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
+
+# Crafter - Create
+safeplanet.crafting.start: "⚒️ Inizia!"
+safeplanet.crafting.what: "Cosa vorresti realizzare?"
+safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
+safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
+safeplanet.crafting.add: "Aggiungi"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.wait: "*Bene!* Mi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
+safeplanet.crafting.wait_validation: "Sto ancora lavorando alla tua richiesta.\nDovrei riuscire a termininare la lavorazione alle *%s*, torna più tardi."
+safeplanet.crafting.craft_completed: "Ecco a te il tuo ordine!\nSpero ti possa piacere e aiutare nelle tue imprese.\nHai ottenuto: *%s*!"
+safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantità per questa risorsa!"
+safeplanet.crafting.no_resource: "Non hai questa risorsa!"
+
+
+# Crafter - Repair
+safeplanet.crafting.repair.what: "Qualte tra le tua armi danneggiate vorresti riparare?"
+safeplanet.crafting.repair.confirm: "Posso ripararti *%s* immediatamente!\nSei sicuro di vole riparare al costo di 💰*%v*?"
+safeplanet.crafting.repair.completed: "Ecco a te ora è come nuova, fanne buon uso!"
+
+# Accademy
+safeplanet.accademy.info: "Benvenuto in ⛩*Accademia* esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 *Amuleti* davvero importanti per noi..."
+safeplanet.accademy.which: "Quale tipologia di abilità vorresti apprendere?"
+safeplanet.accademy.striker: "⚔️ Attaccante"
+safeplanet.accademy.defender: "🛡 Difensore"
+safeplanet.accademy.explorer: "🚀 Esploratore"
+safeplanet.accademy.done: "Nuova abilità appresa correttamente!"
+safeplanet.accademy.no_more_abilities: "Attulamente non ci sono altre abilità per questa tipologia."
+safeplanet.accademy.not_enough_amulets: "Non hai abbastanza amuleti per apprender l'abilità"
+
+safeplanet.accademy.ability_details: "Ecco a te una nuova abilità!\n\nNome: *%s* - Livello: *%d*\nDescrizione: %s"
+safeplanet.accademy.ability_confirm: "Al momento possiedi 🧿*%d*, per apprendere questa abilità avremmo bisogno di 🧿*%d*"
+
+safeplanet.accademy.ability.accurate: "Preciso"
+safeplanet.accademy.ability.quick: "Rapido"
+safeplanet.accademy.ability.lucky: "Forutunato"
+safeplanet.accademy.ability.base_strength: "Forza Base"
+safeplanet.accademy.ability.base_defense: "Difesa Base"
+safeplanet.accademy.ability.base_speed: "Velocità Base"
+safeplanet.accademy.ability.hard_hit: "Colpo Duro!"
+safeplanet.accademy.ability.doctor: "Medicazione"
+safeplanet.accademy.ability.express: "Express"
+
+safeplanet.accademy.ability.accurate.details: "Aumenta precisione attacco di x0.2"
+safeplanet.accademy.ability.quick.details: "Aumenta schivata difesa di x0.2"
+safeplanet.accademy.ability.lucky.details: "Aumenta il drop di rarità maggiori di x0.2"
+safeplanet.accademy.ability.base_strength.details: "Aumenta danno finale di x0.2"
+safeplanet.accademy.ability.base_defense.details: "Aumenta difesa totale di x0.2"
+safeplanet.accademy.ability.base_speed.details: "Riduce tempo esplorazione di x0.2"
+safeplanet.accademy.ability.hard_hit.details: "Abilità attiva: effettui il doppio dei danni ma perdi 5HP"
+safeplanet.accademy.ability.doctor.details: "Abilità attiva: Ti curi di 5HP ma i tuoi danni sono dimezzati"
+safeplanet.accademy.ability.express.details: "Abilità attiva: Il tempo di esplorazione viene dimezzato, ma ridici anche la qanità di risorse trovate"
+
+# Guild
+safeplanet.coalition.protectors.info: "Benvenuto nella sala dei 💢 *Protettori*.\n\nOgni giorno incontriamo nuovi 👨🏼‍🚀*esploratori* che cercano una casa o un gruppo con cui stare, qui hai la possibilità di farlo."
+safeplanet.coalition.protectors.player_protectors_details: "\n\nLa tua gilda attuale: *%s*"
+safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto."
+safeplanet.coalition.protectors.protectors_name_not_exists: "La gilda da te indicata non sembra esser corretta."
+safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda prima di crearne una nuova devi abbandonare quella attuale."
+safeplanet.coalition.protectors.adding_player_already_in_one_protectors: "Il player da te indicato è già in una gilda."
+safeplanet.coalition.protectors.protectors_player_not_exists: "Non è stato trovato nessun esploratore con quel nome."
+
+safeplanet.coalition.protectors.create_start: "Inserisci il nome della 💢*Gilda* che vuoi creare"
+safeplanet.coalition.protectors.create_accessibility: "Indicaci il tipo di visibilità che vuoi dare al tuo gruppo?\n\n*Pubblica*: tutti potranno accedere alla tua gilda.\n*Privata*: solo il fondatore potrà aggiungere player alla gida."
+safeplanet.coalition.protectors.create_accessibility.public: "Pubblica"
+safeplanet.coalition.protectors.create_accessibility.private: "Privata"
+safeplanet.coalition.protectors.creation_completed_ok: "Gilda registrata con successo. Buona fortuna!"
+
+safeplanet.coalition.protectors.join_start: "Inserisci il nome della 💢*Gilda* alla quale vuoi unirti o selezionane una dalla lista qui sotto:"
+safeplanet.coalition.protectors.join_confirm: "Confermi di voler entrare nella gilda *%s*?"
+safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte della gilda!"
+
+safeplanet.coalition.protectors.leave_confirm: "Sei sicuro di voler abbandonare i *%s*?"
+safeplanet.coalition.protectors.leave_completed_ok: "Ora non appartieni più a nessun gruppo."
+
+safeplanet.coalition.protectors.add_player_start: "Inserisci l'username dell'esploratore che vuoi aggiungere:"
+safeplanet.coalition.protectors.add_player_confirm: "Sei sicuro di voler aggiungere %s alla tua gilda?"
+safeplanet.coalition.protectors.add_completed_ok: "L'esploratore è stato aggiunto alla tua gilda!"
+
+safeplanet.coalition.protectors.remove_player_start: "Inserisci l'username dell'esploratore che vuoi rimuovere o selezionalo dalla lista qui sotto:"
+safeplanet.coalition.protectors.remove_player_confirm: "Sei sicuro di voler rimuovere %s alla tua gilda?"
+safeplanet.coalition.protectors.remove_completed_ok: "L'esploratore è stato rimosso dalla tua gilda!"
+safeplanet.coalition.protectors.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dalla tua gilda."

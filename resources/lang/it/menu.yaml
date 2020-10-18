@@ -1,0 +1,15 @@
+# MENU
+menu: "*BoardSystem v0.1*\n🌏 %s \n%s \n\n%s"
+
+# Task
+menu.tasks: "⏱ *Attività in corso:*\n"
+menu.tasks.minutes_left: "*%v* minuti al termine"
+menu.tasks.completed: "*completata!*"
+
+# Safeplanet
+menu.safeplanet: "Benvenuto su 🏟*%s*\nPianeta *sicuro* e area protetta per *tutti*!✌️\n\n%s"
+
+# Titanplanet
+menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
+menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta..."
+menu.titanplanet.titan_dead: "Sconfitto da da valorosi viaggiatori! Ora tutto sembra tranquillo."
