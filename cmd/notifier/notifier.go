@@ -71,13 +71,6 @@ func handleAchievementNotification(playerAchievement *pb.PlayerAchievement) {
 	}()
 
 	// Recupero testo da notificare
-	// text, _ := config.App.Localization.GetTranslation("notificaton.achievement.message", playerAchievement.GetPlayer().GetLanguage().GetSlug(),
-	// 	helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", playerAchievement.GetAchievement().GetSlug())), // Achievement
-	// 	playerAchievement.GetAchievement().GetGoldReward(),
-	// 	playerAchievement.GetAchievement().GetDiamondReward(),
-	// 	playerAchievement.GetAchievement().GetExperienceReward(),
-	// 	)
-
 	text := helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), "notification.achievement.message",
 		helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", playerAchievement.GetAchievement().GetSlug())), // Achievement
 		playerAchievement.GetAchievement().GetGoldReward(),

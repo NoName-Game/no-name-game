@@ -276,7 +276,6 @@ notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo 
 notification.activity.route.death: "Hai recuperato le energie!"
 
 notification.achievement.message: "🎯 Achievement *completato*!\nHai portato a termine *%s* ottenendo così:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
-achievement.tutorial: "Tutorial"
 ################################################################################################################
 ################################################################################################################
 # SHIP
@@ -553,6 +552,18 @@ player.guild.members: "Lista Membri:\n"
 player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢*Gilda*.\n\nVisita la 💈*Coalizione* per trovare nuovi gruppi."
 player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Gilda: *%v*\n👑 Fondatore: *%s*"
 player.guild.player_details: "👨🏼‍🚀 *%s* - 🎓 *%v*\n🌏 %s\n\n"
+
+# Achievement
+achievement.category.general: "Generale"
+achievement.category.elimination: "Eliminazione"
+
+achievement.tutorial: "Tutorial"
+achievement.kill-enemies-10: "Uccidi i nemici (10)"
+achievement.kill-enemies-50: "Uccidi i nemici (50)"
+achievement.kill-enemies-100: "Uccidi i nemici (100)"
+
+player.achievement.intro: "Ecco qui la la lista dei tuoi abbiettivi da esploratore che hai raggiunto e che devi raggiungere:"
+player.achievement.category_recap: "Obbiettivi raggiunti per la categoria *%s*:\n\n%s"
 
 # Inventory
 inventory.intro: "Cosa vuoi gestire del tuo 🎒*inventario*?"
