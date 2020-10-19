@@ -9,9 +9,8 @@ import (
 )
 
 func GetEndTime(timestamp *types.Timestamp, player *pb.Player) (t time.Time, err error) {
-	// TODO: Recuperare location da info player
 	var location *time.Location
-	if location, err = time.LoadLocation("Europe/Rome"); err != nil {
+	if location, err = time.LoadLocation(player.GetTimezone().GetName()); err != nil {
 		return time.Time{}, err
 	}
 

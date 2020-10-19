@@ -41,18 +41,16 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
-	// Recupero pianeta corrente del player
-	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-		PlayerID: c.Player.GetID(),
-	}); err != nil {
+	// Recupero posizione player corrente
+	var playerPosition *pb.Planet
+	if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 		c.Logger.Panic(err)
 	}
 
 	// Riceco pianeta per ID, in modo da ottenere maggior informazioni
 	var rGetPlanetByID *pb.GetPlanetByIDResponse
 	if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
-		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+		PlanetID: playerPosition.GetID(),
 	}); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -66,7 +64,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse
 	if rCountPlayerVisitedCurrentPlanet, err = config.App.Server.Connection.CountPlayerVisitedCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerVisitedCurrentPlanetRequest{
-		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+		PlanetID: playerPosition.GetID(),
 	}); err != nil {
 		c.Logger.Panic(err)
 	}

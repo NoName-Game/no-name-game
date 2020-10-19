@@ -3,9 +3,10 @@ package helpers
 import (
 	"errors"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -73,8 +74,7 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	return
 }
 
-// CheckPlayerHaveActiveActivity
-// Verifica se il player ha in corso una determinata attività
+// CheckPlayerHaveActiveActivity - Verifica se il player ha in corso una determinata attività
 func CheckPlayerHaveActiveActivity(activities []*pb.PlayerActivity, controller string) bool {
 	for _, state := range activities {
 		if state.Controller == controller {
@@ -83,4 +83,32 @@ func CheckPlayerHaveActiveActivity(activities []*pb.PlayerActivity, controller s
 	}
 
 	return false
+}
+
+// GetPlayerPosition - Recupera l'ultima posizione del player
+func GetPlayerPosition(playerID uint32) (position *pb.Planet, err error) {
+	// Tento di recuperare posizione da cache
+	if position, err = GetPlayerPlanetPositionInCache(playerID); err != nil {
+		// Recupero ultima posizione nota del player
+		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
+		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
+			PlayerID: playerID,
+		}); err != nil {
+			return nil, err
+		}
+
+		// Verifico se il player si trova su un pianeta valido
+		if rGetPlayerCurrentPlanet.GetPlanet() == nil {
+			return nil, err
+		}
+
+		position = rGetPlayerCurrentPlanet.GetPlanet()
+
+		// Creo cache posizione
+		if err = SetPlayerPlanetPositionInCache(playerID, position); err != nil {
+			logrus.Errorf("error creating player position cache: %s", err.Error())
+		}
+	}
+
+	return
 }

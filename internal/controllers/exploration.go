@@ -146,14 +146,14 @@ func (c *ExplorationController) Stage() {
 	// i vari tipi di missioni disponibili
 	case 0:
 		// Recupero tutte le categorie di esplorazione possibili
-		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
-		if rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
+		var categories []*pb.ExplorationCategory
+		if categories, err = helpers.GetExplorationCategories(); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Creo messaggio con la lista delle missioni possibili
 		var keyboardRows [][]tgbotapi.KeyboardButton
-		for _, missionType := range rGetAllExplorationCategories.GetExplorationCategories() {
+		for _, missionType := range categories {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("exploration.%s", missionType.GetSlug()))),
 			)
@@ -172,18 +172,16 @@ func (c *ExplorationController) Stage() {
 		var messageExploration string
 		messageExploration = helpers.Trans(c.Player.Language.Slug, "exploration.exploration")
 
-		// Recupero posizione player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
+		// Recupero posizione player corrente
+		var playerPosition *pb.Planet
+		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Verifico se sono conquistatore
 		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
 		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
-			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+			PlanetID: playerPosition.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

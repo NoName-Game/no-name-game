@@ -180,18 +180,16 @@ func (c *SafePlanetExpansionController) Stage() {
 		// Lista pianeti sicuri raggiungibili
 		// #######################
 
-		// Recupero ultima posizione del player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.GetID(),
-		}); err != nil {
+		// Recupero posizione player corrente
+		var playerPosition *pb.Planet
+		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Mostro la lista dei pianeti sicuri disponibili
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
-			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+			PlanetID: playerPosition.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -231,17 +229,15 @@ func (c *SafePlanetExpansionController) Stage() {
 		// Recupero quale pianeta vole raggiungere e dettaglio costo
 		planetNameChoiched := strings.Split(c.Update.Message.Text, " -")[0]
 
-		// Recupero ultima posizione del player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.GetID(),
-		}); err != nil {
+		// Recupero posizione player corrente
+		var playerPosition *pb.Planet
+		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
-			PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+			PlanetID: playerPosition.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

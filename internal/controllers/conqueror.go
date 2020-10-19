@@ -41,18 +41,16 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		return
 	}
 
-	// Recupero pianeta corrente del player
-	var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-	if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-		PlayerID: c.Player.GetID(),
-	}); err != nil {
+	// Recupero posizione player corrente
+	var playerPosition *pb.Planet
+	if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 		c.Logger.Panic(err)
 	}
 
 	// Recupero top 10 player per uccisioni in questo pianeta
 	var rGetConquerorsByPlanetID *pb.GetConquerorsByPlanetIDResponse
 	if rGetConquerorsByPlanetID, err = config.App.Server.Connection.GetConquerorsByPlanetID(helpers.NewContext(1), &pb.GetConquerorsByPlanetIDRequest{
-		PlanetID: rGetPlayerCurrentPlanet.GetPlanet().GetID(),
+		PlanetID: playerPosition.GetID(),
 	}); err != nil {
 		c.Logger.Panic(err)
 	}

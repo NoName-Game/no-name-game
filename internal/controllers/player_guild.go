@@ -106,11 +106,9 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	var playersList string
 	playersList = helpers.Trans(player.Language.Slug, "player.guild.members")
 	for _, playerDetails := range rGetPlayersGuild.GetPlayers() {
-		// Recupero posizione player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: playerDetails.GetID(),
-		}); err != nil {
+		// Recupero posizione player corrente
+		var playerPosition *pb.Planet
+		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -126,7 +124,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 		playersList += helpers.Trans(player.Language.Slug, "player.guild.player_details",
 			playerDetails.GetUsername(),
 			rGetPlayerGuildPoints.GetResult(),
-			rGetPlayerCurrentPlanet.GetPlanet().GetName(),
+			playerPosition.GetName(),
 		)
 	}
 

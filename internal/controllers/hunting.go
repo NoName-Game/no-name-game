@@ -259,10 +259,8 @@ func (c *HuntingController) Hunting() {
 		// Recupero ultima posizione del player, dando per scontato che sia
 		// la posizione del pianeta e quindi della mappa corrente che si vuole recuperare
 		// Dalla ultima posizione recupero il pianeta corrente
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.GetID(),
-		}); err != nil {
+		var playerPosition *pb.Planet
+		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
 			c.Logger.Panic(err)
 		}
 
@@ -270,7 +268,7 @@ func (c *HuntingController) Hunting() {
 		// al DB registro il tutto sula cache
 		var rGetPlanetMapByID *pb.GetPlanetMapByIDResponse
 		if rGetPlanetMapByID, err = config.App.Server.Connection.GetPlanetMapByID(helpers.NewContext(1), &pb.GetPlanetMapByIDRequest{
-			PlanetMapID: rGetPlayerCurrentPlanet.GetPlanet().GetPlanetMapID(),
+			PlanetMapID: playerPosition.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -314,8 +312,6 @@ func (c *HuntingController) Hunting() {
 		}
 
 		// Controllo tipo di callback data - move / fight
-		// actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
-
 		var inlineData helpers.InlineDataStruct
 		inlineData = inlineData.GetDataValue(c.Update.CallbackQuery.Data)
 

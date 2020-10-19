@@ -14,7 +14,6 @@ import (
 // =================
 // Current Controller Cache
 // =================
-
 // GetCurrentControllerCache - Metodo generico per il recupero degli stati di un player
 func GetCurrentControllerCache(playerID uint32) (result string, err error) {
 	if result, err = config.App.Redis.Connection.Get(fmt.Sprintf("player_%v_current_controller", playerID)).Result(); err != nil {
@@ -88,7 +87,6 @@ func DelControllerCacheData(playerID uint32, controller string) (err error) {
 // =================
 // Cache Map
 // =================
-
 // SetMapInCache - Salvo mappa in cache per non appesantire le chiamate a DB
 func SetMapInCache(maps *pb.PlanetMap) (err error) {
 	var jsonValue []byte
@@ -140,5 +138,30 @@ func DelPlayerPlanetPositionInCache(playerID uint32) (err error) {
 	if err := config.App.Redis.Connection.Del(fmt.Sprintf("player_%v_current_planet", playerID)).Err(); err != nil {
 		return fmt.Errorf("cant delete player position in cache data: %s", err.Error())
 	}
+	return
+}
+
+// =================
+// Exploration Categories
+// =================
+// SetExplorationCategoriesInCache - Setto categorie esplorazione
+func SetExplorationCategoriesInCache(categories []*pb.ExplorationCategory) (err error) {
+	var jsonValue []byte
+	jsonValue, _ = json.Marshal(categories)
+
+	if err := config.App.Redis.Connection.Set("sys_exploration_categories", string(jsonValue), 10*time.Minute).Err(); err != nil {
+		return fmt.Errorf("cant set exploration categories in cache: %s", err.Error())
+	}
+	return
+}
+
+// GetExplorationCategoriesInCache - Recupero categorie esplorazione
+func GetExplorationCategoriesInCache() (categories []*pb.ExplorationCategory, err error) {
+	var result string
+	if result, err = config.App.Redis.Connection.Get("sys_exploration_categories").Result(); err != nil {
+		return categories, fmt.Errorf("cant get exploration categories in cache: %s", err.Error())
+	}
+
+	err = json.Unmarshal([]byte(result), &categories)
 	return
 }

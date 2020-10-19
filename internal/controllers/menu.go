@@ -120,27 +120,9 @@ func (c *MenuController) GetRecap() (message string) {
 func (c *MenuController) GetPlayerPosition() (position *pb.Planet) {
 	var err error
 
-	// Tento di recuperare posizione da cache
-	if position, err = helpers.GetPlayerPlanetPositionInCache(c.Player.GetID()); err != nil {
-		// Recupero ultima posizione nota del player
-		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
-		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(helpers.NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
-			PlayerID: c.Player.GetID(),
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Verifico se il player si trova su un pianeta valido
-		if rGetPlayerCurrentPlanet.GetPlanet() == nil {
-			c.Logger.Panic(err)
-		}
-
-		position = rGetPlayerCurrentPlanet.GetPlanet()
-
-		// Creo cache posizione
-		if err = helpers.SetPlayerPlanetPositionInCache(c.Player.GetID(), position); err != nil {
-			c.Logger.Panicf("error creating player position cache: %s", err.Error())
-		}
+	// Recupero posizione player corrente
+	if position, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
+		c.Logger.Panic(err)
 	}
 
 	// Verifico se il player si trova su un pianeta sicuro
