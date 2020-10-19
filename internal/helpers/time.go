@@ -3,13 +3,12 @@ package helpers
 import (
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
+	"github.com/gogo/protobuf/types"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"github.com/golang/protobuf/ptypes/timestamp"
 )
 
-func GetEndTime(timestamp *timestamp.Timestamp, player *pb.Player) (t time.Time, err error) {
+func GetEndTime(timestamp *types.Timestamp, player *pb.Player) (t time.Time, err error) {
 	// TODO: Recuperare location da info player
 	var location *time.Location
 	if location, err = time.LoadLocation("Europe/Rome"); err != nil {
@@ -17,7 +16,7 @@ func GetEndTime(timestamp *timestamp.Timestamp, player *pb.Player) (t time.Time,
 	}
 
 	// Converto timestamp ricevuto
-	if t, err = ptypes.Timestamp(timestamp); err != nil {
+	if t, err = types.TimestampFromProto(timestamp); err != nil {
 		return time.Time{}, err
 	}
 

@@ -12,6 +12,7 @@ require (
 	github.com/getsentry/sentry-go v0.5.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.2
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/gommon v0.3.0
@@ -21,6 +22,6 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	golang.org/x/text v0.3.3
-	google.golang.org/grpc v1.31.1
+	google.golang.org/grpc v1.33.0
 	gopkg.in/yaml.v2 v2.2.4
 )
