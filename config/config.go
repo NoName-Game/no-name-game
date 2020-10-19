@@ -32,11 +32,12 @@ func (config *Configuration) Bootstrap() {
 		&App.Logger,
 		&App.Redis,
 		&App.Server,
-		&App.Localization,
 		&App.Bot,
 	} {
 		service.Init()
 	}
+
+	App.Localization.Init(App.Server.Connection)
 }
 
 func init() {
