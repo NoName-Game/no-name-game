@@ -152,15 +152,23 @@ func (c *SetupController) Stage() {
 		}
 
 		// Aggiungo lingue alla tastiera
-		keyboard := make([]tgbotapi.KeyboardButton, len(rGetLanguages.GetLanguages()))
-		for i, lang := range rGetLanguages.GetLanguages() {
-			keyboard[i] = tgbotapi.NewKeyboardButton(lang.Name)
+		var keyboard [][]tgbotapi.KeyboardButton
+		for _, language := range rGetLanguages.GetLanguages() {
+			if language.GetEnabled() {
+				keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+					language.GetName(),
+				)))
+			}
 		}
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.select_language"))
 		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboard)
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboard,
+		}
+
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
