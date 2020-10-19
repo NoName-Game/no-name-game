@@ -1,0 +1,33 @@
+# Accademy
+safeplanet.accademy.info: "Benvenuto in ⛩*Accademia* esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 *Amuleti* davvero importanti per noi..."
+safeplanet.accademy.which: "Quale tipologia di abilità vorresti apprendere?"
+safeplanet.accademy.striker: "⚔️ Attaccante"
+safeplanet.accademy.defender: "🛡 Difensore"
+safeplanet.accademy.explorer: "🚀 Esploratore"
+safeplanet.accademy.done: "Nuova abilità appresa correttamente!"
+safeplanet.accademy.no_more_abilities: "Attulamente non ci sono altre abilità per questa tipologia."
+safeplanet.accademy.not_enough_amulets: "Non hai abbastanza amuleti per apprender l'abilità"
+
+safeplanet.accademy.ability_details: "Ecco a te una nuova abilità!\n\nNome: *%s* - Livello: *%d*\nDescrizione: %s"
+safeplanet.accademy.ability_confirm: "Al momento possiedi 🧿*%d*, per apprendere questa abilità avremmo bisogno di 🧿*%d*"
+
+safeplanet.accademy.ability.accurate: "Preciso"
+safeplanet.accademy.ability.quick: "Rapido"
+safeplanet.accademy.ability.lucky: "Forutunato"
+safeplanet.accademy.ability.base_strength: "Forza Base"
+safeplanet.accademy.ability.base_defense: "Difesa Base"
+safeplanet.accademy.ability.base_speed: "Velocità Base"
+safeplanet.accademy.ability.hard_hit: "Colpo Duro!"
+safeplanet.accademy.ability.doctor: "Medicazione"
+safeplanet.accademy.ability.express: "Express"
+
+safeplanet.accademy.ability.accurate.details: "Aumenta precisione attacco di x0.2"
+safeplanet.accademy.ability.quick.details: "Aumenta schivata difesa di x0.2"
+safeplanet.accademy.ability.lucky.details: "Aumenta il drop di rarità maggiori di x0.2"
+safeplanet.accademy.ability.base_strength.details: "Aumenta danno finale di x0.2"
+safeplanet.accademy.ability.base_defense.details: "Aumenta difesa totale di x0.2"
+safeplanet.accademy.ability.base_speed.details: "Riduce tempo esplorazione di x0.2"
+safeplanet.accademy.ability.hard_hit.details: "Abilità attiva: effettui il doppio dei danni ma perdi 5HP"
+safeplanet.accademy.ability.doctor.details: "Abilità attiva: Ti curi di 5HP ma i tuoi danni sono dimezzati"
+safeplanet.accademy.ability.express.details: "Abilità attiva: Il tempo di esplorazione viene dimezzato, ma ridici anche la qanità di risorse trovate"
+

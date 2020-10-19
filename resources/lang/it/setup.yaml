@@ -1,4 +1,4 @@
-# SETUP ( questi messaggi non devono esser tradotti )
+# SETUP
 setup.intro: "Hello 👨🏼‍🚀 *%s*!\nWelcome to 🕹 *NoName* Game!"
 setup.select_timezone: "⚙️ Setup 1 of 2: *experience*.\n\nChoose your current 🕘️ timezone:"
 setup.select_language: "⚙️ Setup 2 of 2: *comunication*.\n\nChoose your favourite 💬 language:"
