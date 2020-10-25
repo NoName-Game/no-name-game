@@ -1,10 +1,7 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -198,39 +195,29 @@ func (c *TitanPlanetTackleController) Tackle() {
 
 	// Se il messaggio è di tipo callback sicuramete è un messaggio di attacco
 	if c.Update.CallbackQuery != nil {
+		// Controllo tipo di callback data - fight
+		var inlineData helpers.InlineDataStruct
+		inlineData = inlineData.GetDataValue(c.Update.CallbackQuery.Data)
+
 		// Verifico che non sia in corso un'evento
 		//TODO: verificare
-		if c.Payload.InEvent {
-			// evento in corso
-			var rGetEvent *pb.GetTitanEventByIDResponse
-			if rGetEvent, err = config.App.Server.Connection.GetEventByID(helpers.NewContext(1), &pb.GetTitanEventByIDRequest{
-				ID: c.Payload.EventID,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			c.Event(c.Update.CallbackQuery.Data, rGetEvent.GetEvent(), rGetTitanByPlanetID.GetTitan())
-		} else {
-			// Controllo tipo di callback data - fight
-			var inlineData helpers.InlineDataStruct
-			inlineData = inlineData.GetDataValue(c.Update.CallbackQuery.Data)
-
+		if c.Payload.InEvent && inlineData.AT == "event" {
+			err = c.Event(inlineData, rGetTitanByPlanetID.GetTitan())
+		} else if inlineData.AT == "fight" {
 			// Verifica tipo di movimento e mi assicuro che non sia in combattimento
-			if inlineData.AT == "fight" {
-				err = c.Fight(inlineData, rGetTitanByPlanetID.GetTitan())
-			}
-
-			if err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Rimuove rotella di caricamento dal bottone
-			err = helpers.AnswerCallbackQuery(
-				helpers.NewAnswer(c.Update.CallbackQuery.ID, "", false),
-			)
-
-			return
+			err = c.Fight(inlineData, rGetTitanByPlanetID.GetTitan())
 		}
+
+		if err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Rimuove rotella di caricamento dal bottone
+		err = helpers.AnswerCallbackQuery(
+			helpers.NewAnswer(c.Update.CallbackQuery.ID, "", false),
+		)
+
+		return
 	}
 
 	return
@@ -263,10 +250,8 @@ func (c *TitanPlanetTackleController) Fight(inlineData helpers.InlineDataStruct,
 		c.CurrentState.Completed = true
 		return
 	case "titan_die":
-		// Il player è morto
+		// Il titano è morto
 		c.CurrentState.Completed = true
-		// Drop Moment
-		// c.Drop(titan)
 		return
 	case "use":
 		c.UseItem(inlineData)
@@ -436,23 +421,29 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 		combactMessage.Text += "\n A causa della tua abilità hai perso ulteriri 5HP"
 	}
 
-	// 15% probabilità che si scateni un evento al prossimo giro.
-	// r := rand.Int31n(101)
-	// if r <= 50 {
-	// 	c.Payload.InEvent = true
-	// 	// Recupero un evento random
-	// 	var rEventRandom *pb.GetRandomEventResponse
-	// 	if rEventRandom, err = config.App.Server.Connection.GetRandomEvent(helpers.NewContext(1), &pb.GetRandomEventRequest{}); err != nil {
-	// 		c.Logger.Panic(err)
-	// 	}
-	// 	c.Payload.EventID = rEventRandom.GetEvent().GetID()
-	// }
-
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
 		),
 	)
+
+	// Verifico se il prossimo colpo è un evento, se così fosse cambio keyborad
+	if rHitTitan.GetTitanEventID() > 0 {
+		c.Payload.InEvent = true
+		c.Payload.EventID = rHitTitan.GetTitanEventID()
+
+		// Aggiungo messggio che il titano si prepara ad un evento
+		combactMessage.Text += "\n Il titano si infuria..."
+
+		// Carico keyboard dedicata
+		var dataEventStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "event", A: "q"}
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Preparati", dataEventStruct.GetDataString()),
+			),
+		)
+	}
+
 	combactMessage.ReplyMarkup = &keyboard
 	combactMessage.ParseMode = "markdown"
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
@@ -512,127 +503,86 @@ func (c *TitanPlanetTackleController) TitanDie(titan *pb.Titan) {
 // ====================================
 // Event
 // ====================================
-func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, titan *pb.Titan) {
-	var editMessage tgbotapi.EditMessageTextConfig
-	// Standard message titanplanet.event.event1.choice1
-	// route.event.eventID.choiceID
-	actionType := strings.Split(c.Update.CallbackQuery.Data, ".")
-	switch actionType[2] {
-	case "fight":
-		// arriverà dallo scontro, stampo semplicemente messaggio.
-		editMessage = helpers.NewEditMessage(
+func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct, titan *pb.Titan) (err error) {
+	// Recupero evento in corso
+	var rGetQuestion *pb.GetTitanEventQuestionByIDResponse
+	if rGetQuestion, err = config.App.Server.Connection.GetTitanEventQuestionByID(helpers.NewContext(1), &pb.GetTitanEventQuestionByIDRequest{
+		ID: c.Payload.EventID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var question *pb.TitanEventQuestion
+	question = rGetQuestion.GetQuestion()
+
+	switch inlineData.A {
+	case "q": // QUESTION
+		// Recupero domande e risposte da dare al player
+		questionMessage := helpers.NewEditMessage(
 			c.Player.GetChatID(),
 			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), question.TextCode),
 		)
+
 		var keyboardRow [][]tgbotapi.InlineKeyboardButton
-		for _, choice := range event.Choices {
+		for _, answer := range question.Answers {
+			var dataAnswerStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "event", A: "a", D: answer.ID}
 			keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), choice.GetTextCode()), choice.GetTextCode()),
+				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), answer.GetTextCode()), dataAnswerStruct.GetDataString()),
 			))
 		}
 
-		var ok = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboardRow}
-		editMessage.ReplyMarkup = &ok
-	default:
-		// Teoricamente è una choice
-		if actionType[1] == "event" {
-			// controllo che la choice faccia effettivamente parte dell'evento
-			choiceID, err := strconv.Atoi(strings.Split(actionType[3], "choice")[1])
-			if err != nil {
-				c.Logger.Panic(err)
-			}
-
-			exist := false
-			for _, choice := range event.Choices {
-				if choice.ID == uint32(choiceID) {
-					exist = true
-				}
-			}
-
-			if exist {
-				var rSubmitAnswer *pb.SubmitAnswerResponse
-				if rSubmitAnswer, err = config.App.Server.Connection.SubmitAnswer(helpers.NewContext(1), &pb.SubmitAnswerRequest{
-					TitanID:  titan.ID,
-					ChoiceID: uint32(choiceID),
-					PlayerID: c.Player.GetID(),
-				}); err != nil {
-					c.Logger.Panic(err)
-				}
-
-				if rSubmitAnswer.IsMalus {
-					// Malus!
-					// Player riceve danni
-					editMessage = helpers.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.wrong"))
-					var ok = tgbotapi.NewInlineKeyboardMarkup(
-						tgbotapi.NewInlineKeyboardRow(
-							tgbotapi.NewInlineKeyboardButtonData(
-								helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
-							),
-						),
-					)
-					editMessage.ReplyMarkup = &ok
-					editMessage.ParseMode = tgbotapi.ModeMarkdown
-
-				} else {
-					// Bonus!
-					// titano riceve danni
-					if rSubmitAnswer.Hit.TitanDie {
-						editMessage = helpers.NewEditMessage(
-							c.Player.ChatID,
-							c.Update.CallbackQuery.Message.MessageID,
-							helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.combat.mob_killed", titan.GetName()),
-						)
-
-						var ok = tgbotapi.NewInlineKeyboardMarkup(
-							tgbotapi.NewInlineKeyboardRow(
-								tgbotapi.NewInlineKeyboardButtonData(
-									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.titan_die",
-								),
-							),
-						)
-						editMessage.ParseMode = "markdown"
-						editMessage.ReplyMarkup = &ok
-
-						// Setto stato
-						// c.Payload.Kill++
-						c.Payload.TitanID = 0
-					} else {
-						editMessage = helpers.NewEditMessage(
-							c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, helpers.Trans(c.Player.Language.Slug, "titanplanet.event.correct", rSubmitAnswer.Hit.PlayerDamage))
-						var ok = tgbotapi.NewInlineKeyboardMarkup(
-							tgbotapi.NewInlineKeyboardRow(
-								tgbotapi.NewInlineKeyboardButtonData(
-									helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.no_action",
-								),
-							),
-						)
-						editMessage.ReplyMarkup = &ok
-						editMessage.ParseMode = tgbotapi.ModeMarkdown
-					}
-				}
-				c.Payload.InEvent = false
-			} else {
-				// Risposta non presente fra quelle predefinite dall'evento. ERRORE
-				c.Logger.Panic(errors.New("choice choosen not in event choices"))
-			}
+		var keyboard = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboardRow}
+		questionMessage.ReplyMarkup = &keyboard
+		if _, err := helpers.SendMessage(questionMessage); err != nil {
+			c.Logger.Panic(err)
 		}
-	}
 
-	// Non sono state fatte modifiche al messaggio
-	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
-		helpers.NewEditMessage(
-			c.Player.GetChatID(),
-			c.Update.CallbackQuery.Message.MessageID,
-			helpers.Trans(c.Player.GetLanguage().GetSlug(), event.TextCode),
+	case "a": // ANSWER
+		var rTitanEventSubmitAnswer *pb.TitanEventSubmitAnswerResponse
+		if rTitanEventSubmitAnswer, err = config.App.Server.Connection.TitanEventSubmitAnswer(helpers.NewContext(1), &pb.TitanEventSubmitAnswerRequest{
+			TitanID:  titan.ID,
+			AnswerID: inlineData.D,
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Verifico se il TITANO è morto
+		if rTitanEventSubmitAnswer.GetTitanDie() {
+			c.TitanDie(titan)
+			return
+		}
+
+		// Verifico se il PLAYER è morto
+		if rTitanEventSubmitAnswer.GetPlayerDie() {
+			c.PlayerDie()
+			return
+		}
+
+		// Malus! | Bonus!
+		var recap string
+		if rTitanEventSubmitAnswer.GetIsMalus() {
+			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.malus", rTitanEventSubmitAnswer.GetTitanDamage())
+		} else {
+			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.bonus", rTitanEventSubmitAnswer.GetPlayerDamage())
+		}
+
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Continua!", fightNoAction.GetDataString()),
+			),
 		)
-		editMessage.ParseMode = "markdown"
-		editMessage.ReplyMarkup = c.PlayerFightKeyboard()
-	}
 
-	// Invio messaggio modificato
-	if _, err := helpers.SendMessage(editMessage); err != nil {
-		c.Logger.Panic(err)
+		recapMessage := helpers.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, recap)
+		recapMessage.ParseMode = tgbotapi.ModeMarkdown
+		recapMessage.ReplyMarkup = &keyboard
+		if _, err := helpers.SendMessage(recapMessage); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		c.Payload.InEvent = false
+		c.Payload.EventID = 0
 	}
 
 	return

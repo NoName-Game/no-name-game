@@ -4,9 +4,10 @@ titanplanet.tackle.init: "Il titano si mostra alla tua presenza."
 titanplanet.tackle.leave: "⬅️ Abbandona"
 titanplanet.tackle.combat.card: "👁 %s \n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nStai mirando a: *%s*\nArma equipaggiata:\n*%s* (🛠 *%v*)"
 
-
 titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."
 titanplanet.tackle.reward: "Congratulazioni per aver sconfitto il titano!\n\nLa *Coalizione* ti premia per aver inflitto *%d danni*!\n\nResoconto premi:\n%s"
-titanplanet.event.correct: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
-titanplanet.event.wrong: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci un'ingente quantità di danni. Ti rimane solo 1 HP!"
+
+# Event
+titanplanet.event.bonus: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
+titanplanet.event.malus: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci *%d* danni."
 titanplanet.tackle.no_action: "Continua!"
