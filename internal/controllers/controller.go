@@ -214,7 +214,6 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 				if _, err := config.App.Server.Connection.DeletePlayerActivityByController(helpers.NewContext(1), &pb.DeletePlayerActivityByControllerRequest{
 					PlayerID:   c.Player.ID,
 					Controller: c.CurrentState.Controller,
-					Force:      true,
 				}); err != nil {
 					panic(err)
 				}

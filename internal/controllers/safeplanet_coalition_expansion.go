@@ -149,7 +149,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		)
 
 		// Messaggio pianeti che mancano da esplorare
-		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 && rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter() > 0 {
+		if rGetExpansionInfo.GetMissPlanetsCounter() <= 0 && rGetTitanByPlanetSystemID.GetTitan().GetDied() {
 			expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.done")
 		} else {
 			// Recap pianeti
@@ -163,7 +163,7 @@ func (c *SafePlanetExpansionController) Stage() {
 			}
 
 			// Recap titano
-			if rGetTitanByPlanetSystemID.GetTitan().GetDeadCounter() > 0 {
+			if rGetTitanByPlanetSystemID.GetTitan().GetDied() {
 				expansionRecap += helpers.Trans(c.Player.Language.Slug,
 					"safeplanet.coalition.expansion.recap_titan_done",
 					rGetTitanByPlanetSystemID.GetTitan().GetName(),

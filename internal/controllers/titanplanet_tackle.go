@@ -30,6 +30,12 @@ type TitanPlanetTackleController struct {
 
 // Settings generali
 var (
+	fightTitanDie = helpers.InlineDataStruct{
+		C:  "tackle",
+		AT: "fight",
+		A:  "titan_die",
+	}
+
 	titanKeyboard = [][]tgbotapi.InlineKeyboardButton{
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", fightUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
@@ -260,7 +266,7 @@ func (c *TitanPlanetTackleController) Fight(inlineData helpers.InlineDataStruct,
 		// Il player è morto
 		c.CurrentState.Completed = true
 		// Drop Moment
-		c.Drop(titan)
+		// c.Drop(titan)
 		return
 	case "use":
 		c.UseItem(inlineData)
@@ -488,7 +494,7 @@ func (c *TitanPlanetTackleController) TitanDie(titan *pb.Titan) {
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, "continue"), "titanplanet.tackle.fight.titan_die",
+				helpers.Trans(c.Player.Language.Slug, "continue"), fightTitanDie.GetDataString(),
 			),
 		),
 	)
@@ -612,6 +618,7 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 			}
 		}
 	}
+
 	// Non sono state fatte modifiche al messaggio
 	if editMessage == (tgbotapi.EditMessageTextConfig{}) {
 		helpers.NewEditMessage(
@@ -626,41 +633,6 @@ func (c *TitanPlanetTackleController) Event(text string, event *pb.TitanEvent, t
 	// Invio messaggio modificato
 	if _, err := helpers.SendMessage(editMessage); err != nil {
 		c.Logger.Panic(err)
-	}
-
-	return
-}
-
-func (c *TitanPlanetTackleController) Drop(titan *pb.Titan) {
-	var err error
-	// THIS FUNCTION TAKE ALL THE DAMAGES INFLICTED BY PLAYER AND GIVE HIM THE RIGHT DROP
-
-	var rTitanDamage *pb.GetTitanDamageByTitanIDResponse
-	if rTitanDamage, err = config.App.Server.Connection.GetTitanDamageByTitanID(helpers.NewContext(1), &pb.GetTitanDamageByTitanIDRequest{
-		TitanID: titan.ID,
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-	for _, damage := range rTitanDamage.Damages {
-		var rGetPlayer *pb.GetPlayerByIDResponse
-		rGetPlayer, err = config.App.Server.Connection.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
-			ID: damage.PlayerID,
-		})
-		if err != nil {
-			c.Logger.Panic(err)
-		}
-		// Parte calcolo drop
-		// TODO
-
-		// Crafto messaggio drop
-		msg := helpers.NewMessage(rGetPlayer.GetPlayer().ChatID, helpers.Trans(
-			rGetPlayer.GetPlayer().GetLanguage().GetSlug(), "titanplanet.tackle.reward", damage.GetDamageInflicted() /*Aggiungere lista drop*/),
-		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
-		_, err := helpers.SendMessage(msg)
-		if err != nil {
-			c.Logger.Panic(err)
-		}
 	}
 
 	return
@@ -700,6 +672,7 @@ func (c *TitanPlanetTackleController) UseItem(inlineData helpers.InlineDataStruc
 			rGetItemByID.GetItem().GetValue(),
 		),
 	)
+
 	combactMessage.ReplyMarkup = &keyboard
 	combactMessage.ParseMode = "markdown"
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
