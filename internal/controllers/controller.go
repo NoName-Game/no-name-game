@@ -122,6 +122,24 @@ func (c *Controller) LoadControllerData() (err error) {
 	return
 }
 
+func (c *Controller) RegisterError(err error) {
+	// Registro errore su sentry
+	c.Logger.Error(err)
+
+	// Invio il messaggio in caso di errore e chiudo
+	validatorMsg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.error"))
+	validatorMsg.ParseMode = "markdown"
+	validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+		),
+	)
+
+	if _, err := helpers.SendMessage(validatorMsg); err != nil {
+		panic(err)
+	}
+}
+
 // Validate - Metodo comune per mandare messaggio di validazione
 func (c *Controller) Validate() {
 	// Se non ha un messaggio particolare allora setto configurazione di default

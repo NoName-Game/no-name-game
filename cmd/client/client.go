@@ -36,24 +36,34 @@ func main() {
 func handleUpdate(update tgbotapi.Update) {
 	var err error
 
-	// Gestico panic
-	defer recoverUpdate()
-
 	// Gestisco utente
 	var player *pb.Player
 	if player, err = helpers.HandleUser(update); err != nil {
 		logrus.Panic(err)
 	}
 
+	// Gestico panic
+	defer recoverUpdate(player, update)
+
 	// Gestisco update
 	router.Routing(player, update)
 }
 
-func recoverUpdate() {
+func recoverUpdate(player *pb.Player, update tgbotapi.Update) {
 	if err := recover(); err != nil {
-		// TODO: Eseguire qualcosa se esplode male
 		if err, ok := err.(error); ok {
 			logrus.Errorf("[*] Recoverd Error: %v", err)
 		}
+
+		// Invio il messaggio in caso di errore e chiudo
+		validatorMsg := helpers.NewMessage(update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "validator.error"))
+		validatorMsg.ParseMode = "markdown"
+		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			),
+		)
+
+		_, _ = helpers.SendMessage(validatorMsg)
 	}
 }
