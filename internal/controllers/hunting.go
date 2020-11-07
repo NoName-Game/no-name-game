@@ -38,7 +38,7 @@ type HuntingController struct {
 // ====================================
 var (
 	// Parti di corpo disponibili per l'attacco
-	bodyParts = [4]string{"head", "chest", "gauntlets", "leg"}
+	bodyParts = [4]string{"helmet", "chest", "glove", "boots"}
 
 	// Hunting Move Actions
 	moveDown = helpers.InlineDataStruct{
@@ -323,7 +323,7 @@ func (c *HuntingController) Hunting() {
 		}
 
 		if err != nil {
-			c.Logger.Panic(err)
+			c.Logger.Info(err)
 		}
 
 		// Rimuove rotella di caricamento dal bottone
@@ -408,7 +408,7 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 
 	msg.ParseMode = "HTML"
 	if _, err = helpers.SendMessage(msg); err != nil {
-		c.Logger.Panic(err)
+		c.Logger.Info(err)
 	}
 
 	return

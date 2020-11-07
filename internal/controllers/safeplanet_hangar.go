@@ -54,8 +54,8 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 	recapShip := helpers.Trans(c.Player.Language.Slug, "ship.report.card",
 		rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
 		rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
-		rGetPlayerShipEquipped.GetShip().GetShipStats().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
-		rGetPlayerShipEquipped.GetShip().GetShipStats().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
+		rGetPlayerShipEquipped.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+		rGetPlayerShipEquipped.GetShip().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
 	)
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s",
