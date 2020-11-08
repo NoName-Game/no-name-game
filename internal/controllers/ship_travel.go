@@ -358,6 +358,8 @@ func (c *ShipTravelController) Stage() {
 
 		// Completo lo stato
 		c.CurrentState.Completed = true
+		// Imposto nil in modo da esser portato al menù principale
+		c.Configurations.ControllerBack.To = nil
 	}
 
 	return
