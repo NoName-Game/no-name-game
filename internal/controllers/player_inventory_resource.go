@@ -55,19 +55,9 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	var recapResources string
 	for _, resource := range rGetPlayerResource.GetPlayerInventory() {
 		if resource.GetQuantity() > 0 {
-			category := ""
-			switch resource.GetResource().GetResourceCategoryID() {
-			case 1:
-				category = "🔥"
-			case 2:
-				category = "💧"
-			case 3:
-				category = "⚡️"
-			}
-
 			recapResources += fmt.Sprintf(
 				"- %s %v x %s (*%s*)\n",
-				category,
+				helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
 				resource.Quantity,
 				resource.Resource.Name,
 				strings.ToUpper(resource.Resource.Rarity.Slug),

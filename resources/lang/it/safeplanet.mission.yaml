@@ -11,4 +11,4 @@ safeplanet.mission.type.planet_finding.description: "La tua missione è quella d
 safeplanet.mission.type.kill_mob: "Uccidi il nemico"
 safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare 🐺 *%s* avvistato sul pianeta 🌏*%s* e annientarlo.\nBuona fortuna."
 safeplanet.mission.type.resources_finding: "Recupero risorse"
-safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di recuperare *%v* quantità di 💠*%v*.\nBuona fortuna."
+safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di trovare e recuperare:\n- 💠 *%v* x %s*%v* (%s) %s\nBuona fortuna."

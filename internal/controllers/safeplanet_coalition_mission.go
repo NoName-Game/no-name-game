@@ -173,7 +173,9 @@ func (c *SafePlanetMissionController) Stage() {
 			),
 		)
 
+		// Verifico quale tipologia di missione è stata estratta
 		switch rGetMission.GetMission().GetMissionCategory().GetSlug() {
+		// Trova il pianeta
 		case "resources_finding":
 			var missionPayload *pb.MissionResourcesFinding
 			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
@@ -189,8 +191,13 @@ func (c *SafePlanetMissionController) Stage() {
 			missionRecap += helpers.Trans(c.Player.Language.Slug,
 				"safeplanet.mission.type.resources_finding.description",
 				missionPayload.GetResourceQty(),
+				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 				rGetResourceByID.GetResource().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 			)
+
+		// Trova le risorse
 		case "planet_finding":
 			var missionPayload *pb.MissionPlanetFinding
 			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
@@ -207,6 +214,8 @@ func (c *SafePlanetMissionController) Stage() {
 				"safeplanet.mission.type.planet_finding.description",
 				rGetPlanetByID.GetPlanet().GetName(),
 			)
+
+		// Uccidi il nemico
 		case "kill_mob":
 			var missionPayload *pb.MissionKillMob
 			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
