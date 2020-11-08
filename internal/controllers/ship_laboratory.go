@@ -337,11 +337,28 @@ func (c *ShipLaboratoryController) Stage() {
 				resourceName = "*???*"
 			}
 
-			itemsRecipeList += fmt.Sprintf("%s %v/*%v* x %s (%s)\n",
+			resourceCategory := ""
+			switch rGetResourceByID.GetResource().GetResourceCategoryID() {
+			case 1:
+				resourceCategory = "🔥"
+			case 2:
+				resourceCategory = "💧"
+			case 3:
+				resourceCategory = "⚡️"
+			}
+
+			// Verifico se è una risorsa base
+			baseResources := ""
+			if rGetResourceByID.GetResource().GetBase() {
+				baseResources = "🔬Base"
+			}
+
+			itemsRecipeList += fmt.Sprintf("%s %s%s (%s) %s - %v/*%v*\n",
 				haveQuantity,
-				rGetPlayerResourceByID.GetPlayerInventory().GetQuantity(), value,
-				resourceName,
+				resourceCategory, resourceName,
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				baseResources,
+				rGetPlayerResourceByID.GetPlayerInventory().GetQuantity(), value,
 			)
 		}
 

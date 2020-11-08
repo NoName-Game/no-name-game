@@ -264,11 +264,18 @@ func (c *ExplorationController) Stage() {
 				c.Logger.Panic(err)
 			}
 
+			// Verifico se è una risorsa base
+			baseResources := ""
+			if rGetResourceByID.GetResource().GetBase() {
+				baseResources = "🔬Base"
+			}
+
 			// Aggiungo dettaglio risorsa
-			resourcesListMessage += fmt.Sprintf("💠 *%v* x *%s* (%s)\n",
+			resourcesListMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
-				rGetResourceByID.GetResource().GetRarity().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				baseResources,
 			)
 		}
 

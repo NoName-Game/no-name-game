@@ -54,12 +54,25 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 
 	var recapResources string
 	for _, resource := range rGetPlayerResource.GetPlayerInventory() {
-		recapResources += fmt.Sprintf(
-			"- %v x %s (*%s*)\n",
-			resource.Quantity,
-			resource.Resource.Name,
-			strings.ToUpper(resource.Resource.Rarity.Slug),
-		)
+		if resource.GetQuantity() > 0 {
+			category := ""
+			switch resource.GetResource().GetResourceCategoryID() {
+			case 1:
+				category = "🔥"
+			case 2:
+				category = "💧"
+			case 3:
+				category = "⚡️"
+			}
+
+			recapResources += fmt.Sprintf(
+				"- %s %v x %s (*%s*)\n",
+				category,
+				resource.Quantity,
+				resource.Resource.Name,
+				strings.ToUpper(resource.Resource.Rarity.Slug),
+			)
+		}
 	}
 
 	// Riassumo il tutto
@@ -71,6 +84,12 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, finalResource)
 	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+		),
+	)
+
 	if _, err = helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}

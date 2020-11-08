@@ -20,7 +20,8 @@ ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazi
 
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare un po' di enerigie?"
-ship.rests.time: "\n\n⏱: Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests.play_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti per riprendere le attività."
+ship.rests.full_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti al recupero *totale* delle forze."
 ship.rests.info: "\n\n📖: Mettendosi a dormire recupererai *1HP* per ogni minuto passato a riposare. Non è necessario attendere il recupero totale delle forze per svegliarsi.\n"
 ship.rests.start: "💤 Mettiti a dormire 💤"
 ship.rests.wakeup: "⏰ Svegliati"

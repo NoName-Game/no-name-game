@@ -227,9 +227,15 @@ func (c *ShipTravelController) Stage() {
 				planetName = fmt.Sprintf("%s 🏟", explorationInfo.Planet.Name)
 			}
 
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⏱ %v (%s) ⛽️ -%v%% 🔧 -%v%%",
+			// Calcolo tempo di esplorazione e se il viaggi è più breve di 1 ora riporto in minuti
+			travelTime := fmt.Sprintf("%v (%s)", explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"))
+			if explorationInfo.Time/60 <= 0 {
+				travelTime = fmt.Sprintf("%v (%s)", explorationInfo.Time, helpers.Trans(c.Player.Language.Slug, "minutes"))
+			}
+
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⏱ %v ⛽️ -%v%% 🔧 -%v%%",
 				planetName,
-				explorationInfo.Time/60, helpers.Trans(c.Player.Language.Slug, "hours"),
+				travelTime,
 				explorationInfo.Fuel,
 				explorationInfo.Integrity,
 			)

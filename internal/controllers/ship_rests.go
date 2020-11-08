@@ -119,7 +119,8 @@ func (c *ShipRestsController) Stage() {
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests")
 		if restsInfo.NeedRests {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.time", restsInfo.GetRestsTime())
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.play_rest_time", restsInfo.GetPlayRestsTime())
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.full_rest_time", restsInfo.GetFullRestsTime())
 		}
 		restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 
@@ -201,10 +202,14 @@ func (c *ShipRestsController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Recap Rest
+		var recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
+		if rEndPlayerRest.GetLifeRecovered() > 0 {
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered())
+		}
+
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered()),
-		)
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapMessage)
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
