@@ -8,11 +8,11 @@ items.amulets: "Amuleto"
 
 # Medical
 items.revitalizing_small: "Revitalizzante piccolo"
-items.description.revitalizing_small: "📖: Permette di recuperare *%vHP*. Ideale nelle situazioni più critiche."
+items.description.revitalizing_small: "📖: Permette di recuperare *%v%%* della vita massima. Ideale nelle situazioni più critiche."
 items.revitalizing_medium: "Revitalizzante medio"
-items.description.revitalizing_medium: "📖: Permette di recuperare *%vHP*."
+items.description.revitalizing_medium: "📖: Permette di recuperare *%v%%* della vita massima."
 items.revitalizing_max: "Revitalizzante grande"
-items.description.revitalizing_max: "📖: Permette di recuperare *%vHP*."
+items.description.revitalizing_max: "📖: Permette di recuperare *%v%%* della vita massima."
 
 # Ship support
 items.raw_fuel: "Carburante grezzo"

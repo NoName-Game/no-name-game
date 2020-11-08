@@ -17,6 +17,8 @@ ship.travel.end: "Hai raggiunto il nuovo pianeta."
 ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
 ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
+ship.travel.reachable: "✅ Raggiungibilie"
+ship.travel.unreachable: "❌ Non Raggiungibilie"
 
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare un po' di enerigie?"

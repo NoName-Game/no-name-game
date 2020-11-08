@@ -268,7 +268,7 @@ func (c *HuntingController) Hunting() {
 		// al DB registro il tutto sula cache
 		var rGetPlanetMapByID *pb.GetPlanetMapByIDResponse
 		if rGetPlanetMapByID, err = config.App.Server.Connection.GetPlanetMapByID(helpers.NewContext(1), &pb.GetPlanetMapByIDRequest{
-			PlanetMapID: playerPosition.GetID(),
+			PlanetMapID: playerPosition.GetPlanetMapID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

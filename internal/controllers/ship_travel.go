@@ -168,9 +168,7 @@ func (c *ShipTravelController) Stage() {
 	// Notifico al player la sua posizione e se vuole avviare
 	// una nuova esplorazione
 	case 0:
-		// ****************************
-		// Recupero nave attiva de player
-		// ****************************
+		// Recupero nave attualemente attiva
 		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
 			PlayerID: c.Player.GetID(),
@@ -206,6 +204,14 @@ func (c *ShipTravelController) Stage() {
 
 	// In questo stage recupero le stelle più vicine disponibili per il player
 	case 1:
+		// Recupero nave attualemente attiva
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Recupero informazioni di esplorazione
 		var responseTravelInfo *pb.GetShipTravelInfoResponse
 		if responseTravelInfo, err = config.App.Server.Connection.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
@@ -221,6 +227,17 @@ func (c *ShipTravelController) Stage() {
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
 		for _, explorationInfo := range responseTravelInfo.GetInfo() {
+			// Per scontato che il pianeta sia raggiungibile
+			reachable := true
+
+			// Verifico se il pianeta è raggiungibile in base allo stato della nave
+			reachableMsg := helpers.Trans(c.Player.Language.Slug, "ship.travel.reachable")
+			if rGetPlayerShipEquipped.GetShip().GetIntegrity() < explorationInfo.Integrity ||
+				rGetPlayerShipEquipped.GetShip().GetTank() < explorationInfo.Fuel {
+				reachable = false
+				reachableMsg = helpers.Trans(c.Player.Language.Slug, "ship.travel.unreachable")
+			}
+
 			// Se il pianeta è sicuro allora appendo al nome l'icona di riferimento
 			planetName := explorationInfo.Planet.Name
 			if explorationInfo.Planet.Safe {
@@ -233,8 +250,8 @@ func (c *ShipTravelController) Stage() {
 				travelTime = fmt.Sprintf("%v (%s)", explorationInfo.Time, helpers.Trans(c.Player.Language.Slug, "minutes"))
 			}
 
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s\n⏱ %v ⛽️ -%v%% 🔧 -%v%%",
-				planetName,
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s - %s\n⏱ %v ⛽️ -%v%% 🔧 -%v%%",
+				planetName, reachableMsg,
 				travelTime,
 				explorationInfo.Fuel,
 				explorationInfo.Integrity,
@@ -244,11 +261,12 @@ func (c *ShipTravelController) Stage() {
 			starNearestMapName[int(explorationInfo.Planet.ID)] = explorationInfo.Planet.Name
 			starNearestMapInfo[int(explorationInfo.Planet.ID)] = explorationInfo
 
-			// Aggiungo stelle alla keyboard
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-				explorationInfo.Planet.Name,
-			))
-			keyboardRowStars = append(keyboardRowStars, keyboardRow)
+			// Aggiungo stelle raggiungibili alla keyboard
+			if reachable {
+				keyboardRowStars = append(keyboardRowStars, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+					explorationInfo.Planet.Name,
+				)))
+			}
 		}
 
 		keyboardRowStars = append(keyboardRowStars,

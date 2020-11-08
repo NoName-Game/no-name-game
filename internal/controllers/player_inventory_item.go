@@ -139,7 +139,9 @@ func (c *PlayerInventoryItemController) Stage() {
 				),
 			)
 
-			keyboardRowItems = append(keyboardRowItems, keyboardRowItem)
+			if item.Quantity > 0 {
+				keyboardRowItems = append(keyboardRowItems, keyboardRowItem)
+			}
 		}
 
 		keyboardRowItems = append(keyboardRowItems, tgbotapi.NewKeyboardButtonRow(

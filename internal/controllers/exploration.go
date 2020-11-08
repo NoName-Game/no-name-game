@@ -253,9 +253,9 @@ func (c *ExplorationController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Ciclo risorse recuperate
-		var resourcesListMessage string
-		for _, dropResult := range rExplorationDropResources.GetDropResults() {
+		// Riporto le risorese estratte in questo ciclo
+		var cycleResourcesMessage string
+		for _, dropResult := range rExplorationDropResources.GetCycleDropResults() {
 			// Recupero dettagli risorse
 			var rGetResourceByID *pb.GetResourceByIDResponse
 			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
@@ -271,7 +271,33 @@ func (c *ExplorationController) Stage() {
 			}
 
 			// Aggiungo dettaglio risorsa
-			resourcesListMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
+			cycleResourcesMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
+				dropResult.GetQuantity(),
+				rGetResourceByID.GetResource().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				baseResources,
+			)
+		}
+
+		// TUTTE le risorse estratte
+		var allResourcesMessage string
+		for _, dropResult := range rExplorationDropResources.GetAllDropResults() {
+			// Recupero dettagli risorse
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: dropResult.GetResourceID(),
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			// Verifico se è una risorsa base
+			baseResources := ""
+			if rGetResourceByID.GetResource().GetBase() {
+				baseResources = "🔬Base"
+			}
+
+			// Aggiungo dettaglio risorsa
+			allResourcesMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
@@ -284,7 +310,8 @@ func (c *ExplorationController) Stage() {
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"exploration.extraction_recap",
-				resourcesListMessage,
+				cycleResourcesMessage,
+				allResourcesMessage,
 			),
 		)
 
