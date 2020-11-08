@@ -56,10 +56,11 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Aggiunto informazioni principali pianeta
-	planetDetailsMsg := fmt.Sprintf("%s \n\n%s \n%s\n\n",
+	planetDetailsMsg := fmt.Sprintf("%s\n%s \n%s\n%s\n\n",
 		helpers.Trans(player.Language.Slug, "planet.intro"),
 		helpers.Trans(player.Language.Slug, "planet.details.system", rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName()),
 		helpers.Trans(player.Language.Slug, "planet.details.name", rGetPlanetByID.GetPlanet().GetName()),
+		helpers.Trans(player.Language.Slug, "planet.details.coordinate.encypted", rGetPlanetByID.GetPlanet().GetHashPosition()),
 	)
 
 	var rCountPlayerVisitedCurrentPlanet *pb.CountPlayerVisitedCurrentPlanetResponse
@@ -72,14 +73,6 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Aggiunto informazioni aggiuntive
 	planetDetailsMsg += fmt.Sprintf("%s\n\n",
 		helpers.Trans(player.Language.Slug, "planet.details.count_visited_player", rCountPlayerVisitedCurrentPlanet.GetValue()),
-	)
-
-	// Aggiungo coordinate pianeta
-	planetDetailsMsg += fmt.Sprintf("📡 %s:\n%s \n%s \n%s",
-		helpers.Trans(player.Language.Slug, "coordinate"),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.x", rGetPlanetByID.GetPlanet().GetX()),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.y", rGetPlanetByID.GetPlanet().GetY()),
-		helpers.Trans(player.Language.Slug, "planet.details.coordinate.z", rGetPlanetByID.GetPlanet().GetZ()),
 	)
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)

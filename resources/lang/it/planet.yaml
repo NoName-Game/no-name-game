@@ -1,7 +1,8 @@
 # PLANET
-planet.intro: "Dettagli posizione attuale:"
+planet.intro: "Dettagli pianeta corrente:"
 planet.details.system: "💫 Sistema: *%s*"
 planet.details.name: "🌍 Pianeta: *%s*"
+planet.details.coordinate.encypted: "📡 Crypted Coordinate:\n*%v*"
 planet.details.coordinate.x: "🆇 %v"
 planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
