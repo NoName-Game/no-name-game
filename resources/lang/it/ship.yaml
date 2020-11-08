@@ -1,7 +1,7 @@
 # SHIP
 ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
-# Exploration
+# Travel
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 *Pianeta*?"
 ship.travel.ship_stats: "\n\nLa tua 🚀 *Nave* posside:"
 ship.travel.ship_engine: "\nMotori di livello: *%v*"
@@ -14,7 +14,7 @@ ship.travel.fuel_needed: "Carburante necessario"
 ship.travel.time_needed: "Tempo necessario"
 ship.travel.exploring: "🚀 Motori accesi, buon viaggio!\nIl tuo arrivo è previsto per le *%s*"
 ship.travel.end: "Hai raggiunto il nuovo pianeta."
-ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
+ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\n*Le tue gemme*:💎*%v*\nUtilizza 💎*1* per completare subito il viaggio.\n"
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
 ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 ship.travel.reachable: "✅ Raggiungibilie"

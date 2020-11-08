@@ -275,7 +275,7 @@ notification.activity.route.ship.travel: "Nuovo pianeta raggiunto!"
 notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 notification.activity.route.death: "Hai recuperato le energie!"
 
-notification.achievement.message: "Achievement completato!\nHai portato a termine *%s* ottenendo così:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.achievement.message: "Achievement completato!\nHai portato a termine: *%s*\n\n*Ricompensa*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
 achievement.tutorial: "Tutorial"
 ################################################################################################################
 ################################################################################################################

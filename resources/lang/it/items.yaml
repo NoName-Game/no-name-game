@@ -7,11 +7,11 @@ items.ship_support: "⚙️"
 items.amulets: "Amuleto"
 
 # Medical
-items.revitalizing_small: "Revitalizzante piccolo"
+items.revitalizing_small: "Rivitalizzante piccolo"
 items.description.revitalizing_small: "📖: Permette di recuperare *%v%%* della vita massima. Ideale nelle situazioni più critiche."
-items.revitalizing_medium: "Revitalizzante medio"
+items.revitalizing_medium: "Rivitalizzante medio"
 items.description.revitalizing_medium: "📖: Permette di recuperare *%v%%* della vita massima."
-items.revitalizing_max: "Revitalizzante grande"
+items.revitalizing_max: "Rivitalizzante grande"
 items.description.revitalizing_max: "📖: Permette di recuperare *%v%%* della vita massima."
 
 # Ship support

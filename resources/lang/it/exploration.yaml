@@ -1,8 +1,8 @@
 # MISSION
-exploration.tips: "📖: Esegui delle esplorazioni per recupero materiale unico per ogni pianeta.*Ogni* esplorazione ha una durata iniziale di *10* minuti, questa durata *aumenterà* ripetendo più volte lo stesso ciclo, così come i materiali da te recuperabili."
+exploration.tips: "📖: Esegui delle esplorazioni per il recupero del materiale proprio del pianeta.*Ogni* esplorazione ha una durata iniziale di *10* minuti, ripetendo più volte l'esplorazione la durata e i materiali da te recuperabili aumenteranno."
 exploration.exploration: "Seleziona campo di esplorazione:"
 exploration.underground: "🔥 Sottosuolo"
-exploration.surface: "💧 Superfice"
+exploration.surface: "💧 Superficie"
 exploration.atmosphere: "⚡️️ Atmosfera"
 exploration.extraction_recap: "In questo ciclo esplorativo hai estratto le seguenti risorse:\n%s \nEstraendo in totale le seguenti risorse:\n%s \nVuoi continuare l'esplorazione?"
 exploration.extraction_ended: "Sei rientrato con le tue nuove risorse!\n\n💠 *Rapporto Esplorazione:*\n"
