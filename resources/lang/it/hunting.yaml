@@ -17,7 +17,7 @@ combat.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico è riuscito a
 combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nStai mirando a: *%s*\nArma equipaggiata:\n*%s* (🛠 *%v*)"
 combat.mob_killed: "Sei riuscito a *sconfiggere* il nemico!\nDallo scontro riesci a recuperare:\n%s"
 combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
-combat.found.resource: "\n💠*%s*"
+combat.found.resource: "\n%s*%s* (%s) %s"
 combat.found.item: "\n🔩*%s*"
 combat.found.transaction: "\n💰*%v*"
 combat.experience: "Ottenendo anche 🏵 *%v* esperienza!"

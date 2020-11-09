@@ -8,7 +8,7 @@ exploration.extraction_recap: "In questo ciclo esplorativo hai estratto le segue
 exploration.extraction_ended: "Sei rientrato con le tue nuove risorse!\n\n💠 *Rapporto Esplorazione:*\n"
 exploration.comeback: "🏃‍♂️ Torna alla base"
 exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle *%s*."
-exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle *%s*."
+exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle *%s*.\n\n⚠️ Abbandonando rinuncerai a tutte le risorse recuperate in questa esplorazione."
 exploration.conqueror_bonus: "\n\n🚩*Bouns Conquistatore! (x2)*\nSembra che tu conosca molto bene questo pianeta! Grazie a questo bonus ogni ricerca ti fornirà il *doppio* di 💠 *Risorse*!"
 exploration.continue: "Continua ad esplorare"
 exploration.breaker.continue: "Continua esplorazione"

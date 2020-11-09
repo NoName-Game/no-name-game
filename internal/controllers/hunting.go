@@ -831,7 +831,12 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *
 
 	// Aggiungo risorse o item trovati
 	if rHitEnemy.GetEnemyDrop().GetResource() != nil {
-		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource", rHitEnemy.GetEnemyDrop().GetResource().GetName())
+		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.resource",
+			helpers.GetResourceCategoryIcons(rHitEnemy.GetEnemyDrop().GetResource().GetResourceCategoryID()),
+			rHitEnemy.GetEnemyDrop().GetResource().GetName(),
+			rHitEnemy.GetEnemyDrop().GetResource().GetRarity().GetSlug(),
+			helpers.GetResourceBaseIcons(rHitEnemy.GetEnemyDrop().GetResource().GetBase()),
+		)
 	} else if rHitEnemy.GetEnemyDrop().GetItem() != nil {
 		itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rHitEnemy.GetEnemyDrop().GetItem().GetSlug()))
 		dropRecap += helpers.Trans(c.Player.Language.Slug, "combat.found.item", itemFound)
