@@ -305,8 +305,7 @@ func (c *PlayerEquipmentController) Stage() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s (%s) %v🩸",
-								// helpers.Trans(c.Player.Language.Slug, "equip"),
+								"%s (%s) -🩸%v",
 								weapon.Name,
 								strings.ToUpper(weapon.Rarity.Slug),
 								weapon.RawDamage,
