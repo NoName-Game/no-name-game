@@ -1,5 +1,6 @@
 # Hangar
-safeplanet.hangar.intro: "Benvenuto nell'hangar, cosa vuoi fare?"
+safeplanet.hangar.intro: "Benvenuto nell'*hangar*!\n\nQui possiamo tenere al sicuro le tue navi e potrati sfruttare dei nostri servizi dedicati.\nCosa vuoi fare?"
+safeplanet.hangar.ship_recap: "La tua nave attuale:\n🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
 safeplanet.hangar.info: "Vuoi riparare la tua nave?\n\n"
 safeplanet.hangar.partial: "Riparazione *Parziale*:"
@@ -23,6 +24,7 @@ safeplanet.hangar.create.end: "Fine lavorazione: %s"
 safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rairtà *%s* al costo di 💰*%v*?"
 safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
+safeplanet.hangar.ships.intro: "Quale tipologia di nave vorresti vedere?"
 safeplanet.hangar.ships.list: "Ecco la lista delle tue navi per la categoria scelta"
 safeplanet.hangar.ships.confirm_equip: "Sei sicuro di volere sostituire la tua attuale nave con questa?"
 safeplanet.hangar.ships.confirm: "Equipaggia nave"

@@ -1,11 +1,13 @@
 # SHIP
-ship.report.card: "🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
+ship.intro: "Sali a bordo della tua nave 🚀 *%s* (*%s*) - *%s*\n\nQuale attività vorresti eseguire?"
 
 # Travel
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 *Pianeta*?"
-ship.travel.ship_stats: "\n\nLa tua 🚀 *Nave* posside:"
+ship.travel.ship_stats: "\n\nStato della tua 🚀 *Nave*:"
 ship.travel.ship_engine: "\nMotori di livello: *%v*"
 ship.travel.ship_scanner: "\nScanner di livello: *%v*"
+ship.travel.ship_integrity: "\nIntegrità: 🔧*%v*%%"
+ship.travel.ship_carburante: "\nCarburante: ⛽*%v*%%"
 ship.travel.tip: "\n\n📖: Effettuando una ricerca potrai trovare nuovi pianeti in base alla posizione attuale e alla potenza dello scanner della tua nave.\nIl tempo di raggiungimento è dato dalla forza dei motori della nave."
 ship.travel.current_position: "🗺 Coordinati correnti:"
 ship.travel.research: "Sono stati rilevati 🌏*%d* pianeti!\nQuale di questi vorresti raggiungere?"
@@ -21,9 +23,9 @@ ship.travel.unreachable: "❌ Non Raggiungibilie"
 
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare un po' di enerigie?"
-ship.rests.play_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti per riprendere le attività."
 ship.rests.full_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti al recupero *totale* delle forze."
-ship.rests.info: "\n\n📖: Mettendosi a dormire recupererai *1HP* per ogni minuto passato a riposare. Non è necessario attendere il recupero totale delle forze per svegliarsi.\n"
+ship.rests.play_rest_time: "\n\n⚠️: *%v* minuti per riprendere le attività."
+ship.rests.info: "\n\n📖: Mettendosi a dormire recupererai *10HP* per ogni minuto passato a riposare. Non è necessario attendere il recupero totale delle forze per svegliarsi.\n"
 ship.rests.start: "💤 Mettiti a dormire 💤"
 ship.rests.wakeup: "⏰ Svegliati"
 ship.rests.dont_need: "Sei pieno di energie, ci provi, ma proprio non riesci ad addormentarti.\nTorna quando ne avrai bisogno."

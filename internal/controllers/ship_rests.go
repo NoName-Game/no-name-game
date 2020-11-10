@@ -119,8 +119,12 @@ func (c *ShipRestsController) Stage() {
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests")
 		if restsInfo.NeedRests {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.play_rest_time", restsInfo.GetPlayRestsTime())
 			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.full_rest_time", restsInfo.GetFullRestsTime())
+
+			// Verifico quanto è necessario riposare per tornare in vita/svolgere le attività
+			if restsInfo.GetPlayRestsTime() > 0 {
+				restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.play_rest_time", restsInfo.GetPlayRestsTime())
+			}
 		}
 		restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 
@@ -205,7 +209,7 @@ func (c *ShipRestsController) Stage() {
 		// Recap Rest
 		var recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
 		if rEndPlayerRest.GetLifeRecovered() > 0 {
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered())
+			recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered())
 		}
 
 		// Invio messaggio

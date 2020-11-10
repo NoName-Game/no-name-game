@@ -36,7 +36,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &ShipController{},
 				FromStage: 0,
 			},
 		},
@@ -54,11 +54,13 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 
 	// Invio messaggio con recap
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-		fmt.Sprintf("%s %s %s %s %s",
+		fmt.Sprintf("%s %s %s %s %s %s %s",
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats"),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetEngine()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetRadar()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_integrity", rGetPlayerShipEquipped.GetShip().GetIntegrity()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.tip"),
 		))
 	msg.ParseMode = "markdown"

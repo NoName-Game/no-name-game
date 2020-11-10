@@ -51,7 +51,7 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 	}
 
 	// Invio messaggio
-	recapShip := helpers.Trans(c.Player.Language.Slug, "ship.report.card",
+	recapShip := helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ship_recap",
 		rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
 		rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
 		rGetPlayerShipEquipped.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
