@@ -213,20 +213,20 @@ func (c *ShipTravelController) Stage() {
 		}
 
 		// Recupero informazioni di esplorazione
-		var responseTravelInfo *pb.GetShipTravelInfoResponse
-		if responseTravelInfo, err = config.App.Server.Connection.GetShipTravelInfo(helpers.NewContext(1), &pb.GetShipTravelInfoRequest{
+		var rShipTravelRadarInfo *pb.ShipTravelInfoResponse
+		if rShipTravelRadarInfo, err = config.App.Server.Connection.ShipTravelRadarInfo(helpers.NewContext(1), &pb.ShipTravelInfoRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var starNearestMapName = make(map[int]string)
-		var starNearestMapInfo = make(map[int]*pb.GetShipTravelInfoResponse_GetShipTravelInfo)
+		var starNearestMapInfo = make(map[int]*pb.ShipTravelInfoResponse_ShipTravelInfo)
 		var msgNearestStars string
 
 		// Keyboard con riassunto risorse necessarie
 		var keyboardRowStars [][]tgbotapi.KeyboardButton
-		for _, explorationInfo := range responseTravelInfo.GetInfo() {
+		for _, explorationInfo := range rShipTravelRadarInfo.GetInfo() {
 			// Per scontato che il pianeta sia raggiungibile
 			reachable := true
 
@@ -279,7 +279,7 @@ func (c *ShipTravelController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 			fmt.Sprintf(
 				"%s %s",
-				helpers.Trans(c.Player.Language.Slug, "ship.travel.research", len(responseTravelInfo.GetInfo())),
+				helpers.Trans(c.Player.Language.Slug, "ship.travel.research", len(rShipTravelRadarInfo.GetInfo())),
 				msgNearestStars,
 			),
 		)
