@@ -25,10 +25,12 @@ var routes = map[string]reflect.Type{
 	"route.hunting":     reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
 
 	// Ship
-	"route.ship":            reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
-	"route.ship.travel":     reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
-	"route.ship.rests":      reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
-	"route.ship.laboratory": reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
+	"route.ship":                 reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),
+	"route.ship.travel":          reflect.TypeOf((*controllers.ShipTravelController)(nil)).Elem(),
+	"route.ship.travel.finding":  reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
+	"route.ship.travel.favorite": reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
+	"route.ship.rests":           reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+	"route.ship.laboratory":      reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
 
 	// Player
 	"route.player":                     reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
