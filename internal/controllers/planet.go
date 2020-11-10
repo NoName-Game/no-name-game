@@ -47,7 +47,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
-	// Riceco pianeta per ID, in modo da ottenere maggior informazioni
+	// Ricerco pianeta per ID, in modo da ottenere maggior informazioni
 	var rGetPlanetByID *pb.GetPlanetByIDResponse
 	if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
 		PlanetID: playerPosition.GetID(),
@@ -75,13 +75,37 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		helpers.Trans(player.Language.Slug, "planet.details.count_visited_player", rCountPlayerVisitedCurrentPlanet.GetValue()),
 	)
 
+	// Verifico se il player ha già il pianeta tra i preferiti
+	var rCheckIfPlayerHavePlanetBookmark *pb.CheckIfPlayerHavePlanetBookmarkResponse
+	if rCheckIfPlayerHavePlanetBookmark, err = config.App.Server.Connection.CheckIfPlayerHavePlanetBookmark(helpers.NewContext(1), &pb.CheckIfPlayerHavePlanetBookmarkRequest{
+		PlanetID: playerPosition.GetID(),
+		PlayerID: c.Player.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var keyboardRow [][]tgbotapi.KeyboardButton
+	if rCheckIfPlayerHavePlanetBookmark.GetHaveBookmark() {
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.bookmark.remove")),
+		))
+	} else {
+		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.bookmark.add")),
+		))
+	}
+
+	// Aggiungo torna al menu
+	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+	))
+
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)
 	msg.ParseMode = "markdown"
-	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
-		),
-	)
+	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+		ResizeKeyboard: true,
+		Keyboard:       keyboardRow,
+	}
 
 	if _, err = helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)

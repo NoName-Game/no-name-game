@@ -41,7 +41,9 @@ var routes = map[string]reflect.Type{
 	"route.banned":                     reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
 
 	// Planet
-	"route.planet": reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
+	"route.planet":                 reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
+	"route.planet.bookmark.add":    reflect.TypeOf((*controllers.PlanetBookmarkAddController)(nil)).Elem(),
+	"route.planet.bookmark.remove": reflect.TypeOf((*controllers.PlanetBookmarkRemoveController)(nil)).Elem(),
 
 	// Safe Planet
 	"route.safeplanet.coalition.daily_reward":             reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),

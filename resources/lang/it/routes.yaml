@@ -22,6 +22,8 @@ route.menu.npc: "🏛 Piazza"
 route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Pianeta"
+route.planet.bookmark.add: "⭐️ Aggiunti ai preferiti"
+route.planet.bookmark.remove: "⭐️ Rimuovi dai preferiti"
 route.conqueror: "🚩 Conquistatore"
 
 # Safe planet
