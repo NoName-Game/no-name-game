@@ -3,7 +3,8 @@ safeplanet.hangar.intro: "Benvenuto nell'*hangar*!\n\nQui possiamo tenere al sic
 safeplanet.hangar.ship_recap: "Nave attuale:\n🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
 # Repair
-safeplanet.hangar.info: "Vuoi riparare la tua nave?\n\n"
+safeplanet.hangar.info: "Ecco la lista delle tue navi che necessitano una riparzione:"
+safeplanet.hangar.repairinfo: "Ecco i dettagli di riparazione per *%s*\n\n"
 safeplanet.hangar.partial: "Riparazione *Parziale*:"
 safeplanet.hangar.full: "Riparazione *Completa*:"
 safeplanet.hangar.time: "⏱ Tempo necessario: *%v* (minuti)"
@@ -21,8 +22,8 @@ safeplanet.hangar.reparing.finish: "La tua nave è stata riparata con successo."
 safeplanet.hangar.create.intro: "Possiamo metterci al lavoro per provare a relizzare la nave che desideri.\nA quale categoria di nave sei interessato?"
 safeplanet.hangar.create.chose_rarity: "Perfetto!\nPer quale rarità?"
 safeplanet.hangar.create.wait: "Stiamo lavorando ancora alla tua nave, dovremmo concludere i lavori per le *%s*\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
-safeplanet.hangar.create.start: "Richiesta presa in carico *%s*"
-safeplanet.hangar.create.end: "Fine lavorazione: %s"
+safeplanet.hangar.create.start: "Abbiamo preso in carico la tua richiesta, torna da noi alle *%s*"
+safeplanet.hangar.create.end: "Ecco a te! Vai al deposito per scoprire la tua nuova nave: *%s*"
 safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rairtà *%s* al costo di 💰*%v*?"
 safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 

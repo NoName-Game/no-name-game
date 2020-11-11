@@ -1,6 +1,6 @@
 # Crafter
 safeplanet.crafting.intro: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa dobbiamo fare oggi?"
-safeplanet.crafting.no_money: "Mi spiace non hai abbastanza denaro per proseguire!"
+safeplanet.crafting.no_money: "❌ Mi spiace non hai abbastanza denaro per proseguire!"
 
 # Crafter - Create
 safeplanet.crafting.start: "⚒️ Inizia!"

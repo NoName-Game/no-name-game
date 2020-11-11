@@ -405,12 +405,12 @@ func (c *SafePlanetHangarCreateController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.end", ship.GetName()))
+		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 			),
 		)
-
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

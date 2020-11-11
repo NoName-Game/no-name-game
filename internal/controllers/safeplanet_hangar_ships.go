@@ -67,6 +67,8 @@ func (c *SafePlanetHangarShipsController) Validator() (hasErrors bool) {
 	// Verifico categoria passata
 	// ##################################################################################################
 	case 1:
+		categoryMsg := strings.Split(c.Update.Message.Text, " (")[0]
+
 		var err error
 		var rGetAllShipCategories *pb.GetAllShipCategoriesResponse
 		if rGetAllShipCategories, err = config.App.Server.Connection.GetAllShipCategories(helpers.NewContext(1), &pb.GetAllShipCategoriesRequest{}); err != nil {
@@ -74,7 +76,7 @@ func (c *SafePlanetHangarShipsController) Validator() (hasErrors bool) {
 		}
 
 		for _, category := range rGetAllShipCategories.GetShipCategories() {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())) == c.Update.Message.Text {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())) == categoryMsg {
 				c.Payload.CategoryID = category.GetID()
 				return false
 			}
@@ -86,6 +88,8 @@ func (c *SafePlanetHangarShipsController) Validator() (hasErrors bool) {
 	// Verifico nave passata
 	// ##################################################################################################
 	case 2:
+		shipMsg := strings.Split(c.Update.Message.Text, " (")[0]
+
 		var err error
 		var rGetPlayerShips *pb.GetPlayerShipsResponse
 		if rGetPlayerShips, err = config.App.Server.Connection.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
@@ -95,7 +99,7 @@ func (c *SafePlanetHangarShipsController) Validator() (hasErrors bool) {
 		}
 
 		for _, ship := range rGetPlayerShips.GetShips() {
-			if c.Update.Message.Text == ship.GetName() {
+			if shipMsg == ship.GetName() {
 				c.Payload.ShipID = ship.GetID()
 				return false
 			}
@@ -142,16 +146,21 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		for _, category := range rGetAllShipCategories.GetShipCategories() {
 			// Verifico se il player possiede navi di questa categoria
 			var haveCategoryShipForThisCategory bool
+			var shipQuantityForThisCategory int32
 			for _, ship := range rGetPlayerShips.GetShips() {
 				if ship.ShipCategoryID == category.ID {
 					haveCategoryShipForThisCategory = true
+					shipQuantityForThisCategory++
 				}
 			}
 
 			if haveCategoryShipForThisCategory {
 				categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())),
+						fmt.Sprintf("%s (%v)",
+							helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())),
+							shipQuantityForThisCategory,
+						),
 					),
 				))
 			}
@@ -192,7 +201,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 			if ship.GetShipCategory().GetID() == c.Payload.CategoryID {
 				shipsKeyboard = append(shipsKeyboard, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						ship.GetName(),
+						fmt.Sprintf("%s (%s)", ship.GetName(), ship.GetRarity().GetSlug()),
 					),
 				))
 			}
