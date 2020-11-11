@@ -644,24 +644,27 @@ func (c *HuntingController) PlayerFightKeyboard() *tgbotapi.InlineKeyboardMarkup
 	// #######################
 	// Abilità
 	// #######################
-	// Verifico se il player possiede abilità di comattimento o difesa
-	var rCheckIfPlayerHaveAbility *pb.CheckIfPlayerHaveAbilityResponse
-	if rCheckIfPlayerHaveAbility, err = config.App.Server.Connection.CheckIfPlayerHaveAbility(helpers.NewContext(1), &pb.CheckIfPlayerHaveAbilityRequest{
-		PlayerID:  c.Player.ID,
-		AbilityID: 7, // Attacco pesante
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
+	// Ciclo le abilità al combattimento
+	for _, abilityID := range []uint32{7, 8} {
+		// Verifico se il player possiede abilità di comattimento o difesa
+		var rCheckIfPlayerHaveAbility *pb.CheckIfPlayerHaveAbilityResponse
+		if rCheckIfPlayerHaveAbility, err = config.App.Server.Connection.CheckIfPlayerHaveAbility(helpers.NewContext(1), &pb.CheckIfPlayerHaveAbilityRequest{
+			PlayerID:  c.Player.ID,
+			AbilityID: abilityID, // Attacco pesante
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
 
-	if rCheckIfPlayerHaveAbility.GetHaveAbility() {
-		// Appendo abilità player
-		var dataAbilityStruct = helpers.InlineDataStruct{C: "hunting", AT: "fight", A: "hit", SA: "ability", D: rCheckIfPlayerHaveAbility.GetAbility().GetID()}
-		newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.accademy.ability.%s", rCheckIfPlayerHaveAbility.GetAbility().GetSlug())),
-				dataAbilityStruct.GetDataString(),
-			),
-		))
+		if rCheckIfPlayerHaveAbility.GetHaveAbility() {
+			// Appendo abilità player
+			var dataAbilityStruct = helpers.InlineDataStruct{C: "hunting", AT: "fight", A: "hit", SA: "ability", D: rCheckIfPlayerHaveAbility.GetAbility().GetID()}
+			newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(
+					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.accademy.ability.%s", rCheckIfPlayerHaveAbility.GetAbility().GetSlug())),
+					dataAbilityStruct.GetDataString(),
+				),
+			))
+		}
 	}
 
 	return newfightKeyboard
@@ -782,11 +785,6 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 			c.Update.CallbackQuery.Message.MessageID,
 			helpers.Trans(c.Player.Language.Slug, "combat.damage", rHitEnemy.GetPlayerDamage(), rHitEnemy.GetEnemyDamage()),
 		)
-	}
-
-	// Aggiungo dettagli abilità
-	if abilityID == 7 {
-		combactMessage.Text += "\n A causa della tua abilità hai perso ulteriri 5HP"
 	}
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

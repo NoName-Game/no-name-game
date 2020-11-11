@@ -206,7 +206,7 @@ func (c *SafePlanetAccademyController) Stage() {
 			AbilityCategoryID: c.Payload.AbilityCategoryID,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player dont have enough amulets quantity") {
+		if err != nil && strings.Contains(err.Error(), "not enough quantity") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di amuleti
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.accademy.not_enough_amulets"),
@@ -218,6 +218,8 @@ func (c *SafePlanetAccademyController) Stage() {
 			c.CurrentState.Completed = true
 			c.Configurations.ControllerBack.To = &SafePlanetAccademyController{}
 			return
+		} else if err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Mando messaggio di completamento
