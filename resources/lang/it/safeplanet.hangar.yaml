@@ -1,7 +1,8 @@
 # Hangar
 safeplanet.hangar.intro: "Benvenuto nell'*hangar*!\n\nQui possiamo tenere al sicuro le tue navi e potrati sfruttare dei nostri servizi dedicati.\nCosa vuoi fare?"
-safeplanet.hangar.ship_recap: "La tua nave attuale:\n🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
+safeplanet.hangar.ship_recap: "Nave attuale:\n🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 
+# Repair
 safeplanet.hangar.info: "Vuoi riparare la tua nave?\n\n"
 safeplanet.hangar.partial: "Riparazione *Parziale*:"
 safeplanet.hangar.full: "Riparazione *Completa*:"
@@ -16,16 +17,19 @@ safeplanet.hangar.wait: "Il termine per la riparazione della tua nave è previst
 safeplanet.hangar.reparing: "Hai avviato la riparazione della tua nave, il completamento delle riparazioni è previsto alle *%s*"
 safeplanet.hangar.reparing.finish: "La tua nave è stata riparata con successo."
 
-safeplanet.hangar.create.intro: "Posso mettermi al lavoro per te e provare a relizzare la nave che desideri"
-safeplanet.hangar.create.chose_rarity: "Quale rarità?"
+# Create
+safeplanet.hangar.create.intro: "Possiamo metterci al lavoro per provare a relizzare la nave che desideri.\nA quale categoria di nave sei interessato?"
+safeplanet.hangar.create.chose_rarity: "Perfetto!\nPer quale rarità?"
 safeplanet.hangar.create.wait: "Stiamo lavorando ancora alla tua nave, dovremmo concludere i lavori per le *%s*\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
 safeplanet.hangar.create.start: "Richiesta presa in carico *%s*"
 safeplanet.hangar.create.end: "Fine lavorazione: %s"
 safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rairtà *%s* al costo di 💰*%v*?"
 safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
-safeplanet.hangar.ships.intro: "Quale tipologia di nave vorresti vedere?"
-safeplanet.hangar.ships.list: "Ecco la lista delle tue navi per la categoria scelta"
+# Deposit
+safeplanet.hangar.ships.intro: "Quale categoria di navi vuoi visualizzare?"
+safeplanet.hangar.ships.list: "Ecco le lista delle tue navi per la categoria scelta"
+safeplanet.hangar.ships.ship_recap: "Ecco i dettagli della nave:\n🚀 *%s* (*%s*) - *%s*\n🔧 *%v%%* (%s)\n⛽ *%v%%* (%s)"
 safeplanet.hangar.ships.confirm_equip: "Sei sicuro di volere sostituire la tua attuale nave con questa?"
 safeplanet.hangar.ships.confirm: "Equipaggia nave"
-safeplanet.hangar.ships.equip_ok: "Nave equipaggiata"
+safeplanet.hangar.ships.equip_ok: "Nave equipaggiata!"

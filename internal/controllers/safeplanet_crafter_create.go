@@ -104,21 +104,8 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 	// Se il player ha dato conferma verifico se ha il denaro necessario per proseguire
 	// ##################################################################################################
 	case 4:
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "confirm") {
-			var err error
-			var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
-			if rGetPlayerEconomyMoney, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
-				PlayerID:    c.Player.GetID(),
-				EconomyType: pb.GetPlayerEconomyRequest_MONEY,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// TODO: da spostare su ws
-			if rGetPlayerEconomyMoney.GetValue() < int32(c.Payload.Price) {
-				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money")
-				return true
-			}
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return true
 		}
 	// ##################################################################################################
 	// Verifico stato crafting
@@ -438,13 +425,27 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		// Start crating
 		// =========================
 		var rCrafterStart *pb.CrafterStartResponse
-		if rCrafterStart, err = config.App.Server.Connection.CrafterStart(helpers.NewContext(1), &pb.CrafterStartRequest{
+		rCrafterStart, err = config.App.Server.Connection.CrafterStart(helpers.NewContext(1), &pb.CrafterStartRequest{
 			PlayerID:     c.Player.ID,
 			Resources:    c.Payload.Resources,
 			Price:        c.Payload.Price,
 			ItemType:     c.Payload.ItemType,
 			ItemCategory: c.Payload.ItemCategory,
-		}); err != nil {
+		})
+
+		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
+			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
+			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
+			)
+
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil {
 			c.Logger.Panic(err)
 		}
 

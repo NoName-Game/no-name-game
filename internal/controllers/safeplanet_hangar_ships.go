@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
@@ -129,13 +130,31 @@ func (c *SafePlanetHangarShipsController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Recupero tutte le navi del player
+		var rGetPlayerShips *pb.GetPlayerShipsResponse
+		if rGetPlayerShips, err = config.App.Server.Connection.GetPlayerShips(helpers.NewContext(1), &pb.GetPlayerShipsRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		var categoriesKeyboard [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllShipCategories.GetShipCategories() {
-			categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())),
-				),
-			))
+			// Verifico se il player possiede navi di questa categoria
+			var haveCategoryShipForThisCategory bool
+			for _, ship := range rGetPlayerShips.GetShips() {
+				if ship.ShipCategoryID == category.ID {
+					haveCategoryShipForThisCategory = true
+				}
+			}
+
+			if haveCategoryShipForThisCategory {
+				categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", category.GetSlug())),
+					),
+				))
+			}
 		}
 
 		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
@@ -143,7 +162,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.intro"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.intro"))
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -208,12 +227,14 @@ func (c *SafePlanetHangarShipsController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		var text string
-		text = fmt.Sprintf(" Ecco i dettagli della nave: %s\n",
-			rGetShipByID.GetShip().GetName(),
+		recapShip := helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.ship_recap",
+			rGetShipByID.GetShip().GetName(), strings.ToUpper(rGetShipByID.GetShip().GetRarity().GetSlug()),
+			rGetShipByID.GetShip().GetShipCategory().GetName(),
+			rGetShipByID.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+			rGetShipByID.GetShip().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
 		)
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, text)
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapShip)
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

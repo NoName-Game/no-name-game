@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -86,6 +87,8 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 	// Verifico quale rarità vuole il player
 	// ##################################################################################################
 	case 2:
+		rarityMsg := strings.Split(c.Update.Message.Text, " -")[0]
+
 		var err error
 		var rGetAllCraftableRarities *pb.GetAllCraftableRaritiesResponse
 		if rGetAllCraftableRarities, err = config.App.Server.Connection.GetAllCraftableRarities(helpers.NewContext(1), &pb.GetAllCraftableRaritiesRequest{}); err != nil {
@@ -93,7 +96,7 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 		}
 
 		for _, rarity := range rGetAllCraftableRarities.GetRarities() {
-			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rarity.GetSlug())) == c.Update.Message.Text {
+			if helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rarity.GetSlug())) == rarityMsg {
 				c.Payload.RarityID = rarity.GetID()
 				return false
 			}
@@ -222,16 +225,28 @@ func (c *SafePlanetHangarCreateController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		var categoriesKeyboard [][]tgbotapi.KeyboardButton
-		for _, category := range rGetAllCraftableRarities.GetRarities() {
-			categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
+		var raritiesKeyboard [][]tgbotapi.KeyboardButton
+		for _, rarity := range rGetAllCraftableRarities.GetRarities() {
+			// Recupero informazioni costruzione
+			var rGetCreateShipInfo *pb.GetCreateShipInfoResponse
+			if rGetCreateShipInfo, err = config.App.Server.Connection.GetCreateShipInfo(helpers.NewContext(1), &pb.GetCreateShipInfoRequest{
+				RarityID:   rarity.ID,
+				CategoryID: c.Payload.CategoryID,
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			raritiesKeyboard = append(raritiesKeyboard, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", category.GetSlug())),
+					fmt.Sprintf("%s - 💰%v",
+						helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rarity.GetSlug())),
+						rGetCreateShipInfo.GetPrice(),
+					),
 				),
 			))
 		}
 
-		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
+		raritiesKeyboard = append(raritiesKeyboard, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
@@ -240,7 +255,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
-			Keyboard:       categoriesKeyboard,
+			Keyboard:       raritiesKeyboard,
 		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
@@ -305,12 +320,26 @@ func (c *SafePlanetHangarCreateController) Stage() {
 	// Avvio costruzione nave
 	// ##################################################################################################
 	case 3:
+		var err error
 		var rStartCreateShip *pb.StartCreateShipResponse
-		if rStartCreateShip, err = config.App.Server.Connection.StartCreateShip(helpers.NewContext(1), &pb.StartCreateShipRequest{
+		rStartCreateShip, err = config.App.Server.Connection.StartCreateShip(helpers.NewContext(1), &pb.StartCreateShipRequest{
 			RarityID:   c.Payload.RarityID,
 			CategoryID: c.Payload.CategoryID,
 			PlayerID:   c.Player.ID,
-		}); err != nil {
+		})
+
+		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
+			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
+			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
+			)
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil {
 			c.Logger.Panic(err)
 		}
 
