@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -63,13 +64,15 @@ func (c *SafePlanetCrafterRepairController) Validator() bool {
 	// Verifico se l'arma scelta esiste ed è sua
 	// ##################################################################################################
 	case 1:
+		weaponMsg := strings.Split(c.Update.Message.Text, " -")[0]
+
 		var rGetPlayerWeapons *pb.GetPlayerWeaponsResponse
 		rGetPlayerWeapons, _ = config.App.Server.Connection.GetPlayerWeapons(helpers.NewContext(1), &pb.GetPlayerWeaponsRequest{
 			PlayerID: c.Player.ID,
 		})
 
 		for _, weapon := range rGetPlayerWeapons.GetWeapons() {
-			if weapon.GetName() == c.Update.Message.Text {
+			if weapon.GetName() == weaponMsg {
 				c.Payload.WeaponID = weapon.GetID()
 				return false
 			}
@@ -110,7 +113,13 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 			// Mostro solo armi danneggiate
 			if weapon.Durability < weapon.DurabilityCap {
 				weaponsKeyboard = append(weaponsKeyboard, tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(weapon.GetName()),
+					tgbotapi.NewKeyboardButton(
+						fmt.Sprintf("%s - 🔧%v/%v",
+							weapon.GetName(),
+							weapon.GetDurability(),
+							weapon.GetDurabilityCap(),
+						),
+					),
 				))
 			}
 		}
@@ -175,13 +184,11 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 	// Riparo arma
 	// ##################################################################################################
 	case 2:
-		// Recuero gilda corrente
-		if _, err = config.App.Server.Connection.CrafterRepairWeapon(helpers.NewContext(1), &pb.CrafterRepairWeaponRequest{
+		// Avvio riparazione arma
+		_, err = config.App.Server.Connection.CrafterRepairWeapon(helpers.NewContext(1), &pb.CrafterRepairWeaponRequest{
 			PlayerID: c.Player.ID,
 			WeaponID: c.Payload.WeaponID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
+		})
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete

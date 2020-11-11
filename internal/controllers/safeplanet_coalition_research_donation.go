@@ -67,7 +67,7 @@ func (c *SafePlanetResearchDonationController) Validator() (hasErrors bool) {
 	// Verifico se la risorsa passata esiste
 	// ##################################################################################################
 	case 1:
-		resourceName := strings.Split(c.Update.Message.Text, " -")[0]
+		resourceName := strings.Split(c.Update.Message.Text, " (")[0]
 
 		var err error
 		var rGetResourceByName *pb.GetResourceByNameResponse
@@ -131,7 +131,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 			if resource.GetResource().GetRarityID() == rGetRecapActiveResearch.GetResearch().GetDonationRarityID() {
 				newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						fmt.Sprintf("%s - (%v)", resource.GetResource().GetName(), resource.Quantity),
+						fmt.Sprintf("%s (%v)", resource.GetResource().GetName(), resource.Quantity),
 					),
 				)
 				keyboardRow = append(keyboardRow, newKeyboardRow)
