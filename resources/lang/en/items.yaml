@@ -1,0 +1,27 @@
+# ITEMS
+items.stuff: "🔩"
+items.medical: "💊"
+items.ship_support: "⚙️"
+
+# Other
+items.amulets: "Amuleto"
+
+# Medical
+items.revitalizing_small: "Rivitalizzante piccolo"
+items.description.revitalizing_small: "📖: Permette di recuperare *%v%%* della vita massima. Ideale nelle situazioni più critiche."
+items.revitalizing_medium: "Rivitalizzante medio"
+items.description.revitalizing_medium: "📖: Permette di recuperare *%v%%* della vita massima."
+items.revitalizing_max: "Rivitalizzante grande"
+items.description.revitalizing_max: "📖: Permette di recuperare *%v%%* della vita massima."
+
+# Ship support
+items.raw_fuel: "Carburante grezzo"
+items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.refined_fuel: "Carburante raffinato"
+items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.final_fuel: "Carburante finale"
+items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.basic_repair_component: "Componente riparatore base"
+items.description.basic_repair_component: "Componente buona qualità, permetterà di riparare immediatamente la tua nave di *%v*"
+items.advanced_repair_component: "Componente riparatore avanzato"
+items.description.advanced_repair_component: "Componente di ottima qualità, permetterà di riparare immediatamente la tua nave di *%v*"

@@ -1,0 +1,14 @@
+# PLANET
+planet.intro: "Dettagli pianeta corrente:"
+planet.details.system: "💫 Sistema: *%s*"
+planet.details.name: "🌍 Pianeta: *%s*"
+planet.details.coordinate.encypted: "📡 Crypted Coordinate:\n*%v*"
+planet.details.coordinate.x: "🆇 %v"
+planet.details.coordinate.y: "🆈 %v"
+planet.details.coordinate.z: "🆉 %v"
+planet.details.biome: "Bioma: *%s*"
+planet.details.atmosphere: "Atmosfera: *%s*"
+planet.details.count_visited_player: "👨🏼‍🚀 *%d* Esploratori hanno visitato questo pianeta"
+
+planet.bookmark.add_ok: "✅ Il pianeta è stato *aggiunto* tra i preferiti."
+planet.bookmark.remove_ok: "✅ Il pianeta è stato *rimosso* dai preferiti."

@@ -1,0 +1,19 @@
+# MENU
+menu.borad_system: "*BoardSystem v0.1*\n"
+menu.general: "🌏 %s \n%s \n\n"
+
+# Task
+menu.tasks: "⏱ *Attività in corso:*\n"
+menu.tasks.minutes_left: "*%v* minuti al termine"
+menu.tasks.completed: "*completata!*"
+
+# Safeplanet
+menu.safeplanet: "Ti trovi su 🏟*%s* pianeta *sicuro* e area protetta per *tutti*!✌️\n\n"
+
+# Titanplanet
+menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del titano 👁 *%s*.\n\n"
+menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta..."
+menu.titanplanet.titan_dead: "Sconfitto da da valorosi viaggiatori! Ora tutto sembra tranquillo."
+
+# Travel
+menu.travel: "In 🚀viaggio da 🌏*%s* verso 🌏*%s*...\n\n"

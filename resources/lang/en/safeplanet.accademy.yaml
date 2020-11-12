@@ -1,0 +1,33 @@
+# Accademy
+safeplanet.accademy.info: "Benvenuto in ⛩*Accademia* esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 *Amuleti* davvero importanti per noi..."
+safeplanet.accademy.which: "Quale tipologia di abilità vorresti apprendere?"
+safeplanet.accademy.striker: "⚔️ Attaccante"
+safeplanet.accademy.defender: "🛡 Difensore"
+safeplanet.accademy.explorer: "🚀 Esploratore"
+safeplanet.accademy.done: "Nuova abilità appresa correttamente!"
+safeplanet.accademy.no_more_abilities: "Attulamente non ci sono altre abilità per questa tipologia."
+safeplanet.accademy.not_enough_amulets: "❌ Non hai abbastanza amuleti per apprender l'abilità."
+
+safeplanet.accademy.ability_details: "Ecco a te una nuova abilità!\n\nNome: *%s* - Livello: *%d*\nDescrizione: %s"
+safeplanet.accademy.ability_confirm: "Al momento possiedi 🧿*%d*, per apprendere questa abilità avremmo bisogno di 🧿*%d*"
+
+safeplanet.accademy.ability.accurate: "Preciso"
+safeplanet.accademy.ability.quick: "Rapido"
+safeplanet.accademy.ability.lucky: "Forutunato"
+safeplanet.accademy.ability.base_strength: "Forza Base"
+safeplanet.accademy.ability.base_defense: "Difesa Base"
+safeplanet.accademy.ability.base_speed: "Velocità Base"
+safeplanet.accademy.ability.hard_hit: "Colpo Duro!"
+safeplanet.accademy.ability.doctor: "Medicazione"
+safeplanet.accademy.ability.express: "Express"
+
+safeplanet.accademy.ability.accurate.details: "Aumenta precisione attacco (+10%%)"
+safeplanet.accademy.ability.quick.details: "Aumenta schivata difensiva (+10%%)"
+safeplanet.accademy.ability.lucky.details: "Aumenta le probabilità di raddoppiare le risorse in esplorazione (+10%%)"
+safeplanet.accademy.ability.base_strength.details: "Aumenta attacco esploratore (+20%%)"
+safeplanet.accademy.ability.base_defense.details: "Aumenta difesa esploratore (+20%%)"
+safeplanet.accademy.ability.base_speed.details: "Riduce tempo esplorazione (+20%%)"
+safeplanet.accademy.ability.hard_hit.details: "Effettui il doppio dei danni ma perdi il 10%% di vita"
+safeplanet.accademy.ability.doctor.details: "Il tuo danno è dimezzato! Ma recuperi il 5%% di vita"
+safeplanet.accademy.ability.express.details: "Riduce tempo esplorazione (+40%%)"
+
