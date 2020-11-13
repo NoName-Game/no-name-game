@@ -153,7 +153,7 @@ func (c *PlayerInventoryItemController) Stage() {
 			c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.items.what"),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowItems,
@@ -184,7 +184,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, text)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -217,7 +217,7 @@ func (c *PlayerInventoryItemController) Stage() {
 				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

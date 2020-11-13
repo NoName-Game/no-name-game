@@ -7,7 +7,16 @@ titanplanet.tackle.combat.card: "👁 %s \n❤️ %d/%d\n\n👨🏼‍🚀 %s\n�
 titanplanet.tackle.combat.mob_killed: "👁 %s è stato sconfitto! 🎉 \n\nA breve riceverai un adeguata ricompensa per il lavoro da te svolto in base ai danni da te inflitti."
 titanplanet.tackle.reward: "Congratulazioni per aver sconfitto il titano!\n\nLa *Coalizione* ti premia per aver inflitto *%d danni*!\n\nResoconto premi:\n%s"
 
-# Event
 titanplanet.event.bonus: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
 titanplanet.event.malus: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci *%d* danni."
 titanplanet.tackle.no_action: "Continua!"
+titanplanet.event.hungry: "\n\nIl titano si infuria..."
+titanplanet.event.get_ready: "Preparati"
+
+# Events
+titanplanet.event.question_1: "L'aria si fa sempre più fitta... il Titano sta preparando un attacco devastante!"
+titanplanet.event.question_1.answer_1: "Riparati dietro una colonna V"
+titanplanet.event.question_1.answer_2: "Sfrutta il momento per colpirlo"
+titanplanet.event.question_1.answer_3: "Preparati all'impatto"
+titanplanet.event.question_1.bonus: "Schivi il colpo caricato del titano e mentre si rialza riesci ad infliggere *%d* danni!"
+titanplanet.event.question_1.malus: "Tenti di schivare il colpo del Titano, ma non riuscendoci subisci un'ingente quantità di danni. Hai subito *%d* danni!"

@@ -173,7 +173,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.info"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       shipsKeyboard,
@@ -226,7 +226,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, shipRecap)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_partial")),
@@ -294,7 +294,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				recapResourceUsed,
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

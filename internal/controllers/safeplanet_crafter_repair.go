@@ -129,7 +129,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.what"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       weaponsKeyboard,
@@ -165,7 +165,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 			rCrafterGetRepairWeaponInfo.GetValue(),
 		))
 
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -206,7 +206,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.completed"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),

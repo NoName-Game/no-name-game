@@ -83,7 +83,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, conquerorsListMsg)
-	msg.ParseMode = "markdown"
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),

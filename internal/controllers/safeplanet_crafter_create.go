@@ -153,7 +153,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		)
 
 		msg := helpers.NewMessage(c.Player.ChatID, startMsg)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armor")),
@@ -365,7 +365,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			c.Payload.Price,
 			recipe,
 		))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,
@@ -405,7 +405,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			c.Payload.Price,
 			recipe,
 		))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -459,7 +459,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		msg = helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.wait", finishAt.Format("15:04")),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -482,7 +482,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, endCraftMessage)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

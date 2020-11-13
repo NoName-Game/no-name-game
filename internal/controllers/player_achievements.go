@@ -115,7 +115,7 @@ func (c *PlayerAchievementsController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.achievement.intro"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       categoriesKeyboard,
@@ -175,7 +175,7 @@ func (c *PlayerAchievementsController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("achievement.category.%s", rGetAchievementCategoryByID.GetAchievementCategory().GetSlug())),
 			achievementList,
 		))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),

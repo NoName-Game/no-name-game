@@ -145,7 +145,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.choose_reseource"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
@@ -174,7 +174,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.choose_quantity"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowQuantities,
@@ -201,7 +201,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 				rGetResourceByID.GetResource().GetName(),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -243,7 +243,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.completed"),
 		)
 
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

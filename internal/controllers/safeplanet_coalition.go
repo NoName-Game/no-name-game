@@ -37,7 +37,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 	}
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "safeplanet.coalition.info"))
-	msg.ParseMode = "markdown"
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.mission")),

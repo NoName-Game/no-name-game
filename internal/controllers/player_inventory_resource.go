@@ -73,7 +73,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	)
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, finalResource)
-	msg.ParseMode = "markdown"
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),

@@ -84,18 +84,6 @@ var (
 		A:  "start_fight",
 	}
 
-	fightUp = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "up",
-	}
-
-	fightDown = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "down",
-	}
-
 	fightReturnMap = helpers.InlineDataStruct{
 		C:  "hunting",
 		AT: "fight",
@@ -106,18 +94,6 @@ var (
 		C:  "hunting",
 		AT: "fight",
 		A:  "player_die",
-	}
-
-	fightHit = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "hit",
-	}
-
-	fightNoAction = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "no_action",
 	}
 
 	// Keyboard inline di esplorazione
@@ -150,13 +126,13 @@ var (
 		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
 	)
 
-	fightKeyboard = [][]tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", fightUp.GetDataString())),
+	huntingFightKeyboard = [][]tgbotapi.InlineKeyboardButton{
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", helpers.FightUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🏃‍♂️💨", fightReturnMap.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightHit.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("🏃‍♂️💨", helpers.FightReturnMap.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", helpers.FightHit.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", fightDown.GetDataString())),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", helpers.FightDown.GetDataString())),
 	}
 )
 
@@ -496,7 +472,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 		)
 
 		tresureMessage.ReplyMarkup = &keyboard
-		tresureMessage.ParseMode = "markdown"
+		tresureMessage.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(tresureMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -556,7 +532,9 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 		c.Hit(enemy, planetMap, inlineData)
 		return
 	case "use":
-		c.UseItem(inlineData)
+		if err = helpers.UseItem(c.Player, inlineData.D, c.Payload.CallbackMessageID); err != nil {
+			c.Logger.Panic(err)
+		}
 		return
 	}
 
@@ -588,86 +566,17 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 		),
 	)
 
-	combactStatusMessage.ParseMode = "markdown"
-	combactStatusMessage.ReplyMarkup = c.PlayerFightKeyboard()
+	// Inserisco fight keyboard
+	if combactStatusMessage.ReplyMarkup, err = helpers.PlayerFightKeyboard(c.Player, huntingFightKeyboard); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	combactStatusMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}
 
 	return
-}
-
-func (c *HuntingController) PlayerFightKeyboard() *tgbotapi.InlineKeyboardMarkup {
-	var err error
-	newfightKeyboard := new(tgbotapi.InlineKeyboardMarkup)
-
-	// #######################
-	// Usabili: recupero quali item possono essere usati in combattimento
-	// #######################
-	// Ciclo pozioni per ID item
-	for _, itemID := range []uint32{1, 2, 3} {
-		var rGetItemByID *pb.GetItemByIDResponse
-		if rGetItemByID, err = config.App.Server.Connection.GetItemByID(helpers.NewContext(1), &pb.GetItemByIDRequest{
-			ItemID: itemID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		var rGetPlayerItemByID *pb.GetPlayerItemByIDResponse
-		if rGetPlayerItemByID, err = config.App.Server.Connection.GetPlayerItemByID(helpers.NewContext(1), &pb.GetPlayerItemByIDRequest{
-			PlayerID: c.Player.ID,
-			ItemID:   itemID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiunto tasto solo se la quantità del player è > 0
-		if rGetPlayerItemByID.GetPlayerInventory().GetQuantity() > 0 {
-			var potionStruct = helpers.InlineDataStruct{C: "hunting", AT: "fight", A: "use", D: rGetItemByID.GetItem().GetID()}
-			newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(
-					fmt.Sprintf("%s (%v)",
-						helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
-						rGetPlayerItemByID.GetPlayerInventory().GetQuantity(),
-					),
-					potionStruct.GetDataString(),
-				),
-			))
-		}
-	}
-
-	// #######################
-	// Keyboard Selezione, attacco e fuga
-	// #######################
-	newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, fightKeyboard...)
-
-	// #######################
-	// Abilità
-	// #######################
-	// Ciclo le abilità al combattimento
-	for _, abilityID := range []uint32{7, 8} {
-		// Verifico se il player possiede abilità di comattimento o difesa
-		var rCheckIfPlayerHaveAbility *pb.CheckIfPlayerHaveAbilityResponse
-		if rCheckIfPlayerHaveAbility, err = config.App.Server.Connection.CheckIfPlayerHaveAbility(helpers.NewContext(1), &pb.CheckIfPlayerHaveAbilityRequest{
-			PlayerID:  c.Player.ID,
-			AbilityID: abilityID, // Attacco pesante
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		if rCheckIfPlayerHaveAbility.GetHaveAbility() {
-			// Appendo abilità player
-			var dataAbilityStruct = helpers.InlineDataStruct{C: "hunting", AT: "fight", A: "hit", SA: "ability", D: rCheckIfPlayerHaveAbility.GetAbility().GetID()}
-			newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(
-					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.accademy.ability.%s", rCheckIfPlayerHaveAbility.GetAbility().GetSlug())),
-					dataAbilityStruct.GetDataString(),
-				),
-			))
-		}
-	}
-
-	return newfightKeyboard
 }
 
 func (c *HuntingController) ReturnToMap(planetMap *pb.PlanetMap) {
@@ -689,47 +598,6 @@ func (c *HuntingController) ReturnToMap(planetMap *pb.PlanetMap) {
 	returnMessage.ParseMode = "HTML"
 	returnMessage.ReplyMarkup = &mapKeyboard
 	if _, err = helpers.SendMessage(returnMessage); err != nil {
-		c.Logger.Panic(err)
-	}
-}
-
-func (c *HuntingController) UseItem(inlineData helpers.InlineDataStruct) {
-	var err error
-
-	// Recupero dettagli item che si vuole usare
-	var rGetItemByID *pb.GetItemByIDResponse
-	if rGetItemByID, err = config.App.Server.Connection.GetItemByID(helpers.NewContext(1), &pb.GetItemByIDRequest{
-		ItemID: inlineData.D,
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	// Richiamo il ws per usare l'item selezionato
-	if _, err = config.App.Server.Connection.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
-		PlayerID: c.Player.ID,
-		ItemID:   rGetItemByID.GetItem().GetID(),
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), "continue"), fightNoAction.GetDataString()),
-		),
-	)
-
-	var combactMessage tgbotapi.EditMessageTextConfig
-	combactMessage = helpers.NewEditMessage(
-		c.Player.ChatID,
-		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.use_item",
-			helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
-			rGetItemByID.GetItem().GetValue(),
-		),
-	)
-	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = "markdown"
-	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
 }
@@ -789,12 +657,12 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("Ok!", helpers.FightNoAction.GetDataString()),
 		),
 	)
 
 	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = "markdown"
+	combactMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -817,7 +685,7 @@ func (c *HuntingController) PlayerDie() {
 	)
 
 	playerDieMessage.ReplyMarkup = &keyboard
-	playerDieMessage.ParseMode = "markdown"
+	playerDieMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -865,7 +733,7 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *
 		),
 	)
 
-	enemyDieMessage.ParseMode = "markdown"
+	enemyDieMessage.ParseMode = tgbotapi.ModeMarkdown
 	enemyDieMessage.ReplyMarkup = &keyboard
 	if _, err := helpers.SendMessage(enemyDieMessage); err != nil {
 		c.Logger.Panic(err)

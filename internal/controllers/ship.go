@@ -61,7 +61,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
 		),
 	)
-	msg.ParseMode = "markdown"
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel")),

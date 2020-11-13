@@ -73,7 +73,7 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 	))
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s", introMessage, recapMessage))
-	msg.ParseMode = "markdown"
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		ResizeKeyboard: true,
 		Keyboard:       keyboardRow,

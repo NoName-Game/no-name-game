@@ -33,12 +33,12 @@ var (
 		A:  "titan_die",
 	}
 
-	titanKeyboard = [][]tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", fightUp.GetDataString())),
+	titanFightKeyboard = [][]tgbotapi.InlineKeyboardButton{
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", helpers.FightUp.GetDataString())),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightHit.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("⚔️", helpers.FightHit.GetDataString()),
 		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", fightDown.GetDataString())),
+		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", helpers.FightDown.GetDataString())),
 	}
 )
 
@@ -179,10 +179,14 @@ func (c *TitanPlanetTackleController) Tackle() {
 
 		// Invio quindi il mesaggio contenente le azioni disponibili
 		msg := helpers.NewMessage(c.Player.ChatID, combactCard)
-		msg.ReplyMarkup = c.PlayerFightKeyboard()
-		msg.ParseMode = "markdown"
+
+		// Inserisco fight keyboard
+		if msg.ReplyMarkup, err = helpers.PlayerFightKeyboard(c.Player, titanFightKeyboard); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		var tackleMessage tgbotapi.Message
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if tackleMessage, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -200,7 +204,6 @@ func (c *TitanPlanetTackleController) Tackle() {
 		inlineData = inlineData.GetDataValue(c.Update.CallbackQuery.Data)
 
 		// Verifico che non sia in corso un'evento
-		//TODO: verificare
 		if c.Payload.InEvent && inlineData.AT == "event" {
 			err = c.Event(inlineData, rGetTitanByPlanetID.GetTitan())
 		} else if inlineData.AT == "fight" {
@@ -254,7 +257,9 @@ func (c *TitanPlanetTackleController) Fight(inlineData helpers.InlineDataStruct,
 		c.CurrentState.Completed = true
 		return
 	case "use":
-		c.UseItem(inlineData)
+		if err = helpers.UseItem(c.Player, inlineData.D, c.Payload.CallbackMessageID); err != nil {
+			c.Logger.Panic(err)
+		}
 		return
 	case "no_action":
 		//
@@ -289,83 +294,17 @@ func (c *TitanPlanetTackleController) Fight(inlineData helpers.InlineDataStruct,
 		),
 	)
 
-	combactStatusMessage.ParseMode = "markdown"
-	combactStatusMessage.ReplyMarkup = c.PlayerFightKeyboard()
+	// Inserisco fight keyboard
+	if combactStatusMessage.ReplyMarkup, err = helpers.PlayerFightKeyboard(c.Player, titanFightKeyboard); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	combactStatusMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}
 
 	return
-}
-
-func (c *TitanPlanetTackleController) PlayerFightKeyboard() *tgbotapi.InlineKeyboardMarkup {
-	var err error
-	newfightKeyboard := new(tgbotapi.InlineKeyboardMarkup)
-
-	// #######################
-	// Usabili: recupero quali item possono essere usati in combattimento
-	// #######################
-	// Ciclo pozioni per ID item
-	for _, itemID := range []uint32{1, 2, 3} {
-		var rGetItemByID *pb.GetItemByIDResponse
-		if rGetItemByID, err = config.App.Server.Connection.GetItemByID(helpers.NewContext(1), &pb.GetItemByIDRequest{
-			ItemID: itemID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		var rGetPlayerItemByID *pb.GetPlayerItemByIDResponse
-		if rGetPlayerItemByID, err = config.App.Server.Connection.GetPlayerItemByID(helpers.NewContext(1), &pb.GetPlayerItemByIDRequest{
-			PlayerID: c.Player.ID,
-			ItemID:   itemID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiunto tasto solo se la quantità del player è > 0
-		if rGetPlayerItemByID.GetPlayerInventory().GetQuantity() > 0 {
-			var potionStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "fight", A: "use", D: rGetItemByID.GetItem().GetID()}
-			newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(
-					fmt.Sprintf("%s (%v)",
-						helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
-						rGetPlayerItemByID.GetPlayerInventory().GetQuantity(),
-					),
-					potionStruct.GetDataString(),
-				),
-			))
-		}
-	}
-
-	// #######################
-	// Keyboard Selezione, attacco e fuga
-	// #######################
-	newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, titanKeyboard...)
-
-	// #######################
-	// Abilità
-	// #######################
-	// Verifico se il player possiede abilità di comattimento o difesa
-	var rCheckIfPlayerHaveAbility *pb.CheckIfPlayerHaveAbilityResponse
-	if rCheckIfPlayerHaveAbility, err = config.App.Server.Connection.CheckIfPlayerHaveAbility(helpers.NewContext(1), &pb.CheckIfPlayerHaveAbilityRequest{
-		PlayerID:  c.Player.ID,
-		AbilityID: 7, // Attacco pesante
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	if rCheckIfPlayerHaveAbility.GetHaveAbility() {
-		// Appendo abilità player
-		var dataAbilityStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "fight", A: "hit", SA: "ability", D: rCheckIfPlayerHaveAbility.GetAbility().GetID()}
-		newfightKeyboard.InlineKeyboard = append(newfightKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.accademy.ability.%s", rCheckIfPlayerHaveAbility.GetAbility().GetSlug())),
-				dataAbilityStruct.GetDataString(),
-			),
-		))
-	}
-
-	return newfightKeyboard
 }
 
 func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.InlineDataStruct) {
@@ -416,14 +355,9 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 		)
 	}
 
-	// Aggiungo dettagli abilità
-	if abilityID == 7 {
-		combactMessage.Text += "\n A causa della tua abilità hai perso ulteriri 5HP"
-	}
-
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Ok!", fightNoAction.GetDataString()),
+			tgbotapi.NewInlineKeyboardButtonData("Ok!", helpers.FightNoAction.GetDataString()),
 		),
 	)
 
@@ -433,19 +367,19 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 		c.Payload.EventID = rHitTitan.GetTitanEventID()
 
 		// Aggiungo messggio che il titano si prepara ad un evento
-		combactMessage.Text += "\n Il titano si infuria..."
+		combactMessage.Text += helpers.Trans(c.Player.Language.Slug, "titanplanet.event.hungry")
 
 		// Carico keyboard dedicata
 		var dataEventStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "event", A: "q"}
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Preparati", dataEventStruct.GetDataString()),
+				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.Language.Slug, "titanplanet.event.get_ready"), dataEventStruct.GetDataString()),
 			),
 		)
 	}
 
 	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = "markdown"
+	combactMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -468,7 +402,7 @@ func (c *TitanPlanetTackleController) PlayerDie() {
 	)
 
 	playerDieMessage.ReplyMarkup = &keyboard
-	playerDieMessage.ParseMode = "markdown"
+	playerDieMessage.ParseMode = tgbotapi.ModeMarkdown
 	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -490,7 +424,7 @@ func (c *TitanPlanetTackleController) TitanDie(titan *pb.Titan) {
 		),
 	)
 
-	titanDieMessage.ParseMode = "markdown"
+	titanDieMessage.ParseMode = tgbotapi.ModeMarkdown
 	titanDieMessage.ReplyMarkup = &keyboard
 	if _, err := helpers.SendMessage(titanDieMessage); err != nil {
 		c.Logger.Panic(err)
@@ -524,16 +458,15 @@ func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct,
 			helpers.Trans(c.Player.GetLanguage().GetSlug(), question.TextCode),
 		)
 
-		var keyboardRow [][]tgbotapi.InlineKeyboardButton
+		keyboardRow := new(tgbotapi.InlineKeyboardMarkup)
 		for _, answer := range question.Answers {
 			var dataAnswerStruct = helpers.InlineDataStruct{C: "titanplanet.tackle", AT: "event", A: "a", D: answer.ID}
-			keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
+			keyboardRow.InlineKeyboard = append(keyboardRow.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), answer.GetTextCode()), dataAnswerStruct.GetDataString()),
 			))
 		}
 
-		var keyboard = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: keyboardRow}
-		questionMessage.ReplyMarkup = &keyboard
+		questionMessage.ReplyMarkup = keyboardRow
 		if _, err := helpers.SendMessage(questionMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -563,14 +496,18 @@ func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct,
 		// Malus! | Bonus!
 		var recap string
 		if rTitanEventSubmitAnswer.GetIsMalus() {
-			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.malus", rTitanEventSubmitAnswer.GetTitanDamage())
+			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf(
+				"titanplanet.event.question_%v.malus", rTitanEventSubmitAnswer.GetQuestionID(),
+			), rTitanEventSubmitAnswer.GetTitanDamage())
 		} else {
-			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.event.bonus", rTitanEventSubmitAnswer.GetPlayerDamage())
+			recap = helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf(
+				"titanplanet.event.question_%v.bonus", rTitanEventSubmitAnswer.GetQuestionID(),
+			), rTitanEventSubmitAnswer.GetPlayerDamage())
 		}
 
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Continua!", fightNoAction.GetDataString()),
+				tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), "titanplanet.tackle.no_action"), helpers.FightNoAction.GetDataString()),
 			),
 		)
 
@@ -586,46 +523,4 @@ func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct,
 	}
 
 	return
-}
-
-func (c *TitanPlanetTackleController) UseItem(inlineData helpers.InlineDataStruct) {
-	var err error
-
-	// Recupero dettagli item che si vuole usare
-	var rGetItemByID *pb.GetItemByIDResponse
-	if rGetItemByID, err = config.App.Server.Connection.GetItemByID(helpers.NewContext(1), &pb.GetItemByIDRequest{
-		ItemID: inlineData.D,
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	// Richiamo il ws per usare l'item selezionato
-	if _, err = config.App.Server.Connection.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
-		PlayerID: c.Player.ID,
-		ItemID:   rGetItemByID.GetItem().GetID(),
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(helpers.Trans(c.Player.GetLanguage().GetSlug(), "continue"), fightNoAction.GetDataString()),
-		),
-	)
-
-	var combactMessage tgbotapi.EditMessageTextConfig
-	combactMessage = helpers.NewEditMessage(
-		c.Player.ChatID,
-		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.use_item",
-			helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
-			rGetItemByID.GetItem().GetValue(),
-		),
-	)
-
-	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = "markdown"
-	if _, err = helpers.SendMessage(combactMessage); err != nil {
-		c.Logger.Panic(err)
-	}
 }

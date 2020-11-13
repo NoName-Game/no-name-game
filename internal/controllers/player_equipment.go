@@ -181,7 +181,7 @@ func (c *PlayerEquipmentController) Stage() {
 				currentWeaponsEquipment,
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
@@ -324,7 +324,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, mainMessage)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -415,7 +415,7 @@ func (c *PlayerEquipmentController) Stage() {
 		if equipmentError {
 			// Invio messaggio error
 			msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"))
-			msg.ParseMode = "markdown"
+			msg.ParseMode = tgbotapi.ModeMarkdown
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
@@ -431,7 +431,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		// Invio messaggio per conferma equipaggiamento
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, confirmMessage)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -519,7 +519,7 @@ func (c *PlayerEquipmentController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

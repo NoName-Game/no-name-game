@@ -355,7 +355,7 @@ func (c *ShipLaboratoryController) Stage() {
 			),
 		)
 
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
@@ -397,7 +397,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", finishAt.Format("15:04:05")),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -425,7 +425,7 @@ func (c *ShipLaboratoryController) Stage() {
 				helpers.Trans(c.Player.Language.Slug, "items."+rLaboratoryEndCrafting.GetItem().GetSlug()),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),

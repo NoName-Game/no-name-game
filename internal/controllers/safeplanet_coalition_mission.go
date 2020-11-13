@@ -144,7 +144,7 @@ func (c *SafePlanetMissionController) Stage() {
 
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.info"))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -245,7 +245,7 @@ func (c *SafePlanetMissionController) Stage() {
 
 		// Invio messaggio di attesa
 		msg := helpers.NewMessage(c.Player.ChatID, missionRecap)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -270,7 +270,7 @@ func (c *SafePlanetMissionController) Stage() {
 				rGetMissionReward.GetExp(),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

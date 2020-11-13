@@ -196,7 +196,7 @@ func (c *ExplorationController) Stage() {
 			messageExploration,
 			helpers.Trans(c.Player.Language.Slug, "exploration.tips"),
 		))
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -234,7 +234,7 @@ func (c *ExplorationController) Stage() {
 				finishAt.Format("15:04:05"),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -315,7 +315,7 @@ func (c *ExplorationController) Stage() {
 			),
 		)
 
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
@@ -356,7 +356,7 @@ func (c *ExplorationController) Stage() {
 				finishAt.Format("15:04:05"),
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -400,7 +400,7 @@ func (c *ExplorationController) Stage() {
 				dropList,
 			),
 		)
-		msg.ParseMode = "markdown"
+		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
