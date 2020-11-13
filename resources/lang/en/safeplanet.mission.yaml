@@ -1,0 +1,14 @@
+# Mission
+safeplanet.mission.info: "Benvenuto nel centro *missioni*.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
+safeplanet.mission.start: "Avvia Missione"
+safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
+safeplanet.mission.check: "Non hai completato la tua missione ancora in corso.\nCosa vuoi fare?"
+safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n"
+safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la missione, guadagnando così:\n +*%v*💰\n+*%v*💎\n+*%v* Exp.\nLa coalizione ti rigrazia!"
+
+safeplanet.mission.type.planet_finding: "Trova il pianeta"
+safeplanet.mission.type.planet_finding.description: "La tua missione è quella di trovare e raggiungere il pianeta 🌏*%s*.\nBuona fortuna."
+safeplanet.mission.type.kill_mob: "Uccidi il nemico"
+safeplanet.mission.type.kill_mob.description: "Il tuo obbiettivo è di trovare 🐺 *%s* avvistato sul pianeta 🌏*%s* e annientarlo.\nBuona fortuna."
+safeplanet.mission.type.resources_finding: "Recupero risorse"
+safeplanet.mission.type.resources_finding.description: "Il tuo obbiettivo è di trovare e recuperare:\n- 💠 *%v* x %s*%v* (%s) %s\nBuona fortuna."
