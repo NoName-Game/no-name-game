@@ -9,9 +9,9 @@ import (
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
-	"github.com/sirupsen/logrus"
-
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
+	"github.com/sirupsen/logrus"
 )
 
 var (
