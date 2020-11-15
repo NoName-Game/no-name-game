@@ -16,11 +16,11 @@ items.description.revitalizing_max: "📖: Permette di recuperare *%v%%* della v
 
 # Ship support
 items.raw_fuel: "Carburante grezzo"
-items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.description.raw_fuel: "Di pessima qualità, un carburante abbastanza comune, permetterà di ricaricare il serbatoio della tua nave di *%v*"
 items.refined_fuel: "Carburante raffinato"
-items.description.refined_fuel: "Di buona qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.description.refined_fuel: "Di buona qualità, permetterà di ricaricare il serbatoio della tua nave di *%v*"
 items.final_fuel: "Carburante finale"
-items.description.final_fuel: "Di ottima qualità, permetterà di ricare il serbatoio della tua nave di *%v*"
+items.description.final_fuel: "Di ottima qualità, permetterà di ricaricare il serbatoio della tua nave di *%v*"
 items.basic_repair_component: "Componente riparatore base"
 items.description.basic_repair_component: "Componente buona qualità, permetterà di riparare immediatamente la tua nave di *%v*"
 items.advanced_repair_component: "Componente riparatore avanzato"
