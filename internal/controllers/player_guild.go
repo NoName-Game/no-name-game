@@ -108,7 +108,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	for _, playerDetails := range rGetPlayersGuild.GetPlayers() {
 		// Recupero posizione player corrente
 		var playerPosition *pb.Planet
-		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
+		if playerPosition, err = helpers.GetPlayerPosition(playerDetails.GetID()); err != nil {
 			c.Logger.Panic(err)
 		}
 
