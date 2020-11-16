@@ -218,7 +218,8 @@ func (c *HuntingController) Hunting() {
 			c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue") {
 			return
 		}
-
+		// Metto il puntatore del body selection sul petto.
+		c.Payload.BodySelection = 1
 		// Questo messaggio è necessario per immettere il tasto di abbandona caccia
 		initHunting := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "hunting.init"))
 		initHunting.ReplyMarkup = tgbotapi.NewReplyKeyboard(

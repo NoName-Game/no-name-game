@@ -2,6 +2,7 @@
 ship.intro: "Sali a bordo della tua nave 🚀 *%s* (*%s*) - *%s*\n\nQuale attività vorresti eseguire?"
 
 # Travel
+ship.travel.land: "Atterra! 🛬"
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 *Pianeta*?"
 ship.travel.ship_stats: "\n\nStato della tua 🚀 *Nave*:"
 ship.travel.ship_engine: "\nMotori di livello: *%v*"
