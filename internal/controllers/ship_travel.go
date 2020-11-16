@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
@@ -52,6 +53,20 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 		c.Logger.Panic(err)
 	}
 
+	var travel string
+	travel = "route.ship.travel.finding"
+	for _, state := range c.Data.PlayerActiveStates {
+		if state.Controller == "route.ship.travel" {
+			// Se il player sta già viaggiando
+			var finishAt time.Time
+			if finishAt, err = helpers.GetEndTime(state.GetFinishAt(), c.Player); err != nil {
+				c.Logger.Panic(err)
+			}
+			if time.Now().After(finishAt) {
+				travel = "ship.travel.land"
+			}
+		}
+	}
 	// Invio messaggio con recap
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 		fmt.Sprintf("%s %s %s %s %s %s %s",
@@ -66,7 +81,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel.finding")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, travel)),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel.favorite")),
