@@ -7,5 +7,5 @@ notification.activity.route.safeplanet.hangar.create: "Crezione nave completata"
 notification.activity.route.ship.travel: "Nuovo pianeta raggiunto!"
 notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 notification.activity.route.death: "Hai recuperato le energie!"
-
+notification.activity.route.ship.rests: "Hai recuperato le energie!"
 notification.achievement.message: "🎯 Achievement *completato*!\n\nHai portato a termine: *%s*\n*Ricompensa*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"

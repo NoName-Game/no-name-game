@@ -24,7 +24,7 @@ safeplanet.hangar.create.chose_rarity: "Perfetto!\nPer quale rarità?"
 safeplanet.hangar.create.wait: "Stiamo lavorando ancora alla tua nave, dovremmo concludere i lavori per le *%s*\n\nPossiedi 💎*%v* al costo di 💎*1* potrai sfruttare il suo potere per completare direttamente il viaggio.\n"
 safeplanet.hangar.create.start: "Abbiamo preso in carico la tua richiesta, torna da noi alle *%s*"
 safeplanet.hangar.create.end: "Ecco a te! Vai al deposito per scoprire la tua nuova nave: *%s*"
-safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rairtà *%s* al costo di 💰*%v*?"
+safeplanet.hangar.create.confirm: "Se sicuro di voler procedere con la richiesta si una nave di tipo *%s* di rarità *%s* al costo di 💰*%v*?"
 safeplanet.hangar.create.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
 
 # Deposit
