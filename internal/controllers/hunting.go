@@ -504,7 +504,18 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
 			EnemyID: enemy.ID,
 		}); err != nil {
-			c.Logger.Panic(err)
+			c.Logger.Debugf("Error during hunting %s", err.Error())
+			// Mando un messaggio che avvisi l'utente di un eventuale errore.
+			errMsg := helpers.NewEditMessage(c.Player.ChatID,
+				c.Update.CallbackQuery.Message.MessageID,
+				helpers.Trans(c.Player.Language.Slug, "hunting.mob.error"),
+			)
+			if _, err = helpers.SendMessage(errMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+			c.ReturnToMap(planetMap)
+			return
+
 		}
 		enemy = rGetEnemyByID.GetEnemy()
 	}
