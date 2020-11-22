@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -500,7 +499,6 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 	// Recupero dettagli aggiornati enemy
 	var enemy *pb.Enemy
 	enemy, _ = helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY)
-	log.Println(enemy)
 	if enemy != nil {
 		var rGetEnemyByID *pb.GetEnemyByIDResponse
 		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
