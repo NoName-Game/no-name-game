@@ -25,4 +25,4 @@ combat.no_weapon: "❌ Nessuna"
 combat.use_item: "Hai usato *%s* recuperando il *%v%%*."
 
 #error
-hunting.mob.error: "Un grave errore nel software della tua tuta ti blocca, prova a contattare l'amministratore!"
+hunting.mob.error: "Un cacciatore più svelto di te ti ha fregato la preda, ritorni alla caccia desolato..."
