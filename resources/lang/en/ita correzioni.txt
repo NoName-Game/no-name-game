@@ -1,0 +1,22 @@
+## conqueror.yaml ##
+sconfingendo
+ricervere
+
+## exploration.yaml ##
+Bouns
+
+## general.yaml ##
+Rapidatamente
+
+## hunting.yaml ##
+infligergli
+
+esperienza -> EXP
+
+
+## routes.yaml ##
+coalition -> alliance
+
+crafter -> gunsmith
+
+protectors -> guardians
