@@ -129,13 +129,6 @@ func (c *ShipTravelFindingController) Validator() (hasErrors bool) {
 	case 1:
 		if !helpers.InArray(c.Update.Message.Text, c.Payload.StarNearestMapName) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-					),
-				),
-			)
 
 			return true
 		}

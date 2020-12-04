@@ -39,7 +39,7 @@ titanplanet.event.question_4: "Il terreno inizia a tremare... le Maliarde stanno
 titanplanet.event.question_4.answer_1: "Abbatti le Maliarde"
 titanplanet.event.question_4.answer_2: "Cerchi di fare baccano con le armi"
 titanplanet.event.question_4.answer_3: "Attendi l'evoluzione dei fatti"
-titanplanet.event.question_4.bonus: "Riesci ad abbattere le Maliarde prima che finiscano di intonare il loro cantico, tutto il potere che il Titano stava accomulando causa una grossa esplosione che lo ferisce e subisce *%d% danni!"
+titanplanet.event.question_4.bonus: "Riesci ad abbattere le Maliarde prima che finiscano di intonare il loro cantico, tutto il potere che il Titano stava accomulando causa una grossa esplosione che lo ferisce e subisce *%d* danni!"
 titanplanet.event.question_4.malus: "Le Maliarde finisco il loro cantico senza che tu possa fare nulla, l'aura del Titano ti fa cadere a terra e subisci un colpo quasi mortale, hai subito *%d* danni!"
 
 titanplanet.event.question_5: "L'oscurità inizia a prevalere su di te, la tua mente viene sopraffatta da questa misteriosa forza che si cela in tutta la zona...stai per perdere il controllo!"

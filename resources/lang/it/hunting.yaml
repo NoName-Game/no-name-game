@@ -23,3 +23,6 @@ combat.found.transaction: "\n💰*%v*"
 combat.experience: "Ottenendo anche 🏵 *%v* esperienza!"
 combat.no_weapon: "❌ Nessuna"
 combat.use_item: "Hai usato *%s* recuperando il *%v%%*."
+
+#error
+hunting.mob.error: "Un cacciatore più svelto di te ti ha fregato la preda, ritorni alla caccia desolato..."
