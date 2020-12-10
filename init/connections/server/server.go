@@ -43,7 +43,7 @@ func (server *Server) Init() {
 	}
 
 	server.Connection = pb.NewNoNameClient(conn)
-
-	logrus.Info("[*] Server connections: OK!")
+	logrus.WithField("server", fmt.Sprintf("%s:%s", os.Getenv("WS_HOST"), os.Getenv("WS_PORT"))).
+		Info("[*] Server connections: OK!")
 	return
 }
