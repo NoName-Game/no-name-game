@@ -1,0 +1,90 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nn-ws-planet-system-generator
+  namespace: production
+  labels:
+    name: nn-ws-planet-system-generator
+    tier: nn-ws-planet-system-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nn-ws-planet-system-generator
+      tier: nn-ws-planet-system-generator
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        name: nn-ws-planet-system-generator
+        tier: nn-ws-planet-system-generator
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: nn-ws-planet-system-generator
+          image: valkyrie00/nn-ws:GIT_COMMIT
+          imagePullPolicy: IfNotPresent
+          command:
+            - "sh"
+            - "-c"
+            - "/planet_system_generator"
+          resources:
+            limits:
+              cpu: 250m
+              memory: 60Mi
+            requests:
+              cpu: 200m
+              memory: 50Mi
+          env:
+            - name: VERSION
+              value: "0.1.0"
+            - name: APP_DEBUG
+              value: "true"
+            - name: CRON_MINUTES
+              value: "1"
+            - name: WS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "ws_host"
+            - name: WS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "ws_port"
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_host"
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_port"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_name"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_user"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_password"
+            - name: DB_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-ws-secrets"
+                  key: "db_ssl"
