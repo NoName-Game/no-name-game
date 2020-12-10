@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nn-telegram-client
-  namespace: production
+  namespace: noname
   labels:
     name: nn-telegram-client
     tier: nn-telegram-client
