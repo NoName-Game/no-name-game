@@ -1,0 +1,3 @@
+[submodule "nn-grpc"]
+	path = nn-grpc
+	url = git@bitbucket.org:no-name-game/nn-grpc.git
