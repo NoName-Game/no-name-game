@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nn-telegram-client
+  name: nn-telegram-notifier
   namespace: noname
   labels:
-    name: nn-telegram-client
-    tier: nn-telegram-client
+    name: nn-telegram-notifier
+    tier: nn-telegram-notifier
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: nn-telegram-client
-      tier: nn-telegram-client
+      name: nn-telegram-notifier
+      tier: nn-telegram-notifier
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,13 +21,13 @@ spec:
   template:
     metadata:
       labels:
-        name: nn-telegram-client
-        tier: nn-telegram-client
+        name: nn-telegram-notifier
+        tier: nn-telegram-notifier
     spec:
       imagePullSecrets:
         - name: regcred
       containers:
-        - name: nn-telegram-client
+        - name: nn-telegram-notifier
           image: valkyrie00/nn-telegram:BRANCH_NAME
           imagePullPolicy: Always
           command:
