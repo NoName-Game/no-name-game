@@ -43,7 +43,7 @@ func (l *Localization) getAviableLanguages(serverConnection pb.NoNameClient) ([]
 	var err error
 
 	// Recupero tutte le lingue attive
-	d := time.Now().Add(1 * time.Second)
+	d := time.Now().Add(10 * time.Second)
 	ctx, _ := context.WithDeadline(context.Background(), d)
 	var rGetAllLanguages *pb.GetAllLanguagesResponse
 	if rGetAllLanguages, err = serverConnection.GetAllLanguages(ctx, &pb.GetAllLanguagesRequest{}); err != nil {

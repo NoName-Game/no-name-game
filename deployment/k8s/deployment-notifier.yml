@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nn-telegram-client
+  namespace: noname
+  labels:
+    name: nn-telegram-client
+    tier: nn-telegram-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nn-telegram-client
+      tier: nn-telegram-client
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        name: nn-telegram-client
+        tier: nn-telegram-client
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: nn-telegram-client
+          image: valkyrie00/nn-telegram:BRANCH_NAME
+          imagePullPolicy: Always
+          command:
+            - "sh"
+            - "-c"
+            - "/notifier"
+          resources:
+            limits:
+              cpu: 600m
+              memory: 160Mi
+            requests:
+              cpu: 300m
+              memory: 80Mi
+          env:
+            - name: VERSION
+              value: BRANCH_NAME
+            - name: CRON_MINUTES
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "cron_minutes"
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "sentry_dsn"
+
+            - name: TELEGRAM_DEBUG
+              value: "false"
+            - name: TELEGRAM_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "telegram_apikey"
+
+            - name: WS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "ws_host"
+            - name: WS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "ws_port"
+            - name: TTL_RPC
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "ttl_rpc"
+
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "redis_host"
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "redis_port"
+            - name: REDIS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "redis_db"

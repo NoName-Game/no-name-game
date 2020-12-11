@@ -2,7 +2,7 @@ module bitbucket.org/no-name-game/nn-telegram
 
 go 1.14
 
-replace bitbucket.org/no-name-game/nn-grpc => ../nn-grpc
+replace bitbucket.org/no-name-game/nn-grpc => ./nn-grpc
 
 require (
 	bitbucket.org/no-name-game/nn-grpc v1.0.0
