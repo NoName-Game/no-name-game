@@ -28,8 +28,8 @@ spec:
         - name: regcred
       containers:
         - name: nn-telegram-client
-          image: valkyrie00/nn-telegram:GIT_COMMIT
-          imagePullPolicy: IfNotPresent
+          image: valkyrie00/nn-telegram:BRANCH_NAME
+          imagePullPolicy: Always
           command:
             - "sh"
             - "-c"
@@ -43,9 +43,12 @@ spec:
               memory: 80Mi
           env:
             - name: VERSION
-              value: "1.0.0"
+              value: BRANCH_NAME
             - name: CRON_MINUTES
-              value: "1"
+              valueFrom:
+                secretKeyRef:
+                  name: "nn-telegram-secrets"
+                  key: "cron_minutes"
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:

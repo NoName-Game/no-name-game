@@ -28,5 +28,3 @@ COPY --from=builder /go/bin/client /client
 COPY --from=builder /go/bin/notifier /notifier
 
 STOPSIGNAL SIGTERM
-
-CMD ["sh", "-c", "/client"]
