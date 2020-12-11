@@ -10,7 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 No-Name requires:
 
-- [Docker](https://www.docker.com/) - Needed for run containers with postegres DB and Redis DB
+- [Docker](https://www.docker.com/) - Needed for run containers with postegres DB
 - [Go](https://golang.org/) - Simple.. it's language of bot.
 - [Glide](https://github.com/Masterminds/glide/blob/master/README.md) - Glide it's package manager used in this project, for install and manage dependencies.
 
