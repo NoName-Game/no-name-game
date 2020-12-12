@@ -96,7 +96,7 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			c.Payload.AddResource = true
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
 			// Non è possibile iniziare il craft senza risorse
-			if len(c.Payload.Resources) < 0 {
+			if len(c.Payload.Resources) <= 0 {
 				return true
 			}
 		}
