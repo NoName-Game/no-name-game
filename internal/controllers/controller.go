@@ -312,7 +312,7 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 	for _, state := range c.Data.PlayerActiveStates {
 		for _, blockState := range c.Configurations.ControllerBlocked {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))
 				if _, err := helpers.SendMessage(msg); err != nil {
 					panic(err)
 				}
