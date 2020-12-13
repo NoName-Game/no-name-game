@@ -18,7 +18,7 @@ achievement.kill-enemies-10: "Uccidi i nemici (10)"
 achievement.kill-enemies-50: "Uccidi i nemici (50)"
 achievement.kill-enemies-100: "Uccidi i nemici (100)"
 
-player.achievement.intro: "Ecco qui la la lista dei tuoi abbiettivi da esploratore che hai raggiunto e che devi raggiungere:"
+player.achievement.intro: "Ecco qui la la lista dei tuoi obbiettivi da esploratore che hai raggiunto e che devi raggiungere:"
 player.achievement.category_recap: "Obbiettivi raggiunti per la categoria *%s*:\n\n%s"
 
 # Inventory
@@ -34,7 +34,7 @@ inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 
 # Equip
 inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
-inventory.equip.error: "Non è possibile eqipaggiare l'item da te scelto."
+inventory.equip.error: "Non è possibile equipaggiare l'item da te scelto."
 inventory.equip.confirm: "Confermi di voler equipaggiare *%s*?"
 inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma *%s*, sostituendo *%s*?"
 inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura *%s*, sostituendo *%s*?"
@@ -42,7 +42,7 @@ inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
 
 # Items
 inventory.items.what: "Ecco gli 🔩 *Oggetti* in tuo possesso.\nDesideri usare qualcosa?"
-inventory.items.not_found: "L'oggetto che vuoi usare non sembra esser valido."
+inventory.items.not_found: "L'oggetto che vuoi usare non sembra essere valido."
 inventory.items.confirm: "Confermi di voler usare *%v*?"
 inventory.items.confirm_warning: "\n\n⚠️Attenzione, l'eccedenza verrà automaticamente scartata."
 inventory.items.completed: "Hai usato *%s*."
