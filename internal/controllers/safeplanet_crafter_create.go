@@ -103,6 +103,13 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			// Il player ha aggiunto una nuova risorsa
 			c.CurrentState.Stage = 2
 			c.Payload.AddResource = true
+
+			// Recupero risorsa da messaggio, e se non rispecchia le specifiche ritorno errore
+			resourceName := strings.Split(strings.Split(c.Update.Message.Text, " (")[0], " ")
+			if len(resourceName) < 3 {
+				return true
+			}
+
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
 			// Non è possibile iniziare il craft senza risorse
 			if len(c.Payload.Resources) <= 0 {
@@ -247,20 +254,22 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		type CraftResourceStruct struct {
-			ResourceName   string
-			ResourceRarity string
-			ResourceID     uint32
-			Quantity       int32
+			ResourceName       string
+			ResourceRarity     string
+			ResourceCategoryID uint32
+			ResourceID         uint32
+			Quantity           int32
 		}
 
 		// Mappo tutte le risorse del player
 		var playerResources []CraftResourceStruct
 		for _, resource := range rGetPlayerResources.GetPlayerInventory() {
 			playerResources = append(playerResources, CraftResourceStruct{
-				ResourceID:     resource.GetResource().GetID(),
-				ResourceName:   resource.GetResource().GetName(),
-				ResourceRarity: resource.GetResource().GetRarity().GetSlug(),
-				Quantity:       resource.GetQuantity(),
+				ResourceID:         resource.GetResource().GetID(),
+				ResourceName:       resource.GetResource().GetName(),
+				ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
+				ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
+				Quantity:           resource.GetQuantity(),
 			})
 		}
 
@@ -271,11 +280,9 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				c.Payload.Resources = make(map[uint32]int32)
 			}
 
-			// Recupero risorsa da messaggio
-			resourceName := strings.Split(
-				strings.Split(c.Update.Message.Text, " (")[0],
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")+" ",
-			)[1]
+			// Recupero risorsa da messaggio, posso recuperare tranquillamente usando l'indice in quanto
+			// il controllo sulla stringa viene fatto in fase di validazione
+			resourceName := strings.Split(strings.Split(c.Update.Message.Text, " (")[0], " ")[2]
 
 			// Recupero risorsa
 			var rGetResourceByName *pb.GetResourceByNameResponse
@@ -338,8 +345,9 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				availabeQuantity := resource.Quantity - c.Payload.Resources[resource.ResourceID]
 				if availabeQuantity > 0 {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-						fmt.Sprintf("%s %s (%s) %v/%v",
+						fmt.Sprintf("%s %s %s (%s) %v/%v",
 							helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
+							helpers.GetResourceCategoryIcons(resource.ResourceCategoryID),
 							resource.ResourceName,
 							resource.ResourceRarity,
 							resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
@@ -368,8 +376,9 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
+				recipe += fmt.Sprintf("- *%v* x %s %s (%s)\n",
 					quantity,
+					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
 					rGetResourceByID.GetResource().GetRarity().GetSlug(),
 				)
