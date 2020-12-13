@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -78,7 +79,7 @@ func (c *MenuController) Stage() {
 // GetRecap - Recap principale
 func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 	// Appendo board system
-	message = helpers.Trans(c.Player.Language.Slug, "menu.borad_system")
+	message = helpers.Trans(c.Player.Language.Slug, "menu.borad_system", os.Getenv("VERSION"))
 
 	// Menu se il player si trova su un pianeta sicuro
 	if c.CheckInSafePlanet(currentPosition) {
