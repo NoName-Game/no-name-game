@@ -202,7 +202,7 @@ func (c *ShipTravelFindingController) Stage() {
 			// Mostro se il pianeta è stato mai raggiunto
 			var planetAlreadyVisited string
 			if explorationInfo.AlreadyVisited {
-				planetAlreadyVisited = "🧳"
+				planetAlreadyVisited = "❇️"
 			}
 
 			msgNearestStars += fmt.Sprintf("\n\n🌏 %s - 💫 %s (%d) %s\n%s ⏱ %v ⛽️ -%v%% 🔧 -%v%%",
