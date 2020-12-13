@@ -199,8 +199,15 @@ func (c *ShipTravelFindingController) Stage() {
 				travelTime = fmt.Sprintf("%v (%s)", explorationInfo.Time, helpers.Trans(c.Player.Language.Slug, "minutes"))
 			}
 
-			msgNearestStars += fmt.Sprintf("\n\n🌏 %s - %s\n⏱ %v ⛽️ -%v%% 🔧 -%v%%",
-				planetName, reachableMsg,
+			// Mostro se il pianeta è stato mai raggiunto
+			var planetAlreadyVisited string
+			if explorationInfo.AlreadyVisited {
+				planetAlreadyVisited = "🧳"
+			}
+
+			msgNearestStars += fmt.Sprintf("\n\n🌏 %s - 💫 %s (%d) %s\n%s ⏱ %v ⛽️ -%v%% 🔧 -%v%%",
+				planetName, explorationInfo.Planet.PlanetSystem.Name, explorationInfo.Planet.PlanetSystem.ID, planetAlreadyVisited,
+				reachableMsg,
 				travelTime,
 				explorationInfo.Fuel,
 				explorationInfo.Integrity,
