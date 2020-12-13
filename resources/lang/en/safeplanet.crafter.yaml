@@ -17,6 +17,6 @@ safeplanet.crafting.no_resources: "Mi spiace non puoì aggiungere altre quantit�
 safeplanet.crafting.no_resource: "Non hai questa risorsa!"
 
 # Crafter - Repair
-safeplanet.crafting.repair.what: "Qualte tra le tua armi danneggiate vorresti riparare?"
+safeplanet.crafting.repair.what: "Quale tra le tue armi danneggiate vorresti riparare?"
 safeplanet.crafting.repair.confirm: "Posso ripararti *%s* immediatamente!\nSei sicuro di vole riparare al costo di 💰*%v*?"
 safeplanet.crafting.repair.completed: "Ecco a te ora è come nuova, fanne buon uso!"

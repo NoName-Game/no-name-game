@@ -32,6 +32,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 				To:        &SafePlanetCoalitionController{},
 				FromStage: 1,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

@@ -29,6 +29,7 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 				To:        &MenuController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return
