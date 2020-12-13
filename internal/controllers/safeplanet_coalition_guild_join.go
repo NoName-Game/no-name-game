@@ -36,6 +36,7 @@ func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tg
 				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

@@ -42,6 +42,7 @@ func (c *SafePlanetHangarCreateController) Handle(player *pb.Player, update tgbo
 				To:        &SafePlanetHangarController{},
 				FromStage: 1,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

@@ -124,24 +124,19 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 // CheckInSafePlanet
 // Verifico se il player si trova su un pianeta sicuro
 func (c *MenuController) CheckInSafePlanet(position *pb.Planet) bool {
-	return position.GetSafe()
+	return c.Controller.CheckInSafePlanet(position)
 }
 
 // CheckInTitanPlanet
 // Verifico se il player si trova su un pianeta sicuro
 func (c *MenuController) CheckInTitanPlanet(position *pb.Planet) bool {
-	// Verifico se il pianeta corrente è occupato da un titano
-	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
-	rGetTitanByPlanetID, _ = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
-		PlanetID: position.GetID(),
-	})
 
-	if rGetTitanByPlanetID.GetTitan().GetID() > 0 {
-		c.Titan = rGetTitanByPlanetID.GetTitan()
-		return true
+	inPlanet, titan := c.Controller.CheckInTitanPlanet(position)
+	if titan != nil {
+		c.Titan = titan
 	}
 
-	return false
+	return inPlanet
 }
 
 // CheckInTravel
