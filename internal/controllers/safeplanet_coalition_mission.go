@@ -57,6 +57,14 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
+	// Verifico sempre se è già in corso una missione
+	var rCheckMission *pb.CheckMissionResponse
+	if rCheckMission, _ = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
+		PlayerID: c.Player.GetID(),
+	}); rCheckMission != nil && rCheckMission.GetInMission() {
+		c.CurrentState.Stage = 2
+	}
+
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -80,10 +88,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 
 		// Verifico se realmente il player è in missione
 		if !rCheckMission.GetInMission() {
-			c.Validation.Message = helpers.Trans(
-				c.Player.Language.Slug,
-				"safeplanet.mission.check_nomission",
-			)
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.check_nomission")
 
 			// Aggiungo anche abbandona
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
@@ -99,9 +104,12 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 
 		// Verifico se il player ha completato la missione
 		if !rCheckMission.GetCompleted() {
-			c.Validation.Message = helpers.Trans(
-				c.Player.Language.Slug,
-				"safeplanet.mission.check",
+			// Recupero dettagli missione
+			missionRecap := c.getMissionRecap(rCheckMission.GetMission())
+
+			c.Validation.Message = fmt.Sprintf("%s\n\n%s",
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.check"),
+				missionRecap,
 			)
 
 			// Aggiungo anche abbandona
@@ -166,83 +174,8 @@ func (c *SafePlanetMissionController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// In base alla categoria della missione costruisco il messaggio
-		var missionRecap string
-		missionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.type",
-			helpers.Trans(c.Player.Language.Slug,
-				fmt.Sprintf("safeplanet.mission.type.%s", rGetMission.GetMission().GetMissionCategory().GetSlug()),
-			),
-		)
-
-		// Verifico quale tipologia di missione è stata estratta
-		switch rGetMission.GetMission().GetMissionCategory().GetSlug() {
-		// Trova il pianeta
-		case "resources_finding":
-			var missionPayload *pb.MissionResourcesFinding
-			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
-
-			// Recupero enitità risorsa da cercare
-			var rGetResourceByID *pb.GetResourceByIDResponse
-			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-				ID: missionPayload.GetResourceID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			missionRecap += helpers.Trans(c.Player.Language.Slug,
-				"safeplanet.mission.type.resources_finding.description",
-				missionPayload.GetResourceQty(),
-				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
-				rGetResourceByID.GetResource().GetName(),
-				rGetResourceByID.GetResource().GetRarity().GetSlug(),
-				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
-			)
-
-		// Trova le risorse
-		case "planet_finding":
-			var missionPayload *pb.MissionPlanetFinding
-			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
-
-			// Recupero pianeta da trovare
-			var rGetPlanetByID *pb.GetPlanetByIDResponse
-			if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
-				PlanetID: missionPayload.GetPlanetID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			missionRecap += helpers.Trans(c.Player.Language.Slug,
-				"safeplanet.mission.type.planet_finding.description",
-				rGetPlanetByID.GetPlanet().GetName(),
-			)
-
-		// Uccidi il nemico
-		case "kill_mob":
-			var missionPayload *pb.MissionKillMob
-			helpers.UnmarshalPayload(rGetMission.GetMission().GetPayload(), &missionPayload)
-
-			// Recupero enemy da Uccidere
-			var rGetEnemyByID *pb.GetEnemyByIDResponse
-			if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
-				EnemyID: missionPayload.GetEnemyID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Recupero pianeta di dove si trova il mob
-			var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
-			if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
-				MapID: rGetEnemyByID.GetEnemy().GetPlanetMapID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			missionRecap += helpers.Trans(c.Player.Language.Slug,
-				"safeplanet.mission.type.kill_mob.description",
-				rGetEnemyByID.GetEnemy().GetName(),
-				rGetPlanetByMapID.GetPlanet().GetName(),
-			)
-		}
+		// Recupero dettagli missione
+		missionRecap := c.getMissionRecap(rGetMission.GetMission())
 
 		// Invio messaggio di attesa
 		msg := helpers.NewMessage(c.Player.ChatID, missionRecap)
@@ -278,6 +211,90 @@ func (c *SafePlanetMissionController) Stage() {
 
 		// Completo lo stato
 		c.CurrentState.Completed = true
+	}
+
+	return
+}
+
+// getMissionRecap
+func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (missionRecap string) {
+	var err error
+
+	// In base alla categoria della missione costruisco il messaggio
+	missionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.type",
+		helpers.Trans(c.Player.Language.Slug,
+			fmt.Sprintf("safeplanet.mission.type.%s", mission.GetMissionCategory().GetSlug()),
+		),
+	)
+
+	// Verifico quale tipologia di missione è stata estratta
+	switch mission.GetMissionCategory().GetSlug() {
+	// Trova il pianeta
+	case "resources_finding":
+		var missionPayload *pb.MissionResourcesFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enitità risorsa da cercare
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			ID: missionPayload.GetResourceID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.resources_finding.description",
+			missionPayload.GetResourceQty(),
+			helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
+			rGetResourceByID.GetResource().GetName(),
+			rGetResourceByID.GetResource().GetRarity().GetSlug(),
+			helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+		)
+
+	// Trova le risorse
+	case "planet_finding":
+		var missionPayload *pb.MissionPlanetFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero pianeta da trovare
+		var rGetPlanetByID *pb.GetPlanetByIDResponse
+		if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+			PlanetID: missionPayload.GetPlanetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.planet_finding.description",
+			rGetPlanetByID.GetPlanet().GetName(),
+		)
+
+	// Uccidi il nemico
+	case "kill_mob":
+		var missionPayload *pb.MissionKillMob
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enemy da Uccidere
+		var rGetEnemyByID *pb.GetEnemyByIDResponse
+		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+			EnemyID: missionPayload.GetEnemyID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero pianeta di dove si trova il mob
+		var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
+		if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
+			MapID: rGetEnemyByID.GetEnemy().GetPlanetMapID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.kill_mob.description",
+			rGetEnemyByID.GetEnemy().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetName(),
+		)
 	}
 
 	return
