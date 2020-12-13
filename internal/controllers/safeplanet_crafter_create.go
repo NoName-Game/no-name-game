@@ -325,15 +325,19 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		// Inserisco lista delle risorse
 		for _, resource := range playerResources {
 			if c.Payload.Resources[resource.ResourceID] <= resource.Quantity {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					fmt.Sprintf("%s %s (%s) %v/%v",
-						helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
-						resource.ResourceName,
-						resource.ResourceRarity,
-						resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
-					),
-				))
-				keyboardRowResources = append(keyboardRowResources, keyboardRow)
+				// Verifico se la quantità disponibile sia sopra allo 0
+				availabeQuantity := resource.Quantity - c.Payload.Resources[resource.ResourceID]
+				if availabeQuantity > 0 {
+					keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+						fmt.Sprintf("%s %s (%s) %v/%v",
+							helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
+							resource.ResourceName,
+							resource.ResourceRarity,
+							resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
+						),
+					))
+					keyboardRowResources = append(keyboardRowResources, keyboardRow)
+				}
 			}
 		}
 
