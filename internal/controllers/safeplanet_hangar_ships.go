@@ -40,6 +40,7 @@ func (c *SafePlanetHangarShipsController) Handle(player *pb.Player, update tgbot
 				To:        &SafePlanetHangarController{},
 				FromStage: 1,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

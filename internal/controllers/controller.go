@@ -49,6 +49,7 @@ type ControllerConfigurations struct {
 	CustomBreaker     []string
 	ControllerBlocked []string
 	ControllerBack    ControllerBack
+	PlanetType        []string
 }
 
 type ControllerBack struct {
@@ -68,6 +69,11 @@ func (c *Controller) InitController(controller Controller) bool {
 	// Carico controller data
 	if err = c.LoadControllerData(); err != nil {
 		c.Logger.Panicf("cant load controller data: %s", err.Error())
+	}
+
+	// Verifico che il player si trovi nel pianeta consentito
+	if correctPlanet := c.InCorrectPlanet(); !correctPlanet {
+		return false
 	}
 
 	// Verifico se il player si trova in determinati stati non consentiti
@@ -312,11 +318,50 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 	for _, state := range c.Data.PlayerActiveStates {
 		for _, blockState := range c.Configurations.ControllerBlocked {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "valodator.controller.blocked"))
+				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))
 				if _, err := helpers.SendMessage(msg); err != nil {
 					panic(err)
 				}
 
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// InCorrectPlanet
+// Alcuni controller hanno azioni richiamabili solo da determinati pianeti (sicuro, titano, normale).
+// Effettuare il controllo e ritornare TRUE se l'azione può proseguire.
+// Tipi di pianeta consentiti: {safe, titan, default}
+func (c *Controller) InCorrectPlanet() (correctPlanet bool) {
+	var err error
+
+	// Recupero posizione player.
+	var currentPosition *pb.Planet
+	if currentPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Se l'array è vuoto tutti i pianeti sono consentiti. Skippo il controllo.
+	if len(c.Configurations.PlanetType) == 0 {
+		return true
+	}
+
+	inSafe := c.CheckInSafePlanet(currentPosition)
+	inTitan, _ := c.CheckInTitanPlanet(currentPosition)
+
+	// Ciclo fra i tipi di pianeta consentito
+	for _, planetType := range c.Configurations.PlanetType {
+		switch planetType {
+		case "safe":
+			return inSafe
+		case "titan":
+			return inTitan
+		case "default":
+			// Se entrambi i valori sono falsi allora è un pianeta classico
+			if !(inSafe || inTitan) {
 				return true
 			}
 		}
@@ -334,4 +379,26 @@ func (c *Controller) InTutorial() bool {
 	}
 
 	return false
+}
+
+// CheckInTitanPlanet
+// Verifico se il player si trova su un pianeta sicuro
+func (c *Controller) CheckInTitanPlanet(position *pb.Planet) (inTitanPlanet bool, titan *pb.Titan) {
+	// Verifico se il pianeta corrente è occupato da un titano
+	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
+	rGetTitanByPlanetID, _ = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
+		PlanetID: position.GetID(),
+	})
+
+	if rGetTitanByPlanetID.GetTitan().GetID() > 0 {
+		return true, rGetTitanByPlanetID.GetTitan()
+	}
+
+	return false, nil
+}
+
+// CheckInSafePlanet
+// Verifico se il player si trova su un pianeta sicuro
+func (c *Controller) CheckInSafePlanet(position *pb.Planet) bool {
+	return position.GetSafe()
 }

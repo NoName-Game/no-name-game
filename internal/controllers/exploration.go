@@ -39,6 +39,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 				To:        &MenuController{},
 				FromStage: 1,
 			},
+			PlanetType: []string{"default"},
 		},
 	}) {
 		return

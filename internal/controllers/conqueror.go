@@ -36,6 +36,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 				To:        &MenuController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"default"},
 		},
 	}) {
 		return

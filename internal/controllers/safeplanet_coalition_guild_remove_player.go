@@ -34,6 +34,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, u
 				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

@@ -30,6 +30,7 @@ func (c *SafePlanetProtectorsLeaveController) Handle(player *pb.Player, update t
 				To:        &SafePlanetProtectorsController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

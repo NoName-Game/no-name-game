@@ -31,6 +31,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 				To:        &MenuController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

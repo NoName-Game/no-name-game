@@ -59,6 +59,7 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 				To:        &MenuController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"titan"},
 		},
 	}) {
 		return

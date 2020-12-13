@@ -40,6 +40,7 @@ func (c *SafePlanetResearchDonationController) Handle(player *pb.Player, update 
 				To:        &SafePlanetResearchController{},
 				FromStage: 1,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return

@@ -31,6 +31,7 @@ func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, upd
 				To:        &SafePlanetCoalitionController{},
 				FromStage: 0,
 			},
+			PlanetType: []string{"safe"},
 		},
 	}) {
 		return
