@@ -105,9 +105,9 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Invio set di messaggi
-		// if err = c.sendIntroMessage(); err != nil {
-		// 	c.Logger.Panic(err)
-		// }
+		if err = c.sendIntroMessage(); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		// Ultimo step apri gli occhi
 		var openEyeMessage tgbotapi.MessageConfig

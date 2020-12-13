@@ -65,6 +65,14 @@ func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgb
 // Validator
 // ====================================
 func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
+	// Verifico sempre che il player non abbia già altri craft in corso
+	var rCrafterCheck *pb.CrafterCheckResponse
+	if rCrafterCheck, _ = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
+		PlayerID: c.Player.ID,
+	}); rCrafterCheck != nil && rCrafterCheck.CraftInProgress {
+		c.CurrentState.Stage = 5
+	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico tipologia item che il player vuole craftare
@@ -96,9 +104,12 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			c.Payload.AddResource = true
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
 			// Non è possibile iniziare il craft senza risorse
-			if len(c.Payload.Resources) < 0 {
+			if len(c.Payload.Resources) <= 0 {
 				return true
 			}
+		} else {
+			// Se non è nessuno di questi allora ritorno errore
+			return true
 		}
 	// ##################################################################################################
 	// Se il player ha dato conferma verifico se ha il denaro necessario per proseguire
@@ -322,15 +333,19 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		// Inserisco lista delle risorse
 		for _, resource := range playerResources {
 			if c.Payload.Resources[resource.ResourceID] <= resource.Quantity {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-					fmt.Sprintf("%s %s (%s) %v/%v",
-						helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
-						resource.ResourceName,
-						resource.ResourceRarity,
-						resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
-					),
-				))
-				keyboardRowResources = append(keyboardRowResources, keyboardRow)
+				// Verifico se la quantità disponibile sia sopra allo 0
+				availabeQuantity := resource.Quantity - c.Payload.Resources[resource.ResourceID]
+				if availabeQuantity > 0 {
+					keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+						fmt.Sprintf("%s %s (%s) %v/%v",
+							helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
+							resource.ResourceName,
+							resource.ResourceRarity,
+							resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
+						),
+					))
+					keyboardRowResources = append(keyboardRowResources, keyboardRow)
+				}
 			}
 		}
 
