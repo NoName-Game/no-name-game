@@ -1,5 +1,5 @@
 # MENU
-menu.borad_system: "*BoardSystem v0.1*\n"
+menu.borad_system: "*BoardSystem v%s*\n"
 menu.general: "🌏 %s \n%s \n\n"
 
 # Task
