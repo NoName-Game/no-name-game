@@ -1,11 +1,11 @@
 # Research
-safeplanet.coalition.research.info: "Benventuo nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque."
-safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita ancora di 💠*%d* (*%s*) per esser completata."
-safeplanet.coalition.research.done: "\n🎉 Complimenti esploratori!!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare nuove risorse.\nTorna a breve per scoprire i progressi."
+safeplanet.coalition.research.info: "Welcome to the 🔬 *Research* center.\n\nBy donating some resources to the Coalition you'll help the research center to discover new accessible resources for everyone."
+safeplanet.coalition.research.recap: "The current active research still needs 💠*%d* (*%s*) to be completed."
+safeplanet.coalition.research.done: "\n🎉 Congratulations explorers!!\nThanks to your help our team can now process the data and find new resources.\nCome back in a bit to check out the progress."
 
 # Research - Donations
-safeplanet.coalition.research.donation.choose_reseource: "Quale risorsa vuoi donare?"
-safeplanet.coalition.research.donation.choose_quantity: "Quante risorsa vuoi donare?"
-safeplanet.coalition.research.donation.confirmation: "Stai per donare *%v* risorse di, *%s*, sicuro di voler continuare?"
-safeplanet.coalition.research.donation.completed: "La tua donazione è stata registrata correttamente!"
-safeplanet.coalition.research.donation.not_enough_resource: "Non hai abbastanza risorse per poter procedere alla donazione."
+safeplanet.coalition.research.donation.choose_reseource: "Which resource do you want to donate?"
+safeplanet.coalition.research.donation.choose_quantity: "How many resources do you want to donate?"
+safeplanet.coalition.research.donation.confirmation: "You're going to donate *%v* resources of *%s*, are you sure you want to continue?"
+safeplanet.coalition.research.donation.completed: "Your donation has been registered successfully!"
+safeplanet.coalition.research.donation.not_enough_resource: "You don't have enough resources to proceed with the donation."
