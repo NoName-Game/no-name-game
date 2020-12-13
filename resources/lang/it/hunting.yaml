@@ -5,14 +5,14 @@ hunting.leave: "⬅️ Abbandona"
 # Tresure
 tresure.found.resource: "*Fantastico!*\nHai trovato una 💠 Risorsa: %s*%s* (%s) %s"
 tresure.found.item: "Incredulo davanti e te scopri 🔩*%s*"
-tresure.found.transaction: "Ti avvicini ad qualcosa di luccicante, guardi meglio e scopri di aver trovato *%v*💰"
+tresure.found.transaction: "Ti avvicini a qualcosa di luccicante, guardi meglio e scopri di aver trovato *%v*💰"
 tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
 tresure.found.trap: "AH! Sei inciampato in una trappola, perdi *%v*HP!"
 
 # Combat
 combat.damage: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico infliggendo *%d* danni!\nIl nemico è riuscito comunque a colpirti e infliggerti *%d* danni!"
 combat.enemy_dodge: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico ma è riuscito a *schivare* il colpo, si gira di scatto riuscendo ad infliggerti *%d* danni!"
-combat.player_dodge: "⚔️ Rapporto scontro ⚔️\n\nSei riuscito a *schivare* il colpo nemico, con un colpo deciso riesci a infligergli *%d* danni!"
+combat.player_dodge: "⚔️ Rapporto scontro ⚔️\n\nSei riuscito a *schivare* il colpo nemico, con un colpo deciso riesci a infliggergli *%d* danni!"
 combat.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico è riuscito a *sconfiggerti* in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
 combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nStai mirando a: *%s*\nArma equipaggiata:\n*%s* (🛠 *%v*)"
 combat.mob_killed: "Sei riuscito a *sconfiggere* il nemico!\nDallo scontro riesci a recuperare:\n%s"

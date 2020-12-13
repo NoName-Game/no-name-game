@@ -31,7 +31,7 @@ armor: "🛡 Armatura"
 armors: "🛡 Armature"
 weapon: "🗡 Arma"
 weapons: "🗡 Armi"
-complete_with_diamond: "💎 Concludi Rapidatamente 💎"
+complete_with_diamond: "💎 Concludi Rapidamente 💎"
 
 # Ship Category
 ship.category.light: "Leggera"
@@ -39,7 +39,7 @@ ship.category.normal: "Normale"
 ship.category.heavy: "Pesante"
 
 # Rarities
-rarity.VC: "Molto comune"
+rarity.VC: "Molto Comune"
 rarity.C: "Comune"
 rarity.U: "Non Comune"
 rarity.R: "Raro"
