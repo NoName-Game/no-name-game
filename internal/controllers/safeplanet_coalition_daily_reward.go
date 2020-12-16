@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -52,10 +54,14 @@ func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, upd
 			c.Logger.Panic(err)
 		}
 	} else {
+		// Recupero dettaglio Item droppato
+		itemFound := helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetPlayerDailyReward.GetItem().GetSlug()))
+
 		dailyRewardMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.daily_reward",
 			rGetPlayerDailyReward.GetExperience(),
 			rGetPlayerDailyReward.GetMoney(),
 			rGetPlayerDailyReward.GetDiamond(),
+			itemFound,
 		)
 	}
 
