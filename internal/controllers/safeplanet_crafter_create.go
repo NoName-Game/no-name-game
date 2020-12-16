@@ -257,6 +257,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			ResourceName       string
 			ResourceRarity     string
 			ResourceCategoryID uint32
+			ResourceBase       bool
 			ResourceID         uint32
 			Quantity           int32
 		}
@@ -270,6 +271,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
 				ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
 				Quantity:           resource.GetQuantity(),
+				ResourceBase:       resource.GetResource().GetBase(),
 			})
 		}
 
@@ -344,13 +346,20 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				// Verifico se la quantità disponibile sia sopra allo 0
 				availabeQuantity := resource.Quantity - c.Payload.Resources[resource.ResourceID]
 				if availabeQuantity > 0 {
+					// Verifico se è una risorsa base
+					baseResources := ""
+					if resource.ResourceBase {
+						baseResources = "🔬Base"
+					}
+
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
-						fmt.Sprintf("%s %s %s (%s) %v/%v",
+						fmt.Sprintf("%s %s %s (%s) %v/%v %s",
 							helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add"),
 							helpers.GetResourceCategoryIcons(resource.ResourceCategoryID),
 							resource.ResourceName,
 							resource.ResourceRarity,
 							resource.Quantity-c.Payload.Resources[resource.ResourceID], resource.Quantity,
+							baseResources,
 						),
 					))
 					keyboardRowResources = append(keyboardRowResources, keyboardRow)
@@ -376,11 +385,18 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				recipe += fmt.Sprintf("- *%v* x %s %s (%s)\n",
+				// Verifico se è una risorsa base
+				baseResources := ""
+				if rGetResourceByID.GetResource().GetBase() {
+					baseResources = "🔬Base"
+				}
+
+				recipe += fmt.Sprintf("- *%v* x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
 					rGetResourceByID.GetResource().GetRarity().GetSlug(),
+					baseResources,
 				)
 			}
 		}
@@ -417,10 +433,18 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				recipe += fmt.Sprintf("- *%v* x %s (%s)\n",
+				// Verifico se è una risorsa base
+				baseResources := ""
+				if rGetResourceByID.GetResource().GetBase() {
+					baseResources = "🔬Base"
+				}
+
+				recipe += fmt.Sprintf("- *%v* x %s %s (%s) %s \n",
 					quantity,
+					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
 					rGetResourceByID.GetResource().GetRarity().GetSlug(),
+					baseResources,
 				)
 			}
 		}
