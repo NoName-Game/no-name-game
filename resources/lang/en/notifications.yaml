@@ -2,7 +2,7 @@
 notification.activity.route.exploration: "You got back from the exploration, find out which resources you discovered during it."
 notification.activity.route.ship.laboratory: "The creation of your crafted item was accomplished!"
 notification.activity.route.hunting: "Informations got back successfully!"
-notification.activity.route.ship.repairs: "Ship's restoration accomplished!"
+notification.activity.route.safeplanet.hangar.repair: "Ship's restoration accomplished!"
 notification.activity.route.safeplanet.hangar.create: "Ship creation completed"
 notification.activity.route.ship.travel: "New planet reached!"
 notification.activity.route.safeplanet.crafter: "The gunsmith has completed your order, give it a run to withdraw it!"
