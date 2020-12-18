@@ -48,3 +48,11 @@ ship.laboratory.no_resource_to_craft: "Unfortunately you're missing some resourc
 ship.laboratory.wait: "Production *started*!\nThe end of your item's production is expected to be at *%s*, come back later."
 ship.laboratory.wait_validator: "The end of your item's production is expected to be at *%s*, come back later."
 ship.laboratory.item_does_not_exist: "The chosen item doesn't exist!"
+
+# Rescue
+ship.travel.rescue.info: "🧰 Are you stuck on this planet?\n\nRequest support from the coalition.\nThrough a signal, the coalition is able to teleport you on the closest safe planet.\n\nYou'll need *1*💎 to be rescued"
+ship.travel.rescue.diamond: "💎 Request Support 💎"
+ship.travel.rescue.confirm: "*Are you sure you want to be rescued?*\n⚠️ Will be used *1*💎"
+ship.travel.rescue.confirmed: "Rescue call sent, the coalition is listening!"
+ship.travel.rescue.countdown.init: "Rise your 💎 up high and feel the  power run through your body..."
+ship.travel.rescue.countdown: "Teletrasport start in *%d*!"
