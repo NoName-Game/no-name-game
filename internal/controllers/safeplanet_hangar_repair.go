@@ -65,6 +65,9 @@ func (c *SafePlanetHangarRepairController) Handle(player *pb.Player, update tgbo
 // ====================================
 func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Recupero quale nave si vuole riparare
+	// ##################################################################################################
 	case 1:
 		shipMsg := strings.Split(c.Update.Message.Text, " (")[0]
 
@@ -251,6 +254,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		rStartShipRepair, err = config.App.Server.Connection.StartShipRepair(helpers.NewContext(1), &pb.StartShipRepairRequest{
 			PlayerID:   c.Player.ID,
 			RapairType: c.Payload.RepairType,
+			ShipID:     c.Payload.ShipID,
 		})
 
 		if err != nil && strings.Contains(err.Error(), "not enough resource quantities") {
@@ -262,6 +266,8 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				c.Logger.Panic(err)
 			}
 			return
+		} else if err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Se tutto ok mostro le risorse che vengono consumate per la riparazione
@@ -275,9 +281,12 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			recapResourceUsed += fmt.Sprintf("\n- *%v* x %s (%s)",
+			recapResourceUsed += fmt.Sprintf("- *%v* x %s%s (%s) %s\n",
 				resourceUsed.Quantity,
-				rGetResourceByID.GetResource().GetName(), rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
+				rGetResourceByID.GetResource().GetName(),
+				rGetResourceByID.GetResource().GetRarity().GetSlug(),
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 			)
 		}
 
