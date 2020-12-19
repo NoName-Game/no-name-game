@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -121,6 +122,7 @@ func (c *PlayerEquipmentController) Stage() {
 		// ******************
 		// Recupero armatura equipaggiata
 		// ******************
+
 		var currentArmorsEquipment string
 		currentArmorsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "armor"))
 
@@ -134,14 +136,18 @@ func (c *PlayerEquipmentController) Stage() {
 		// armatura base player
 		if len(rGetPlayerArmors.GetArmors()) > 0 {
 			// var head, gauntlets, chest, leg string
-			for _, armor := range rGetPlayerArmors.GetArmors() {
-				currentArmorsEquipment += fmt.Sprintf("\n%s\n*%s* (*%s*)\nDEF: *%.2v* | EVS: *%.2v* | HLV: *%.2v*\n",
-					helpers.Trans(c.Player.Language.Slug, armor.GetArmorCategory().GetSlug()),
-					armor.Name, strings.ToUpper(armor.GetRarity().GetSlug()),
-					armor.Defense,
-					armor.Evasion,
-					armor.Halving,
-				)
+			armors := helpers.SortPlayerArmor(rGetPlayerArmors.GetArmors())
+
+			for _, armor := range armors {
+				if armor != nil {
+					currentArmorsEquipment += fmt.Sprintf("\n%s \\[*%s*] (%s)\nDEF: *%v* | EVS: *%v* | HLV: *%v*\n",
+						helpers.Trans(c.Player.Language.Slug, armor.GetArmorCategory().GetSlug()+"_emoji"),
+						armor.Name, strings.ToUpper(armor.GetRarity().GetSlug()),
+						math.Round(armor.Defense),
+						math.Round(armor.Evasion),
+						math.Round(armor.Halving),
+					)
+				}
 			}
 		} else {
 			currentArmorsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.armors.zero_equipment")
@@ -165,8 +171,8 @@ func (c *PlayerEquipmentController) Stage() {
 				"\n*%s* (*%s*)\nDamage: *%v* | Precision: *%v*",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
-				rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage(),
-				rGetPlayerWeaponEquippedResponse.GetWeapon().GetPrecision(),
+				math.Round(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage()),
+				math.Round(rGetPlayerWeaponEquippedResponse.GetWeapon().GetPrecision()),
 			)
 		} else {
 			currentWeaponsEquipment += helpers.Trans(c.Player.Language.Slug, "inventory.weapons.zero_equipment")
