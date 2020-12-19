@@ -54,6 +54,23 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	// *************************
+	// Recupero amuleti player
+	// *************************
+	var rGetPlayerItems *pb.GetPlayerItemsResponse
+	if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		PlayerID: c.Player.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var amulets int32
+	for _, item := range rGetPlayerItems.GetPlayerInventory() {
+		if item.Item.ID == 7 {
+			amulets = item.Quantity
+		}
+	}
+
 	recapPlayer := helpers.Trans(
 		c.Player.Language.Slug,
 		"player.datails.card",
@@ -62,7 +79,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Player.GetLevel().GetPlayerMaxLife(), // Vita massima del player
 		rGetPlayerExperience.GetValue(),        // Esperienza
 		c.Player.GetLevel().GetID(),            // Livello
-		money, diamond,
+		money, diamond, amulets,
 	)
 
 	// *************************
