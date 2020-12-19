@@ -8,7 +8,7 @@ safeplanet.hangar.repairinfo: "Here are the details of the repair status for *%s
 safeplanet.hangar.partial: "*Partial* Repair:"
 safeplanet.hangar.full: "*Complete* Repair:"
 safeplanet.hangar.time: "⏱ Necessary time: *%v* (minutes)"
-safeplanet.hangar.quantity_resources: "💠 Necessary resources: *%v*"
+safeplanet.hangar.quantity_resources: "💠 Necessary resources: *%v* (%s)"
 safeplanet.hangar.used_resources: "💠 Resources used for the repair:\n"
 safeplanet.hangar.not_enough_resource: "You don't have enough resources to repair your ship."
 safeplanet.hangar.dont_need: "Your ship doesn't need repair."

@@ -216,7 +216,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.partial"),
 				rGetShipByID.GetShip().GetIntegrity(), rGetShipRepairInfo.GetPartial().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetPartial().GetRepairTime()),
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetPartial().GetQuantityResources()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetPartial().GetQuantityResources(), rGetShipRepairInfo.GetPartial().GetRarityResources().GetSlug()),
 			)
 
 			// Mostro Full
@@ -224,7 +224,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.full"),
 				rGetShipByID.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetFull().GetRepairTime()),
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetFull().GetQuantityResources()),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.quantity_resources", rGetShipRepairInfo.GetFull().GetQuantityResources(), rGetShipRepairInfo.GetFull().GetRarityResources().GetSlug()),
 			)
 		}
 
