@@ -128,6 +128,12 @@ func (c *PlayerInventoryItemController) Stage() {
 		// Ciclo items e li inserisco nella keyboard
 		var keyboardRowItems [][]tgbotapi.KeyboardButton
 		for _, item := range rGetPlayerItems.GetPlayerInventory() {
+			// Rimuovo amuleti dalla visualizzazione
+			// Nel caso diventassero pìu oggetti creare un metodo dedicato
+			if item.Item.ID == 7 {
+				continue
+			}
+
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
