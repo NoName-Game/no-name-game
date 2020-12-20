@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"log"
+	"sort"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 )
@@ -29,17 +29,9 @@ func GetResourceBaseIcons(isBase bool) (result string) {
 
 // SortInventoryByRarity
 func SortInventoryByRarity(inventory []*pb.PlayerInventory) []*pb.PlayerInventory {
-	var n = len(inventory)
-	for i := 1; i < n; i++ {
-		j := i
-		for j > 0 {
-			if inventory[j-1].GetResource().GetRarityID() > inventory[j].GetResource().GetRarityID() {
-				inventory[j-1], inventory[j] = inventory[j], inventory[j-1]
-			}
-			j = j - 1
-		}
-	}
+	sort.Slice(inventory, func(i, j int) bool {
+		return inventory[i].GetResource().GetRarityID() < inventory[j].GetResource().GetRarityID()
+	})
 
-	log.Println(inventory)
 	return inventory
 }
