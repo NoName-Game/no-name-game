@@ -316,6 +316,21 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Data.PlayerActiveStates {
+
+		// Verifico sie il player sta dormendo, in questo caso non può effettuare nessuna azione
+		if state.Controller == "route.ship.rests" {
+			// Se un azione è diversa dal risvegliati
+			if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") != c.Update.Message.Text {
+				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup"))
+				if _, err := helpers.SendMessage(msg); err != nil {
+					panic(err)
+				}
+
+				return true
+			}
+		}
+
+		// Verifico se ci sono stati particolare bloccati
 		for _, blockState := range c.Configurations.ControllerBlocked {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))

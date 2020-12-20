@@ -103,3 +103,21 @@ func GetPlayerPosition(playerID uint32) (position *pb.Planet, err error) {
 
 	return
 }
+
+func SortPlayerArmor(armors []*pb.Armor) []*pb.Armor {
+	result := make([]*pb.Armor, 4)
+	// testa, braccia, petto, gambe
+	for _, armor := range armors {
+		switch armor.GetArmorCategory().GetSlug() {
+		case "helmet":
+			result[0] = armor
+		case "glove":
+			result[1] = armor
+		case "chest":
+			result[2] = armor
+		case "boots":
+			result[3] = armor
+		}
+	}
+	return result
+}

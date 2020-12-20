@@ -165,3 +165,31 @@ func GetExplorationCategoriesInCache() (categories []*pb.ExplorationCategory, er
 	err = json.Unmarshal([]byte(result), &categories)
 	return
 }
+
+// =================
+// AntiFlood
+// =================
+// SetAntiFlood
+func SetAntiFlood(playerID uint32) (err error) {
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_antiflood", playerID), 1, 5*time.Second).Err(); err != nil {
+		return fmt.Errorf("cant set antiflood in cache: %s", err.Error())
+	}
+	return
+}
+
+// GetAntiFlood
+func GetAntiFlood(playerID uint32) (result string, err error) {
+	if result, err = config.App.Redis.Connection.Get(fmt.Sprintf("player_%v_antiflood", playerID)).Result(); err != nil {
+		return result, fmt.Errorf("cant get player antiflood in cache: %s", err.Error())
+	}
+
+	return
+}
+
+// DelAntiFlood
+func DelAntiFlood(playerID uint32) (err error) {
+	if err := config.App.Redis.Connection.Del(fmt.Sprintf("player_%v_antiflood", playerID)).Err(); err != nil {
+		return fmt.Errorf("cant delete player antiflood in cache : %s", err.Error())
+	}
+	return
+}

@@ -209,7 +209,14 @@ func (c *ShipRestsController) Stage() {
 		// Recap Rest
 		var recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.need_to_rest")
 		if rEndPlayerRest.GetLifeRecovered() > 0 {
-			recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", rEndPlayerRest.GetLifeRecovered())
+			lifeRecovered := rEndPlayerRest.GetLifeRecovered()
+
+			// Verifico overflow vita
+			if lifeRecovered > c.Player.GetLevel().GetPlayerMaxLife() {
+				lifeRecovered = c.Player.GetLevel().GetPlayerMaxLife()
+			}
+
+			recapMessage = helpers.Trans(c.Player.Language.Slug, "ship.rests.finish", lifeRecovered)
 		}
 
 		// Invio messaggio
