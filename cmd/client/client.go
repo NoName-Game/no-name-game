@@ -45,8 +45,18 @@ func handleUpdate(update tgbotapi.Update) {
 	// Gestico panic
 	defer recoverUpdate(player, update)
 
-	// Gestisco update
-	router.Routing(player, update)
+	if _, err := helpers.GetAntiFlood(player.ID); err != nil {
+		// Setto antiflood player
+		_ = helpers.SetAntiFlood(player.ID)
+
+		// Se non è stato trovato nulla allora posso eseguire il tutto
+		router.Routing(player, update)
+
+		// Cancello antiflood player
+		_ = helpers.DelAntiFlood(player.ID)
+
+		return
+	}
 }
 
 func recoverUpdate(player *pb.Player, update tgbotapi.Update) {
