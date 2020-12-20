@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -186,10 +187,13 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Ordino risorse droppate
+		winningResources := c.winningResourcesList(rThreeCardGameCheckResponse.GetResources())
+
 		// Recupero possibile bottino
 		var recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
-		for _, resource := range rThreeCardGameCheckResponse.GetResources() {
-			recapList += fmt.Sprintf("- %s\n", resource.GetName())
+		for _, resource := range winningResources {
+			recapList += fmt.Sprintf("-%d x %s\n", resource.Quantity, resource.Resource.GetName())
 		}
 
 		// ***********************************
@@ -251,7 +255,8 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 	// ##################################################################################################
 	case 3:
 		// Se entro qui vuol dire che ha deciso di usare i diamanti
-		_, err = config.App.Server.Connection.ThreeCardGameRecoverPlay(helpers.NewContext(1), &pb.ThreeCardGameRecoverPlayRequest{
+		var rThreeCardGameRecoverPlay *pb.ThreeCardGameRecoverPlayResponse
+		rThreeCardGameRecoverPlay, err = config.App.Server.Connection.ThreeCardGameRecoverPlay(helpers.NewContext(1), &pb.ThreeCardGameRecoverPlayRequest{
 			PlayerID: c.Player.GetID(),
 		})
 
@@ -271,8 +276,19 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		recoverMessage := helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recoverd")
+
+		// Ordino risorse droppate
+		winningResources := c.winningResourcesList(rThreeCardGameRecoverPlay.GetResources())
+
+		// Recupero possibile bottino
+		var recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
+		for _, resource := range winningResources {
+			recapList += fmt.Sprintf("-%d x %s\n", resource.Quantity, resource.Resource.GetName())
+		}
+
 		// Invio messggio con ancora le 3 scelte di carte
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recoverd"))
+		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s \n%s", recoverMessage, recapList))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -314,6 +330,40 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		// Completo lo stato
 		c.CurrentState.Completed = true
 	}
+
+	return
+}
+
+// Struttura per riepilogo risorse vinte
+type WinningResourcesDropped struct {
+	ResourceID uint32
+	Resource   *pb.Resource
+	Quantity   int32
+}
+
+func (c *SafePlanetRelaxThreeCardController) winningResourcesList(winResults []*pb.Resource) (results []WinningResourcesDropped) {
+	for _, drop := range winResults {
+		var found bool
+		for i, resource := range results {
+			if drop.ID == resource.ResourceID {
+				results[i].Quantity++
+				found = true
+			}
+		}
+
+		// Se non è stato mai recuperata appendo
+		if !found {
+			results = append(results, WinningResourcesDropped{
+				ResourceID: drop.ID,
+				Resource:   drop,
+				Quantity:   1,
+			})
+		}
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Quantity > results[j].Quantity
+	})
 
 	return
 }
