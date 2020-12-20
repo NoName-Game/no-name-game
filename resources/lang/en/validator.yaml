@@ -1,4 +1,4 @@
 # VALIDATOR
 validator.error: "A solar storm has corrupted the communications data, the Coalition has registered the anomaly. Try again later."
 validator.not_valid: "The parameter inserted it's not valid."
-valodator.controller.blocked: "To proceed bring first to an end the other objectives."
+validator.controller.blocked: "To proceed bring first to an end the other objectives."

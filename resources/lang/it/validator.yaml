@@ -1,4 +1,4 @@
 # VALIDATOR
 validator.error: "Una tempesta solare ha corrotto i dati di comunicazione, la Coalizione ha già registrato l'anomalia. Riprova più tardi."
 validator.not_valid: "Il parametro inserito non è valido."
-valodator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi."
+validator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi."
