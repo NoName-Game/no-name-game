@@ -54,7 +54,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 
 	var recapResources string
 
-	// Ordino l'array per rarità (dal più grande al più piccolo)
+	// Ordino l'array per rarità (dal più piccolo al più grande)
 	resources := helpers.SortInventoryByRarity(rGetPlayerResource.GetPlayerInventory())
 
 	for _, resource := range resources {
