@@ -57,6 +57,8 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.crafter.repair":                     reflect.TypeOf((*controllers.SafePlanetCrafterRepairController)(nil)).Elem(),
 	"route.safeplanet.dealer":                             reflect.TypeOf((*controllers.SafePlanetDealerController)(nil)).Elem(),
 	"route.safeplanet.accademy":                           reflect.TypeOf((*controllers.SafePlanetAccademyController)(nil)).Elem(),
+	"route.safeplanet.relax":                              reflect.TypeOf((*controllers.SafePlanetRelaxController)(nil)).Elem(),
+	"route.safeplanet.relax.threecard":                    reflect.TypeOf((*controllers.SafePlanetRelaxThreeCardController)(nil)).Elem(),
 	"route.safeplanet.hangar":                             reflect.TypeOf((*controllers.SafePlanetHangarController)(nil)).Elem(),
 	"route.safeplanet.hangar.ships":                       reflect.TypeOf((*controllers.SafePlanetHangarShipsController)(nil)).Elem(),
 	"route.safeplanet.hangar.repair":                      reflect.TypeOf((*controllers.SafePlanetHangarRepairController)(nil)).Elem(),

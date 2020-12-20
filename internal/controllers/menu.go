@@ -328,28 +328,26 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.coalition")),
 	})
 
-	// Recupero gli npc attivi in questo momento
-	rGetAll, err := config.App.Server.Connection.GetAllNPC(helpers.NewContext(1), &pb.GetAllNPCRequest{})
-	if err != nil {
-		panic(err)
-	}
-
-	for _, npc := range rGetAll.GetNPCs() {
-		row := tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.safeplanet.%s", npc.Slug)),
-			),
-		)
-		keyboardRow = append(keyboardRow, row)
-	}
-
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.accademy")),
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.hangar")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.dealer")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.bank")),
 	})
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.crafter")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.relax")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.hangar")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.accademy")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 	})
 
