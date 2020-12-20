@@ -191,9 +191,19 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		winningResources := c.winningResourcesList(rThreeCardGameCheckResponse.GetResources())
 
 		// Recupero possibile bottino
-		var recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
-		for _, resource := range winningResources {
-			recapList += fmt.Sprintf("-%d x %s\n", resource.Quantity, resource.Resource.GetName())
+		var recapList string
+		if len(winningResources) > 0 {
+			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
+			for _, resource := range winningResources {
+				recapList += fmt.Sprintf(
+					"- %s %v x %s (*%s*) %s\n",
+					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
+					resource.Quantity,
+					resource.Resource.Name,
+					resource.Resource.Rarity.Slug,
+					helpers.GetResourceBaseIcons(resource.Resource.GetBase()),
+				)
+			}
 		}
 
 		// ***********************************
@@ -227,8 +237,16 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			return
 		}
 
+		resourceFound := fmt.Sprintf(
+			"%s %s (*%s*) %s\n",
+			helpers.GetResourceCategoryIcons(rThreeCardGameCheckResponse.GetResource().GetResourceCategoryID()),
+			rThreeCardGameCheckResponse.GetResource().Name,
+			rThreeCardGameCheckResponse.GetResource().Rarity.Slug,
+			helpers.GetResourceBaseIcons(rThreeCardGameCheckResponse.GetResource().GetBase()),
+		)
+
 		// Recupero risorsa vinta in questo turno
-		winMessage := helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.round_win", rThreeCardGameCheckResponse.GetResource().GetName())
+		winMessage := helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.round_win", resourceFound)
 
 		// Invio messggio con ancora le 3 scelte di carte
 		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s \n%s", winMessage, recapList))
@@ -282,9 +300,19 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		winningResources := c.winningResourcesList(rThreeCardGameRecoverPlay.GetResources())
 
 		// Recupero possibile bottino
-		var recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
-		for _, resource := range winningResources {
-			recapList += fmt.Sprintf("-%d x %s\n", resource.Quantity, resource.Resource.GetName())
+		var recapList string
+		if len(winningResources) > 0 {
+			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
+			for _, resource := range winningResources {
+				recapList += fmt.Sprintf(
+					"- %s %v x %s (*%s*) %s\n",
+					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
+					resource.Quantity,
+					resource.Resource.Name,
+					resource.Resource.Rarity.Slug,
+					helpers.GetResourceBaseIcons(resource.Resource.GetBase()),
+				)
+			}
 		}
 
 		// Invio messggio con ancora le 3 scelte di carte
