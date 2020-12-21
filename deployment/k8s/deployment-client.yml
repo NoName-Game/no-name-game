@@ -36,7 +36,7 @@ spec:
             - "/client"
           resources:
             limits:
-              cpu: 50m
+              cpu: 200m
               memory: 50Mi
             requests:
               cpu: 40m
