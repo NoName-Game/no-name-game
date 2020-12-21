@@ -1,0 +1,15 @@
+# Statistics
+safeplanet.coalition.statistics.intro: "〽️ Discorver the best 👨🏼‍🚀 Explorer by category"
+
+# Statistics - Category
+safeplanet.coalition.statistics.top_kill_enemy: "⚔️ Uccisione Nemici"
+safeplanet.coalition.statistics.top_kill_enemy.description: "📖: Top 10 player per nemici uccisi"
+
+safeplanet.coalition.statistics.top_explored_planets: "🌏 Planet exploration"
+safeplanet.coalition.statistics.top_explored_planets.description: "📖: Top 10 player for planet exploration"
+
+safeplanet.coalition.statistics.top_travel: "🔭 Travel"
+safeplanet.coalition.statistics.top_travel.description: "📖: Top 10 player for travel made"
+
+safeplanet.coalition.statistics.top_mission_completed: "🏢 Completed Missions"
+safeplanet.coalition.statistics.top_mission_completed.description: "📖: Top 10 player for completed mission"
