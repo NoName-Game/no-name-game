@@ -69,6 +69,7 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.coalition.expansion":                reflect.TypeOf((*controllers.SafePlanetExpansionController)(nil)).Elem(),
 	"route.safeplanet.coalition.research":                 reflect.TypeOf((*controllers.SafePlanetResearchController)(nil)).Elem(),
 	"route.safeplanet.coalition.research.donation":        reflect.TypeOf((*controllers.SafePlanetResearchDonationController)(nil)).Elem(),
+	"route.safeplanet.coalition.statistics":               reflect.TypeOf((*controllers.SafePlanetCoalitionStatisticsController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors":               reflect.TypeOf((*controllers.SafePlanetProtectorsController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.create":        reflect.TypeOf((*controllers.SafePlanetProtectorsCreateController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.join":          reflect.TypeOf((*controllers.SafePlanetProtectorsJoinController)(nil)).Elem(),
