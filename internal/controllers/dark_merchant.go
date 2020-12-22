@@ -1,0 +1,280 @@
+package controllers
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"bitbucket.org/no-name-game/nn-telegram/config"
+
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+// ====================================
+// DarkMerchantController
+// ====================================
+type DarkMerchantController struct {
+	Payload struct {
+		ResourceID uint32
+		Price      int64
+		Quantity   int64
+	}
+	Controller
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.darkmerchant",
+			Payload:    &c.Payload,
+		},
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+			PlanetType: []string{"default"},
+		},
+	}) {
+		return
+	}
+
+	// Validate
+	if c.Validator() {
+		c.Validate()
+		return
+	}
+
+	// Ok! Run!
+	c.Stage()
+
+	// Completo progressione
+	c.Completing(&c.Payload)
+}
+
+// ====================================
+// Validator
+// ====================================
+func (c *DarkMerchantController) Validator() (hasErrors bool) {
+	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Verifico quale item vuole comprare il player
+	// ##################################################################################################
+	case 1:
+		var err error
+		var rDarkMerchantGetResources *pb.DarkMerchantGetResourcesResponse
+		if rDarkMerchantGetResources, err = config.App.Server.Connection.DarkMerchantGetResources(helpers.NewContext(1), &pb.DarkMerchantGetResourcesRequest{}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		resourceName := strings.Split(c.Update.Message.Text, " (")[0]
+
+		for _, resource := range rDarkMerchantGetResources.GetResources() {
+			if resourceName == resource.GetResource().GetName() {
+				c.Payload.ResourceID = resource.GetResource().GetID()
+
+				// Salvo anche prezzo della risorsa scelta
+				c.Payload.Price = resource.GetPrice()
+
+				return false
+			}
+		}
+
+		return true
+
+	// ##################################################################################################
+	// Verifico se il quantitativo richiesto è valido
+	// ##################################################################################################
+	case 2:
+		quantity, err := strconv.Atoi(c.Update.Message.Text)
+		if err != nil || quantity < 1 {
+			return true
+		}
+
+		c.Payload.Quantity = int64(quantity)
+
+	// ##################################################################################################
+	// Verifico conferma player
+	// ##################################################################################################
+	case 3:
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ====================================
+// Stage
+// ====================================
+func (c *DarkMerchantController) Stage() {
+	var err error
+	switch c.CurrentState.Stage {
+	// ##################################################################################################
+	// Mostro item vendibili
+	// ##################################################################################################
+	case 0:
+		// Recupero momente player, mi serve per mostrare budget
+		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
+		if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.ID,
+			EconomyType: pb.GetPlayerEconomyRequest_MONEY,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var rDarkMerchantGetResources *pb.DarkMerchantGetResourcesResponse
+		if rDarkMerchantGetResources, err = config.App.Server.Connection.DarkMerchantGetResources(helpers.NewContext(1), &pb.DarkMerchantGetResourcesRequest{}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var itemsKeyboard [][]tgbotapi.KeyboardButton
+		for _, resource := range rDarkMerchantGetResources.GetResources() {
+			itemsKeyboard = append(itemsKeyboard, tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(
+					fmt.Sprintf("%s (💰%v)",
+						resource.Resource.GetName(), // Nome risorsa
+						resource.Price,              // Costo
+					),
+				),
+			))
+		}
+
+		// Aggiungo torna al menu
+		itemsKeyboard = append(itemsKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+		))
+
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.intro", rGetPlayerEconomy.GetValue()))
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       itemsKeyboard,
+		}
+
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		c.CurrentState.Stage = 1
+
+	// ##################################################################################################
+	// Chiedo quante ne vuole comprare
+	// ##################################################################################################
+	case 1:
+		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
+		for i := 1; i <= 5; i++ {
+			keyboardRow := tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(fmt.Sprintf("%d", i)),
+			)
+			keyboardRowQuantities = append(keyboardRowQuantities, keyboardRow)
+		}
+
+		// Aggiungo tasti back and clears
+		keyboardRowQuantities = append(keyboardRowQuantities, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+		))
+
+		// Invio messaggio
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.quantity"))
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       keyboardRowQuantities,
+		}
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Aggiorno stato
+		c.CurrentState.Stage = 2
+
+	// ##################################################################################################
+	// Faccio Recap e chiedo conferma
+	// ##################################################################################################
+	case 2:
+		// Recupero dettagli item scelto
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			ID: c.Payload.ResourceID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.confirm",
+			c.Payload.Quantity,
+			rGetResourceByID.GetResource().GetName(), // Nome Risorsa
+			c.Payload.Quantity*c.Payload.Price,       // Costo
+		))
+
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Aggiorno stato
+		c.CurrentState.Stage = 3
+
+	// ##################################################################################################
+	// Confermo acquisto
+	// ##################################################################################################
+	case 3:
+		_, err = config.App.Server.Connection.DarkMerchantBuyResource(helpers.NewContext(1), &pb.DarkMerchantBuyResourceRequest{
+			PlayerID:   c.Player.GetID(),
+			ResourceID: c.Payload.ResourceID,
+			Price:      c.Payload.Price,
+			Quantity:   c.Payload.Quantity,
+		})
+
+		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
+			// Potrebbero esserci stati degli errori come per esempio la mancanza di amuleti
+			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+				helpers.Trans(c.Player.Language.Slug, "darkmerchant.not_enough_money"),
+			)
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil {
+			c.Logger.Panic(err)
+		}
+
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.completed"))
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Completo lo stato
+		c.CurrentState.Completed = true
+	}
+
+	return
+}

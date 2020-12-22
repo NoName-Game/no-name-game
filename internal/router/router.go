@@ -21,8 +21,9 @@ var routes = map[string]reflect.Type{
 	"route.tutorial":          reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 	"route.tutorial.continue": reflect.TypeOf((*controllers.TutorialController)(nil)).Elem(),
 
-	"route.exploration": reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
-	"route.hunting":     reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
+	"route.exploration":  reflect.TypeOf((*controllers.ExplorationController)(nil)).Elem(),
+	"route.hunting":      reflect.TypeOf((*controllers.HuntingController)(nil)).Elem(),
+	"route.darkmerchant": reflect.TypeOf((*controllers.DarkMerchantController)(nil)).Elem(),
 
 	// Ship
 	"route.ship":                 reflect.TypeOf((*controllers.ShipController)(nil)).Elem(),

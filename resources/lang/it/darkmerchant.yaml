@@ -1,0 +1,6 @@
+# DarkMerchant
+darkmerchant.intro: "Benvenuto io sono il mercante nero scegli la risorsa che preferisci.\n\nIl tuo budget: 💰*%v*"
+darkmerchant.quantity: "Quante quantità ne vorresti acquistare?"
+darkmerchant.confirm: "Perfetto! Allora dimmi, sei sicuro di voler acquistare *%v* quantità di *%s* al costo di 💰*%v*?"
+darkmerchant.completed: "Ed ecco a te! Buona giornata esploratore, torna pure quando vuoi!"
+darkmerchant.not_enough_money: "Sembra tu non abbia abbastanza denaro per continuare."
