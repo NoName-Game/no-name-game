@@ -1,0 +1,6 @@
+# DarkMerchant
+darkmerchant.intro: "Salve esploratore, sei interessato a qualche risorsa?\n\n... fa presto la tua scelta, non credo rimarrò qui a lungo... maledetta Coalizione...\n\nIl tuo budget: 💰*%v*"
+darkmerchant.quantity: "Quante quantità ne vorresti acquistare?"
+darkmerchant.confirm: "Perfetto! Allora dimmi, sei sicuro di voler acquistare *%v* quantità di *%s* al costo di 💰*%v*?"
+darkmerchant.completed: "Ed ecco a te le tue risorse, è stato un piacere fare affari con te. Spero di ricontrarti su qualche altro pianeta."
+darkmerchant.not_enough_money: "Sembra tu non abbia abbastanza denaro per continuare."
