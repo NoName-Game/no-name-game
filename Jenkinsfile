@@ -15,7 +15,7 @@ node {
     }
 
     stage('Build image') {
-        image_id = sh (script: "docker images -q valkyrie00/nn-telegram:${BRANCH_NAME#*/}", returnStdout: true).trim()
+        image_id = sh (script: 'docker images -q valkyrie00/nn-telegram:${BRANCH_NAME#*/}', returnStdout: true).trim()
         if (image_id.isEmpty()) {
             app = docker.build('valkyrie00/nn-telegram:${BRANCH_NAME#*/}', '-f deployment/docker/Dockerfile .')
             docker.withRegistry('', '94376016-b8fd-4049-b17f-df423b6c5611') {
