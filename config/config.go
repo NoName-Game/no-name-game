@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/bot"
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/redis"
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/server"
+	"bitbucket.org/no-name-game/nn-telegram/init/limiter"
 	"bitbucket.org/no-name-game/nn-telegram/init/localization"
 	"bitbucket.org/no-name-game/nn-telegram/init/logger"
 
@@ -20,6 +21,7 @@ type Configuration struct {
 	Redis        redis.Redis
 	Server       server.Server
 	Localization localization.Localization
+	RateLimiter  limiter.RateLimiter
 }
 
 type GameService interface {
@@ -32,6 +34,7 @@ func (config *Configuration) Bootstrap() {
 		&App.Logger,
 		&App.Redis,
 		&App.Server,
+		&App.RateLimiter,
 		&App.Bot,
 	} {
 		service.Init()

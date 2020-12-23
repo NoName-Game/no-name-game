@@ -21,6 +21,7 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+	go.uber.org/ratelimit v0.1.0
 	golang.org/x/text v0.3.3
 	google.golang.org/grpc v1.33.0
 	gopkg.in/yaml.v2 v2.2.4
