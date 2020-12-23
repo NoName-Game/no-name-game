@@ -4,8 +4,11 @@ ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$PATH
 ENV PROJECT_PATH=/go/src/bitbucket.org/no-name-game/nn-telegram
 
-RUN mkdir -p $PROJECT_PATH
+RUN mkdir -p $GOPATH/src/bitbucket.org/no-name-game/nn-grpc && \
+    mkdir -p $PROJECT_PATH
+
 COPY . $PROJECT_PATH
+COPY ./nn-grpc $GOPATH/src/bitbucket.org/no-name-game/nn-grpc
 
 # go build server
 WORKDIR $PROJECT_PATH/cmd/client
