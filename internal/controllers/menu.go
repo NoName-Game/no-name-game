@@ -249,27 +249,45 @@ func (c *MenuController) GetKeyboard(currentPosition *pb.Planet) [][]tgbotapi.Ke
 	}
 
 	// Si trova su un pianeta normale
-	return c.MainKeyboard()
+	return c.MainKeyboard(currentPosition)
 }
 
 // MainMenu
-func (c *MenuController) MainKeyboard() (keyboard [][]tgbotapi.KeyboardButton) {
-	return [][]tgbotapi.KeyboardButton{
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.exploration")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
-		},
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
-		},
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
-		},
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
-		},
+func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.KeyboardButton {
+	var err error
+	var keyboardRow [][]tgbotapi.KeyboardButton
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.exploration")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.hunting")),
+	})
+
+	// Verifico se il pianeta corrente è quello del mercante oscuro
+	var rGetDarkMerchant *pb.GetDarkMerchantResponse
+	if rGetDarkMerchant, err = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{}); err != nil {
+		c.Logger.Panic(err)
 	}
+
+	if rGetDarkMerchant.PlanetID == position.ID {
+		keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.darkmerchant")),
+		})
+	}
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
+	})
+
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
+	})
+
+	return keyboardRow
 }
 
 // TutorialMenu

@@ -41,7 +41,7 @@ func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Updat
 				To:        &MenuController{},
 				FromStage: 0,
 			},
-			PlanetType: []string{"default"},
+			PlanetType: []string{"darkMerchant"},
 		},
 	}) {
 		return
@@ -70,14 +70,13 @@ func (c *DarkMerchantController) Validator() (hasErrors bool) {
 	// ##################################################################################################
 	case 1:
 		var err error
-		var rDarkMerchantGetResources *pb.DarkMerchantGetResourcesResponse
-		if rDarkMerchantGetResources, err = config.App.Server.Connection.DarkMerchantGetResources(helpers.NewContext(1), &pb.DarkMerchantGetResourcesRequest{}); err != nil {
+		var rGetDarkMerchant *pb.GetDarkMerchantResponse
+		if rGetDarkMerchant, err = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		resourceName := strings.Split(c.Update.Message.Text, " (")[0]
-
-		for _, resource := range rDarkMerchantGetResources.GetResources() {
+		resourceName := strings.Split(c.Update.Message.Text, " ")[1]
+		for _, resource := range rGetDarkMerchant.GetResources() {
 			if resourceName == resource.GetResource().GetName() {
 				c.Payload.ResourceID = resource.GetResource().GetID()
 
@@ -132,18 +131,21 @@ func (c *DarkMerchantController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		var rDarkMerchantGetResources *pb.DarkMerchantGetResourcesResponse
-		if rDarkMerchantGetResources, err = config.App.Server.Connection.DarkMerchantGetResources(helpers.NewContext(1), &pb.DarkMerchantGetResourcesRequest{}); err != nil {
+		var rGetDarkMerchant *pb.GetDarkMerchantResponse
+		if rGetDarkMerchant, err = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var itemsKeyboard [][]tgbotapi.KeyboardButton
-		for _, resource := range rDarkMerchantGetResources.GetResources() {
+		for _, resource := range rGetDarkMerchant.GetResources() {
 			itemsKeyboard = append(itemsKeyboard, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					fmt.Sprintf("%s (💰%v)",
-						resource.Resource.GetName(), // Nome risorsa
-						resource.Price,              // Costo
+					fmt.Sprintf("%s %s (%s) %s - 💰%v",
+						helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
+						resource.GetResource().GetName(), // Nome risorsa
+						resource.GetResource().GetRarity().GetSlug(),
+						helpers.GetResourceBaseIcons(resource.GetResource().GetBase()),
+						resource.Price, // Costo
 					),
 				),
 			))

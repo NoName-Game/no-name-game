@@ -366,6 +366,7 @@ func (c *Controller) InCorrectPlanet() (correctPlanet bool) {
 
 	inSafe := c.CheckInSafePlanet(currentPosition)
 	inTitan, _ := c.CheckInTitanPlanet(currentPosition)
+	inDarkMerchantPlanet := c.CheckInDarkMerchantPlanet(currentPosition)
 
 	// Ciclo fra i tipi di pianeta consentito
 	for _, planetType := range c.Configurations.PlanetType {
@@ -374,6 +375,8 @@ func (c *Controller) InCorrectPlanet() (correctPlanet bool) {
 			return inSafe
 		case "titan":
 			return inTitan
+		case "darkMerchant":
+			return inDarkMerchantPlanet
 		case "default":
 			// Se entrambi i valori sono falsi allora è un pianeta classico
 			if !(inSafe || inTitan) {
@@ -410,6 +413,22 @@ func (c *Controller) CheckInTitanPlanet(position *pb.Planet) (inTitanPlanet bool
 	}
 
 	return false, nil
+}
+
+// CheckInDarkMerchantPlanet
+// Verifico se il player si trova sul pianeta del mercante oscuro
+func (c *Controller) CheckInDarkMerchantPlanet(position *pb.Planet) (inDarkMerchant bool) {
+	var err error
+	var rGetDarkMerchant *pb.GetDarkMerchantResponse
+	if rGetDarkMerchant, err = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	if rGetDarkMerchant.GetPlanetID() == position.ID {
+		return true
+	}
+
+	return false
 }
 
 // CheckInSafePlanet
