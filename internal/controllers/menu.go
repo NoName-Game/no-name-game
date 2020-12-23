@@ -254,7 +254,6 @@ func (c *MenuController) GetKeyboard(currentPosition *pb.Planet) [][]tgbotapi.Ke
 
 // MainMenu
 func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.KeyboardButton {
-	var err error
 	var keyboardRow [][]tgbotapi.KeyboardButton
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
@@ -264,14 +263,13 @@ func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.Keyboard
 
 	// Verifico se il pianeta corrente è quello del mercante oscuro
 	var rGetDarkMerchant *pb.GetDarkMerchantResponse
-	if rGetDarkMerchant, err = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{}); err != nil {
-		c.Logger.Panic(err)
-	}
-
-	if rGetDarkMerchant.PlanetID == position.ID {
-		keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.darkmerchant")),
-		})
+	rGetDarkMerchant, _ = config.App.Server.Connection.GetDarkMerchant(helpers.NewContext(1), &pb.GetDarkMerchantRequest{})
+	if rGetDarkMerchant != nil {
+		if rGetDarkMerchant.PlanetID == position.ID {
+			keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.darkmerchant")),
+			})
+		}
 	}
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
