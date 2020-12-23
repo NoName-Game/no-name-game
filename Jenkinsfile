@@ -9,8 +9,9 @@ node {
 
     stage('Clone repository') {
         scmVars = checkout scm
-        sh 'git submodule update --init'
         sh 'ls -al'
+
+        sh 'git clone  -b develop git@bitbucket.org:no-name-game/nn-grpc.git ./nn-grpc'
     }
 
     stage('Build image') {
