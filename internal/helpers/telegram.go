@@ -69,8 +69,10 @@ func NewEditMessage(chatID int64, messageID int, text string) tgbotapi.EditMessa
 
 // SendMessage - Invia messaggio
 func SendMessage(chattable tgbotapi.Chattable) (message tgbotapi.Message, err error) {
-	message, err = config.App.Bot.API.Send(chattable)
-	if err != nil {
+	// Richiamo ratelimiter
+	_ = config.App.RateLimiter.Limiter.Take()
+
+	if message, err = config.App.Bot.API.Send(chattable); err != nil {
 		return message, err
 	}
 
