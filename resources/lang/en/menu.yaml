@@ -3,7 +3,7 @@ menu.borad_system: "*BoardSystem v%s*\n"
 menu.general: "🌏 %s \n%s \n\n"
 
 # Task
-menu.tasks: "⏱ *Activities ongoing:*\n"
+menu.tasks: "⏱ *Activities List:*\n"
 menu.tasks.minutes_left: "*%v* minutes at the end"
 menu.tasks.completed: "*Completed!*"
 

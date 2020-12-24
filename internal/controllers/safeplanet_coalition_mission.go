@@ -104,13 +104,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 
 		// Verifico se il player ha completato la missione
 		if !rCheckMission.GetCompleted() {
-			// Recupero dettagli missione
-			missionRecap := c.getMissionRecap(rCheckMission.GetMission())
-
-			c.Validation.Message = fmt.Sprintf("%s\n\n%s",
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.check"),
-				missionRecap,
-			)
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.check")
 
 			// Aggiungo anche abbandona
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
@@ -225,6 +219,7 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 		helpers.Trans(c.Player.Language.Slug,
 			fmt.Sprintf("safeplanet.mission.type.%s", mission.GetMissionCategory().GetSlug()),
 		),
+		mission.ID,
 	)
 
 	// Verifico quale tipologia di missione è stata estratta
