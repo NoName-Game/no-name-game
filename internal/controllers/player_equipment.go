@@ -275,6 +275,13 @@ func (c *PlayerEquipmentController) Stage() {
 
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
+					mainMessage += fmt.Sprintf(
+						"\n*%s* (%s) - \\[%v, %v%%, %v%%]", armor.Name,
+						strings.ToUpper(armor.Rarity.Slug),
+						math.Round(armor.Defense),
+						math.Round(armor.Evasion),
+						math.Round(armor.Halving),
+					)
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
@@ -306,15 +313,23 @@ func (c *PlayerEquipmentController) Stage() {
 
 			if len(rGetPlayerWeapons.GetWeapons()) > 0 {
 				mainMessage = helpers.Trans(c.Player.Language.Slug, "inventory.weapons.what")
+
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
+					mainMessage += fmt.Sprintf(
+						"\n*%s* (%s) - \\[%v, %v%%, %v]", weapon.Name,
+						strings.ToUpper(weapon.Rarity.Slug),
+						math.Round(weapon.RawDamage),
+						math.Round(weapon.Precision),
+						weapon.Durability,
+					)
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
 								"%s (%s) -🩸%v",
 								weapon.Name,
 								strings.ToUpper(weapon.Rarity.Slug),
-								weapon.RawDamage,
+								math.Round(weapon.RawDamage),
 							),
 						),
 					)
