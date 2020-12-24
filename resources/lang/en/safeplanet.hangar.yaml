@@ -14,16 +14,16 @@ safeplanet.hangar.not_enough_resource: "You don't have enough resources to repai
 safeplanet.hangar.dont_need: "Your ship doesn't need repair."
 safeplanet.hangar.start_partial: "Partial repair"
 safeplanet.hangar.start_full: "Complete repair"
-safeplanet.hangar.wait: "The end of your ship's repair expected at *%s*, come back later."
+safeplanet.hangar.wait: "The end of your ship's repair is expected at *%s*, come back later."
 safeplanet.hangar.reparing: "You started your ship's repair, the end of the repairs is expected at *%s*"
 safeplanet.hangar.reparing.finish: "Your ship has been repaired successfully."
 
 # Create
 safeplanet.hangar.create.intro: "We can get to work to try and produce the ship that you desire.\nWhich ship category are you interested in?"
 safeplanet.hangar.create.chose_rarity: "Perfect!\nWhich rarity?"
-safeplanet.hangar.create.wait: "We're still working on on your ship, we should finish our work at *%s*\n\nYou own 💎*%v* at the cost of 💎*1* you will get advantage of his power to complete directly the travel.\n"
-safeplanet.hangar.create.start: "We took over your request, come back to use at *%s*"
-safeplanet.hangar.create.end: "There you go! Go to the warehouse to find out about your new ship: *%s*"
+safeplanet.hangar.create.wait: "We're still working on your ship, we should finish our work at *%s*\n\nYou own 💎*%v* at the cost of 💎*1* you will get advantage of his power to complete directly the travel.\n"
+safeplanet.hangar.create.start: "We took over your request, come back to us at *%s*"
+safeplanet.hangar.create.end: "There you go! Go to the hangar to find out about your new ship: *%s*"
 safeplanet.hangar.create.confirm: "Are you sure you want to proceed with the request of a ship of type *%s* of rarity *%s* at the cost of 💰*%v*?"
 safeplanet.hangar.create.complete_diamond_error: "It wasn't possible to complete the operation. Try again later."
 
