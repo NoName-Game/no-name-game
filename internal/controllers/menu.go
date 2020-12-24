@@ -181,42 +181,64 @@ func (c *MenuController) GetPlayerLife() (life string) {
 	return
 }
 
+// FormatPlayerTasks
+// Metodo dedicato a fomrattare e impaginare meglio i task in corso e completati
+func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks string) {
+	var err error
+
+	// Verifico se si tritta di una missione
+	if activity.Controller == "route.safeplanet.coalition.mission" {
+		var rCheckMission *pb.CheckMissionResponse
+		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		if rCheckMission.GetCompleted() {
+			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
+		} else {
+			// Recupero dettagli missione
+			type MissionPaylodStruct struct {
+				MissionID uint32
+			}
+
+			var missionController MissionPaylodStruct
+			helpers.UnmarshalPayload(activity.GetPayload(), &missionController)
+
+			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), missionController.MissionID)
+		}
+
+		return
+	}
+
+	var finishAt time.Time
+	if finishAt, err = helpers.GetEndTime(activity.FinishAt, c.Player); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Se sono delle attività non ancora concluse
+	if activity.GetToNotify() && time.Until(finishAt).Minutes() > 0 {
+		finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
+		switch activity.Controller {
+		case "route.tutorial":
+			tasks = helpers.Trans(c.Player.Language.Slug, "route.tutorial.activity.progress")
+		default:
+			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
+		}
+	} else {
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
+	}
+	return
+}
+
 // GetPlayerTask
 // Metodo dedicato alla rappresentazione dei task attivi del player
 func (c *MenuController) GetPlayerTasks() (tasks string) {
-	var err error
 	if len(c.Data.PlayerActiveStates) > 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
-
 		for _, state := range c.Data.PlayerActiveStates {
-			var finishAt time.Time
-			if finishAt, err = helpers.GetEndTime(state.FinishAt, c.Player); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Se sono da notificare formatto con la data
-			if state.GetToNotify() && time.Since(finishAt).Minutes() < 0 {
-				finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-				tasks += fmt.Sprintf("- %s %v\n",
-					helpers.Trans(c.Player.Language.Slug, state.Controller),
-					helpers.Trans(c.Player.Language.Slug, "menu.tasks.minutes_left", finishTime),
-				)
-			} else {
-				if state.Controller == "route.tutorial" {
-					tasks += fmt.Sprintf("- %s \n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-					)
-				} else if state.Controller == "route.safeplanet.coalition.mission" {
-					tasks += fmt.Sprintf("- %s \n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-					)
-				} else {
-					tasks += fmt.Sprintf("- %s %s\n",
-						helpers.Trans(c.Player.Language.Slug, state.Controller),
-						helpers.Trans(c.Player.Language.Slug, "menu.tasks.completed"),
-					)
-				}
-			}
+			tasks += fmt.Sprintf("- %s \n", c.FormatPlayerTasks(state))
 		}
 	}
 
