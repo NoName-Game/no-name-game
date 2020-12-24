@@ -13,8 +13,8 @@ route.exploration.activity.done: "✅ *⭕️ Esplorazione* completata, scopri s
 route.safeplanet.crafter.activity.progress: "*🛠 Armaiolo*: Lavorazione in corso, *%v* minuti al termine"
 route.safeplanet.crafter.activity.done: "✅ *🛠 Armaiolo*: Il tuo craft è pronto al ritiro, passa a ritiralo quando vuoi"
 
-route.ship.laboratory.activity.progress: "*🧪 Laboratorio*: Prodizione in corso, *%v* minuti al termine"
-route.ship.laboratory.activity.done: "✅ *🧪 Laboratorio*: Prodizione terminata, torna al laboratorio per completare"
+route.ship.laboratory.activity.progress: "*🧪 Laboratorio*: Produzione in corso, *%v* minuti al termine"
+route.ship.laboratory.activity.done: "✅ *🧪 Laboratorio*: Produzione terminata, torna al laboratorio per completare"
 
 route.tutorial.activity.progress: "📖 *Tutorial* in corso..."
-route.tutorial.activity.done: "✅ 📖 *Tutorial* Completato!"
+route.tutorial.activity.done: "✅ 📖 *Tutorial* completato!"
