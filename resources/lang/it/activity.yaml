@@ -16,5 +16,8 @@ route.safeplanet.crafter.activity.done: "✅ *🛠 Armaiolo*: Il tuo craft è pr
 route.ship.laboratory.activity.progress: "*🧪 Laboratorio*: Produzione in corso, *%v* minuti al termine"
 route.ship.laboratory.activity.done: "✅ *🧪 Laboratorio*: Produzione terminata, torna al laboratorio per completare"
 
+route.ship.travel.activity.progress: "*🚀 Viaggio* in corso, *%v* minuti al termine"
+route.ship.travel.activity.done: "✅ *🚀 Viaggio*: nuovo pianeta raggiunto, ora puoi procedere con l'atterraggio"
+
 route.tutorial.activity.progress: "📖 *Tutorial* in corso..."
 route.tutorial.activity.done: "✅ 📖 *Tutorial* completato!"
