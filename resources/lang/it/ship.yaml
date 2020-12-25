@@ -24,7 +24,7 @@ ship.travel.unreachable: "❌ Non Raggiungibile"
 
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare le tue energie?"
-ship.rests.full_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests.full_rest_time: "\n\n⏱: Saranno necessari *%v* minuti al recupero *totale* delle forze."
 ship.rests.play_rest_time: "\n\n⚠️: *%v* minuti per riprendere le attività."
 ship.rests.info: "\n\n📖: Mettendosi a dormire recupererai *10HP* per ogni minuto passato a riposare. Non è necessario attendere il recupero totale delle forze per svegliarsi.\n"
 ship.rests.start: "💤 Mettiti a dormire 💤"

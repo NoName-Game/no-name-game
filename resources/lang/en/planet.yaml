@@ -2,7 +2,7 @@
 planet.intro: "Current planet details:"
 planet.details.system: "💫 System: *%s*"
 planet.details.name: "🌍 Planet: *%s*"
-planet.details.coordinate.encypted: "📡 Crypted Coordinate:\n*%v*"
+planet.details.coordinate.encypted: "📡 Coordinate:\nCrypted *%v*"
 planet.details.coordinate.x: "🆇 %v"
 planet.details.coordinate.y: "🆈 %v"
 planet.details.coordinate.z: "🆉 %v"
