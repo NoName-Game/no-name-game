@@ -15,7 +15,7 @@ ship.travel.research: "Sono stati rilevati 🌏*%d* pianeti!\nQuale di questi vo
 ship.travel.fuel_needed: "Carburante necessario"
 ship.travel.time_needed: "Tempo necessario"
 ship.travel.exploring: "🚀 Motori accesi, buon viaggio!\nIl tuo arrivo è previsto per le *%s*"
-ship.travel.end: "Hai raggiunto il nuovo pianeta."
+ship.travel.end: "🛬 Atterraggio completato con successo."
 ship.travel.wait: "🚀 Il termine del viaggio attualmente in corso è previsto alle *%s*.\n\n*Le tue gemme*:💎*%v*\nUtilizza 💎*1* per completare subito il viaggio.\n"
 ship.travel.not_enough_fuel: "Non hai abbastanza carburante per effettuare il viaggio."
 ship.travel.complete_diamond_error: "Non è stato possibile completare l'operazione. Prova più tardi."
@@ -24,7 +24,7 @@ ship.travel.unreachable: "❌ Non Raggiungibile"
 
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare le tue energie?"
-ship.rests.full_rest_time: "\n\n⏱: Saranno Necessari *%v* minuti al recupero *totale* delle forze."
+ship.rests.full_rest_time: "\n\n⏱: Saranno necessari *%v* minuti al recupero *totale* delle forze."
 ship.rests.play_rest_time: "\n\n⚠️: *%v* minuti per riprendere le attività."
 ship.rests.info: "\n\n📖: Mettendosi a dormire recupererai *10HP* per ogni minuto passato a riposare. Non è necessario attendere il recupero totale delle forze per svegliarsi.\n"
 ship.rests.start: "💤 Mettiti a dormire 💤"

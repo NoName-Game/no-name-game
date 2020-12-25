@@ -15,7 +15,7 @@ ship.travel.research: "There have been detected 🌏*%d* planets!\nWhich one of 
 ship.travel.fuel_needed: "Fuel needed"
 ship.travel.time_needed: "Time needed"
 ship.travel.exploring: "🚀 Engines powered up, have a nice trip!\nYour arrival is expected to be at *%s*"
-ship.travel.end: "You reached the new planet."
+ship.travel.end: "🛬 Landing completed successfully."
 ship.travel.wait: "🚀 The end of the current trip is expected to be at *%s*.\n\n*Your gems*:💎*%v*\nUse 💎*1* to complete immediately your trip.\n"
 ship.travel.not_enough_fuel: "You don't have enough fuel to make a trip."
 ship.travel.complete_diamond_error: "It wasn't possible to complete the operation.try again later."
