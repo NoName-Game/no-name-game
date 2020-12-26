@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -279,7 +280,6 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			EquipID:   c.Payload.ItemID,
 		})
 
-		//TODO: da completare controllo monete
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
@@ -295,13 +295,24 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Recap risorse recuperate
-		var recap string
-		for _, resource := range rCrafterDecompose.GetResources() {
-			recap += fmt.Sprintf("- %s (%s)\n", resource.GetName(), resource.GetRarity().GetSlug())
+		// Ordino risorse
+		decomposeResources := c.decomposeResourcesList(rCrafterDecompose.GetResources())
+
+		var recapList string
+		if len(decomposeResources) > 0 {
+			for _, resource := range decomposeResources {
+				recapList += fmt.Sprintf(
+					"- %s %v x %s (*%s*) %s\n",
+					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
+					resource.Quantity,
+					resource.Resource.Name,
+					resource.Resource.Rarity.Slug,
+					helpers.GetResourceBaseIcons(resource.Resource.GetBase()),
+				)
+			}
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.completed", recap))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.completed", recapList))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -315,4 +326,38 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 
 		c.CurrentState.Completed = true
 	}
+}
+
+// Struttura per riepilogo risorse scomposte
+type DecomposeResourcesDropped struct {
+	ResourceID uint32
+	Resource   *pb.Resource
+	Quantity   int32
+}
+
+func (c *SafePlanetCrafterDecomposeController) decomposeResourcesList(decomposeResults []*pb.Resource) (results []DecomposeResourcesDropped) {
+	for _, drop := range decomposeResults {
+		var found bool
+		for i, resource := range results {
+			if drop.ID == resource.ResourceID {
+				results[i].Quantity++
+				found = true
+			}
+		}
+
+		// Se non è stato mai recuperata appendo
+		if !found {
+			results = append(results, DecomposeResourcesDropped{
+				ResourceID: drop.ID,
+				Resource:   drop,
+				Quantity:   1,
+			})
+		}
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Quantity > results[j].Quantity
+	})
+
+	return
 }
