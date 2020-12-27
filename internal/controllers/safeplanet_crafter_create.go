@@ -17,11 +17,12 @@ import (
 // ====================================
 type SafePlanetCrafterCreateController struct {
 	Payload struct {
-		ItemType     string
-		ItemCategory string
-		Resources    map[uint32]int32
-		AddResource  bool // Flag per verifica aggiunta nuova risorsa
-		Price        int32
+		ItemType         string
+		ItemCategory     string
+		Resources        map[uint32]int32
+		ResourceQuantity int32 // Quantità di risorse aggiunte
+		AddResource      bool  // Flag per verifica aggiunta nuova risorsa
+		Price            int32
 	}
 	Controller
 }
@@ -326,13 +327,15 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 			}
+
+			c.Payload.ResourceQuantity++
 		}
 
 		// Costruisco keyboard
 		var keyboardRowResources [][]tgbotapi.KeyboardButton
 
 		// Se sono già stati inseriti delle risorse mostro tasto start craft!
-		if len(c.Payload.Resources) > 0 {
+		if c.Payload.ResourceQuantity >= 20 {
 			keyboardRowResources = append(keyboardRowResources, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start"),
@@ -385,27 +388,28 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				// Verifico se è una risorsa base
-				baseResources := ""
-				if rGetResourceByID.GetResource().GetBase() {
-					baseResources = "🔬Base"
-				}
-
 				recipe += fmt.Sprintf("- *%v* x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
 					rGetResourceByID.GetResource().GetRarity().GetSlug(),
-					baseResources,
+					helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 				)
 			}
 		}
 
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
-			"safeplanet.crafting.choose_resources",
+		msgContent := helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.choose_resources",
 			c.Payload.Price,
 			recipe,
-		))
+		)
+
+		if c.Payload.ResourceQuantity < 20 {
+			msgContent += helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.min_resources",
+				20-c.Payload.ResourceQuantity,
+			)
+		}
+
+		msg := helpers.NewMessage(c.Player.ChatID, msgContent)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
