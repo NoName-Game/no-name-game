@@ -1,14 +1,15 @@
 # Crafter
-safeplanet.crafting.intro: "👋 Salve Esploratore!\nQui l'armaiolo al tuo servizio!\nCosa dobbiamo fare oggi?"
+safeplanet.crafting.intro: "👋 Salve Esploratore! Qui l'armaiolo al tuo servizio!"
 safeplanet.crafting.no_money: "❌ Mi spiace non hai abbastanza denaro per proseguire!"
 
 # Crafter - Create
 safeplanet.crafting.start: "🛠 Inizia!"
 safeplanet.crafting.what: "Cosa vorresti realizzare?"
-safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
+safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi *almeno 20 risorse* a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
 safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
 safeplanet.crafting.add: "Aggiungi"
-safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s\n"
+safeplanet.crafting.min_resources: "⚠️ Risorse minime richieste per il craft: *%v*"
 safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Bene!* Mi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.wait_validation: "Stò ancora lavorando alla tua richiesta.\nDovrei riuscire a termininare la lavorazione alle *%s*, torna più tardi."
@@ -20,3 +21,10 @@ safeplanet.crafting.no_resource: "Non possiedi questa risorsa!"
 safeplanet.crafting.repair.what: "Quale tra le tue armi danneggiate vorresti riparare?"
 safeplanet.crafting.repair.confirm: "Posso ripararti *%s* immediatamente!\nSei sicuro di voler riparare al costo di 💰*%v*?"
 safeplanet.crafting.repair.completed: "Ecco a te ora è come nuova, fanne buon uso!"
+
+# Crafter - Decompose
+safeplanet.crafting.decompose.info: "Scomponendo un equipaggiamento da te scelto è possibile recuperare delle risorse con il quale è stato forgiato.\nIl costo del servizio è di: 💰*1000*"
+safeplanet.crafting.decompose.what: "Quale categoria vorresti visualizzare?"
+safeplanet.crafting.decompose.which: "Quale equipaggiamento vorresti scomporre?"
+safeplanet.crafting.decompose.confirm: "Sei sicuro di volere procedere alla scomposizione di *%s*?\n\n⚠️ *Attenzione*: Perderai per sempre questo equipaggiamento"
+safeplanet.crafting.decompose.completed: "Equipaggiamento scomposto, ecco le risorse recuperate:\n%s"

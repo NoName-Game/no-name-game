@@ -8,7 +8,7 @@ safeplanet.coalition.statistics.top_kill_enemy.description: "📖: Top 10 player
 safeplanet.coalition.statistics.top_explored_planets: "🌏 Planet exploration"
 safeplanet.coalition.statistics.top_explored_planets.description: "📖: Top 10 player for planet exploration"
 
-safeplanet.coalition.statistics.top_travel: "🔭 Travel"
+safeplanet.coalition.statistics.top_travel: "🔭 Travels"
 safeplanet.coalition.statistics.top_travel.description: "📖: Top 10 player for travel made"
 
 safeplanet.coalition.statistics.top_mission_completed: "🏢 Completed Missions"
