@@ -5,10 +5,11 @@ safeplanet.crafting.no_money: "❌ Mi spiace non hai abbastanza denaro per prose
 # Crafter - Create
 safeplanet.crafting.start: "🛠 Inizia!"
 safeplanet.crafting.what: "Cosa vorresti realizzare?"
-safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi delle risorse a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
+safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi *almeno 20 risorse* a tua scelta e l'armaiolo tenterà di creare qualcosa di *unico* solo per te!"
 safeplanet.crafting.armor.type: "Quale parte del corpo vorresti proteggere?"
 safeplanet.crafting.add: "Aggiungi"
-safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s"
+safeplanet.crafting.choose_resources: "Quali 💠 *Risorse* vorresti usare?\n\nIl costo della lavorazione: *%v*💰\n%s\n"
+safeplanet.crafting.min_resources: "⚠️ Risorse minime richieste per il craft: *%v*"
 safeplanet.crafting.confirm_choose_resources: "Sei sicuro di voler procedere con il seguente ordine?\n\nIl costo della lavorazione: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Bene!* Mi metto subito al lavoro!\nDovrei riuscire a termininare i lavori alle *%s*, torna più tardi."
 safeplanet.crafting.wait_validation: "Stò ancora lavorando alla tua richiesta.\nDovrei riuscire a termininare la lavorazione alle *%s*, torna più tardi."
