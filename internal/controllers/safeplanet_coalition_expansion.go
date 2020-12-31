@@ -290,7 +290,7 @@ func (c *SafePlanetExpansionController) Stage() {
 
 		// Cancello posizione su cache così che venga rigenerata correttamente. NNWS-62
 		if err = helpers.DelPlayerPlanetPositionInCache(c.Player.ID); err != nil {
-			c.Logger.Panic(err)
+			c.Logger.Warning(err)
 		}
 
 		// Invio messaggio
