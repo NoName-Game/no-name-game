@@ -288,6 +288,11 @@ func (c *SafePlanetExpansionController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Cancello posizione su cache così che venga rigenerata correttamente. NNWS-62
+		if err = helpers.DelPlayerPlanetPositionInCache(c.Player.ID); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.teleport_ok"),
