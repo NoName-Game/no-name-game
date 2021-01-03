@@ -173,26 +173,26 @@ func (c *DarkMerchantController) Stage() {
 	// Chiedo quante ne vuole comprare
 	// ##################################################################################################
 	case 1:
-		var keyboardRowQuantities [][]tgbotapi.KeyboardButton
-		for i := 1; i <= 5; i++ {
-			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(fmt.Sprintf("%d", i)),
-			)
-			keyboardRowQuantities = append(keyboardRowQuantities, keyboardRow)
-		}
-
-		// Aggiungo tasti back and clears
-		keyboardRowQuantities = append(keyboardRowQuantities, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
-		))
-
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.quantity"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
-			ResizeKeyboard: true,
-			Keyboard:       keyboardRowQuantities,
-		}
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("1"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("2"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("5"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("10"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			),
+		)
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
