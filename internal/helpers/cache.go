@@ -59,7 +59,7 @@ func SetControllerCacheData(playerID uint32, controller string, stage int32, pay
 		return fmt.Errorf("error marshal data for cache: %s", err.Error())
 	}
 
-	return config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_controller_%s", playerID, controller), marshalData, 72*time.Hour).Err()
+	return config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_controller_%s", playerID, controller), marshalData, 0).Err()
 }
 
 func GetControllerCacheData(playerID uint32, controller string, payload interface{}) (stage int32, err error) {
