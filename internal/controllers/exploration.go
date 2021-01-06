@@ -63,6 +63,16 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 func (c *ExplorationController) Validator() (hasErrors bool) {
 	var err error
+	// Verifico sempre che il player non abbia già altre esplorazioni in corso
+	if c.CurrentState.Stage < 2 {
+		var rExplorationCheck *pb.ExplorationCheckResponse
+		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
+			PlayerID: c.Player.ID,
+		}); rExplorationCheck != nil && rExplorationCheck.InExploration {
+			c.CurrentState.Stage = 2
+		}
+	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il player ha passato una tipoligia di esplorazione valida
@@ -95,6 +105,12 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 
 		// Il Player deve terminare prima l'esplorazione in corso
 		if !rExplorationCheck.GetFinishExploration() {
+			// Verificio se il player vuole forzare il ritorno alla base
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+				c.CurrentState.Stage = 4
+				return false
+			}
+
 			var finishAt time.Time
 			if finishAt, err = helpers.GetEndTime(rExplorationCheck.GetExplorationEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
@@ -113,7 +129,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 						helpers.Trans(c.Player.Language.Slug, "exploration.breaker.continue"),
 					),
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "exploration.comeback"),
 					),
 				),
 			)
@@ -265,18 +281,12 @@ func (c *ExplorationController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			// Verifico se è una risorsa base
-			baseResources := ""
-			if rGetResourceByID.GetResource().GetBase() {
-				baseResources = "🔬Base"
-			}
-
 			// Aggiungo dettaglio risorsa
 			cycleResourcesMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
-				baseResources,
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 			)
 		}
 
@@ -291,18 +301,12 @@ func (c *ExplorationController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			// Verifico se è una risorsa base
-			baseResources := ""
-			if rGetResourceByID.GetResource().GetBase() {
-				baseResources = "🔬Base"
-			}
-
 			// Aggiungo dettaglio risorsa
 			allResourcesMessage += fmt.Sprintf("💠 *%v* x *%s* (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
-				baseResources,
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 			)
 		}
 
@@ -387,10 +391,11 @@ func (c *ExplorationController) Stage() {
 			}
 
 			dropList += fmt.Sprintf(
-				"- %v x *%s* (%s)\n",
+				"- 💠 *%v* x *%s* (%s) %s\n",
 				drop.Quantity,
 				rGetResourceByID.GetResource().GetName(),
 				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 			)
 		}
 
