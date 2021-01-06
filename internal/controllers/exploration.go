@@ -105,6 +105,12 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 
 		// Il Player deve terminare prima l'esplorazione in corso
 		if !rExplorationCheck.GetFinishExploration() {
+			// Verificio se il player vuole forzare il ritorno alla base
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+				c.CurrentState.Stage = 4
+				return false
+			}
+
 			var finishAt time.Time
 			if finishAt, err = helpers.GetEndTime(rExplorationCheck.GetExplorationEndTime(), c.Player); err != nil {
 				c.Logger.Panic(err)
@@ -123,7 +129,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 						helpers.Trans(c.Player.Language.Slug, "exploration.breaker.continue"),
 					),
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "exploration.comeback"),
 					),
 				),
 			)
