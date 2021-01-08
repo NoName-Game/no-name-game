@@ -22,6 +22,10 @@ ship.travel.complete_diamond_error: "It wasn't possible to complete the operatio
 ship.travel.reachable: "✅ Reachable"
 ship.travel.unreachable: "❌ Not Reachable"
 
+# Travel manual
+ship.travel.manual.info: "Insert crypted coordinates to get some travel info.\n\n📖: The travel coordinates can be retrieved from a planet's detail page"
+ship.travel.manual.trip_details: "Travel info for the given coordinates:"
+
 # Rests
 ship.rests: "It seems like you need some rest, do you want to recover some energy?"
 ship.rests.full_rest_time: "\n\n⏱: There will be needed *%v* minutes for your *total* energy recovery."
