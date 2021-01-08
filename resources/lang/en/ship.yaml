@@ -23,8 +23,8 @@ ship.travel.reachable: "✅ Reachable"
 ship.travel.unreachable: "❌ Not Reachable"
 
 # Travel manual
-ship.travel.manual.info: "Inserisci delle coordinate cryptate per recupeare le informazioni di viaggio.\n\n📖: Le coordinate di viaggio possono esser recuperate dalla pagina dettaglio di un pianeta"
-ship.travel.manual.trip_details: "Dettagli viaggio per le coordinate inserite:"
+ship.travel.manual.info: "Insert some crypted coordinates to get some travel info.\n\n📖: The travel coordinates can be retrieved from a planet's detail page"
+ship.travel.manual.trip_details: "Travel info for the given coordinates:"
 
 # Rests
 ship.rests: "It seems like you need some rest, do you want to recover some energy?"
