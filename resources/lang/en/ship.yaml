@@ -1,7 +1,7 @@
-# SHIP
+---
+#SHIP
 ship.intro: "You get in your ship 🚀 *%s* (*%s*) - *%s*\n\nWhich activity would you like to do?"
-
-# Travel
+#Travel
 ship.travel.land: "Land! 🛬"
 ship.travel.info: "Do you want to reach a new 🌏 *Planet*?"
 ship.travel.ship_stats: "\n\nStatus of your 🚀 *Ship*:"
@@ -18,15 +18,13 @@ ship.travel.exploring: "🚀 Engines powered up, have a nice trip!\nYour arrival
 ship.travel.end: "🛬 Landing completed successfully."
 ship.travel.wait: "🚀 The end of the current trip is expected to be at *%s*.\n\n*Your gems*:💎*%v*\nUse 💎*1* to complete immediately your trip.\n"
 ship.travel.not_enough_fuel: "You don't have enough fuel to make a trip."
-ship.travel.complete_diamond_error: "It wasn't possible to complete the operation.try again later."
+ship.travel.complete_diamond_error: "It wasn't possible to complete the operation. Try again later."
 ship.travel.reachable: "✅ Reachable"
 ship.travel.unreachable: "❌ Not Reachable"
-
-# Travel manual
+#Travel manual
 ship.travel.manual.info: "Insert crypted coordinates to get some travel info.\n\n📖: The travel coordinates can be retrieved from a planet's detail page"
 ship.travel.manual.trip_details: "Travel info for the given coordinates:"
-
-# Rests
+#Rests
 ship.rests: "It seems like you need some rest, do you want to recover some energy?"
 ship.rests.full_rest_time: "\n\n⏱: There will be needed *%v* minutes for your *total* energy recovery."
 ship.rests.play_rest_time: "\n\n⚠️: *%v* minutes to reclaim the activities."
@@ -38,8 +36,7 @@ ship.rests.sleep: "You close your eyes and start your deserved sleep, for a tota
 ship.rests.need_to_rest: "You wake up although you have not recovered energy."
 ship.rests.finish: "You wake up feeling better, you recovered *%vHP*!"
 ship.rests.validator.need_to_wakeup: "You're sleeping, you should wake up before doing any other operation"
-
-# Laboratory
+#Laboratory
 ship.laboratory.categories.medical: "💊 Medical"
 ship.laboratory.categories.ship_support: "⚙️ Ship support"
 ship.laboratory.categories.stuff: "🔩 Others"
@@ -52,8 +49,7 @@ ship.laboratory.no_resource_to_craft: "Unfortunately you're missing some resourc
 ship.laboratory.wait: "Production *started*!\nThe end of your item's production is expected to be at *%s*, come back later."
 ship.laboratory.wait_validator: "The end of your item's production is expected to be at *%s*, come back later."
 ship.laboratory.item_does_not_exist: "The chosen item doesn't exist!"
-
-# Rescue
+#Rescue
 ship.travel.rescue.info: "🧰 Did you get stuck on this planet?\n\nRequest support to the Coalition.\nThrough a signal the Coalition can teleport you directly to the nearest secure planet.\n\nTo proceed with the rescue *1*💎 will be needed"
 ship.travel.rescue.diamond: "💎 Request Rescue 💎"
 ship.travel.rescue.confirm: "*Are you sure you want to ask for a rescue?*\n⚠️: *1*💎 Will be used"
