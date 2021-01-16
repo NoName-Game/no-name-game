@@ -1,20 +1,18 @@
-# ITEMS
+---
+#ITEMS
 items.stuff: "🔩"
 items.medical: "💊"
 items.ship_support: "⚙️"
-
-# Other
+#Other
 items.amulets: "Amulet"
-
-# Medical
+#Medical
 items.revitalizing_small: "Small revitalizing"
 items.description.revitalizing_small: "📖: It allows you to restore *%v%%* of your maximum health. Ideal in critical circumstances."
 items.revitalizing_medium: "Medium revitalizing"
 items.description.revitalizing_medium: "📖: It allows you to restore *%v%%* of your maximum health."
 items.revitalizing_max: "Big revitalizing"
 items.description.revitalizing_max: "📖: It allows you to restore *%v%%* of your maximum health."
-
-# Ship support
+#Ship support
 items.raw_fuel: "Raw fuel"
 items.description.raw_fuel: "Poor quality, quite a common fuel, it will let you refill your ship's tank by *%v*"
 items.refined_fuel: "Refined fuel"
