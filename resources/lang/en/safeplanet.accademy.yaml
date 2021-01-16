@@ -1,4 +1,5 @@
-# Accademy
+---
+#Accademy
 safeplanet.accademy.info: "Welcome in ⛩*Academy* explorer!\n\nWe Masters can help you learn unique abilites using the power of some 🧿 *Amulets* that are really important for us..."
 safeplanet.accademy.which: "What type of ability do you want to learn?"
 safeplanet.accademy.striker: "⚔️ Attacker"
@@ -7,10 +8,8 @@ safeplanet.accademy.explorer: "🚀 Explorer"
 safeplanet.accademy.done: "New ability learned correctly!"
 safeplanet.accademy.no_more_abilities: "Currently there are no other abilities for this typology."
 safeplanet.accademy.not_enough_amulets: "❌ You don't have enough amulets to learn the ability."
-
 safeplanet.accademy.ability_details: "Here's a new ability for you!\n\nName: *%s* - Level: *%d*\nDescription: %s"
 safeplanet.accademy.ability_confirm: "Currently you own 🧿*%d*, to learn this ability we'll need 🧿*%d*"
-
 safeplanet.accademy.ability.accurate: "Accurate"
 safeplanet.accademy.ability.quick: "Quick"
 safeplanet.accademy.ability.lucky: "Lucky"
@@ -20,7 +19,6 @@ safeplanet.accademy.ability.base_speed: "Base Speed"
 safeplanet.accademy.ability.hard_hit: "Hard Hit!"
 safeplanet.accademy.ability.doctor: "Treatment"
 safeplanet.accademy.ability.express: "Express"
-
 safeplanet.accademy.ability.accurate.details: "Increases attack accuracy (+10%%)"
 safeplanet.accademy.ability.quick.details: "Increases defensive dodge (+10%%)"
 safeplanet.accademy.ability.lucky.details: "Increases the odds of doubling resources in exploration (+10%%)"
