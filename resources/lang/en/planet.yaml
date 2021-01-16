@@ -1,4 +1,5 @@
-# PLANET
+---
+#PLANET
 planet.intro: "Current planet details:"
 planet.details.system: "💫 System: *%s*"
 planet.details.name: "🌍 Planet: *%s*"
@@ -9,6 +10,5 @@ planet.details.coordinate.z: "🆉 %v"
 planet.details.biome: "Biome: *%s*"
 planet.details.atmosphere: "Atmosphere: *%s*"
 planet.details.count_visited_player: "👨🏼‍🚀 *%d* Explorers have visited this planet"
-
 planet.bookmark.add_ok: "✅ The planet was *added* to your favourites."
 planet.bookmark.remove_ok: "✅ The planet was *removed* from your favourites."
