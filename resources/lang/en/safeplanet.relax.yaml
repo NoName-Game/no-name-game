@@ -1,7 +1,7 @@
-# Relax
+---
+#Relax
 safeplanet.relax.intro: "Welcome explorer, sometimes a bit of relaxation never hurts..."
-
-# Three Cards
+#Three Cards
 safeplanet.relax.threecards.intro: "🃏 Welcome to the 3 cards game.\n\n📖 *Rules:* Choose one of the 3 cards available, two of these will make you win some prizes, one of these will make you lose everything! By giving up you'll take at home all the collected prizes and the game will conclude.\n\nSingle game cost: *1000*💰"
 safeplanet.relax.threecards.play: "Play!"
 safeplanet.relax.threecards.play.start: "Game started! Here's your cards, make your choice..."

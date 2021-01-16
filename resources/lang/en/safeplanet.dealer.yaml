@@ -1,4 +1,5 @@
-# Dealer
+---
+#Dealer
 safeplanet.dealer.intro: "Welcome to my shop explorer!\n\nHere you'll find products of *excellent* quality!\nWould you like to buy something?\n\n Your budget: 💰*%v*"
 safeplanet.dealer.quantity: "What amount would you like to purchase?"
 safeplanet.dealer.confirm: "Perfect! Then tell me, are you sure you want to buy *%v* quantities of *%s* for 💰*%v*?"

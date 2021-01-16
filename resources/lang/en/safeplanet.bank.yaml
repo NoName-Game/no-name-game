@@ -1,9 +1,9 @@
-# Bank
+---
+#Bank
 safeplanet.bank.info: "💰 Welcome to the branch of the Dipper&Co bank."
 safeplanet.bank.account_details: "Here are your account details:\nIn your possession: *%v*💰\nCurrent deposit: *%v*💰\n\n📖: Remember, a deposit in bank will protect your savings *freely*, however at withdrawal there will be applied a commission of *20%%* on the transaction."
 safeplanet.bank.deposit: "🔽 Deposit"
 safeplanet.bank.deposit_message: "How much would you like to deposit?\n\nYou can even input manually the amount that you wish to deposit."
-
 safeplanet.bank.withdraws: "🔼 Withdraw"
 safeplanet.bank.withdraws_message: "How much would you like to withdraw?\n\nYou can even input manually the amount you wish to withdraw."
 safeplanet.bank.operation_done: "🧾 Your transactions has been completed *successfully*!\n\nOur services are always on your disposal."
