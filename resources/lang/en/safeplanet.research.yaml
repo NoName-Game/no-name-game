@@ -1,9 +1,9 @@
-# Research
+---
+#Research
 safeplanet.coalition.research.info: "Welcome to the 🔬 *Research* center.\n\nBy donating some resources to the Coalition you'll help the research center to discover new accessible resources for everyone."
 safeplanet.coalition.research.recap: "The current active research still needs 💠*%d* (*%s*) to be completed."
 safeplanet.coalition.research.done: "\n🎉 Congratulations explorers!!\nThanks to your help our team can now process the data and find new resources.\nCome back in a bit to check out the progress."
-
-# Research - Donations
+#Research - Donations
 safeplanet.coalition.research.donation.choose_reseource: "Which resource do you want to donate?"
 safeplanet.coalition.research.donation.choose_quantity: "How many resources do you want to donate?"
 safeplanet.coalition.research.donation.confirmation: "You're going to donate *%v* resources of *%s*, are you sure you want to continue?"
