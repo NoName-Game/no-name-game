@@ -34,6 +34,7 @@ var routes = map[string]reflect.Type{
 	"ship.travel.land":           reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
 	"route.ship.travel.favorite": reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
 	"route.ship.rests":           reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+	"ship.rests.wakeup":          reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 	"route.ship.laboratory":      reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
 
 	// Player
