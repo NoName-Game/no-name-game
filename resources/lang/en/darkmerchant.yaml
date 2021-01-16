@@ -1,4 +1,5 @@
-# DarkMerchant
+---
+#DarkMerchant
 darkmerchant.intro: "Greetings explorer, are you interested on any resource?\n\n... make your choice quickly, I don't think it will last long here... damn Coalition...\n\nYour budget: 💰*%v*"
 darkmerchant.quantity: "How many would you like to purchase?"
 darkmerchant.confirm: "Perfect! So tell me, are you sure you want to buy *%v* pieces of *%s* at the cost of 💰*%v*?"
