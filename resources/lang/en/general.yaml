@@ -1,5 +1,6 @@
+---
 ################################################################################################################
-# GENERAL
+#GENERAL
 complete: "Done!"
 continue: "Continue"
 exit: "Exit"
@@ -36,13 +37,11 @@ armors: "🛡 Armors"
 weapon: "🗡 Weapon"
 weapons: "🗡 Weapons"
 complete_with_diamond: "💎 Finish quickly 💎"
-
-# Ship Category
+#Ship Category
 ship.category.light: "Light"
 ship.category.normal: "Normal"
 ship.category.heavy: "Heavy"
-
-# Rarities
+#Rarities
 rarity.VC: "Very Common"
 rarity.C: "Common"
 rarity.U: "Not Common"
@@ -50,10 +49,8 @@ rarity.R: "Rare"
 rarity.UR: "Ultra Rare"
 rarity.L: "Legendary"
 rarity.X: "Experimental"
-
 ################################################################################################################
-# EVENTS
+#EVENTS
 titan_event.test_event: "THIS IS A TEST EVENT"
 titanplanet.event.event1.choice1: "CHOICE ONE"
 titanplanet.event.event1.choice2: "CHOICE TWO"
-################################################################################################################

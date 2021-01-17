@@ -1,5 +1,6 @@
-# MISSION
-exploration.tips: "📖:Run some explorations for the recovery of the planet's own material. *Every* exploration has an initial duration of *10* minutes, by repeating more than once the exploration the duration and materials recoverable by you will increase."
+---
+#MISSION
+exploration.tips: "📖: Run some explorations for the recovery of the planet's own material. *Every* exploration has an initial duration of *10* minutes, by repeating more than once the exploration the duration and materials recoverable by you will increase."
 exploration.exploration: "Select the exploration field:"
 exploration.underground: "🔥 Subsoil"
 exploration.surface: "💧 Surface"

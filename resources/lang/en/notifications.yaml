@@ -1,4 +1,5 @@
-# NOTIFICATIONS
+---
+#NOTIFICATIONS
 notification.activity.route.exploration: "You got back from the exploration, find out which resources you discovered during it."
 notification.activity.route.ship.laboratory: "The creation of your crafted item was accomplished!"
 notification.activity.route.hunting: "Informations got back successfully!"

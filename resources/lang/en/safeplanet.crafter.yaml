@@ -1,14 +1,14 @@
-# Crafter
+---
+#Crafter
 safeplanet.crafting.intro: "👋 Hi Explorer! Here you have the gunsmith at your disposal!"
 safeplanet.crafting.no_money: "❌ I'm sorry but you haven't got enough money to continue!"
-
-# Crafter - Create
+#Crafter - Create
 safeplanet.crafting.start: "🛠 Start!"
 safeplanet.crafting.what: "What would you like to craft?"
 safeplanet.crafting.info: "📖: Choose what type of weapon or armor you would like to craft, add *at least 20 resources* of your choice and the gunsmith will try to create something *unique* only for you!"
 safeplanet.crafting.armor.type: "Which part of the body would you like to protect?"
 safeplanet.crafting.add: "Add"
-safeplanet.crafting.choose_resources: "Which 💠 *Resources* would you like to use?\n\nThe production cost: *%v*💰\n%s"
+safeplanet.crafting.choose_resources: "Which 💠 *Resources* would you like to use?\n\nThe production cost: *%v*💰\n%s\n"
 safeplanet.crafting.min_resources: "⚠️ Minimum resources required for the craft: *%v*"
 safeplanet.crafting.confirm_choose_resources: "Are you sure you want to proceed with the following order?\n\nThe production cost: *%v*💰\n%s"
 safeplanet.crafting.wait: "*Good!* I will get right on it!\nI should finish the jobs at *%s*, come back later."
@@ -16,14 +16,12 @@ safeplanet.crafting.wait_validation: "I'm still working on your request.\nI shou
 safeplanet.crafting.craft_completed: "Here's your order!\nHope you like it and it helps you in your feats.\nYou obtained: *%s*!"
 safeplanet.crafting.no_resources: "I'm sorry but you can't add another quantity of this resource!"
 safeplanet.crafting.no_resource: "You don't have this resource!"
-
-# Crafter - Repair
+#Crafter - Repair
 safeplanet.crafting.repair.what: "Which one of your damaged weapons would you like to repair?"
 safeplanet.crafting.repair.confirm: "I can repair you *%s* immediately!\nAre you sure you want to repair it for 💰*%v*?"
 safeplanet.crafting.repair.completed: "There you have it, it's as brand new, make good use of it!"
-
-# Crafter - Decompose
-safeplanet.crafting.decompose.info: " By breaking down an equip you chose it's possible to retrieve some resources once used to forge it.\nThe service's cost is: 💰*1000*"
+#Crafter - Decompose
+safeplanet.crafting.decompose.info: "By breaking down an equip you chose it's possible to retrieve some resources once used to forge it.\nThe service's cost is: 💰*1000*"
 safeplanet.crafting.decompose.what: "Which category would you like to view?"
 safeplanet.crafting.decompose.which: "Which equipment would you like to break down?"
 safeplanet.crafting.decompose.confirm: "Are you sure you want to break down *%s*?\n\n⚠️ *Attention*: You'll lose forever this equipment"

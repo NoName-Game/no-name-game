@@ -1,4 +1,5 @@
-# ROUTES
+---
+#ROUTES
 route.setup: "⚙️ Setup"
 route.tutorial: "📖 Tutorial"
 route.tutorial.continue: "📖 Continue tutorial"
@@ -17,8 +18,8 @@ route.ship: "🚀 Ship"
 route.ship.travel: "🔭 Travel"
 route.ship.travel.finding: "📡 Find"
 route.ship.travel.rescue: "🧰 Rescue"
-route.ship.travel.manual: "🧭 Manual"
 route.ship.travel.favorite: "⭐️ Favourites List"
+route.ship.travel.manual: "🧭 Manual"
 route.ship.warehouse: "Warehouse"
 route.ship.rests: "💤 Rest"
 route.ship.laboratory: "🧪 Laboratory"
@@ -27,11 +28,10 @@ route.menu.npc: "🏛 Plaza"
 route.force.die: "Delete"
 route.banned: "Banned"
 route.planet: "🌍 Planet"
-route.planet.bookmark.add: "⭐️ Add to favourites"
+route.planet.bookmark.add: "⭐️ Add to favourite"
 route.planet.bookmark.remove: "⭐️ Remove from favourites"
 route.conqueror: "🚩 Conqueror"
-
-# Safe planet
+#Safe planet
 route.safeplanet.coalition.daily_reward: "📦 Daily reward"
 route.safeplanet.bank: "🏦 Bank"
 route.safeplanet.crafter: "🛠 Gunsmith"
@@ -59,11 +59,9 @@ route.safeplanet.coalition.protectors.join: "🔍 Find"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Leave Guild"
 route.safeplanet.coalition.protectors.add_player: "➕ Add explorer"
 route.safeplanet.coalition.protectors.remove_player: "➖ Remove explorer"
-
-# Titan planet
+#Titan planet
 route.titanplanet.tackle: "Take on 👁 Titan"
-
-# Breaker
+#Breaker
 route.breaker.continue: "Continue"
 route.breaker.back: "⬅️ Back"
 route.breaker.more: "⬅️ Back to menu"
