@@ -187,6 +187,14 @@ func (c *SetupController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Recupero infomazioni player aggiornate
+		rGetPlayerByID, _ := config.App.Server.Connection.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{
+			ID: c.Player.ID,
+		})
+
+		// Recupero player
+		c.Player = rGetPlayerByID.GetPlayer()
+
 		// Mando messaggio fine confiurazione
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.end"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
