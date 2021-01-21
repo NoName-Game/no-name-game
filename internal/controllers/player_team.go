@@ -61,6 +61,10 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.leave")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.add_player")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 			),
 		)
@@ -75,6 +79,9 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("Non in team"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.create")),
+		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
 		),
