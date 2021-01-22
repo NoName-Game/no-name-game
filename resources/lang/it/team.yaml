@@ -6,5 +6,11 @@ player.team.create.created: "Team creato con sucesso"
 
 #Add
 player.team.add.add_player_start: "Inserisci lo username dell'esploratore che vuoi aggiungere:"
-player.team.add.add_player_confirm: "Sei sicuro di voler aggiungere %s al tuo gruppo?"
+player.team.add.add_player_confirm: "Sei sicuro di voler aggiungere %s al tuo team?"
 player.team.add.completed_ok: "Esploratore aggiunto correttamente"
+
+#Remove
+player.team.remove.remove_player_start: "Inserisci lo username dell'esploratore che vuoi rimuovere o selezionalo dalla lista qui sotto:"
+player.team.remove.remove_player_confirm: "Sei sicuro di voler rimuovere %s dall tuo team?"
+player.team.remove.remove_completed_ok: "L'esploratore è stato rimosso dal tuo team!"
+player.team.remove.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dal tuo team."
