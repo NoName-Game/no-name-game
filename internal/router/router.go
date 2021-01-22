@@ -42,6 +42,7 @@ var routes = map[string]reflect.Type{
 	"route.player.guild":               reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
 	"route.player.team":                reflect.TypeOf((*controllers.PlayerTeamController)(nil)).Elem(),
 	"route.player.team.create":         reflect.TypeOf((*controllers.PlayerTeamCreateController)(nil)).Elem(),
+	"route.player.team.leave":          reflect.TypeOf((*controllers.PlayerTeamLeaveController)(nil)).Elem(),
 	"route.player.team.add_player":     reflect.TypeOf((*controllers.PlayerTeamAddPlayerController)(nil)).Elem(),
 	"route.player.team.remove_player":  reflect.TypeOf((*controllers.PlayerTeamRemovePlayerController)(nil)).Elem(),
 	"route.player.achievements":        reflect.TypeOf((*controllers.PlayerAchievementsController)(nil)).Elem(),

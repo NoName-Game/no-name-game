@@ -14,3 +14,8 @@ player.team.remove.remove_player_start: "Inserisci lo username dell'esploratore 
 player.team.remove.remove_player_confirm: "Sei sicuro di voler rimuovere %s dall tuo team?"
 player.team.remove.remove_completed_ok: "L'esploratore è stato rimosso dal tuo team!"
 player.team.remove.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dal tuo team."
+
+#Leave
+player.team.leave.confirm: "Sei sicuro di voler abbandonare questo team?"
+player.team.leave.completed_ok: "Hai abbandonato correttamente il team."
+player.team.leave.completed_ko: "Non è stato possibile abbandonare il team."
