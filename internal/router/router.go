@@ -100,6 +100,7 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 	// Se morto spedisco direttamente al riposo
 	if player.Dead {
 		invoke(routes["route.ship.rests"], "Handle", player, update)
+		return
 	}
 
 	// Verifica il tipo di messaggio
