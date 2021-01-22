@@ -1,0 +1,10 @@
+player.team.already_in_team: "Sembra che tu sia già in un team"
+player.team.adding_player_already_in_one_team: "Il player da te indicato è già in un team."
+
+#Create
+player.team.create.created: "Team creato con sucesso"
+
+#Add
+player.team.add.add_player_start: "Inserisci lo username dell'esploratore che vuoi aggiungere:"
+player.team.add.add_player_confirm: "Sei sicuro di voler aggiungere %s al tuo gruppo?"
+player.team.add.completed_ok: "Esploratore aggiunto correttamente"
