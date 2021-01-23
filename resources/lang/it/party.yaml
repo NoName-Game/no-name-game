@@ -1,0 +1,30 @@
+#Validation
+player.party.not_leader: "⚠️ Non puoi eseguire questi comandi, devi essere leader del party per poter proseguire."
+player.party.already_in_party: "⚠️ Sembra che tu sia già in un party."
+player.party.adding_player_already_in_one_party: "⚠️ L'esploratore da te indicato è già in un party."
+player.party.party_limit_reached: "⚠️ Il party ha raggiunto il numero massimo di partecipanti."
+
+#Show
+player.party.show: "🔰 Party di *%s*\n\n👨🏼‍🚀 Esploratori (%v/3):\n%s"
+
+#Create
+player.party.non_in_party: "Attualmente non appartieni a nessun party, puoi creane uno, o farti invitare per poter affrontare avventure assieme ai tuoi compagni.\n\n📖: Puoi creare un party e aggiungere fino ad un massimo di 3 esploratori."
+player.party.create.created: "Party creato con sucesso! Adesso puoi invitare altri esploratori."
+
+#Add
+player.party.add.add_player_start: "Inserisci l'username dell'esploratore che vuoi aggiungere:"
+player.party.add.add_player_confirm: "Sei sicuro di voler aggiungere %s al tuo party?"
+player.party.add.completed_ok: "Esploratore aggiunto correttamente"
+player.party.add.add_player_confirm_to_player: "Sei stato aggiunto al party di %s"
+
+#Remove
+player.party.remove.remove_player_start: "Inserisci l'username dell'esploratore che vuoi rimuovere o selezionalo dalla lista qui sotto:"
+player.party.remove.remove_player_confirm: "Sei sicuro di voler rimuovere %s dall tuo party?"
+player.party.remove.remove_completed_ok: "L'esploratore è stato rimosso dal tuo party!"
+player.party.remove.remove_completed_ko: "⚠️ Non è stato possibile rimuovere l'esploratore dal tuo party."
+player.party.remove.remove_player_confirm_to_player: "Sei stato rimosso dal party di *%s*"
+
+#Leave
+player.party.leave.confirm: "⚠️ Sei sicuro di voler *abbandonare* questo party?"
+player.party.leave.completed_ok: "Hai abbandonato correttamente il party."
+player.party.leave.completed_ko: "⚠️ Non è stato possibile abbandonare il party."

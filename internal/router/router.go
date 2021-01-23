@@ -40,6 +40,11 @@ var routes = map[string]reflect.Type{
 	// Player
 	"route.player":                     reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
 	"route.player.guild":               reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
+	"route.player.party":               reflect.TypeOf((*controllers.PlayerPartyController)(nil)).Elem(),
+	"route.player.party.create":        reflect.TypeOf((*controllers.PlayerPartyCreateController)(nil)).Elem(),
+	"route.player.party.leave":         reflect.TypeOf((*controllers.PlayerPartyLeaveController)(nil)).Elem(),
+	"route.player.party.add_player":    reflect.TypeOf((*controllers.PlayerPartyAddPlayerController)(nil)).Elem(),
+	"route.player.party.remove_player": reflect.TypeOf((*controllers.PlayerPartyRemovePlayerController)(nil)).Elem(),
 	"route.player.achievements":        reflect.TypeOf((*controllers.PlayerAchievementsController)(nil)).Elem(),
 	"route.player.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
 	"route.player.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
