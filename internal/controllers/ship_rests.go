@@ -57,6 +57,16 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 // Validator
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool) {
+	// Se è stato passato il comando sveglia e il player sta effettivamente dormendo lo sveglio
+	if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") == c.Update.Message.Text {
+		var rRestCheck *pb.RestCheckResponse
+		if rRestCheck, _ = config.App.Server.Connection.RestCheck(helpers.NewContext(1), &pb.RestCheckRequest{
+			PlayerID: c.Player.GetID(),
+		}); rRestCheck.GetInRest() {
+			c.CurrentState.Stage = 2
+		}
+	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il player necessita davvero di dormire

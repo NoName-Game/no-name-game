@@ -34,11 +34,17 @@ var routes = map[string]reflect.Type{
 	"ship.travel.land":           reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
 	"route.ship.travel.favorite": reflect.TypeOf((*controllers.ShipTravelFindingController)(nil)).Elem(),
 	"route.ship.rests":           reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
+	"ship.rests.wakeup":          reflect.TypeOf((*controllers.ShipRestsController)(nil)).Elem(),
 	"route.ship.laboratory":      reflect.TypeOf((*controllers.ShipLaboratoryController)(nil)).Elem(),
 
 	// Player
 	"route.player":                     reflect.TypeOf((*controllers.PlayerController)(nil)).Elem(),
 	"route.player.guild":               reflect.TypeOf((*controllers.PlayerGuildController)(nil)).Elem(),
+	"route.player.party":               reflect.TypeOf((*controllers.PlayerPartyController)(nil)).Elem(),
+	"route.player.party.create":        reflect.TypeOf((*controllers.PlayerPartyCreateController)(nil)).Elem(),
+	"route.player.party.leave":         reflect.TypeOf((*controllers.PlayerPartyLeaveController)(nil)).Elem(),
+	"route.player.party.add_player":    reflect.TypeOf((*controllers.PlayerPartyAddPlayerController)(nil)).Elem(),
+	"route.player.party.remove_player": reflect.TypeOf((*controllers.PlayerPartyRemovePlayerController)(nil)).Elem(),
 	"route.player.achievements":        reflect.TypeOf((*controllers.PlayerAchievementsController)(nil)).Elem(),
 	"route.player.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
 	"route.player.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
@@ -93,6 +99,12 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 	// Se così fosse non gestisco nemmeno l'update.
 	if player.Banned {
 		invoke(routes["route.banned"], "Handle", player, update)
+		return
+	}
+
+	// Se morto spedisco direttamente al riposo
+	if player.Dead {
+		invoke(routes["route.ship.rests"], "Handle", player, update)
 		return
 	}
 

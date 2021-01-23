@@ -124,6 +124,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.guild")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.party")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.achievements")),
