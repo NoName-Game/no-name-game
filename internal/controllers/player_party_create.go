@@ -8,26 +8,26 @@ import (
 )
 
 // ====================================
-// PlayerTeamCreateController
+// PlayerPartyCreateController
 // ====================================
-type PlayerTeamCreateController struct {
+type PlayerPartyCreateController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerTeamCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerPartyCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.player.team.create",
+			Controller: "route.player.party.create",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &PlayerTeamController{},
+				To:        &PlayerPartyController{},
 				FromStage: 0,
 			},
 		},
@@ -51,21 +51,21 @@ func (c *PlayerTeamCreateController) Handle(player *pb.Player, update tgbotapi.U
 // ====================================
 // Validator
 // ====================================
-func (c *PlayerTeamCreateController) Validator() bool {
+func (c *PlayerPartyCreateController) Validator() bool {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Verifico se il player appartiene già ad un team
+	// Verifico se il player appartiene già ad un party
 	// ##################################################################################################
 	case 0:
-		// Recupero team player
-		var rGetTeamDetails *pb.GetTeamDetailsResponse
-		rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		// Recupero party player
+		var rGetPartyDetails *pb.GetPartyDetailsResponse
+		rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 			PlayerID: c.Player.ID,
 		})
 
-		// Se il player si trova in un team recupero i dettagli
-		if rGetTeamDetails.GetInTeam() {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.already_in_team")
+		// Se il player si trova in un party recupero i dettagli
+		if rGetPartyDetails.GetInParty() {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.party.already_in_party")
 			return true
 		}
 	}
@@ -76,20 +76,20 @@ func (c *PlayerTeamCreateController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *PlayerTeamCreateController) Stage() {
+func (c *PlayerPartyCreateController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Creo team player
+	// Creo party player
 	// ##################################################################################################
 	case 0:
-		if _, err = config.App.Server.Connection.CreateTeam(helpers.NewContext(1), &pb.CreateTeamRequest{
+		if _, err = config.App.Server.Connection.CreateParty(helpers.NewContext(1), &pb.CreatePartyRequest{
 			OwnerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.create.created"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.create.created"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

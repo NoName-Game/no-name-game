@@ -8,9 +8,9 @@ import (
 )
 
 // ====================================
-// PlayerTeamRemovePlayerController
+// PlayerPartyRemovePlayerController
 // ====================================
-type PlayerTeamRemovePlayerController struct {
+type PlayerPartyRemovePlayerController struct {
 	Payload struct {
 		Username string
 	}
@@ -20,18 +20,18 @@ type PlayerTeamRemovePlayerController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerTeamRemovePlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerPartyRemovePlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.player.team.remove_player",
+			Controller: "route.player.party.remove_player",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &PlayerTeamController{},
+				To:        &PlayerPartyController{},
 				FromStage: 0,
 			},
 		},
@@ -55,15 +55,15 @@ func (c *PlayerTeamRemovePlayerController) Handle(player *pb.Player, update tgbo
 // ====================================
 // Validator
 // ====================================
-func (c *PlayerTeamRemovePlayerController) Validator() bool {
-	// Verifico sempre che il player sia owner del team, se no non può eseguire questi comandi
-	var rGetTeamDetails *pb.GetTeamDetailsResponse
-	rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+func (c *PlayerPartyRemovePlayerController) Validator() bool {
+	// Verifico sempre che il player sia owner del party, se no non può eseguire questi comandi
+	var rGetPartyDetails *pb.GetPartyDetailsResponse
+	rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 		PlayerID: c.Player.ID,
 	})
 
-	if rGetTeamDetails.GetOwner().GetID() != c.Player.ID {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.not_leader")
+	if rGetPartyDetails.GetOwner().GetID() != c.Player.ID {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.party.not_leader")
 		return true
 	}
 
@@ -98,7 +98,7 @@ func (c *PlayerTeamRemovePlayerController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *PlayerTeamRemovePlayerController) Stage() {
+func (c *PlayerPartyRemovePlayerController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -107,15 +107,15 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 	case 0:
 		// Verifico/Recupero Gilda player
 		var err error
-		var rGetTeamDetails *pb.GetTeamDetailsResponse
-		if rGetTeamDetails, err = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		var rGetPartyDetails *pb.GetPartyDetailsResponse
+		if rGetPartyDetails, err = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var protectorsKeyboard [][]tgbotapi.KeyboardButton
-		for _, player := range rGetTeamDetails.GetPlayers() {
+		for _, player := range rGetPartyDetails.GetPlayers() {
 			if player.GetID() != c.Player.GetID() {
 				protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(player.GetUsername()),
@@ -128,7 +128,7 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.remove.remove_player_start"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -144,7 +144,7 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.remove.remove_player_confirm", c.Payload.Username))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_confirm", c.Payload.Username))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -161,24 +161,24 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 
 		c.CurrentState.Stage = 2
 	// ##################################################################################################
-	// Salvo e associo player al team
+	// Salvo e associo player al party
 	// ##################################################################################################
 	case 2:
-		// Recupero team player
-		var rGetTeamDetails *pb.GetTeamDetailsResponse
-		rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		// Recupero party player
+		var rGetPartyDetails *pb.GetPartyDetailsResponse
+		rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 			PlayerID: c.Player.ID,
 		})
 
-		if _, err = config.App.Server.Connection.RemovePlayerToTeam(helpers.NewContext(1), &pb.RemovePlayerToTeamRequest{
+		if _, err = config.App.Server.Connection.RemovePlayerToParty(helpers.NewContext(1), &pb.RemovePlayerToPartyRequest{
 			PlayerUsername: c.Payload.Username,
-			TeamID:         rGetTeamDetails.GetTeamID(),
+			PartyID:        rGetPartyDetails.GetPartyID(),
 		}); err != nil {
 			c.Logger.Warning(err)
 
 			// Potrebbero esserci stati degli errori generici
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "player.team.remove.remove_completed_ko"),
+				helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -196,14 +196,14 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 
 		msgToPlayerRemoved := helpers.NewMessage(rGetPlayerByUsername.GetPlayer().GetChatID(), helpers.Trans(
 			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
-			"player.team.remove.remove_player_confirm_to_player", c.Player.GetUsername(),
+			"player.party.remove.remove_player_confirm_to_player", c.Player.GetUsername(),
 		))
 		msgToPlayerRemoved.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msgToPlayerRemoved); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.remove.remove_completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

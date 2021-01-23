@@ -10,9 +10,9 @@ import (
 )
 
 // ====================================
-// PlayerTeamAddPlayerController
+// PlayerPartyAddPlayerController
 // ====================================
-type PlayerTeamAddPlayerController struct {
+type PlayerPartyAddPlayerController struct {
 	Payload struct {
 		Username string
 	}
@@ -22,18 +22,18 @@ type PlayerTeamAddPlayerController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerTeamAddPlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerPartyAddPlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.player.team.add_player",
+			Controller: "route.player.party.add_player",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &PlayerTeamController{},
+				To:        &PlayerPartyController{},
 				FromStage: 0,
 			},
 		},
@@ -57,21 +57,21 @@ func (c *PlayerTeamAddPlayerController) Handle(player *pb.Player, update tgbotap
 // ====================================
 // Validator
 // ====================================
-func (c *PlayerTeamAddPlayerController) Validator() bool {
-	// Verifico sempre che il player sia owner del team, se no non può eseguire questi comandi
-	var rGetTeamDetails *pb.GetTeamDetailsResponse
-	rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+func (c *PlayerPartyAddPlayerController) Validator() bool {
+	// Verifico sempre che il player sia owner del party, se no non può eseguire questi comandi
+	var rGetPartyDetails *pb.GetPartyDetailsResponse
+	rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 		PlayerID: c.Player.ID,
 	})
 
-	if rGetTeamDetails.GetOwner().GetID() != c.Player.ID {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.not_leader")
+	if rGetPartyDetails.GetOwner().GetID() != c.Player.ID {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.party.not_leader")
 		return true
 	}
 
-	// Verifico se non è già stato raggiunto il limite di player in team
-	if rGetTeamDetails.NPlayers >= 3 {
-		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.team_limit_reached")
+	// Verifico se non è già stato raggiunto il limite di player in party
+	if rGetPartyDetails.NPlayers >= 3 {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.party.party_limit_reached")
 		return true
 	}
 
@@ -106,11 +106,11 @@ func (c *PlayerTeamAddPlayerController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *PlayerTeamAddPlayerController) Stage() {
+func (c *PlayerPartyAddPlayerController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Chiedo al player di indicare quale player vuole aggiungere alla suo team
+	// Chiedo al player di indicare quale player vuole aggiungere alla suo party
 	// ##################################################################################################
 	case 0:
 		// Aggiungo torna al menu
@@ -119,7 +119,7 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.add.add_player_start"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -135,7 +135,7 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.add.add_player_confirm", c.Payload.Username))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_confirm", c.Payload.Username))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -155,21 +155,21 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 	// Salvo e associo player alla gilda
 	// ##################################################################################################
 	case 2:
-		// Recupero team player
-		var rGetTeamDetails *pb.GetTeamDetailsResponse
-		rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		// Recupero party player
+		var rGetPartyDetails *pb.GetPartyDetailsResponse
+		rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 			PlayerID: c.Player.ID,
 		})
 
-		_, err = config.App.Server.Connection.AddPlayerToTeam(helpers.NewContext(1), &pb.AddPlayerToTeamRequest{
+		_, err = config.App.Server.Connection.AddPlayerToParty(helpers.NewContext(1), &pb.AddPlayerToPartyRequest{
 			PlayerUsername: c.Payload.Username,
-			TeamID:         rGetTeamDetails.TeamID,
+			PartyID:        rGetPartyDetails.PartyID,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one team") {
+		if err != nil && strings.Contains(err.Error(), "player already in one party") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
-				helpers.Trans(c.Player.Language.Slug, "player.team.adding_player_already_in_one_team"),
+				helpers.Trans(c.Player.Language.Slug, "player.party.adding_player_already_in_one_party"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -187,7 +187,7 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 
 		msgToPlayerAdded := helpers.NewMessage(rGetPlayerByUsername.GetPlayer().GetChatID(), helpers.Trans(
 			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
-			"player.team.add.add_player_confirm_to_player", c.Player.GetUsername(),
+			"player.party.add.add_player_confirm_to_player", c.Player.GetUsername(),
 		))
 		msgToPlayerAdded.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msgToPlayerAdded); err != nil {
@@ -195,7 +195,7 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 		}
 
 		// Ritorno conferma
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.add.completed_ok"))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
