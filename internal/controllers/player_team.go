@@ -47,16 +47,16 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 
 	// Se il player si trova in un team recupero i dettagli
 	if rGetTeamDetails.GetInTeam() {
-		counter := fmt.Sprintf("Presenti: %v\\%v \n\n", rGetTeamDetails.GetNPlayers(), 3)
-
-		// Recap owner
-		var ownerRecap string
-		ownerRecap = fmt.Sprintf("Owner: %s \n\n", rGetTeamDetails.GetOwner().GetUsername())
-
 		// Ciclio utenti nel team
 		var playerRecap string
 		for _, player := range rGetTeamDetails.GetPlayers() {
-			playerRecap += fmt.Sprintf("- %s \n", player.GetUsername())
+			// Recupero posizione player
+			var currentPosition *pb.Planet
+			if currentPosition, err = helpers.GetPlayerPosition(player.ID); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			playerRecap += fmt.Sprintf("- *%s* [[🌏 %s]]\n", player.GetUsername(), currentPosition.GetName())
 		}
 
 		// Costruisco tastiera gestione team
@@ -78,7 +78,11 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s %s %s", counter, ownerRecap, playerRecap))
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.show",
+			rGetTeamDetails.GetOwner().GetUsername(),
+			rGetTeamDetails.GetNPlayers(),
+			playerRecap,
+		))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -92,7 +96,7 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 	}
 
 	// Il Player non è in un team
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("Non in team"))
+	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.non_in_team"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
