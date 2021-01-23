@@ -27,7 +27,7 @@ func (c *PlayerTeamCreateController) Handle(player *pb.Player, update tgbotapi.U
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &PlayerController{},
+				To:        &PlayerTeamController{},
 				FromStage: 0,
 			},
 		},

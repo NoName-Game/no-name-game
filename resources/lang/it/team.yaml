@@ -1,5 +1,7 @@
+player.team.not_leader: "Non puoi eseguire questi comandi, devi essere owner del team."
 player.team.already_in_team: "Sembra che tu sia già in un team"
 player.team.adding_player_already_in_one_team: "Il player da te indicato è già in un team."
+player.team.team_limit_reached: "Il team ha raggiunto il numero massimo di partecipanti"
 
 #Create
 player.team.create.created: "Team creato con sucesso"
@@ -8,12 +10,14 @@ player.team.create.created: "Team creato con sucesso"
 player.team.add.add_player_start: "Inserisci lo username dell'esploratore che vuoi aggiungere:"
 player.team.add.add_player_confirm: "Sei sicuro di voler aggiungere %s al tuo team?"
 player.team.add.completed_ok: "Esploratore aggiunto correttamente"
+player.team.add.add_player_confirm_to_player: "Sei stato aggiunto al team di %s"
 
 #Remove
 player.team.remove.remove_player_start: "Inserisci lo username dell'esploratore che vuoi rimuovere o selezionalo dalla lista qui sotto:"
 player.team.remove.remove_player_confirm: "Sei sicuro di voler rimuovere %s dall tuo team?"
 player.team.remove.remove_completed_ok: "L'esploratore è stato rimosso dal tuo team!"
 player.team.remove.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dal tuo team."
+player.team.remove.remove_player_confirm_to_player: "Sei stato rimosso dal team di %s"
 
 #Leave
 player.team.leave.confirm: "Sei sicuro di voler abbandonare questo team?"

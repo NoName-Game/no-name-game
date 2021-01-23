@@ -58,6 +58,23 @@ func (c *PlayerTeamAddPlayerController) Handle(player *pb.Player, update tgbotap
 // Validator
 // ====================================
 func (c *PlayerTeamAddPlayerController) Validator() bool {
+	// Verifico sempre che il player sia owner del team, se no non può eseguire questi comandi
+	var rGetTeamDetails *pb.GetTeamDetailsResponse
+	rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		PlayerID: c.Player.ID,
+	})
+
+	if rGetTeamDetails.GetOwner().GetID() != c.Player.ID {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.not_leader")
+		return true
+	}
+
+	// Verifico se non è già stato raggiunto il limite di player in team
+	if rGetTeamDetails.NPlayers >= 3 {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.team_limit_reached")
+		return true
+	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il player scelto esiste
@@ -149,7 +166,7 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 			TeamID:         rGetTeamDetails.TeamID,
 		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
+		if err != nil && strings.Contains(err.Error(), "player already in one team") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
 				helpers.Trans(c.Player.Language.Slug, "player.team.adding_player_already_in_one_team"),
@@ -162,6 +179,22 @@ func (c *PlayerTeamAddPlayerController) Stage() {
 			return
 		}
 
+		// Invio messaggio al player aggiunto
+		var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+		rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+			Username: c.Payload.Username,
+		})
+
+		msgToPlayerAdded := helpers.NewMessage(rGetPlayerByUsername.GetPlayer().GetChatID(), helpers.Trans(
+			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
+			"player.team.add.add_player_confirm_to_player", c.Player.GetUsername(),
+		))
+		msgToPlayerAdded.ParseMode = tgbotapi.ModeMarkdown
+		if _, err = helpers.SendMessage(msgToPlayerAdded); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Ritorno conferma
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.add.completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(

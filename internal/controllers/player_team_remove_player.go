@@ -56,6 +56,17 @@ func (c *PlayerTeamRemovePlayerController) Handle(player *pb.Player, update tgbo
 // Validator
 // ====================================
 func (c *PlayerTeamRemovePlayerController) Validator() bool {
+	// Verifico sempre che il player sia owner del team, se no non può eseguire questi comandi
+	var rGetTeamDetails *pb.GetTeamDetailsResponse
+	rGetTeamDetails, _ = config.App.Server.Connection.GetTeamDetails(helpers.NewContext(1), &pb.GetTeamDetailsRequest{
+		PlayerID: c.Player.ID,
+	})
+
+	if rGetTeamDetails.GetOwner().GetID() != c.Player.ID {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "player.team.not_leader")
+		return true
+	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se il player scelto esisteo
@@ -175,6 +186,21 @@ func (c *PlayerTeamRemovePlayerController) Stage() {
 
 			c.CurrentState.Completed = true
 			return
+		}
+
+		// Invio messaggio al player aggiunto
+		var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+		rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+			Username: c.Payload.Username,
+		})
+
+		msgToPlayerRemoved := helpers.NewMessage(rGetPlayerByUsername.GetPlayer().GetChatID(), helpers.Trans(
+			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
+			"player.team.remove.remove_player_confirm_to_player", c.Player.GetUsername(),
+		))
+		msgToPlayerRemoved.ParseMode = tgbotapi.ModeMarkdown
+		if _, err = helpers.SendMessage(msgToPlayerRemoved); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.remove.remove_completed_ok"))

@@ -47,6 +47,8 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 
 	// Se il player si trova in un team recupero i dettagli
 	if rGetTeamDetails.GetInTeam() {
+		counter := fmt.Sprintf("Presenti: %v\\%v \n\n", rGetTeamDetails.GetNPlayers(), 3)
+
 		// Recap owner
 		var ownerRecap string
 		ownerRecap = fmt.Sprintf("Owner: %s \n\n", rGetTeamDetails.GetOwner().GetUsername())
@@ -57,20 +59,31 @@ func (c *PlayerTeamController) Handle(player *pb.Player, update tgbotapi.Update)
 			playerRecap += fmt.Sprintf("- %s \n", player.GetUsername())
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s %s", ownerRecap, playerRecap))
-		msg.ParseMode = tgbotapi.ModeMarkdown
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.leave")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
+		// Costruisco tastiera gestione team
+		var teamsKeyboard [][]tgbotapi.KeyboardButton
+		teamsKeyboard = append(teamsKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.leave")),
+		))
+
+		// Aggiungo tasti gestione team se owner
+		if rGetTeamDetails.GetOwner().GetID() == c.Player.ID {
+			teamsKeyboard = append(teamsKeyboard, tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.add_player")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.team.remove_player")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
-			),
-		)
+			))
+		}
+
+		// Aggiungo torna indietro
+		teamsKeyboard = append(teamsKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+		))
+
+		msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s %s %s", counter, ownerRecap, playerRecap))
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       teamsKeyboard,
+		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

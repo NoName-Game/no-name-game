@@ -123,6 +123,28 @@ func (c *PlayerTeamLeaveController) Stage() {
 			return
 		}
 
+		// Se il player è l'owner del team devo mandare il mesaggio anche a tutti gli altri
+		if rGetTeamDetails.GetOwner().GetID() == c.Player.GetID() {
+			for _, player := range rGetTeamDetails.GetPlayers() {
+				// Lo mando a tutti tranne che a me stesso
+				if player.GetID() != c.Player.GetID() {
+					var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+					rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+						Username: player.GetUsername(),
+					})
+
+					msgToPlayerRemoved := helpers.NewMessage(rGetPlayerByUsername.GetPlayer().GetChatID(), helpers.Trans(
+						rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
+						"player.team.remove.remove_player_confirm_to_player", c.Player.GetUsername(),
+					))
+					msgToPlayerRemoved.ParseMode = tgbotapi.ModeMarkdown
+					if _, err = helpers.SendMessage(msgToPlayerRemoved); err != nil {
+						c.Logger.Panic(err)
+					}
+				}
+			}
+		}
+
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.team.leave.completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
