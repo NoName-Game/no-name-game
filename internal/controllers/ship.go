@@ -35,6 +35,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			Controller: "route.ship",
 		},
 		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &MenuController{},
 				FromStage: 0,
