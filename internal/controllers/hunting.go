@@ -149,7 +149,7 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
-			ControllerBlocked: []string{"exploration"},
+			ControllerBlocked: []string{"exploration", "ship"},
 			ControllerBack: ControllerBack{
 				To:        &MenuController{},
 				FromStage: 0,
