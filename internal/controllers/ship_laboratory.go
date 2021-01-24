@@ -42,6 +42,7 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &ShipController{},
 				FromStage: 1,
