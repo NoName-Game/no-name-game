@@ -401,9 +401,9 @@ func (c *ExplorationController) Stage() {
 
 		// Invio messaggio di chiusura missione
 		msg := helpers.NewMessage(c.Player.ChatID,
-			fmt.Sprintf("%s%s",
-				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended"),
+			helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended",
 				dropList,
+				rExplorationEnd.GetExp(),
 			),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
