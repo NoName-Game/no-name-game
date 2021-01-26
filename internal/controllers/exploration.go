@@ -379,33 +379,37 @@ func (c *ExplorationController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Recap delle risorse ricavate da questa missione
-		var dropList string
-		for _, drop := range rExplorationEnd.GetDropResults() {
-			// Recupero dattigli risorsa
-			var rGetResourceByID *pb.GetResourceByIDResponse
-			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-				ID: drop.ResourceID,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+		var msg tgbotapi.MessageConfig
+		if len(rExplorationEnd.GetDropResults()) == 0 {
+			msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended_zero"))
+		} else {
+			// Recap delle risorse ricavate da questa missione
+			var dropList string
+			for _, drop := range rExplorationEnd.GetDropResults() {
+				// Recupero dattigli risorsa
+				var rGetResourceByID *pb.GetResourceByIDResponse
+				if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+					ID: drop.ResourceID,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
 
-			dropList += fmt.Sprintf(
-				"- 💠 *%v* x *%s* (%s) %s\n",
-				drop.Quantity,
-				rGetResourceByID.GetResource().GetName(),
-				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
-				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+				dropList += fmt.Sprintf(
+					"- 💠 *%v* x *%s* (%s) %s\n",
+					drop.Quantity,
+					rGetResourceByID.GetResource().GetName(),
+					strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
+					helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+				)
+			}
+			// Invio messaggio di chiusura missione
+			msg = helpers.NewMessage(c.Player.ChatID,
+				fmt.Sprintf("%s%s",
+					helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended"),
+					dropList,
+				),
 			)
 		}
-
-		// Invio messaggio di chiusura missione
-		msg := helpers.NewMessage(c.Player.ChatID,
-			fmt.Sprintf("%s%s",
-				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended"),
-				dropList,
-			),
-		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {
