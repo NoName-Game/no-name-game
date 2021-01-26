@@ -206,6 +206,10 @@ func (c *ShipLaboratoryController) Stage() {
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
+			// Tolgo momentaneamente Altro dalla pagina di crafting, rimuovere quando ci saranno item craftabili.
+			if category.Slug == "stuff" {
+				continue
+			}
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)),

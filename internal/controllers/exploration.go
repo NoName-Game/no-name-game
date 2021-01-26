@@ -410,6 +410,7 @@ func (c *ExplorationController) Stage() {
 				),
 			)
 		}
+
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {
