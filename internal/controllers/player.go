@@ -54,6 +54,12 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	// Recupero dettagli livello sucessivo
+	var rGetLevelByID *pb.GetLevelByIDResponse
+	rGetLevelByID, _ = config.App.Server.Connection.GetLevelByID(helpers.NewContext(1), &pb.GetLevelByIDRequest{
+		LevelID: c.Player.GetLevelID() + 1,
+	})
+
 	// *************************
 	// Recupero amuleti player
 	// *************************
@@ -75,10 +81,10 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Player.Language.Slug,
 		"player.datails.card",
 		c.Player.GetUsername(),
-		c.Player.GetLifePoint(),                // Life point player
-		c.Player.GetLevel().GetPlayerMaxLife(), // Vita massima del player
-		rGetPlayerExperience.GetValue(),        // Esperienza
-		c.Player.GetLevel().GetID(),            // Livello
+		c.Player.GetLifePoint(),                                                         // Life point player
+		c.Player.GetLevel().GetPlayerMaxLife(),                                          // Vita massima del player
+		rGetPlayerExperience.GetValue(), rGetLevelByID.GetLevel().GetExperienceNeeded(), // Esperienza
+		c.Player.GetLevel().GetID(), // Livello
 		money, diamond, amulets,
 	)
 
