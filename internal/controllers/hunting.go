@@ -453,7 +453,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 			tresureMessage = helpers.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage()),
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage(), c.Player.GetLifePoint()-int64(rDropTresure.GetTrap().GetDamage())),
 			)
 		} else {
 			// Non hai trovato nulla
