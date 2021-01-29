@@ -68,10 +68,7 @@ func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	var rCheckShipRepair *pb.CheckShipRepairResponse
 	if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
 		PlayerID: c.Player.ID,
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-	if rCheckShipRepair.GetRepairInProgress() {
+	}); rCheckShipRepair != nil && rCheckShipRepair.GetRepairInProgress() {
 		c.CurrentState.Stage = 3
 	}
 
