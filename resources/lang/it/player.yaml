@@ -1,5 +1,5 @@
 # PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*  🎖LvL: *%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
 player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 
