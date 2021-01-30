@@ -343,21 +343,6 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 		}
 	}
 
-	// Oltre all attività verifico anche dalla cache e quindi dall'ultimo controller richiamato
-	controllerCached, _ := helpers.GetCurrentControllerCache(c.Player.ID)
-	if controllerCached != "" {
-		for _, blockState := range c.Configurations.ControllerBlocked {
-			if helpers.Trans(c.Player.Language.Slug, controllerCached) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))
-				if _, err := helpers.SendMessage(msg); err != nil {
-					panic(err)
-				}
-
-				return true
-			}
-		}
-	}
-
 	return false
 }
 
