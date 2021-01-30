@@ -62,6 +62,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 		c.CurrentState.Stage = 0
 		return false
 	}
+
 	// Se è stato passato il comando sveglia e il player sta effettivamente dormendo lo sveglio
 	if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") == c.Update.Message.Text {
 		var rRestCheck *pb.RestCheckResponse
