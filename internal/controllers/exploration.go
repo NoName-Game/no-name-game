@@ -72,6 +72,10 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 			c.CurrentState.Stage = 2
 		}
 	}
+	// NNT-145
+	if c.CurrentState.Stage == 3 && c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.exploration") {
+		c.CurrentState.Stage = 2
+	}
 
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
