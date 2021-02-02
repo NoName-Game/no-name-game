@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -171,7 +172,8 @@ func GetExplorationCategoriesInCache() (categories []*pb.ExplorationCategory, er
 // =================
 // SetAntiFlood
 func SetAntiFlood(playerID uint32) (err error) {
-	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_antiflood", playerID), 1, 5*time.Second).Err(); err != nil {
+	log.Println(time.Duration(config.App.Antiflood.TTL) * time.Second)
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_antiflood", playerID), 1, time.Duration(config.App.Antiflood.TTL)*time.Second).Err(); err != nil {
 		return fmt.Errorf("cant set antiflood in cache: %s", err.Error())
 	}
 	return

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bitbucket.org/no-name-game/nn-telegram/init/antiflood"
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/bot"
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/redis"
 	"bitbucket.org/no-name-game/nn-telegram/init/connections/server"
@@ -22,6 +23,7 @@ type Configuration struct {
 	Server       server.Server
 	Localization localization.Localization
 	RateLimiter  limiter.RateLimiter
+	Antiflood    antiflood.Antiflood
 }
 
 type GameService interface {
@@ -35,6 +37,7 @@ func (config *Configuration) Bootstrap() {
 		&App.Redis,
 		&App.Server,
 		&App.RateLimiter,
+		&App.Antiflood,
 		&App.Bot,
 	} {
 		service.Init()
