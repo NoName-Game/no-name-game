@@ -87,7 +87,7 @@ func (c *Controller) InitController(controller Controller) bool {
 
 	// Carico payload e infomazioni controller
 	if c.CurrentState.Stage, err = helpers.GetControllerCacheData(c.Player.ID, c.CurrentState.Controller, &c.CurrentState.Payload); err != nil {
-		c.Logger.Panicf("cant get stage and paylaod controlelr data: %s", err.Error())
+		c.Logger.Panicf("cant get stage and paylaod controller data: %s", err.Error())
 	}
 
 	// Verifico se esistono condizioni per cambiare stato o uscire

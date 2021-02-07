@@ -51,37 +51,42 @@ func SetControllerCacheData(playerID uint32, controller string, stage int32, pay
 		return fmt.Errorf("error marshal controller payload data for cache: %s", err.Error())
 	}
 
-	var marshalData []byte
-	if marshalData, err = json.Marshal(ControllerCacheData{
-		Stage:   stage,
-		Payload: string(marshalPayload),
-	}); err != nil {
-		return fmt.Errorf("error marshal data for cache: %s", err.Error())
-	}
+	_, err = config.App.Server.Connection.CreateTelegramStatus(NewContext(1), &pb.CreateTelegramStatusRequest{
+		PlayerID:   playerID,
+		Stage:      stage,
+		Controller: controller,
+		Payload:    string(marshalPayload),
+	})
 
-	return config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_controller_%s", playerID, controller), marshalData, 0).Err()
+	return
 }
 
 func GetControllerCacheData(playerID uint32, controller string, payload interface{}) (stage int32, err error) {
-	var result string
-	result, _ = config.App.Redis.Connection.Get(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Result()
-
-	var cachedData ControllerCacheData
-	if result != "" {
-		if err = json.Unmarshal([]byte(result), &cachedData); err == nil {
-			stage = cachedData.Stage
-			err = json.Unmarshal([]byte(cachedData.Payload), &payload)
-		}
+	var rGetTelegramStatus *pb.GetTelegramStatusResponse
+	if rGetTelegramStatus, err = config.App.Server.Connection.GetTelegramStatus(NewContext(1), &pb.GetTelegramStatusRequest{
+		PlayerID:   playerID,
+		Controller: controller,
+	}); err != nil {
+		return 0, nil
 	}
 
-	return
+	if err = json.Unmarshal([]byte(rGetTelegramStatus.GetPayload()), &payload); err != nil {
+		return
+	}
+
+	return rGetTelegramStatus.GetStage(), nil
+
 }
 
 func DelControllerCacheData(playerID uint32, controller string) (err error) {
-	if err := config.App.Redis.Connection.Del(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Err(); err != nil {
+	if _, err = config.App.Server.Connection.DeleteTelegramStatus(NewContext(1), &pb.DeleteTelegramStatusRequest{
+		PlayerID:   playerID,
+		Controller: controller,
+	}); err != nil {
 		return fmt.Errorf("cant delete controller cache data: %s", err.Error())
 	}
-	return
+
+	return nil
 }
 
 // =================
