@@ -235,7 +235,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 				// Cancello stato da ws
-				if _, err := config.App.Server.Connection.DeletePlayerActivityByController(helpers.NewContext(1), &pb.DeletePlayerActivityByControllerRequest{
+				if _, err := config.App.Server.Connection.DeletePlayerActivity(helpers.NewContext(1), &pb.DeletePlayerActivityRequest{
 					PlayerID:   c.Player.ID,
 					Controller: c.CurrentState.Controller,
 				}); err != nil {

@@ -97,13 +97,6 @@ func (c *TutorialController) Stage() {
 	// ============================================================================================================
 	// Intro
 	case 0:
-		// Imposto start tutorial
-		if _, err = config.App.Server.Connection.PlayerStartTutorial(helpers.NewContext(1), &pb.PlayerStartTutorialRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
 		// Invio set di messaggi
 		if err = c.sendIntroMessage(); err != nil {
 			c.Logger.Panic(err)

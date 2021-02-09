@@ -51,7 +51,7 @@ func SetControllerCacheData(playerID uint32, controller string, stage int32, pay
 		return fmt.Errorf("error marshal controller payload data for cache: %s", err.Error())
 	}
 
-	_, err = config.App.Server.Connection.CreateTelegramStatus(NewContext(1), &pb.CreateTelegramStatusRequest{
+	_, err = config.App.Server.Connection.CreatePlayerActivity(NewContext(1), &pb.CreatePlayerActivityRequest{
 		PlayerID:   playerID,
 		Stage:      stage,
 		Controller: controller,
@@ -62,24 +62,24 @@ func SetControllerCacheData(playerID uint32, controller string, stage int32, pay
 }
 
 func GetControllerCacheData(playerID uint32, controller string, payload interface{}) (stage int32, err error) {
-	var rGetTelegramStatus *pb.GetTelegramStatusResponse
-	if rGetTelegramStatus, err = config.App.Server.Connection.GetTelegramStatus(NewContext(1), &pb.GetTelegramStatusRequest{
+	var rGetPlayerActivity *pb.GetPlayerActivityResponse
+	if rGetPlayerActivity, err = config.App.Server.Connection.GetPlayerActivity(NewContext(1), &pb.GetPlayerActivityRequest{
 		PlayerID:   playerID,
 		Controller: controller,
 	}); err != nil {
 		return 0, nil
 	}
 
-	if err = json.Unmarshal([]byte(rGetTelegramStatus.GetPayload()), &payload); err != nil {
+	if err = json.Unmarshal([]byte(rGetPlayerActivity.GetPayload()), &payload); err != nil {
 		return
 	}
 
-	return rGetTelegramStatus.GetStage(), nil
+	return rGetPlayerActivity.GetStage(), nil
 
 }
 
 func DelControllerCacheData(playerID uint32, controller string) (err error) {
-	if _, err = config.App.Server.Connection.DeleteTelegramStatus(NewContext(1), &pb.DeleteTelegramStatusRequest{
+	if _, err = config.App.Server.Connection.DeletePlayerActivity(NewContext(1), &pb.DeletePlayerActivityRequest{
 		PlayerID:   playerID,
 		Controller: controller,
 	}); err != nil {
