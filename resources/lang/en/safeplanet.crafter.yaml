@@ -16,6 +16,7 @@ safeplanet.crafting.wait_validation: "I'm still working on your request.\nI shou
 safeplanet.crafting.craft_completed: "Here's your order!\nHope you like it and it helps you in your feats.\nYou obtained: *%s*!"
 safeplanet.crafting.no_resources: "I'm sorry but you can't add another quantity of this resource!"
 safeplanet.crafting.no_resource: "You don't have this resource!"
+safeplanet.crafting.how_many: "How many resources do you want to use?"
 #Crafter - Repair
 safeplanet.crafting.repair.what: "Which one of your damaged weapons would you like to repair?"
 safeplanet.crafting.repair.confirm: "I can repair you *%s* immediately!\nAre you sure you want to repair it for 💰*%v*?"
