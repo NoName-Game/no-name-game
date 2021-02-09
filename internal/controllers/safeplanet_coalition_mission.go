@@ -57,14 +57,6 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
-	// Verifico sempre se è già in corso una missione
-	var rCheckMission *pb.CheckMissionResponse
-	if rCheckMission, _ = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
-		PlayerID: c.Player.GetID(),
-	}); rCheckMission != nil && rCheckMission.GetInMission() {
-		c.CurrentState.Stage = 2
-	}
-
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################

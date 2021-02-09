@@ -318,7 +318,7 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 	for _, state := range c.Data.PlayerActiveStates {
 
 		// Verifico sie il player sta dormendo, in questo caso non può effettuare nessuna azione
-		if state.Controller == "route.ship.rests" {
+		if state.GetController() == "route.ship.rests" && state.GetStage() > 1 {
 			// Se un azione è diversa dal risvegliati
 			if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") != c.Update.Message.Text {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup"))

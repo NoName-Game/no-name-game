@@ -227,7 +227,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Creo cache per lo stato di viaggio
-		if err = helpers.SetControllerCacheData(c.Player.ID, "route.ship.travel", 3, nil); err != nil {
+		if err = helpers.SetControllerCacheData(c.Player.ID, "route.ship.travel.finding", 2, nil); err != nil {
 			c.Logger.Panic(err)
 		}
 

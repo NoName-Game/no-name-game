@@ -67,14 +67,6 @@ func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgb
 // Validator
 // ====================================
 func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
-	// Verifico sempre che il player non abbia già altri craft in corso
-	var rCrafterCheck *pb.CrafterCheckResponse
-	if rCrafterCheck, _ = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
-		PlayerID: c.Player.ID,
-	}); rCrafterCheck != nil && rCrafterCheck.CraftInProgress {
-		c.CurrentState.Stage = 5
-	}
-
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico tipologia item che il player vuole craftare
@@ -182,7 +174,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
 			),
 		)
 

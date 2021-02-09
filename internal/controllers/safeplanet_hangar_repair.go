@@ -65,12 +65,6 @@ func (c *SafePlanetHangarRepairController) Handle(player *pb.Player, update tgbo
 // ====================================
 func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	var err error
-	var rCheckShipRepair *pb.CheckShipRepairResponse
-	if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
-		PlayerID: c.Player.ID,
-	}); rCheckShipRepair != nil && rCheckShipRepair.GetRepairInProgress() {
-		c.CurrentState.Stage = 3
-	}
 
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -122,6 +116,13 @@ func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	// Verifico stato riparazione
 	// ##################################################################################################
 	case 3:
+		var rCheckShipRepair *pb.CheckShipRepairResponse
+		if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipRepair.GetFinishRepairing() {
 			var finishAt time.Time

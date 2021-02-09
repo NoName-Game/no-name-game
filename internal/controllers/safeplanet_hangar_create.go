@@ -66,14 +66,7 @@ func (c *SafePlanetHangarCreateController) Handle(player *pb.Player, update tgbo
 // ====================================
 func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 	var err error
-	// Controllo se ha già un'acquisto in corso...
-	if c.CurrentState.Stage < 4 {
-		if rCheckCreateShip, _ := config.App.Server.Connection.CheckCreateShip(helpers.NewContext(1), &pb.CheckCreateShipRequest{
-			PlayerID: c.Player.ID,
-		}); rCheckCreateShip != nil && rCheckCreateShip.ShipCreateInProgress {
-			c.CurrentState.Stage = 4
-		}
-	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se è stata passata una categoria di nave corretta

@@ -63,19 +63,6 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 func (c *ExplorationController) Validator() (hasErrors bool) {
 	var err error
-	// Verifico sempre che il player non abbia già altre esplorazioni in corso
-	if c.CurrentState.Stage < 2 {
-		var rExplorationCheck *pb.ExplorationCheckResponse
-		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
-			PlayerID: c.Player.ID,
-		}); rExplorationCheck != nil && rExplorationCheck.InExploration {
-			c.CurrentState.Stage = 2
-		}
-	}
-	// NNT-145
-	if c.CurrentState.Stage == 3 && c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.exploration") {
-		c.CurrentState.Stage = 2
-	}
 
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
