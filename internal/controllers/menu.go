@@ -186,8 +186,10 @@ func (c *MenuController) GetPlayerLife() (life string) {
 func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks string) {
 	var err error
 
+	// Format Custom
+	switch activity.GetController() {
 	// Verifico se si tritta di una missione
-	if activity.GetController() == "route.safeplanet.coalition.mission" {
+	case "route.safeplanet.coalition.mission":
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
@@ -210,6 +212,9 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 		}
 
 		return
+	case "route.tutorial":
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()))
+		return
 	}
 
 	var finishAt time.Time
@@ -218,10 +223,10 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 	}
 
 	// Se sono delle attività non ancora concluse
-	if activity.GetToNotify() && time.Until(finishAt).Minutes() > 0 {
+	if activity.GetToNotify() || time.Until(finishAt).Minutes() > 0 {
 		finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
-	} else {
+	} else if activity.GetFinished() {
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
 	}
 
@@ -234,11 +239,6 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 	if len(c.Data.PlayerActiveStates) > 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, "menu.tasks")
 		for _, state := range c.Data.PlayerActiveStates {
-			// Salto il check del tutorial
-			if state.GetController() == "route.tutorial" {
-				continue
-			}
-
 			tasks += fmt.Sprintf("- %s \n", c.FormatPlayerTasks(state))
 		}
 	}
