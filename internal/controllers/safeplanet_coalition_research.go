@@ -70,7 +70,7 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 
 	// Aggiungo tasti back and clears
 	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 	))
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s", introMessage, recapMessage))

@@ -133,7 +133,7 @@ func (c *SafePlanetMissionController) Stage() {
 		// Aggiungo anche abbandona
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 			),
 		))
 

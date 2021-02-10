@@ -155,7 +155,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		}
 
 		keyboardRowItems = append(keyboardRowItems, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		// Invio messagio con recap e con selettore categoria

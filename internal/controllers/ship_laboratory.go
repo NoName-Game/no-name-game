@@ -221,7 +221,7 @@ func (c *ShipLaboratoryController) Stage() {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 			),
 		))
 
@@ -433,7 +433,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

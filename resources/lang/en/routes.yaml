@@ -69,5 +69,5 @@ route.titanplanet.tackle: "Take on 👁 Titan"
 #Breaker
 route.breaker.continue: "Continue"
 route.breaker.back: "⬅️ Back"
-route.breaker.more: "⬅️ Back to menu"
+route.breaker.menu: "⬅️ Back to menu"
 route.breaker.clears: "❌ Leave"

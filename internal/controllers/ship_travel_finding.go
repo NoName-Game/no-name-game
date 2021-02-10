@@ -123,7 +123,7 @@ func (c *ShipTravelFindingController) Validator() (hasErrors bool) {
 					),
 					tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
-							helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+							helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
 						),
 					),
 				)
@@ -226,7 +226,7 @@ func (c *ShipTravelFindingController) Stage() {
 
 		keyboardRowStars = append(keyboardRowStars,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
@@ -293,7 +293,7 @@ func (c *ShipTravelFindingController) Stage() {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 					),
 				)
 
@@ -318,7 +318,7 @@ func (c *ShipTravelFindingController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.end"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 

@@ -146,7 +146,7 @@ func (c *SafePlanetDealerController) Stage() {
 
 		// Aggiungo torna al menu
 		itemsKeyboard = append(itemsKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.dealer.intro", rGetPlayerEconomy.GetValue()))

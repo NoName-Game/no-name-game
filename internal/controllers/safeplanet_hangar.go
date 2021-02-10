@@ -73,7 +73,7 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.hangar.create")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 	if _, err = helpers.SendMessage(msg); err != nil {
