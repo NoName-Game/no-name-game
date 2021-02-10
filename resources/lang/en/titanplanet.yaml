@@ -2,7 +2,7 @@
 #TITANPLANET
 titanplanet.tackle.error.no_weapon_equipped: "You need to equip a weapon to deal with the Titan!"
 titanplanet.tackle.init: "The Titan shows up in your presence."
-titanplanet.tackle.leave: "⬅️ Leave"
+titanplanet.tackle.leave: "⬅️ Scappa"
 titanplanet.tackle.combat.card: "👁 %s \n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nYou're aiming at: *%s*\nEquipped weapon:\n*%s* (🛠 *%v*)"
 titanplanet.tackle.combat.mob_killed: "👁 %s has been defeated! 🎉 \n\nYou'll shortly receive proper reward for the work you've done, based on the damage you inflicted."
 titanplanet.tackle.reward: "Congratulations for defeating the Titan!\n\nThe *Coalition* rewards you for inflicting *%d damage*!\n\nReward report:\n%s"
