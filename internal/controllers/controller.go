@@ -137,7 +137,7 @@ func (c *Controller) RegisterError(err error) {
 	validatorMsg.ParseMode = tgbotapi.ModeMarkdown
 	validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 
@@ -178,9 +178,10 @@ func (c *Controller) Validate() {
 // Breaking - Metodo che permette di verificare se si vogliono fare
 // delle azioni che permetteranno di concludere
 func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterface) (backed bool) {
-	// Verifico se è effetivamente un messaggio di testo e non una callback
 	if c.Update.Message != nil {
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.back") {
+		switch c.Update.Message.Text {
+		// Questo braker forza il player a tornare al menu precedente senza cancellare lo stato
+		case helpers.Trans(c.Player.Language.Slug, "route.breaker.back"):
 			if c.CurrentState.Stage > canBackFromStage {
 				c.CurrentState.Stage = 0
 				return
@@ -189,7 +190,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
 
-			// se è stato settato un controller esco
+			// Se è stato settato un controller esco
 			if controller != nil {
 				// Rimuovo testo messaggio
 				c.Update.Message.Text = ""
@@ -201,18 +202,12 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
-		}
 
-		// Torna al menu - Cancella solo il current controller cache
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.more") {
+		// Questo braker forza il player a tornare al menù precedente
+		case helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"):
 			// Cancello stato dalla memoria
 			helpers.DelCurrentControllerCache(c.Player.ID)
-
-			// Se non è presente un'attività in corso NON cancello il controller cache data
-			// in quel caso se si vuoi forzare la cancellazione usare clears
-			if !helpers.CheckPlayerHaveActiveActivity(c.Data.PlayerActiveStates, c.CurrentState.Controller) {
-				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
-			}
+			_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 			if controller != nil {
 				// Rimuovo testo messaggio
@@ -225,22 +220,25 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 			new(MenuController).Handle(c.Player, c.Update)
 			backed = true
 			return
-		}
 
-		// Abbandona - chiude definitivamente cancellando anche lo stato
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.breaker.clears") {
+		// Questo braker forza il player a tornare al menù principale cancellando l'attività
+		case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
 			if !c.Player.GetDead() {
 				// Cancello stato da cache
 				helpers.DelCurrentControllerCache(c.Player.ID)
-				helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+				_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
-				// Cancello stato da ws
-				if _, err := config.App.Server.Connection.DeletePlayerActivity(helpers.NewContext(1), &pb.DeletePlayerActivityRequest{
-					PlayerID:   c.Player.ID,
-					Controller: c.CurrentState.Controller,
-				}); err != nil {
-					panic(err)
-				}
+				// Call menu controller
+				new(MenuController).Handle(c.Player, c.Update)
+
+				backed = true
+				return
+			}
+		case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
+			if !c.Player.GetDead() {
+				// Cancello stato da cache
+				helpers.DelCurrentControllerCache(c.Player.ID)
+				_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
 
 				// Call menu controller
 				new(MenuController).Handle(c.Player, c.Update)
