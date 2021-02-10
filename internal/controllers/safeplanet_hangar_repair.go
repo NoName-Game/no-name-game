@@ -65,12 +65,6 @@ func (c *SafePlanetHangarRepairController) Handle(player *pb.Player, update tgbo
 // ====================================
 func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	var err error
-	var rCheckShipRepair *pb.CheckShipRepairResponse
-	if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
-		PlayerID: c.Player.ID,
-	}); rCheckShipRepair != nil && rCheckShipRepair.GetRepairInProgress() {
-		c.CurrentState.Stage = 3
-	}
 
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -111,7 +105,7 @@ func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 		c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 				),
 			),
 		)
@@ -122,6 +116,13 @@ func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 	// Verifico stato riparazione
 	// ##################################################################################################
 	case 3:
+		var rCheckShipRepair *pb.CheckShipRepairResponse
+		if rCheckShipRepair, err = config.App.Server.Connection.CheckShipRepair(helpers.NewContext(1), &pb.CheckShipRepairRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Il crafter sta già portando a terminre un lavoro per questo player
 		if !rCheckShipRepair.GetFinishRepairing() {
 			var finishAt time.Time
@@ -172,7 +173,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		}
 
 		shipsKeyboard = append(shipsKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.info"))
@@ -236,7 +237,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.start_full")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

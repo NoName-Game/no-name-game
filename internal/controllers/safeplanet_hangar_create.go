@@ -66,14 +66,7 @@ func (c *SafePlanetHangarCreateController) Handle(player *pb.Player, update tgbo
 // ====================================
 func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 	var err error
-	// Controllo se ha già un'acquisto in corso...
-	if c.CurrentState.Stage < 4 {
-		if rCheckCreateShip, _ := config.App.Server.Connection.CheckCreateShip(helpers.NewContext(1), &pb.CheckCreateShipRequest{
-			PlayerID: c.Player.ID,
-		}); rCheckCreateShip != nil && rCheckCreateShip.ShipCreateInProgress {
-			c.CurrentState.Stage = 4
-		}
-	}
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se è stata passata una categoria di nave corretta
@@ -169,7 +162,7 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 				),
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
 					),
 				),
 			)
@@ -206,7 +199,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		// Invio messaggio
@@ -385,7 +378,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 					),
 				)
 
@@ -416,7 +409,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

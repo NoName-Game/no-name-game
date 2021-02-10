@@ -63,65 +63,6 @@ func (c *ShipTravelFindingController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *ShipTravelFindingController) Validator() (hasErrors bool) {
-	// Controllo da effettuare sempre
-	var err error
-	var rCheckShipTravel *pb.CheckShipTravelResponse
-	rCheckShipTravel, _ = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
-		PlayerID: c.Player.ID,
-	})
-
-	// Il player sta già effettuando un viaggio
-	if rCheckShipTravel.GetTravelInProgress() {
-		c.CurrentState.Stage = 2
-
-		// Se il viaggio non è finito
-		if !rCheckShipTravel.GetFinishTraveling() {
-			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "complete_with_diamond") {
-				c.Payload.CompleteWithDiamond = true
-				c.CurrentState.Stage = 2
-				return false
-			}
-
-			var finishAt time.Time
-			if finishAt, err = helpers.GetEndTime(rCheckShipTravel.GetTravelingEndTime(), c.Player); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Calcolo diamanti del player
-			var rGetPlayerEconomyDiamond *pb.GetPlayerEconomyResponse
-			if rGetPlayerEconomyDiamond, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
-				PlayerID:    c.Player.GetID(),
-				EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			// Invio messaggio recap fine viaggio
-			c.Validation.Message = helpers.Trans(
-				c.Player.Language.Slug,
-				"ship.travel.wait",
-				finishAt.Format("15:04:05"),
-				rGetPlayerEconomyDiamond.GetValue(),
-			)
-
-			// Aggiungi possibilità di velocizzare
-			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "complete_with_diamond"),
-					),
-				),
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
-					),
-				),
-			)
-
-			return true
-		}
-	}
-
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// In questo stage verifico che il player abbia pasasto la stella vicina
@@ -131,6 +72,64 @@ func (c *ShipTravelFindingController) Validator() (hasErrors bool) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
 			return true
+		}
+	case 2:
+		var err error
+		var rCheckShipTravel *pb.CheckShipTravelResponse
+		rCheckShipTravel, _ = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
+			PlayerID: c.Player.ID,
+		})
+
+		// Il player sta già effettuando un viaggio
+		if rCheckShipTravel.GetTravelInProgress() {
+			c.CurrentState.Stage = 2
+
+			// Se il viaggio non è finito
+			if !rCheckShipTravel.GetFinishTraveling() {
+				if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "complete_with_diamond") {
+					c.Payload.CompleteWithDiamond = true
+					c.CurrentState.Stage = 2
+					return false
+				}
+
+				var finishAt time.Time
+				if finishAt, err = helpers.GetEndTime(rCheckShipTravel.GetTravelingEndTime(), c.Player); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				// Calcolo diamanti del player
+				var rGetPlayerEconomyDiamond *pb.GetPlayerEconomyResponse
+				if rGetPlayerEconomyDiamond, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+					PlayerID:    c.Player.GetID(),
+					EconomyType: pb.GetPlayerEconomyRequest_DIAMOND,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				// Invio messaggio recap fine viaggio
+				c.Validation.Message = helpers.Trans(
+					c.Player.Language.Slug,
+					"ship.travel.wait",
+					finishAt.Format("15:04:05"),
+					rGetPlayerEconomyDiamond.GetValue(),
+				)
+
+				// Aggiungi possibilità di velocizzare
+				c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(
+							helpers.Trans(c.Player.Language.Slug, "complete_with_diamond"),
+						),
+					),
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(
+							helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+						),
+					),
+				)
+
+				return true
+			}
 		}
 	}
 
@@ -227,7 +226,7 @@ func (c *ShipTravelFindingController) Stage() {
 
 		keyboardRowStars = append(keyboardRowStars,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
@@ -294,7 +293,7 @@ func (c *ShipTravelFindingController) Stage() {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 					),
 				)
 
@@ -319,7 +318,7 @@ func (c *ShipTravelFindingController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.end"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 

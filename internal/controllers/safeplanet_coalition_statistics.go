@@ -63,7 +63,7 @@ func (c *SafePlanetCoalitionStatisticsController) Handle(player *pb.Player, upda
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "safeplanet.coalition.statistics.top_explored_planets")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 	if _, err = helpers.SendMessage(msg); err != nil {

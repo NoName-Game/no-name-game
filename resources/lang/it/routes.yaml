@@ -70,6 +70,6 @@ route.titanplanet.tackle: "Affronta 👁 Titano"
 
 # Breaker
 route.breaker.continue: "Continua"
+route.breaker.menu: "⬅️ Torna al menu"
 route.breaker.back: "⬅️ Indietro"
-route.breaker.more: "⬅️ Torna al menu"
-route.breaker.clears: "❌ Abbandona"
+route.breaker.clears: "⬅️ Abbandona"

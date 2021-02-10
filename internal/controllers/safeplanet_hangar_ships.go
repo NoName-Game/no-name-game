@@ -168,7 +168,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		}
 
 		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		// Invio messaggio
@@ -277,7 +277,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.equip_ok"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 

@@ -75,7 +75,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 
 		// Aggiungo torna indietro
 		partysKeyboard = append(partysKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.show",
@@ -103,7 +103,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.party.create")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

@@ -100,7 +100,7 @@ func (c *SafePlanetProtectorsAddPlayerController) Stage() {
 		// Aggiungo torna al menu
 		var protectorsKeyboard [][]tgbotapi.KeyboardButton
 		protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.add_player_start"))
@@ -126,7 +126,7 @@ func (c *SafePlanetProtectorsAddPlayerController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
@@ -168,7 +168,7 @@ func (c *SafePlanetProtectorsAddPlayerController) Stage() {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
