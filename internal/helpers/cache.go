@@ -122,7 +122,7 @@ func SetPlayerPlanetPositionInCache(playerID uint32, planet *pb.Planet) (err err
 	var jsonValue []byte
 	jsonValue, _ = json.Marshal(planet)
 
-	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_current_planet", playerID), string(jsonValue), 10*time.Minute).Err(); err != nil {
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_current_planet", playerID), string(jsonValue), 1*time.Minute).Err(); err != nil {
 		return fmt.Errorf("cant set player position in cache: %s", err.Error())
 	}
 	return
