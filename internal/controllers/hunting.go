@@ -154,9 +154,15 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 				To:        &MenuController{},
 				FromStage: 0,
 			},
-			PlanetType: []string{"default"},
+			PlanetType: []string{"default", "titan"},
 		},
 	}) {
+		return
+	}
+
+	// Validate
+	if c.Validator() {
+		c.Validate()
 		return
 	}
 
@@ -179,6 +185,16 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 // Validator
 // ====================================
 func (c *HuntingController) Validator() (hasErrors bool) {
+	switch c.CurrentState.Stage {
+	case 0:
+		// ##################################################################################################
+		// Verifico che sul pianeta non ci sia un titano
+		// ##################################################################################################
+		if inTitanPlanet, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition); inTitanPlanet {
+			c.CurrentState.Completed = true
+		}
+	}
+
 	return false
 }
 
