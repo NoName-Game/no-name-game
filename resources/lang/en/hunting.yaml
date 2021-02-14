@@ -1,7 +1,7 @@
 ---
 #HUNTING
 hunting.init: "You decide to explore the surrounding area..."
-hunting.leave: "⬅️ Scappa"
+hunting.leave: "⬅️ Get Out"
 #Tresure
 tresure.found.resource: "*Fantastic!*\nYou found a 💠 Resource: %s*%s* (%s) %s"
 tresure.found.item: "Incredulous you find out in front of you 🔩*%s*"
