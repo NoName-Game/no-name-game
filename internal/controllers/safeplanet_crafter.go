@@ -46,7 +46,7 @@ func (c *SafePlanetCrafterController) Handle(player *pb.Player, update tgbotapi.
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.crafter.decompose")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

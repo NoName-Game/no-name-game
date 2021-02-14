@@ -60,11 +60,12 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	for _, resource := range resources {
 		if resource.GetQuantity() > 0 {
 			recapResources += fmt.Sprintf(
-				"- %s %v x %s (*%s*)\n",
+				"- %s %v x %s (*%s*) %s\n",
 				helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
-				resource.Quantity,
-				resource.Resource.Name,
-				strings.ToUpper(resource.Resource.Rarity.Slug),
+				resource.GetQuantity(),
+				resource.GetResource().GetName(),
+				strings.ToUpper(resource.GetResource().GetRarity().GetSlug()),
+				helpers.GetResourceBaseIcons(resource.GetResource().GetBase()),
 			)
 		}
 	}
@@ -80,7 +81,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

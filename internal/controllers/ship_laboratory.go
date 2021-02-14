@@ -42,6 +42,7 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &ShipController{},
 				FromStage: 1,
@@ -205,6 +206,10 @@ func (c *ShipLaboratoryController) Stage() {
 
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
+			// Tolgo momentaneamente Altro dalla pagina di crafting, rimuovere quando ci saranno item craftabili.
+			if category.Slug == "stuff" {
+				continue
+			}
 			row := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.laboratory.categories.%s", category.Slug)),
@@ -216,7 +221,7 @@ func (c *ShipLaboratoryController) Stage() {
 		// Aggiungo bottone cancella
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 			),
 		))
 
@@ -428,7 +433,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

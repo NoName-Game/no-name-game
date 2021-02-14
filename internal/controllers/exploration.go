@@ -39,7 +39,7 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 				To:        &MenuController{},
 				FromStage: 1,
 			},
-			PlanetType: []string{"default"},
+			PlanetType: []string{"default", "titan"},
 		},
 	}) {
 		return
@@ -63,21 +63,21 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 // ====================================
 func (c *ExplorationController) Validator() (hasErrors bool) {
 	var err error
-	// Verifico sempre che il player non abbia già altre esplorazioni in corso
-	if c.CurrentState.Stage < 2 {
-		var rExplorationCheck *pb.ExplorationCheckResponse
-		if rExplorationCheck, err = config.App.Server.Connection.ExplorationCheck(helpers.NewContext(1), &pb.ExplorationCheckRequest{
-			PlayerID: c.Player.ID,
-		}); rExplorationCheck != nil && rExplorationCheck.InExploration {
-			c.CurrentState.Stage = 2
-		}
-	}
 
 	switch c.CurrentState.Stage {
-	// ##################################################################################################
-	// Verifico se il player ha passato una tipoligia di esplorazione valida
-	// ##################################################################################################
+	case 0:
+		// ##################################################################################################
+		// Verifico che sul pianeta non ci sia un titano
+		// ##################################################################################################
+		if inTitanPlanet, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition); inTitanPlanet {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.titan_in_planet")
+			return true
+		}
+
 	case 1:
+		// ##################################################################################################
+		// Verifico se il player ha passato una tipoligia di esplorazione valida
+		// ##################################################################################################
 		var rGetAllExplorationCategories *pb.GetAllExplorationCategoriesResponse
 		if rGetAllExplorationCategories, err = config.App.Server.Connection.GetAllExplorationCategories(helpers.NewContext(1), &pb.GetAllExplorationCategoriesRequest{}); err != nil {
 			c.Logger.Panic(err)
@@ -181,7 +181,7 @@ func (c *ExplorationController) Stage() {
 		// Aggiungo anche abbandona
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(
-				helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+				helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 			),
 		))
 
@@ -379,33 +379,38 @@ func (c *ExplorationController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Recap delle risorse ricavate da questa missione
-		var dropList string
-		for _, drop := range rExplorationEnd.GetDropResults() {
-			// Recupero dattigli risorsa
-			var rGetResourceByID *pb.GetResourceByIDResponse
-			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
-				ID: drop.ResourceID,
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
+		var msg tgbotapi.MessageConfig
+		if len(rExplorationEnd.GetDropResults()) == 0 {
+			msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended_zero"))
+		} else {
+			// Recap delle risorse ricavate da questa missione
+			var dropList string
+			for _, drop := range rExplorationEnd.GetDropResults() {
+				// Recupero dattigli risorsa
+				var rGetResourceByID *pb.GetResourceByIDResponse
+				if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+					ID: drop.ResourceID,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
 
-			dropList += fmt.Sprintf(
-				"- 💠 *%v* x *%s* (%s) %s\n",
-				drop.Quantity,
-				rGetResourceByID.GetResource().GetName(),
-				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
-				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+				dropList += fmt.Sprintf(
+					"- 💠 *%v* x *%s* (%s) %s\n",
+					drop.Quantity,
+					rGetResourceByID.GetResource().GetName(),
+					strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
+					helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+				)
+			}
+			// Invio messaggio di chiusura missione
+			msg = helpers.NewMessage(c.Player.ChatID,
+				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended",
+					dropList,
+					rExplorationEnd.GetExp(),
+				),
 			)
 		}
 
-		// Invio messaggio di chiusura missione
-		msg := helpers.NewMessage(c.Player.ChatID,
-			fmt.Sprintf("%s%s",
-				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended"),
-				dropList,
-			),
-		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {

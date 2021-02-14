@@ -1,13 +1,13 @@
 # HUNTING
 hunting.init: "Decidi di esplorare l'area circostante..."
-hunting.leave: "⬅️ Abbandona"
+hunting.leave: "⬅️ Scappa"
 
 # Tresure
 tresure.found.resource: "*Fantastico!*\nHai trovato una 💠 Risorsa: %s*%s* (%s) %s"
 tresure.found.item: "Incredulo davanti e te scopri 🔩*%s*"
 tresure.found.transaction: "Ti avvicini a qualcosa di luccicante, guardi meglio e scopri di aver trovato *%v*💰"
 tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
-tresure.found.trap: "AH! Sei inciampato in una trappola, perdi *%v*HP!"
+tresure.found.trap: "AH! Sei inciampato in una *trappola*, perdi 💔*%v*, rimani con ❤️*%v*!"
 
 # Combat
 combat.damage: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico infliggendo *%d* danni!\nIl nemico è riuscito comunque a colpirti e infliggerti *%d* danni!"

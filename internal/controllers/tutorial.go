@@ -97,13 +97,6 @@ func (c *TutorialController) Stage() {
 	// ============================================================================================================
 	// Intro
 	case 0:
-		// Imposto start tutorial
-		if _, err = config.App.Server.Connection.PlayerStartTutorial(helpers.NewContext(1), &pb.PlayerStartTutorialRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
 		// Invio set di messaggi
 		if err = c.sendIntroMessage(); err != nil {
 			c.Logger.Panic(err)
@@ -227,7 +220,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Creo cache per lo stato di viaggio
-		if err = helpers.SetControllerCacheData(c.Player.ID, "route.ship.travel", 3, nil); err != nil {
+		if err = helpers.SetControllerCacheData(c.Player.ID, "route.ship.travel.finding", 2, nil); err != nil {
 			c.Logger.Panic(err)
 		}
 

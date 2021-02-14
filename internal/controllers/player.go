@@ -3,7 +3,6 @@ package controllers
 import (
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
-
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -54,6 +53,12 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	// Recupero dettagli livello sucessivo
+	var rGetLevelByID *pb.GetLevelByIDResponse
+	rGetLevelByID, _ = config.App.Server.Connection.GetLevelByID(helpers.NewContext(1), &pb.GetLevelByIDRequest{
+		LevelID: c.Player.GetLevelID() + 1,
+	})
+
 	// *************************
 	// Recupero amuleti player
 	// *************************
@@ -71,14 +76,17 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		}
 	}
 
+	rank := helpers.Trans(c.Player.Language.Slug, "rank."+c.Player.Rank.NameCode)
+
 	recapPlayer := helpers.Trans(
 		c.Player.Language.Slug,
 		"player.datails.card",
 		c.Player.GetUsername(),
-		c.Player.GetLifePoint(),                // Life point player
-		c.Player.GetLevel().GetPlayerMaxLife(), // Vita massima del player
-		rGetPlayerExperience.GetValue(),        // Esperienza
-		c.Player.GetLevel().GetID(),            // Livello
+		c.Player.GetLifePoint(),                                                         // Life point player
+		c.Player.GetLevel().GetPlayerMaxLife(),                                          // Vita massima del player
+		rGetPlayerExperience.GetValue(), rGetLevelByID.GetLevel().GetExperienceNeeded(), // Esperienza
+		c.Player.GetLevel().GetID(), // Livello
+		rank,
 		money, diamond, amulets,
 	)
 
@@ -130,7 +138,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.achievements")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

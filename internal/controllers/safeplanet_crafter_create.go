@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,7 +22,9 @@ type SafePlanetCrafterCreateController struct {
 		ItemCategory     string
 		Resources        map[uint32]int32
 		ResourceQuantity int32 // Quantità di risorse aggiunte
-		AddResource      bool  // Flag per verifica aggiunta nuova risorsa
+		SingleQuantity	 int32 // Quantità per singolo item
+		ResourceName	 string
+ 		AddResource      bool  // Flag per verifica aggiunta nuova risorsa
 		Price            int32
 	}
 	Controller
@@ -67,14 +70,6 @@ func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgb
 // Validator
 // ====================================
 func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
-	// Verifico sempre che il player non abbia già altri craft in corso
-	var rCrafterCheck *pb.CrafterCheckResponse
-	if rCrafterCheck, _ = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
-		PlayerID: c.Player.ID,
-	}); rCrafterCheck != nil && rCrafterCheck.CraftInProgress {
-		c.CurrentState.Stage = 5
-	}
-
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico tipologia item che il player vuole craftare
@@ -102,13 +97,14 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 	case 3:
 		if strings.Contains(c.Update.Message.Text, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.add")) {
 			// Il player ha aggiunto una nuova risorsa
-			c.CurrentState.Stage = 2
 			c.Payload.AddResource = true
 
 			// Recupero risorsa da messaggio, e se non rispecchia le specifiche ritorno errore
 			resourceName := strings.Split(strings.Split(c.Update.Message.Text, " (")[0], " ")
 			if len(resourceName) < 3 {
 				return true
+			} else {
+				c.Payload.ResourceName  = resourceName[2]
 			}
 
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
@@ -116,21 +112,33 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			if len(c.Payload.Resources) <= 0 {
 				return true
 			}
+			c.CurrentState.Stage = 4
 		} else {
 			// Se non è nessuno di questi allora ritorno errore
 			return true
 		}
 	// ##################################################################################################
-	// Se il player ha dato conferma verifico se ha il denaro necessario per proseguire
+	// Verifico quantità di item che il player vuole utilizzare
 	// ##################################################################################################
 	case 4:
+		if quantity, err := strconv.Atoi(c.Update.Message.Text); err != nil && quantity <= 0 {
+			return true
+		} else {
+			c.Payload.SingleQuantity = int32(quantity)
+			c.CurrentState.Stage = 2
+		}
+
+	// ##################################################################################################
+	// Se il player ha dato conferma verifico se ha il denaro necessario per proseguire
+	// ##################################################################################################
+	case 5:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return true
 		}
 	// ##################################################################################################
 	// Verifico stato crafting
 	// ##################################################################################################
-	case 5:
+	case 6:
 		var err error
 		var rCrafterCheck *pb.CrafterCheckResponse
 		if rCrafterCheck, err = config.App.Server.Connection.CrafterCheck(helpers.NewContext(1), &pb.CrafterCheckRequest{
@@ -182,7 +190,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
@@ -212,7 +220,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
 		))
 
 		msg := helpers.NewMessage(c.Player.ChatID, message)
@@ -283,14 +291,11 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				c.Payload.Resources = make(map[uint32]int32)
 			}
 
-			// Recupero risorsa da messaggio, posso recuperare tranquillamente usando l'indice in quanto
-			// il controllo sulla stringa viene fatto in fase di validazione
-			resourceName := strings.Split(strings.Split(c.Update.Message.Text, " (")[0], " ")[2]
 
 			// Recupero risorsa
 			var rGetResourceByName *pb.GetResourceByNameResponse
 			if rGetResourceByName, err = config.App.Server.Connection.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
-				Name: resourceName,
+				Name: c.Payload.ResourceName,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
@@ -302,20 +307,23 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			hasResource := false
 			for _, resource := range playerResources {
 				if resource.ResourceID == choosedResource.GetID() {
-					hasResource = true
-
-					// TODO: spostare questa logica sul ws
-					// Aumento prezzo in base alla rarità della risorsa usata
-					c.Payload.Price += int32(10 * choosedResource.GetRarity().GetID())
-
-					// Se il player ha effettivamente la risorsa creo/incremento
-					// Incremento quantitativo risorse
-					if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
-						if c.Payload.Resources[choosedResource.GetID()] < resource.Quantity {
-							c.Payload.Resources[choosedResource.GetID()]++
+					// Controllo che il player abbia effettivamente la quantità richiesta.
+					if resource.Quantity >= c.Payload.SingleQuantity {
+						hasResource = true
+						// Se il player ha effettivamente la risorsa creo/incremento
+						// Incremento quantitativo risorse
+						if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
+							if c.Payload.Resources[choosedResource.GetID()] + c.Payload.SingleQuantity < resource.Quantity {
+								c.Payload.Resources[choosedResource.GetID()] += c.Payload.SingleQuantity
+								c.Payload.Price += int32(10 * choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
+							}
+						} else if hasResource {
+							// È la prima volta che inserisce questa risorsa
+							c.Payload.Resources[choosedResource.GetID()] = c.Payload.SingleQuantity
+							c.Payload.Price += int32(10 * choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
 						}
-					} else if hasResource {
-						c.Payload.Resources[choosedResource.GetID()] = 1
+
+						c.Payload.ResourceQuantity += c.Payload.SingleQuantity
 					}
 				}
 			}
@@ -327,8 +335,6 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 			}
-
-			c.Payload.ResourceQuantity++
 		}
 
 		// Costruisco keyboard
@@ -425,6 +431,29 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		c.CurrentState.Stage = 3
 	case 3:
 		// =========================
+		// Chiedo il quantitativo di risorse che vuole utilizzare
+		// =========================
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.crafting.how_many",
+		))
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("1"),
+				tgbotapi.NewKeyboardButton("5"),
+				tgbotapi.NewKeyboardButton("10"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+		// Aggiorno stato
+		c.CurrentState.Stage = 4
+	case 4:
+		// =========================
 		// Recap risorse usate per il crafting
 		// =========================
 		var recipe string
@@ -472,8 +501,8 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 4
-	case 4:
+		c.CurrentState.Stage = 5
+	case 5:
 		// =========================
 		// Start crating
 		// =========================
@@ -517,9 +546,9 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		c.CurrentState.Stage = 5
+		c.CurrentState.Stage = 6
 		c.ForceBackTo = true
-	case 5:
+	case 6:
 		var rCrafterEnd *pb.CrafterEndResponse
 		if rCrafterEnd, err = config.App.Server.Connection.CrafterEnd(helpers.NewContext(1), &pb.CrafterEndRequest{
 			PlayerID: c.Player.ID,

@@ -70,7 +70,7 @@ func recoverUpdate(player *pb.Player, update tgbotapi.Update) {
 		validatorMsg.ParseMode = tgbotapi.ModeMarkdown
 		validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.clears")),
 			),
 		)
 

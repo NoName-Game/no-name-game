@@ -35,6 +35,7 @@ func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.U
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &ShipTravelController{},
 				FromStage: 0,
@@ -99,7 +100,7 @@ func (c *ShipTravelRescueController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.diamond")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 
@@ -142,7 +143,7 @@ func (c *ShipTravelRescueController) Stage() {
 			msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 				),
 			)
 

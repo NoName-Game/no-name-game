@@ -68,7 +68,7 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 	// Aggiungo anche abbandona
 	keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton(
-			helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+			helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 		),
 	))
 

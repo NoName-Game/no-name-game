@@ -65,6 +65,8 @@ func (c *SafePlanetHangarCreateController) Handle(player *pb.Player, update tgbo
 // Validator
 // ====================================
 func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
+	var err error
+
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico se è stata passata una categoria di nave corretta
@@ -90,7 +92,6 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 	case 2:
 		rarityMsg := strings.Split(c.Update.Message.Text, " -")[0]
 
-		var err error
 		var rGetAllCraftableRarities *pb.GetAllCraftableRaritiesResponse
 		if rGetAllCraftableRarities, err = config.App.Server.Connection.GetAllCraftableRarities(helpers.NewContext(1), &pb.GetAllCraftableRaritiesRequest{}); err != nil {
 			c.Logger.Panic(err)
@@ -116,7 +117,6 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 	// Verifico completamento costruzione nave
 	// ##################################################################################################
 	case 4:
-		var err error
 		var rCheckCreateShip *pb.CheckCreateShipResponse
 		if rCheckCreateShip, err = config.App.Server.Connection.CheckCreateShip(helpers.NewContext(1), &pb.CheckCreateShipRequest{
 			PlayerID: c.Player.ID,
@@ -162,7 +162,7 @@ func (c *SafePlanetHangarCreateController) Validator() (hasErrors bool) {
 				),
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
 					),
 				),
 			)
@@ -199,7 +199,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		categoriesKeyboard = append(categoriesKeyboard, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		// Invio messaggio
@@ -378,7 +378,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 					),
 				)
 
@@ -409,7 +409,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

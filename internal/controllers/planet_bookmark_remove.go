@@ -53,7 +53,7 @@ func (c *PlanetBookmarkRemoveController) Handle(player *pb.Player, update tgbota
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

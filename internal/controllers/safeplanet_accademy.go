@@ -125,7 +125,7 @@ func (c *SafePlanetAccademyController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			categoryKeyboard,
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 

@@ -36,6 +36,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 			Controller: "route.ship.travel",
 		},
 		Configurations: ControllerConfigurations{
+			ControllerBlocked: []string{"exploration", "hunting"},
 			ControllerBack: ControllerBack{
 				To:        &ShipController{},
 				FromStage: 0,
@@ -53,20 +54,22 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 		c.Logger.Panic(err)
 	}
 
-	var travel string
-	travel = "route.ship.travel.finding"
+	// Sostituisco bottone navigazione con atterra
+	var travel = "route.ship.travel.finding"
 	for _, state := range c.Data.PlayerActiveStates {
-		if state.Controller == "route.ship.travel" {
+		if state.Controller == "route.ship.travel.finding" && state.GetStage() > 1 {
 			// Se il player sta già viaggiando
 			var finishAt time.Time
 			if finishAt, err = helpers.GetEndTime(state.GetFinishAt(), c.Player); err != nil {
 				c.Logger.Panic(err)
 			}
+
 			if time.Now().After(finishAt) {
 				travel = "ship.travel.land"
 			}
 		}
 	}
+
 	// Invio messaggio con recap
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID,
 		fmt.Sprintf("%s %s %s %s %s %s %s",
@@ -91,7 +94,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.travel.rescue")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

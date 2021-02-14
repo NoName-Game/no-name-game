@@ -57,6 +57,12 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 // Validator
 // ====================================
 func (c *ShipRestsController) Validator() (hasErrors bool) {
+	// NNT-140 Se il player arriva dalla caccia (quindi callback query) mando direttamente allo stage 0
+	if c.Update.CallbackQuery != nil {
+		c.CurrentState.Stage = 0
+		return false
+	}
+
 	// Se è stato passato il comando sveglia e il player sta effettivamente dormendo lo sveglio
 	if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") == c.Update.Message.Text {
 		var rRestCheck *pb.RestCheckResponse
@@ -152,7 +158,7 @@ func (c *ShipRestsController) Stage() {
 		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
 		if !c.Player.GetDead() {
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			))
 		}
 
@@ -235,7 +241,7 @@ func (c *ShipRestsController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "route.breaker.more"),
+					helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"),
 				),
 			),
 		)

@@ -149,14 +149,20 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
-			ControllerBlocked: []string{"exploration"},
+			ControllerBlocked: []string{"exploration", "ship"},
 			ControllerBack: ControllerBack{
 				To:        &MenuController{},
 				FromStage: 0,
 			},
-			PlanetType: []string{"default"},
+			PlanetType: []string{"default", "titan"},
 		},
 	}) {
+		return
+	}
+
+	// Validate
+	if c.Validator() {
+		c.Validate()
 		return
 	}
 
@@ -179,6 +185,16 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 // Validator
 // ====================================
 func (c *HuntingController) Validator() (hasErrors bool) {
+	switch c.CurrentState.Stage {
+	case 0:
+		// ##################################################################################################
+		// Verifico che sul pianeta non ci sia un titano
+		// ##################################################################################################
+		if inTitanPlanet, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition); inTitanPlanet {
+			c.CurrentState.Completed = true
+		}
+	}
+
 	return false
 }
 
@@ -453,7 +469,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 			tresureMessage = helpers.NewEditMessage(
 				c.Player.ChatID,
 				c.Update.CallbackQuery.Message.MessageID,
-				helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage()),
+				helpers.Trans(c.Player.Language.Slug, "tresure.found.trap", rDropTresure.GetTrap().GetDamage(), c.Player.GetLifePoint()-int64(rDropTresure.GetTrap().GetDamage())),
 			)
 		} else {
 			// Non hai trovato nulla

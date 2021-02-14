@@ -150,7 +150,7 @@ func (c *MenuController) CheckInTravel() bool {
 	// Verifico se il player si trova in viaggio
 	var travelData travelDataStruct
 	for _, activity := range c.Data.PlayerActiveStates {
-		if activity.Controller == "route.ship.travel" {
+		if activity.Controller == "route.ship.travel.finding" {
 			_ = json.Unmarshal([]byte(activity.Payload), &travelData)
 
 			// Recupero pianeta che si vuole raggiungere
@@ -186,8 +186,10 @@ func (c *MenuController) GetPlayerLife() (life string) {
 func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks string) {
 	var err error
 
+	// Format Custom
+	switch activity.GetController() {
 	// Verifico se si tritta di una missione
-	if activity.Controller == "route.safeplanet.coalition.mission" {
+	case "route.safeplanet.coalition.mission":
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
@@ -210,6 +212,9 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 		}
 
 		return
+	case "route.tutorial":
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()))
+		return
 	}
 
 	var finishAt time.Time
@@ -218,17 +223,13 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 	}
 
 	// Se sono delle attività non ancora concluse
-	if activity.GetToNotify() && time.Until(finishAt).Minutes() > 0 {
+	if activity.GetToNotify() || time.Until(finishAt).Minutes() > 0 {
 		finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-		switch activity.Controller {
-		case "route.tutorial":
-			tasks = helpers.Trans(c.Player.Language.Slug, "route.tutorial.activity.progress")
-		default:
-			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
-		}
-	} else {
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
+	} else if activity.GetFinished() {
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
 	}
+
 	return
 }
 
@@ -252,7 +253,7 @@ func (c *MenuController) GetKeyboard(currentPosition *pb.Planet) [][]tgbotapi.Ke
 	for _, state := range c.Data.PlayerActiveStates {
 		if state.Controller == "route.tutorial" {
 			return c.TutorialKeyboard()
-		} else if state.Controller == "route.ship.travel" {
+		} else if state.Controller == "route.ship.travel.finding" {
 			return c.TravelKeyboard()
 		} else if state.Controller == "route.exploration" {
 			return c.ExplorationKeyboard()
@@ -315,7 +316,7 @@ func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardB
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.Data.PlayerActiveStates {
 		var keyboardRow []tgbotapi.KeyboardButton
-		if state.Controller == "route.tutorial" {
+		if state.GetController() == "route.tutorial" {
 			keyboardRow = tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue")),
 			)

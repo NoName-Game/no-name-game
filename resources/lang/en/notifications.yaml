@@ -9,7 +9,7 @@ notification.activity.route.ship.travel.finding: "New planet reached!"
 notification.activity.route.safeplanet.crafter: "The gunsmith has completed your order, give it a run to withdraw it!"
 notification.activity.route.death: "You recovered your energy!"
 notification.activity.route.ship.rests: "You recovered your energy!"
-#NOTIFICATIONS - ACHIEVEMENT
+# NOTIFICATIONS - ACHIEVEMENT
 notification.achievement.message: "🎯 Achievement *completed*!\n\nYou accomplished: *%s*\n*Reward*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
 #NOTIFICATIONS - TITAN
 notification.titan_drop.message: "️☠️ 👁 *%s* defeat! ☠️\n\nYour hits inflicted *%v* damage!\nThanks to your participation you got:\n%s\n\nThe titan left on earth something very special:\n*%s*"
