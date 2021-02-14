@@ -3,7 +3,6 @@ package controllers
 import (
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
-
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -77,6 +76,8 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		}
 	}
 
+	rank := helpers.Trans(c.Player.Language.Slug, "rank."+c.Player.Rank.NameCode)
+
 	recapPlayer := helpers.Trans(
 		c.Player.Language.Slug,
 		"player.datails.card",
@@ -85,6 +86,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Player.GetLevel().GetPlayerMaxLife(),                                          // Vita massima del player
 		rGetPlayerExperience.GetValue(), rGetLevelByID.GetLevel().GetExperienceNeeded(), // Esperienza
 		c.Player.GetLevel().GetID(), // Livello
+		rank,
 		money, diamond, amulets,
 	)
 
