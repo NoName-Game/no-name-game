@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -63,11 +64,39 @@ func (c *ShipTravelFindingController) Handle(player *pb.Player, update tgbotapi.
 // Validator
 // ====================================
 func (c *ShipTravelFindingController) Validator() (hasErrors bool) {
+	var err error
+
 	switch c.CurrentState.Stage {
-	// ##################################################################################################
-	// In questo stage verifico che il player abbia pasasto la stella vicina
-	// ##################################################################################################
+	case 0:
+		// ##################################################################################################
+		// Verifico che la nave equipaggiata non sia in riparazione
+		// ##################################################################################################
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.GetController() == "route.safeplanet.hangar.repair" {
+				var repairingData struct {
+					ShipID uint32
+				}
+
+				_ = json.Unmarshal([]byte(state.GetPayload()), &repairingData)
+
+				// Recupero nave attualemente attiva
+				var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+				if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+					PlayerID: c.Player.GetID(),
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				if rGetPlayerShipEquipped.GetShip().GetID() == repairingData.ShipID {
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
+					return true
+				}
+			}
+		}
 	case 1:
+		// ##################################################################################################
+		// In questo stage verifico che il player abbia passato la stella vicina
+		// ##################################################################################################
 		if !helpers.InArray(c.Update.Message.Text, c.Payload.StarNearestMapName) {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 
