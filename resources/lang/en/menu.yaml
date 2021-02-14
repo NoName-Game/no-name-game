@@ -8,7 +8,7 @@ menu.tasks: "⏱ *Activities List:*\n"
 menu.safeplanet: "You're on 🏟*%s* *secure* planet and protected area for *everyone*!✌️\n\n"
 #Titanplanet
 menu.titanplanet: "You're on the planet 🌏*%s* Titan's dwelling 👁 *%s*.\n\n"
-menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta...\n\n"
-menu.titanplanet.titan_dead: "Sconfitto da valorosi viaggiatori! Ora tutto sembra tranquillo.\n\n"
+menu.titanplanet.titan_alive: "Only ☠️ *death* reigns on this planet...\n\n"
+menu.titanplanet.titan_dead: "Defeated by heroic explorers! Now everything seems quiet.\n\n"
 #Travel
 menu.travel: "In a 🚀trip from 🌏*%s* to 🌏*%s*...\n\n"
