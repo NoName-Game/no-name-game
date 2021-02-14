@@ -30,7 +30,8 @@ type Controller struct {
 	}
 	CurrentState ControllerCurrentState
 	Data         struct {
-		PlayerActiveStates []*pb.PlayerActivity
+		PlayerActiveStates    []*pb.PlayerActivity
+		PlayerCurrentPosition *pb.Planet
 		// PlayerStats        *pb.PlayerStats
 	}
 	ForceBackTo    bool
@@ -125,6 +126,14 @@ func (c *Controller) LoadControllerData() (err error) {
 	}
 
 	c.Data.PlayerActiveStates = rGetActivePlayerActivities.GetActivities()
+
+	// Recupero posizione player.
+	var currentPosition *pb.Planet
+	if currentPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	c.Data.PlayerCurrentPosition = currentPosition
 	return
 }
 
@@ -349,22 +358,14 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 // Effettuare il controllo e ritornare TRUE se l'azione può proseguire.
 // Tipi di pianeta consentiti: {safe, titan, default}
 func (c *Controller) InCorrectPlanet() (correctPlanet bool) {
-	var err error
-
-	// Recupero posizione player.
-	var currentPosition *pb.Planet
-	if currentPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
-		c.Logger.Panic(err)
-	}
-
 	// Se l'array è vuoto tutti i pianeti sono consentiti. Skippo il controllo.
 	if len(c.Configurations.PlanetType) == 0 {
 		return true
 	}
 
-	inSafe := c.CheckInSafePlanet(currentPosition)
-	inTitan, _ := c.CheckInTitanPlanet(currentPosition)
-	inDarkMerchantPlanet := c.CheckInDarkMerchantPlanet(currentPosition)
+	inSafe := c.CheckInSafePlanet(c.Data.PlayerCurrentPosition)
+	inTitan, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition)
+	inDarkMerchantPlanet := c.CheckInDarkMerchantPlanet(c.Data.PlayerCurrentPosition)
 
 	// Ciclo fra i tipi di pianeta consentito
 	for _, planetType := range c.Configurations.PlanetType {

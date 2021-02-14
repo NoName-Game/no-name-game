@@ -4,3 +4,4 @@ validator.error: "A solar storm has corrupted the communications data, the Coali
 validator.not_valid: "The parameter inserted it's not valid."
 validator.controller.blocked: "To proceed bring first to an end the other objectives."
 validator.player_name_not_exists: "The explorer with that name was not found."
+validator.titan_in_planet: "The activity cant not start beacuse of a titan."

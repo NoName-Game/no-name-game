@@ -2,5 +2,5 @@
 validator.error: "Una tempesta solare ha corrotto i dati di comunicazione, la Coalizione ha già registrato l'anomalia. Riprova più tardi."
 validator.not_valid: "Il parametro inserito non è valido."
 validator.controller.blocked: "Per procedere porta a termine prima gli altri obbiettivi."
-
 validator.player_name_not_exists: "Non è stato trovato nessun esploratore con quel nome."
+validator.titan_in_planet: "La presenza di un titano impedisce l'avvio di questa attività!"
