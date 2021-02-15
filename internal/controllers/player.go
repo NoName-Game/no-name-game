@@ -72,7 +72,9 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Recupero rank player
 	// *************************
 	var rGetPlayerRankPoint *pb.GetPlayerRankPointResponse
-	if rGetPlayerRankPoint, err = config.App.Server.Connection.GetPlayerRankPoint(helpers.NewContext(1), &pb.GetPlayerRankPointRequest{PlayerID: c.Player.ID}); err != nil {
+	if rGetPlayerRankPoint, err = config.App.Server.Connection.GetPlayerRankPoint(helpers.NewContext(1), &pb.GetPlayerRankPointRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
 		c.Logger.Panic(err)
 	}
 
