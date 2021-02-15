@@ -1,6 +1,6 @@
 ---
 #PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rank: *%s*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rank: *%s* -> *%v*/*%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Planets* visited: *%d*"
 player.datails.system_visited: "\n💫 *Systems* visited: *%d*"
 #Guild
