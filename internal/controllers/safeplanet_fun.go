@@ -38,7 +38,7 @@ func (c *SafePlanetRelaxController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 
 	// Invio messaggio
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.intro"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.intro"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

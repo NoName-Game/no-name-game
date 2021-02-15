@@ -119,7 +119,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -135,7 +135,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_confirm", c.Payload.Username))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_confirm", c.Payload.Username))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -168,7 +168,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player already in one party") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "player.party.adding_player_already_in_one_party"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -195,7 +195,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 		}
 
 		// Ritorno conferma
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

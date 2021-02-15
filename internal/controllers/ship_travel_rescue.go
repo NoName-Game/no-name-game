@@ -93,7 +93,7 @@ func (c *ShipTravelRescueController) Stage() {
 	// Chiedo al player se vuole esser trasportato al pianeta sicuro più vicino
 	// ##################################################################################################
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.info"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.info"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -140,7 +140,7 @@ func (c *ShipTravelRescueController) Stage() {
 			PlayerID: c.Player.ID,
 		}); err != nil {
 			// Messaggio errore completamento
-			msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
+			msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -158,14 +158,14 @@ func (c *ShipTravelRescueController) Stage() {
 		}
 
 		// Invio messaggi di chiusura
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.confirmed"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.confirmed"))
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		var msgInit tgbotapi.Message
-		if msgInit, err = helpers.SendMessage(helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.countdown.init"))); err != nil {
+		if msgInit, err = helpers.SendMessage(helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.countdown.init"))); err != nil {
 			c.Logger.Panic(err)
 		}
 

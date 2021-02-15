@@ -172,7 +172,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.intro"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.intro"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -213,7 +213,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.list"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.list"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -244,7 +244,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 			rGetShipByID.GetShip().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
 		)
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapShip)
+		msg := helpers.NewMessage(c.ChatID, recapShip)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -274,7 +274,7 @@ func (c *SafePlanetHangarShipsController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.equip_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.ships.equip_ok"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

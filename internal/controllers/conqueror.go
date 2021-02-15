@@ -83,7 +83,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.planet_free")
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, conquerorsListMsg)
+	msg := helpers.NewMessage(c.ChatID, conquerorsListMsg)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

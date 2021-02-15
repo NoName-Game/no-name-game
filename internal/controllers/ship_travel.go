@@ -71,7 +71,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 	}
 
 	// Invio messaggio con recap
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+	msg := helpers.NewMessage(c.ChatID,
 		fmt.Sprintf("%s %s %s %s %s %s %s",
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats"),

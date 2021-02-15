@@ -201,7 +201,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.which"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.which"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -241,7 +241,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			itemDetails = fmt.Sprintf("%s (%s)", rGetWeaponByID.GetWeapon().GetName(), rGetWeaponByID.GetWeapon().GetRarity().GetSlug())
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.confirm",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.confirm",
 			itemDetails,
 		))
 
@@ -282,7 +282,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -312,7 +312,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			}
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.completed", recapList))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.completed", recapList))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

@@ -51,7 +51,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	// Se il player non appartiene a nessuna gilda
 	// #####################################
 	if !rGetPlayerGuild.GetInGuild() {
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "player.guild.player_not_in_one_guild"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "player.guild.player_not_in_one_guild"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -131,7 +131,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	// #####################################
 	// Invio messggio recap
 	// #####################################
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s",
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("%s\n\n%s",
 		guildDetails,
 		playersList,
 	))
