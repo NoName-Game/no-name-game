@@ -1,8 +1,8 @@
 ---
 #Expansion
-safeplanet.coalition.expansion.info: "Welcome to the 💫 *Expansion* center.\n\nBy exploring all the planets currently known, you'll help the Coalition to expand our borders.\n\n"
+safeplanet.coalition.expansion.info: "Benvenuto nel centro 💫 *Espansione*.\n\nBy increasing *Rank* you will have the opportunity to explore the outer systems!\n\n"
 safeplanet.coalition.expansion.last_system: "Last system discovered: 💫 *%s*\n"
-safeplanet.coalition.expansion.recap_planets: "\n❌ There are still missing 🌏*%d* planets to explore, out of *%d* totally."
+safeplanet.coalition.expansion.recap_planets: "❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
 safeplanet.coalition.expansion.recap_planets_done: "\n✅ All the 🌏 planets of the system have been explored"
 safeplanet.coalition.expansion.recap_titan: "\n❌ Defeat 👁 *%s*, defender of this system."
 safeplanet.coalition.expansion.recap_titan_done: "\n✅ The titan 👁 *%s*, has been defeated!"
@@ -11,3 +11,4 @@ safeplanet.coalition.expansion.choice: "\n\nThe Coalition gives you the opportun
 safeplanet.coalition.expansion.confirmation: "You're going to be teleported on the secure planet 🏟*%s*, the cost of the operations is about 💎*%v*, are you sure you want to continue?"
 safeplanet.coalition.expansion.teleport_ok: "Teleport started, have a nice travel!"
 safeplanet.coalition.expansion.teleport_ko: "You don't have enough 💎 make the trip. Come back later."
+safeplanet.coalition.expansion.player_rank: "Il tuo rango è *%s*.\nPuoi visitare i pianeti fino al sistema *%v*.\nPuoi incrementare il tuo rango attraverso *Esplorazioni*, *Caccia*, *Missioni* e uccidendo i *Titani*.\n\n"
