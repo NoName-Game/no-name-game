@@ -1,4 +1,4 @@
-route.safeplanet.coalition.mission.activity.progress: "*🏢 Missione* #M%v in corso..."
+route.safeplanet.coalition.mission.activity.progress: "*🏢 Missione* #M%v: %s"
 route.safeplanet.coalition.mission.activity.done: "✅ *🏢 Missione* conclusa, torna al centro missioni per la tua ricompensa"
 
 route.safeplanet.hangar.create.activity.progress: "*🏗 Hangar*: Ordine ricevuto, nave disponibile tra %v minuti"
