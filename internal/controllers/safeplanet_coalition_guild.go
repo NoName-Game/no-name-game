@@ -79,7 +79,7 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		protectorsMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.player_protectors_details", rGetPlayerGuild.GetGuild().GetName())
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, protectorsMessage)
+	msg := helpers.NewMessage(c.ChatID, protectorsMessage)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		Keyboard:       keyboardRows,

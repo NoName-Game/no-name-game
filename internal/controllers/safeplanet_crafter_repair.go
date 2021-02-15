@@ -129,7 +129,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.what"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.what"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -161,7 +161,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.confirm",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.confirm",
 			rGetWeaponByID.GetWeapon().GetName(),
 			rCrafterGetRepairWeaponInfo.GetValue(),
 		))
@@ -193,7 +193,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -206,7 +206,7 @@ func (c *SafePlanetCrafterRepairController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.completed"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.repair.completed"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

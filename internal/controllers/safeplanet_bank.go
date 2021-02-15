@@ -158,7 +158,7 @@ func (c *SafePlanetBankController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, mainMessage)
+		msg := helpers.NewMessage(c.ChatID, mainMessage)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -202,7 +202,7 @@ func (c *SafePlanetBankController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, text)
+		msg := helpers.NewMessage(c.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

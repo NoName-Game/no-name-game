@@ -77,7 +77,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	var rGetRankByID *pb.GetRankByIDResponse
-	rGetRankByID, _ = config.App.Server.Connection.GetRankByID(helpers.NewContext(1), &pb.GetRankByIDRequest{RankID: c.Player.RankID+1})
+	rGetRankByID, _ = config.App.Server.Connection.GetRankByID(helpers.NewContext(1), &pb.GetRankByIDRequest{RankID: c.Player.RankID + 1})
 
 	var amulets int32
 	for _, item := range rGetPlayerItems.GetPlayerInventory() {
@@ -133,8 +133,8 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		rCountSystemVisited.GetValue(),
 	)
 
-	// msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "player.intro"))
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapPlayer)
+	// msg := services.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "player.intro"))
+	msg := helpers.NewMessage(c.ChatID, recapPlayer)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

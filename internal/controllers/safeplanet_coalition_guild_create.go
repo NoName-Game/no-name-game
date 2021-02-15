@@ -107,7 +107,7 @@ func (c *SafePlanetProtectorsCreateController) Stage() {
 	// Chiedo al player di inserire il nome della gilda
 	// ##################################################################################################
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_start"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -124,7 +124,7 @@ func (c *SafePlanetProtectorsCreateController) Stage() {
 	// Chiedo al player di inserire di decidere se al gilda deve esser pubblica i privata
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -153,7 +153,7 @@ func (c *SafePlanetProtectorsCreateController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -164,7 +164,7 @@ func (c *SafePlanetProtectorsCreateController) Stage() {
 			return
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.creation_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.creation_completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

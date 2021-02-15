@@ -258,7 +258,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.confirmation",
 				planet.GetName(),
 				price,
@@ -298,7 +298,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.teleport_ok"),
 		)
 

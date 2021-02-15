@@ -143,7 +143,7 @@ func (c *SafePlanetAccademyController) Stage() {
 			AbilityCategoryID: c.Payload.AbilityCategoryID,
 		}); err != nil {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di amuleti
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.accademy.no_more_abilities"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -209,7 +209,7 @@ func (c *SafePlanetAccademyController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "not enough quantity") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di amuleti
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.accademy.not_enough_amulets"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {

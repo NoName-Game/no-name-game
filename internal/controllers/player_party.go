@@ -78,7 +78,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.show",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.show",
 			rGetPartyDetails.GetOwner().GetUsername(),
 			rGetPartyDetails.GetNPlayers(),
 			playerRecap,
@@ -96,7 +96,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Il Player non è in un party
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.non_in_party"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.non_in_party"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

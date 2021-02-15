@@ -79,7 +79,7 @@ func (c *PlayerPartyLeaveController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.confirm"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.confirm"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -112,7 +112,7 @@ func (c *PlayerPartyLeaveController) Stage() {
 			c.Logger.Warning(err)
 
 			// Potrebbero esserci stati degli errori generici
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -145,7 +145,7 @@ func (c *PlayerPartyLeaveController) Stage() {
 			}
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

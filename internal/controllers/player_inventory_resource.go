@@ -77,7 +77,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		recapResources,
 	)
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, finalResource)
+	msg := helpers.NewMessage(c.ChatID, finalResource)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

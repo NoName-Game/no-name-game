@@ -73,7 +73,7 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 	))
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s", introMessage, recapMessage))
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("%s\n\n%s", introMessage, recapMessage))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		ResizeKeyboard: true,

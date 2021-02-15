@@ -21,6 +21,7 @@ type ControllerInterface interface {
 }
 
 type Controller struct {
+	ChatID     int64
 	Player     *pb.Player
 	Update     tgbotapi.Update
 	Validation struct {
@@ -117,6 +118,13 @@ func (c *Controller) SetLoggerData() {
 
 // Carico controller data
 func (c *Controller) LoadControllerData() (err error) {
+	// Recupero ChatID in base alla tipologia di messaggio ricevuto
+	if c.Update.CallbackQuery != nil {
+		c.ChatID = c.Update.CallbackQuery.Message.Chat.ID
+	} else {
+		c.ChatID = c.Update.Message.Chat.ID
+	}
+
 	// Recupero stato utente
 	var rGetActivePlayerActivities *pb.GetActivePlayerActivitiesResponse
 	if rGetActivePlayerActivities, err = config.App.Server.Connection.GetActivePlayerActivities(helpers.NewContext(1), &pb.GetActivePlayerActivitiesRequest{
@@ -142,7 +150,7 @@ func (c *Controller) RegisterError(err error) {
 	c.Logger.Error(err)
 
 	// Invio il messaggio in caso di errore e chiudo
-	validatorMsg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "validator.error"))
+	validatorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "validator.error"))
 	validatorMsg.ParseMode = tgbotapi.ModeMarkdown
 	validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -173,7 +181,7 @@ func (c *Controller) Validate() {
 	// }
 
 	// Invio il messaggio in caso di errore e chiudo
-	validatorMsg := helpers.NewMessage(c.Update.Message.Chat.ID, c.Validation.Message)
+	validatorMsg := helpers.NewMessage(c.ChatID, c.Validation.Message)
 	validatorMsg.ParseMode = tgbotapi.ModeMarkdown
 	if c.Validation.ReplyKeyboard.Keyboard != nil {
 		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
@@ -320,14 +328,6 @@ func (c *Controller) Completing(payload interface{}) {
 // Certi controller non possono essere eseguiti se il player si trova in determinati stati.
 // Ogni controller ha la possibilità nell'handle di passare la lista di rotte bloccanti per esso.
 func (c *Controller) InStatesBlocker() (inStates bool) {
-	// Recupero ChatID
-	var chatID int64
-	if c.Update.CallbackQuery != nil {
-		chatID = c.Update.CallbackQuery.Message.Chat.ID
-	} else {
-		chatID = c.Update.Message.Chat.ID
-	}
-
 	// Certi controller non devono subire la cancellazione degli stati
 	// perchè magari hanno logiche particolari o lo gestiscono a loro modo
 	for _, state := range c.Data.PlayerActiveStates {
@@ -335,7 +335,7 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 		if state.GetController() == "route.ship.rests" && state.GetStage() > 1 {
 			// Se un azione è diversa dal risvegliati
 			if helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") != c.Update.Message.Text {
-				msg := helpers.NewMessage(chatID, helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup"))
+				msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup"))
 				if _, err := helpers.SendMessage(msg); err != nil {
 					panic(err)
 				}
@@ -347,7 +347,7 @@ func (c *Controller) InStatesBlocker() (inStates bool) {
 		// Verifico se ci sono stati particolare bloccati
 		for _, blockState := range c.Configurations.ControllerBlocked {
 			if helpers.Trans(c.Player.Language.Slug, state.Controller) == helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("route.%s", blockState)) {
-				msg := helpers.NewMessage(chatID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))
+				msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked"))
 				if _, err := helpers.SendMessage(msg); err != nil {
 					panic(err)
 				}

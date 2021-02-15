@@ -99,7 +99,7 @@ func (c *SetupController) Stage() {
 	// Settaggio lingua
 	case 0:
 		// Invio messaggio
-		msgIntro := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.intro", c.Player.Username))
+		msgIntro := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.intro", c.Player.Username))
 		msgIntro.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msgIntro); err != nil {
 			c.Logger.Panic(err)
@@ -120,7 +120,7 @@ func (c *SetupController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.select_timezone"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.select_timezone"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -162,7 +162,7 @@ func (c *SetupController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "setup.select_language"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.select_language"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,

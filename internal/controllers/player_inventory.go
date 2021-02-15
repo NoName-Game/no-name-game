@@ -34,7 +34,7 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 		return
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "inventory.intro"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "inventory.intro"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

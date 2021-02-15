@@ -85,7 +85,7 @@ func (c *SafePlanetProtectorsLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_confirm",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_confirm",
 			rGetPlayerGuild.GetGuild().GetName(),
 		))
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -113,7 +113,7 @@ func (c *SafePlanetProtectorsLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

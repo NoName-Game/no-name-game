@@ -59,7 +59,7 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 		rGetPlayerShipEquipped.GetShip().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
 	)
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("%s\n\n%s",
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("%s\n\n%s",
 		helpers.Trans(player.Language.Slug, "safeplanet.hangar.intro"),
 		recapShip,
 	))

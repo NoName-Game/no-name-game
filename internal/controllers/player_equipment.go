@@ -179,7 +179,7 @@ func (c *PlayerEquipmentController) Stage() {
 		}
 
 		// Invio messagio con recap e con selettore categoria
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			fmt.Sprintf(
 				"%s\n\n%s\n%s",
 				helpers.Trans(c.Player.Language.Slug, "inventory.equip.equipped"),
@@ -344,7 +344,7 @@ func (c *PlayerEquipmentController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, mainMessage)
+		msg := helpers.NewMessage(c.ChatID, mainMessage)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -435,7 +435,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		if equipmentError {
 			// Invio messaggio error
-			msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"))
+			msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"))
 			msg.ParseMode = tgbotapi.ModeMarkdown
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -451,7 +451,7 @@ func (c *PlayerEquipmentController) Stage() {
 		}
 
 		// Invio messaggio per conferma equipaggiamento
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, confirmMessage)
+		msg := helpers.NewMessage(c.ChatID, confirmMessage)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -537,7 +537,7 @@ func (c *PlayerEquipmentController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
