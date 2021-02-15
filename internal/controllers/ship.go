@@ -56,7 +56,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Invio messaggio
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+	msg := helpers.NewMessage(c.ChatID,
 		helpers.Trans(c.Player.Language.Slug, "ship.intro",
 			rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
 			rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),

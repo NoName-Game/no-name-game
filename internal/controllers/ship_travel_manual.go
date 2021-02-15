@@ -148,7 +148,7 @@ func (c *ShipTravelManualController) Stage() {
 	switch c.CurrentState.Stage {
 	// In questo stage chiedo al player di inserire le coordinate
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.manual.info"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.manual.info"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -242,7 +242,7 @@ func (c *ShipTravelManualController) Stage() {
 		)
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			fmt.Sprintf(
 				"%s %s",
 				helpers.Trans(c.Player.Language.Slug, "ship.travel.manual.trip_details"),
@@ -281,7 +281,7 @@ func (c *ShipTravelManualController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishAt.Format("15:04:05 01/02")),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -301,7 +301,7 @@ func (c *ShipTravelManualController) Stage() {
 				PlayerID: c.Player.ID,
 			}); err != nil {
 				// Messaggio errore completamento
-				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
+				msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -326,7 +326,7 @@ func (c *ShipTravelManualController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "ship.travel.end"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.end"))
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

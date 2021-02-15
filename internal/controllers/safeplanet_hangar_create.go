@@ -203,7 +203,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.intro"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.intro"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -252,7 +252,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.chose_rarity"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.chose_rarity"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -295,7 +295,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.confirm",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.confirm",
 			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.category.%s", rGetShipCategoryByID.GetShipCategory().GetSlug())), // rarity
 			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rGetRarityByID.GetRarity().GetSlug())),                    // rarity
 			rGetCreateShipInfo.GetPrice(),
@@ -331,7 +331,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -351,7 +351,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.start", finishAt.Format("15:04:05 01/02")),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -375,7 +375,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 				PlayerID: c.Player.ID,
 			}); err != nil {
 				// Messaggio errore completamento
-				msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.complete_diamond_error"))
+				msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.complete_diamond_error"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 					tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -405,7 +405,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.end", ship.GetName()))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.end", ship.GetName()))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

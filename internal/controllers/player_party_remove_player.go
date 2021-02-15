@@ -128,7 +128,7 @@ func (c *PlayerPartyRemovePlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_start"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -144,7 +144,7 @@ func (c *PlayerPartyRemovePlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_confirm", c.Payload.Username))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_player_confirm", c.Payload.Username))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -177,7 +177,7 @@ func (c *PlayerPartyRemovePlayerController) Stage() {
 			c.Logger.Warning(err)
 
 			// Potrebbero esserci stati degli errori generici
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -203,7 +203,7 @@ func (c *PlayerPartyRemovePlayerController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.remove.remove_completed_ok"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

@@ -176,7 +176,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.info"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.info"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -229,7 +229,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, shipRecap)
+		msg := helpers.NewMessage(c.ChatID, shipRecap)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -259,7 +259,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "not enough resource quantities") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.not_enough_resource"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -297,7 +297,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			fmt.Sprintf(
 				"%s \n\n%s",
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.reparing", finishAt.Format("15:04:05")),
@@ -321,7 +321,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.reparing.finish"),
 		)
 		if _, err = helpers.SendMessage(msg); err != nil {

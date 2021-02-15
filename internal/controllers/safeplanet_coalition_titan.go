@@ -150,7 +150,7 @@ func (c *SafePlanetTitanController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.teleport"),
 		)
 

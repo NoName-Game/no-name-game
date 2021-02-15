@@ -160,7 +160,7 @@ func (c *PlayerInventoryItemController) Stage() {
 
 		// Invio messagio con recap e con selettore categoria
 		msg := helpers.NewMessage(
-			c.Update.Message.Chat.ID,
+			c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.items.what"),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -193,7 +193,7 @@ func (c *PlayerInventoryItemController) Stage() {
 			text += helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning")
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, text)
+		msg := helpers.NewMessage(c.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -222,7 +222,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.items.completed",
 				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 			),

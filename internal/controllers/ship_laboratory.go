@@ -423,7 +423,7 @@ func (c *ShipLaboratoryController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"ship.laboratory.craft_completed",

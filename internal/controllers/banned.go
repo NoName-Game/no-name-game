@@ -34,7 +34,7 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "banned.message"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "banned.message"))
 	if _, err := helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}

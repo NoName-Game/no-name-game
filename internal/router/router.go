@@ -102,18 +102,22 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 		return
 	}
 
-	// Se morto spedisco direttamente al riposo
-	if player.Dead {
-		invoke(routes["route.ship.rests"], "Handle", player, update)
-		return
-	}
-
 	// Verifica il tipo di messaggio
 	var callingRoute string
 	if update.Message != nil {
 		callingRoute = parseMessage(update.Message)
 	} else if update.CallbackQuery != nil {
 		callingRoute = parseCallback(update.CallbackQuery)
+	}
+
+	// Se morto spedisco direttamente al riposo
+	// è necessario effettuare il controllo di hunting in quanto è necessario
+	//  per cancellare le attività in corso
+	if callingRoute != "hunting" {
+		if player.Dead {
+			invoke(routes["route.ship.rests"], "Handle", player, update)
+			return
+		}
 	}
 
 	// Dirigo ad una rotta normale
