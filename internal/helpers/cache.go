@@ -51,37 +51,42 @@ func SetControllerCacheData(playerID uint32, controller string, stage int32, pay
 		return fmt.Errorf("error marshal controller payload data for cache: %s", err.Error())
 	}
 
-	var marshalData []byte
-	if marshalData, err = json.Marshal(ControllerCacheData{
-		Stage:   stage,
-		Payload: string(marshalPayload),
-	}); err != nil {
-		return fmt.Errorf("error marshal data for cache: %s", err.Error())
-	}
+	_, err = config.App.Server.Connection.CreatePlayerActivity(NewContext(1), &pb.CreatePlayerActivityRequest{
+		PlayerID:   playerID,
+		Stage:      stage,
+		Controller: controller,
+		Payload:    string(marshalPayload),
+	})
 
-	return config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_controller_%s", playerID, controller), marshalData, 0).Err()
+	return
 }
 
 func GetControllerCacheData(playerID uint32, controller string, payload interface{}) (stage int32, err error) {
-	var result string
-	result, _ = config.App.Redis.Connection.Get(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Result()
-
-	var cachedData ControllerCacheData
-	if result != "" {
-		if err = json.Unmarshal([]byte(result), &cachedData); err == nil {
-			stage = cachedData.Stage
-			err = json.Unmarshal([]byte(cachedData.Payload), &payload)
-		}
+	var rGetPlayerActivity *pb.GetPlayerActivityResponse
+	if rGetPlayerActivity, err = config.App.Server.Connection.GetPlayerActivity(NewContext(1), &pb.GetPlayerActivityRequest{
+		PlayerID:   playerID,
+		Controller: controller,
+	}); err != nil {
+		return 0, nil
 	}
 
-	return
+	if err = json.Unmarshal([]byte(rGetPlayerActivity.GetPayload()), &payload); err != nil {
+		return
+	}
+
+	return rGetPlayerActivity.GetStage(), nil
+
 }
 
 func DelControllerCacheData(playerID uint32, controller string) (err error) {
-	if err := config.App.Redis.Connection.Del(fmt.Sprintf("player_%v_controller_%s", playerID, controller)).Err(); err != nil {
+	if _, err = config.App.Server.Connection.DeletePlayerActivity(NewContext(1), &pb.DeletePlayerActivityRequest{
+		PlayerID:   playerID,
+		Controller: controller,
+	}); err != nil {
 		return fmt.Errorf("cant delete controller cache data: %s", err.Error())
 	}
-	return
+
+	return nil
 }
 
 // =================
@@ -117,7 +122,7 @@ func SetPlayerPlanetPositionInCache(playerID uint32, planet *pb.Planet) (err err
 	var jsonValue []byte
 	jsonValue, _ = json.Marshal(planet)
 
-	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_current_planet", playerID), string(jsonValue), 10*time.Minute).Err(); err != nil {
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_current_planet", playerID), string(jsonValue), 1*time.Minute).Err(); err != nil {
 		return fmt.Errorf("cant set player position in cache: %s", err.Error())
 	}
 	return
@@ -171,7 +176,7 @@ func GetExplorationCategoriesInCache() (categories []*pb.ExplorationCategory, er
 // =================
 // SetAntiFlood
 func SetAntiFlood(playerID uint32) (err error) {
-	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_antiflood", playerID), 1, 5*time.Second).Err(); err != nil {
+	if err := config.App.Redis.Connection.Set(fmt.Sprintf("player_%v_antiflood", playerID), 1, time.Duration(config.App.Antiflood.TTL)*time.Second).Err(); err != nil {
 		return fmt.Errorf("cant set antiflood in cache: %s", err.Error())
 	}
 	return

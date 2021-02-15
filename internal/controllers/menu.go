@@ -150,7 +150,7 @@ func (c *MenuController) CheckInTravel() bool {
 	// Verifico se il player si trova in viaggio
 	var travelData travelDataStruct
 	for _, activity := range c.Data.PlayerActiveStates {
-		if activity.Controller == "route.ship.travel" {
+		if activity.Controller == "route.ship.travel.finding" {
 			_ = json.Unmarshal([]byte(activity.Payload), &travelData)
 
 			// Recupero pianeta che si vuole raggiungere
@@ -186,8 +186,10 @@ func (c *MenuController) GetPlayerLife() (life string) {
 func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks string) {
 	var err error
 
+	// Format Custom
+	switch activity.GetController() {
 	// Verifico se si tritta di una missione
-	if activity.Controller == "route.safeplanet.coalition.mission" {
+	case "route.safeplanet.coalition.mission":
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
@@ -206,9 +208,15 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 			var missionController MissionPaylodStruct
 			helpers.UnmarshalPayload(activity.GetPayload(), &missionController)
 
-			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), missionController.MissionID)
+			// Recupero dettagli missione
+			missionDetails := c.MissionRecap(missionController.MissionID)
+
+			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), missionController.MissionID, missionDetails)
 		}
 
+		return
+	case "route.tutorial":
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()))
 		return
 	}
 
@@ -218,17 +226,98 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 	}
 
 	// Se sono delle attività non ancora concluse
-	if activity.GetToNotify() && time.Until(finishAt).Minutes() > 0 {
+	if time.Until(finishAt).Minutes() >= 0 {
 		finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
-		switch activity.Controller {
-		case "route.tutorial":
-			tasks = helpers.Trans(c.Player.Language.Slug, "route.tutorial.activity.progress")
-		default:
-			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
-		}
-	} else {
+		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
+	} else if activity.GetFinished() || time.Until(finishAt).Minutes() < 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
 	}
+
+	return
+}
+
+func (c *MenuController) MissionRecap(missionID uint32) (missionRecap string) {
+	var err error
+
+	// Recupero dettagli missione
+	var rGetMission *pb.GetMissionResponse
+	if rGetMission, err = config.App.Server.Connection.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
+		MissionID: missionID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	mission := rGetMission.GetMission()
+
+	switch mission.GetMissionCategory().GetSlug() {
+	// Trovare le risorse
+	case "resources_finding":
+		var missionPayload *pb.MissionResourcesFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enitità risorsa da cercare
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			ID: missionPayload.GetResourceID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.resources_finding.description.small",
+			missionPayload.GetResourceQty(),
+			helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
+			rGetResourceByID.GetResource().GetName(),
+			rGetResourceByID.GetResource().GetRarity().GetSlug(),
+			helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+		)
+
+	// Trova le risorse
+	case "planet_finding":
+		var missionPayload *pb.MissionPlanetFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero pianeta da trovare
+		var rGetPlanetByID *pb.GetPlanetByIDResponse
+		if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+			PlanetID: missionPayload.GetPlanetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.planet_finding.description.small",
+			rGetPlanetByID.GetPlanet().GetName(),
+		)
+
+	// Uccidi il nemico
+	case "kill_mob":
+		var missionPayload *pb.MissionKillMob
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enemy da Uccidere
+		var rGetEnemyByID *pb.GetEnemyByIDResponse
+		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+			EnemyID: missionPayload.GetEnemyID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero pianeta di dove si trova il mob
+		var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
+		if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
+			MapID: rGetEnemyByID.GetEnemy().GetPlanetMapID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.kill_mob.description.small",
+			rGetEnemyByID.GetEnemy().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetName(),
+		)
+	}
+
 	return
 }
 
@@ -252,7 +341,7 @@ func (c *MenuController) GetKeyboard(currentPosition *pb.Planet) [][]tgbotapi.Ke
 	for _, state := range c.Data.PlayerActiveStates {
 		if state.Controller == "route.tutorial" {
 			return c.TutorialKeyboard()
-		} else if state.Controller == "route.ship.travel" {
+		} else if state.Controller == "route.ship.travel.finding" {
 			return c.TravelKeyboard()
 		} else if state.Controller == "route.exploration" {
 			return c.ExplorationKeyboard()
@@ -315,7 +404,7 @@ func (c *MenuController) TutorialKeyboard() (keyboardRows [][]tgbotapi.KeyboardB
 	// Per il tutorial costruisco keyboard solo per gli stati attivi
 	for _, state := range c.Data.PlayerActiveStates {
 		var keyboardRow []tgbotapi.KeyboardButton
-		if state.Controller == "route.tutorial" {
+		if state.GetController() == "route.tutorial" {
 			keyboardRow = tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.tutorial.continue")),
 			)

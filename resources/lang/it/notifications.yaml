@@ -1,11 +1,22 @@
-# NOTIFICATIONS
+# NOTIFICATIONS - ACTIVITY
 notification.activity.route.exploration: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
 notification.activity.route.ship.laboratory: "La realizzazione del tuo craft è stata ultimata!"
 notification.activity.route.hunting: "Informazioni ritornate con successo!"
 notification.activity.route.safeplanet.hangar.repair: "Riparazione della nave ultimata!"
 notification.activity.route.safeplanet.hangar.create: "Crezione nave completata"
-notification.activity.route.ship.travel: "Nuovo pianeta raggiunto!"
+notification.activity.route.ship.travel.finding: "Nuovo pianeta raggiunto!"
 notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 notification.activity.route.death: "Hai recuperato le energie!"
 notification.activity.route.ship.rests: "Hai recuperato le energie!"
+
+# NOTIFICATIONS - ACHIEVEMENT
 notification.achievement.message: "🎯 Achievement *completato*!\n\nHai portato a termine: *%s*\n*Ricompensa*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
+
+# NOTIFICATIONS - TITAN
+notification.titan_drop.message: "️☠️ 👁 *%s* è stato sconfitto! ☠️\n\nI tuoi attacchi hanno inflitto *%v* danni!\nPer aver partecipato allo scontro riesci a recuperare:\n%s\n\nIl titano lascia a terra anche qualcosa di davvero speciale:\n*%s*"
+notification.titan_drop.base: "💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.titan_drop.armor.helmet: "👨🏼‍🚀 %s (%s)"
+notification.titan_drop.armor.glove: "🦾 %s (%s)"
+notification.titan_drop.armor.chest: "🥼 %s (%s)"
+notification.titan_drop.armor.boots: "🦿 %s (%s)"
+notification.titan_drop.weapon: "🗡 %s (%s)"

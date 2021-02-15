@@ -42,7 +42,7 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory.items")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
 		),
 	)
 

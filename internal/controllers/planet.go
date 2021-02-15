@@ -98,7 +98,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Aggiungo torna al menu
 	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 	))
 
 	msg := helpers.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)

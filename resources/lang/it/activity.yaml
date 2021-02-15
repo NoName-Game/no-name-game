@@ -1,4 +1,4 @@
-route.safeplanet.coalition.mission.activity.progress: "*🏢 Missione* #M%v in corso..."
+route.safeplanet.coalition.mission.activity.progress: "*🏢 Missione* #M%v: %s"
 route.safeplanet.coalition.mission.activity.done: "✅ *🏢 Missione* conclusa, torna al centro missioni per la tua ricompensa"
 
 route.safeplanet.hangar.create.activity.progress: "*🏗 Hangar*: Ordine ricevuto, nave disponibile tra %v minuti"
@@ -10,14 +10,14 @@ route.safeplanet.hangar.repair.activity.done: "✅ *🏗 Hangar*: Riparazione na
 route.exploration.activity.progress: "*⭕️ Esplorazione* in corso, *%v* minuti previsti al termine"
 route.exploration.activity.done: "✅ *⭕️ Esplorazione* completata, scopri subito le risorse trovate"
 
-route.safeplanet.crafter.activity.progress: "*🛠 Armaiolo*: Lavorazione in corso, *%v* minuti al termine"
-route.safeplanet.crafter.activity.done: "✅ *🛠 Armaiolo*: Il tuo craft è pronto al ritiro, passa a ritiralo quando vuoi"
+route.safeplanet.crafter.create.activity.progress: "*🛠 Armaiolo*: Lavorazione in corso, *%v* minuti al termine"
+route.safeplanet.crafter.create.activity.done: "✅ *🛠 Armaiolo*: Il tuo craft è pronto al ritiro, passa a ritiralo quando vuoi"
 
 route.ship.laboratory.activity.progress: "*🧪 Laboratorio*: Produzione in corso, *%v* minuti al termine"
 route.ship.laboratory.activity.done: "✅ *🧪 Laboratorio*: Produzione terminata, torna al laboratorio per completare"
 
-route.ship.travel.activity.progress: "*🚀 Viaggio* in corso, *%v* minuti al termine"
-route.ship.travel.activity.done: "✅ *🚀 Viaggio*: nuovo pianeta raggiunto, ora puoi procedere con l'atterraggio"
+route.ship.travel.finding.activity.progress: "*🚀 Viaggio* in corso, *%v* minuti al termine"
+route.ship.travel.finding.activity.done: "✅ *🚀 Viaggio*: nuovo pianeta raggiunto, ora puoi procedere con l'atterraggio"
 
 route.tutorial.activity.progress: "📖 *Tutorial* in corso..."
 route.tutorial.activity.done: "✅ 📖 *Tutorial* completato!"

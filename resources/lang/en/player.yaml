@@ -1,6 +1,6 @@
 ---
 #PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rank: *%s*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Planets* visited: *%d*"
 player.datails.system_visited: "\n💫 *Systems* visited: *%d*"
 #Guild
@@ -40,3 +40,8 @@ inventory.items.not_found: "The item you want to use doesn't seem to be valid."
 inventory.items.confirm: "Do you confirm you want to use *%v*?"
 inventory.items.confirm_warning: "\n\n⚠️Attention, any excess will be automatically discarded."
 inventory.items.completed: "You used *%s*."
+#PlayerRank
+rank.soldato: "Soldier"
+rank.caporale: "Corporal"
+rank.maresciallo: "Marshal"
+rank.generale: "General of the army"
