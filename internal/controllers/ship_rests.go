@@ -192,10 +192,15 @@ func (c *ShipRestsController) Stage() {
 		if finishAt, err = helpers.GetEndTime(rStartPlayerRest.GetRestEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
+		// Recupero orario per riprendere attività
+		var playAt time.Time
+		if playAt, err = helpers.GetEndTime(rStartPlayerRest.GetPlayEndTime(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05")),
+			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05"), playAt.Format("15:04:05")),
 		)
 
 		msg.ParseMode = tgbotapi.ModeMarkdown
