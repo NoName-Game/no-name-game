@@ -175,6 +175,13 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 				"ship.laboratory.wait_validator",
 				finishAt.Format("15:04:05"),
 			)
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+				),
+			)
 
 			return true
 		}
@@ -402,6 +409,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", finishAt.Format("15:04:05")),
 		)
+
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
