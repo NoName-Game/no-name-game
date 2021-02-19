@@ -372,7 +372,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 		} else if rDropTresure.GetTrap().GetID() > 0 {
 			// Se è una trappola e il player è morto
 			if rDropTresure.GetTrap().GetPlayerDie() {
-				c.PlayerDie()
+				c.PlayerDie(rDropTresure.GetTrap().GetDamage())
 				return
 			}
 
@@ -576,7 +576,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 
 	// Verifico se il PLAYER è morto
 	if rHitEnemy.GetPlayerDie() {
-		c.PlayerDie()
+		c.PlayerDie(rHitEnemy.GetEnemyDamage())
 		return
 	}
 
@@ -614,12 +614,12 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 	}
 }
 
-func (c *HuntingController) PlayerDie() {
+func (c *HuntingController) PlayerDie(damage int32) {
 	// Aggiorno messaggio notificando al player che è morto
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", damage),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

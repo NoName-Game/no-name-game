@@ -12,7 +12,7 @@ tresure.found.trap: "AH! You stumbled onto a *trap*, you lose 💔*%v*, you're l
 combat.damage: "⚔️ Fight report ⚔️\n\nYou attacked the enemy inflicting *%d* damage!\nHowever the enemy was able to hit and inflict you *%d* damage anyway!"
 combat.enemy_dodge: "⚔️ Fight report ⚔️\n\nYou attacked the enemy but it was able to *dodge* the hit, it turns around quickly and inflicts you *%d* damage!"
 combat.player_dodge: "⚔️ Fight report ⚔️\n\nYou were able to *dodge* the enemy hit, with a rapid hit you're able to deal him *%d* damage!"
-combat.player_killed: "⚔️ Fight report ⚔️\n\nThe enemy *defeated* you in battle!\nYou return to your base on your death bed, you'll need some time to restore your energy..."
+combat.player_killed: "⚔️ Fight report ⚔️\n\nThe enemy inflict you *%d* damage and *defeated* you in battle!\nYou return to your base on your death bed, you'll need some time to restore your energy..."
 combat.card: "You decide to engage in a battle with:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nYou're aiming at: *%s*\nWeapon equipped:\n*%s* (🛠 *%v*)"
 combat.mob_killed: "You *defeated* the enemy!\nYou retrieve from the battle:\n%s"
 combat.found.nothing: "\nToo bad, this time you found nothing!"
