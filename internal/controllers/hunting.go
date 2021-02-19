@@ -253,7 +253,7 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 	// Eseguo azione
 	switch inlineData.A {
 	case "up":
-		if c.Payload.PlayerPositionX-(int32(1*inlineData.D)) > 0 && !cellGrid[c.Payload.PlayerPositionX-int32(inlineData.D)][c.Payload.PlayerPositionY] {
+		if c.Payload.PlayerPositionX-(int32(1*inlineData.D)) >= 0 && !cellGrid[c.Payload.PlayerPositionX-int32(inlineData.D)][c.Payload.PlayerPositionY] {
 			// c.Payload.PlayerPositionX--
 			c.Payload.PlayerPositionX = c.Payload.PlayerPositionX - (int32(1 * inlineData.D))
 			break
@@ -269,7 +269,7 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 
 		return
 	case "left":
-		if c.Payload.PlayerPositionY-(int32(1*inlineData.D)) > 0 && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY-int32(inlineData.D)] {
+		if c.Payload.PlayerPositionY-(int32(1*inlineData.D)) >= 0 && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY-int32(inlineData.D)] {
 			c.Payload.PlayerPositionY = c.Payload.PlayerPositionY - (int32(1 * inlineData.D))
 			break
 		}
