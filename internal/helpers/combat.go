@@ -9,6 +9,13 @@ import (
 )
 
 var (
+	// Hunting Fight Actions
+	FightStart = InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "start_fight",
+	}
+
 	FightUp = InlineDataStruct{
 		C:  "hunting",
 		AT: "fight",
@@ -37,6 +44,12 @@ var (
 		C:  "hunting",
 		AT: "fight",
 		A:  "no_action",
+	}
+
+	FightPlayerDie = InlineDataStruct{
+		C:  "hunting",
+		AT: "fight",
+		A:  "player_die",
 	}
 )
 
