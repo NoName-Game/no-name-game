@@ -1,8 +1,8 @@
 ---
 #Expansion
-safeplanet.coalition.expansion.info: "Benvenuto nel centro 💫 *Espansione*.\n\nBy increasing *Rank* you will have the opportunity to explore the outer systems!\n\n"
+safeplanet.coalition.expansion.info: "Welcome to the 💫 *Expansion* center.\n\nBy increasing your *Rank* you will have the opportunity to explore the outer systems!\n\n"
 safeplanet.coalition.expansion.last_system: "Last system discovered: 💫 *%s*\n"
-safeplanet.coalition.expansion.recap_planets: "❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
+safeplanet.coalition.expansion.recap_planets: "❌ You still need to explore 🌏*%d* planets, out of *%d*."
 safeplanet.coalition.expansion.recap_planets_done: "\n✅ All the 🌏 planets of the system have been explored"
 safeplanet.coalition.expansion.recap_titan: "\n❌ Defeat 👁 *%s*, defender of this system."
 safeplanet.coalition.expansion.recap_titan_done: "\n✅ The titan 👁 *%s*, has been defeated!"
