@@ -397,7 +397,7 @@ func (c *TitanPlanetTackleController) PlayerDie() {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, "continue"), fightPlayerDie.GetDataString(),
+				helpers.Trans(c.Player.Language.Slug, "continue"), helpers.FightPlayerDie.GetDataString(),
 			),
 		),
 	)
