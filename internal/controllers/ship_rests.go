@@ -198,10 +198,14 @@ func (c *ShipRestsController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		var text string
+		text = helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05"))
+		if c.Player.Dead {
+			// Se è morto aggiungo messaggio ripresa attività
+			text += helpers.Trans(c.Player.Language.Slug, "ship.rest.sleep_activity", playAt.Format("15:04:05"))
+		}
 		// Invio messaggio
-		msg := helpers.NewMessage(c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05"), playAt.Format("15:04:05")),
-		)
+		msg := helpers.NewMessage(c.ChatID,text)
 
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
