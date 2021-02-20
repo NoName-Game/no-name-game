@@ -289,9 +289,10 @@ func (c *ShipTravelManualController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Aggiorno stato
-		c.CurrentState.Stage = 2
-		c.ForceBackTo = true
+		// Completo lo stato
+		c.CurrentState.Completed = true
+		// Imposto nil in modo da esser portato al menù principale
+		c.Configurations.ControllerBack.To = nil
 
 	// Fine esplorazione
 	case 3:
