@@ -47,6 +47,10 @@ inventory.items.confirm: "Confermi di voler usare *%v*?"
 inventory.items.confirm_warning: "\n\n⚠️Attenzione, l'eccedenza verrà automaticamente scartata."
 inventory.items.completed: "Hai usato *%s*."
 
+# Packs
+inventory.packs.what: "Ecco i 🎁 *Rifornimenti* in tuo possesso.\nDesideri usare qualcosa?"
+inventory.packs.completed: "Hai aperto la *cassa di rifornimenti* ed hai trovato:\n\n%s"
+
 # PlayerRank
 rank.soldato: "Soldato"
 rank.caporale: "Caporale"

@@ -49,6 +49,7 @@ var routes = map[string]reflect.Type{
 	"route.player.inventory":           reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem(),
 	"route.player.inventory.resources": reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem(),
 	"route.player.inventory.items":     reflect.TypeOf((*controllers.PlayerInventoryItemController)(nil)).Elem(),
+	"route.player.inventory.packs":		reflect.TypeOf((*controllers.PlayerInventoryPackController)(nil)).Elem(),
 	"route.player.inventory.equip":     reflect.TypeOf((*controllers.PlayerEquipmentController)(nil)).Elem(),
 	"route.banned":                     reflect.TypeOf((*controllers.BannedController)(nil)).Elem(),
 
