@@ -182,11 +182,6 @@ func (c *PlayerInventoryPackController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug),
 		)
 
-		// Verifica eccedenza
-		if int32(c.Player.GetLifePoint())+c.Payload.Item.Value > 100 {
-			text += helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning")
-		}
-
 		msg := helpers.NewMessage(c.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
