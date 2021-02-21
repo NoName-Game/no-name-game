@@ -77,17 +77,50 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		recapResources,
 	)
 
-	msg := helpers.NewMessage(c.ChatID, finalResource)
-	msg.ParseMode = tgbotapi.ModeMarkdown
-	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
-		),
-	)
+	// Se supero il limite di caratteri invio in pezzi separati
+	if len(finalResource) > 4096 {
+		// smart split
+		var out []string
+		buf := strings.Split(finalResource, "\n")
+		curr := ""
+		for _, s := range buf {
+			if len(curr + " " + s) <= 2048 {
+				curr += " " + s + "\n"
+			} else {
+				out = append(out, curr)
+				curr = ""
+			}
+		}
+		// final result
+		out = append(out, curr)
+		for _, text := range out {
+			msg := helpers.NewMessage(c.ChatID, text)
+			msg.ParseMode = tgbotapi.ModeMarkdown
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
+				),
+			)
 
-	if _, err = helpers.SendMessage(msg); err != nil {
-		c.Logger.Panic(err)
+			if _, err = helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err)
+			}
+		}
+	} else {
+		msg := helpers.NewMessage(c.ChatID, finalResource)
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
+			),
+		)
+
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
 	}
+
+
 }
 
 func (c *PlayerInventoryResourceController) Validator() bool {
