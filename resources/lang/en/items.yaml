@@ -3,6 +3,7 @@
 items.stuff: "🔩"
 items.medical: "💊"
 items.ship_support: "⚙️"
+items.pack: "🎁"
 #Other
 items.amulets: "Amulet"
 #Medical
@@ -23,3 +24,10 @@ items.basic_repair_component: "Basic repair component"
 items.description.basic_repair_component: "A good quality component, it will let you repair immediately your ship by *%v*"
 items.advanced_repair_component: "Advanced repair component"
 items.description.advanced_repair_component: "An excellent quality component, it will let you repair immediately your ship by *%v*"
+#Packs
+items.low_value_pack: "Rifornimento Comune"
+items.description.low_value_pack: "Pacchetto contente una fornitura limitata di risorse"
+items.medium_value_pack: "Rifornimento Generoso"
+items.description.medium_value_pack: "Pacchetto contente una fornitura generosa di risorse"
+items.high_value_pack: "Rifornimento Leggendario"
+items.description.high_value_pack: "Pacchetto contente una ricca fornitura di risorse e oggetti utili"
