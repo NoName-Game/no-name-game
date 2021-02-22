@@ -404,7 +404,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				recipe += fmt.Sprintf("- <b>(%v)</b> x %s %s (%s) %s \n",
+				recipe += fmt.Sprintf("- <b>%v</b> x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
@@ -482,7 +482,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					baseResources = "🔬Base"
 				}
 
-				recipe += fmt.Sprintf("- <b>(%v)</b> x %s %s (%s) %s \n",
+				recipe += fmt.Sprintf("- <b>%v</b> x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,

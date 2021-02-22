@@ -196,7 +196,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
 			for _, resource := range winningResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (<b>(%s)</b>) %s\n",
+					"- %s %v x %s (<b>%s</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,
@@ -238,7 +238,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		}
 
 		resourceFound := fmt.Sprintf(
-			"%s %s (<b>(%s)</b>) %s\n",
+			"%s %s (<b>%s</b>) %s\n",
 			helpers.GetResourceCategoryIcons(rThreeCardGameCheckResponse.GetResource().GetResourceCategoryID()),
 			rThreeCardGameCheckResponse.GetResource().Name,
 			rThreeCardGameCheckResponse.GetResource().Rarity.Slug,
@@ -305,7 +305,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
 			for _, resource := range winningResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (<b>(%s)</b>) %s\n",
+					"- %s %v x %s (<b>%s</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,

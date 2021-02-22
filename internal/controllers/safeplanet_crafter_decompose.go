@@ -302,7 +302,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 		if len(decomposeResources) > 0 {
 			for _, resource := range decomposeResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (<b>(%s)</b>) %s\n",
+					"- %s %v x %s (<b>%s</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,

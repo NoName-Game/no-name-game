@@ -346,10 +346,10 @@ func (c *ShipLaboratoryController) Stage() {
 			// Se la risorsa non è stata ancora scoperta mostro ???
 			resourceName := rGetResourceByID.GetResource().GetName()
 			if !rGetResourceByID.GetResource().GetEnabled() {
-				resourceName = "<b>(???)</b>"
+				resourceName = "<b>???</b>"
 			}
 
-			itemsRecipeList += fmt.Sprintf("%s %s%s (%s) %s - %v/<b>(%v)</b>\n",
+			itemsRecipeList += fmt.Sprintf("%s %s%s (%s) %s - %v/<b>%v</b>\n",
 				haveQuantity,
 				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()), resourceName,
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),

@@ -282,7 +282,7 @@ func (c *ExplorationController) Stage() {
 			}
 
 			// Aggiungo dettaglio risorsa
-			cycleResourcesMessage += fmt.Sprintf("💠 <b>(%v)</b> x <b>(%s)</b> (%s) %s\n",
+			cycleResourcesMessage += fmt.Sprintf("💠 <b>%v</b> x <b>%s</b> (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
@@ -302,7 +302,7 @@ func (c *ExplorationController) Stage() {
 			}
 
 			// Aggiungo dettaglio risorsa
-			allResourcesMessage += fmt.Sprintf("💠 <b>(%v)</b> x <b>(%s)</b> (%s) %s\n",
+			allResourcesMessage += fmt.Sprintf("💠 <b>%v</b> x <b>%s</b> (%s) %s\n",
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
@@ -395,7 +395,7 @@ func (c *ExplorationController) Stage() {
 				}
 
 				dropList += fmt.Sprintf(
-					"- 💠 <b>(%v)</b> x <b>(%s)</b> (%s) %s\n",
+					"- 💠 <b>%v</b> x <b>%s</b> (%s) %s\n",
 					drop.Quantity,
 					rGetResourceByID.GetResource().GetName(),
 					strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),

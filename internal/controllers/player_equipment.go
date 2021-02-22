@@ -293,7 +293,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - \\[%v, %v%%, %v%%]", armor.Name,
+						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%]", armor.Name,
 						strings.ToUpper(armor.Rarity.Slug),
 						math.Round(armor.Defense),
 						math.Round(armor.Evasion),
@@ -334,7 +334,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - \\[%v, %v%%, %v]", weapon.Name,
+						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v]", weapon.Name,
 						strings.ToUpper(weapon.Rarity.Slug),
 						math.Round(weapon.RawDamage),
 						math.Round(weapon.Precision),

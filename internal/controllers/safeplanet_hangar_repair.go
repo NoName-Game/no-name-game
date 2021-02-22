@@ -212,7 +212,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 		shipRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.repairinfo", rGetShipByID.GetShip().GetName())
 		if rGetShipRepairInfo.GetNeedRepairs() {
 			// Mostro Partial
-			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ <b>(%v%%)</b> (%s)\n%s\n%s\n\n",
+			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ <b>%v%%</b> (%s)\n%s\n%s\n\n",
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.partial"),
 				rGetShipByID.GetShip().GetIntegrity(), rGetShipRepairInfo.GetPartial().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetPartial().GetRepairTime()),
@@ -220,7 +220,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 			)
 
 			// Mostro Full
-			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ <b>(100%%)</b> (%s)\n%s\n%s ",
+			shipRecap += fmt.Sprintf("%s\n🔧 %v%% ➡️ <b>100%%</b> (%s)\n%s\n%s ",
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.full"),
 				rGetShipByID.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.time", rGetShipRepairInfo.GetFull().GetRepairTime()),
@@ -281,7 +281,7 @@ func (c *SafePlanetHangarRepairController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			recapResourceUsed += fmt.Sprintf("- <b>(%v)</b> x %s%s (%s) %s\n",
+			recapResourceUsed += fmt.Sprintf("- <b>%v</b> x %s%s (%s) %s\n",
 				resourceUsed.Quantity,
 				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 				rGetResourceByID.GetResource().GetName(),
