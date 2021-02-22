@@ -165,9 +165,6 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 					tgbotapi.NewKeyboardButton(
 						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
 					),
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-					),
 				),
 			)
 
