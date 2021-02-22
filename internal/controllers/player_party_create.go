@@ -90,7 +90,7 @@ func (c *PlayerPartyCreateController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.create.created"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
