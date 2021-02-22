@@ -14,4 +14,4 @@ safeplanet.mission.type.kill_mob.description: "🔖 *Goal*:\nFind 🐺 *%s* seen
 safeplanet.mission.type.kill_mob.description.small: "Kill🐺 *%s* seen on the planet🌏*%s*"
 safeplanet.mission.type.resources_finding: "Resources retrieve"
 safeplanet.mission.type.resources_finding.description: "🔖 *Goal*:\nFind and retrieve:\n- 💠 *%v* x %s*%v* (%s) %s\n\nGood luck."
-safeplanet.mission.type.resources_finding.description.small: "Fnid *%v* x %s*%v* (%s) %s"
+safeplanet.mission.type.resources_finding.description.small: "Find *%v* x %s*%v* (%s) %s"
