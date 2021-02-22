@@ -5,7 +5,7 @@ safeplanet.crafting.no_money: "❌ I'm sorry but you haven't got enough money to
 #Crafter - Create
 safeplanet.crafting.start: "🛠 Start!"
 safeplanet.crafting.what: "What would you like to craft?"
-safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi *almeno 20 risorse* a tua scelta e l'armaiolo tenterà di creare qualcosa di <b>unico</b> solo per te!"
+safeplanet.crafting.info: "📖: Scegli quale tipo di arma o armatura vorresti realizzare, aggiungi <b>almeno 20 risorse</b> a tua scelta e l'armaiolo tenterà di creare qualcosa di <b>unico</b> solo per te!"
 safeplanet.crafting.armor.type: "Which part of the body would you like to protect?"
 safeplanet.crafting.add: "Add"
 safeplanet.crafting.choose_resources: "Quali 💠 <b>Risorse</b> vorresti usare?\n\nIl costo della lavorazione: <b>%v</b>💰\n%s\n"
