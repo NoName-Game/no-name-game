@@ -2,4 +2,4 @@
 setup.intro: "Hello 👨🏼‍🚀 <b>%s</b>!\nWelcome to 🕹 <b>NoName</b> Game!"
 setup.select_timezone: "⚙️ Setup 1 of 2: <b>experience</b>.\n\nChoose your current 🕘️ timezone:"
 setup.select_language: "⚙️ Setup 2 of 2: <b>communication</b>.\n\nChoose your 💬 language:"
-setup.end: "✅ Setup successfully completed! <b>Good Game!*</b>"
+setup.end: "✅ Setup successfully completed! <b>Good Game!</b>"
