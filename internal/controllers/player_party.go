@@ -83,7 +83,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 			rGetPartyDetails.GetNPlayers(),
 			playerRecap,
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       partysKeyboard,
@@ -97,7 +97,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 
 	// Il Player non è in un party
 	msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.non_in_party"))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.party.create")),
