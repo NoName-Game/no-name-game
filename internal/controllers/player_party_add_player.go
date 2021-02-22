@@ -120,7 +120,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 		))
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       protectorsKeyboard,
@@ -189,14 +189,14 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
 			"player.party.add.add_player_confirm_to_player", c.Player.GetUsername(),
 		))
-		msgToPlayerAdded.ParseMode = tgbotapi.ModeMarkdown
+		msgToPlayerAdded.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msgToPlayerAdded); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Ritorno conferma
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
