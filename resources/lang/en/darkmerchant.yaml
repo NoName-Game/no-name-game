@@ -1,7 +1,7 @@
 ---
 #DarkMerchant
-darkmerchant.intro: "Greetings explorer, are you interested on any resource?\n\n... make your choice quickly, I don't think it will last long here... damn Coalition...\n\nYour budget: 💰*%v*"
-darkmerchant.quantity: "How many would you like to purchase?"
-darkmerchant.confirm: "Perfect! So tell me, are you sure you want to buy *%v* pieces of *%s* at the cost of 💰*%v*?"
+darkmerchant.intro: "Greetings explorer, are you interested in any resource?\n\n... make your choice quickly, I don't think I'll stop here too long... damn Coalition...\n\nYour budget: 💰*%v*"
+darkmerchant.quantity: "How much would you like to purchase?"
+darkmerchant.confirm: "Perfect! Tell me then, are you sure you want to buy *%v* pieces of *%s* at the cost of 💰*%v*?"
 darkmerchant.completed: "Here are your resources, it was a pleasure doing business with you. I hope to meet you again on another planet."
 darkmerchant.not_enough_money: "It seems like you don't have enough money to continue."
