@@ -85,7 +85,9 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 	// Verifico che la tipologia di equip che vuole il player esista
 	// ##################################################################################################
 	case 2:
-		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, c.Update.Message.Text); c.Payload.ItemCategory == "" {
+		// Recupero categoria scelta in base alla formattazione passata
+		categorySplit := strings.Split(c.Update.Message.Text, " (")
+		if c.Payload.ItemCategory = helpers.CheckAndReturnCategorySlug(c.Player.Language.Slug, categorySplit[0]); c.Payload.ItemCategory == "" {
 			return true
 		}
 	// ##################################################################################################
@@ -220,7 +222,22 @@ func (c *PlayerEquipmentController) Stage() {
 			}
 
 			for _, category := range rGetAllArmorCategory.GetArmorCategories() {
-				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, category.Slug)))
+				// Recupero quante armature per quella tipologia del player per contare quante ne ha
+				var rGetPlayerArmorsByCategoryID *pb.GetPlayerArmorsByCategoryIDResponse
+				if rGetPlayerArmorsByCategoryID, err = config.App.Server.Connection.GetPlayerArmorsByCategoryID(helpers.NewContext(1), &pb.GetPlayerArmorsByCategoryIDRequest{
+					PlayerID:   c.Player.GetID(),
+					CategoryID: category.GetID(),
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				keyboardRow := tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(
+					fmt.Sprintf("%s (%v)",
+						helpers.Trans(c.Player.Language.Slug, category.Slug),
+						len(rGetPlayerArmorsByCategoryID.GetArmors()),
+					),
+				))
+
 				keyboardRowCategories = append(keyboardRowCategories, keyboardRow)
 			}
 		}
