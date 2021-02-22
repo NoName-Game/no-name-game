@@ -225,7 +225,7 @@ func (c *TutorialController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishAt.Format("15:04:05 01/02")),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -282,7 +282,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 	textList := helpers.GenerateTextArray(c.Player.Language.Slug, c.CurrentState.Controller)
 
 	// Invio il primo messaggio per eliminare la tastiera
-	initMessage := helpers.NewMessage(c.Update.Message.Chat.ID, "...")
+	initMessage := helpers.NewMessage(c.ChatID, "...")
 	initMessage.ParseMode = tgbotapi.ModeMarkdown
 	initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	if _, err = helpers.SendMessage(initMessage); err != nil {
@@ -387,7 +387,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 
 	// Mando messaggio allert
 	time.Sleep(2 * time.Second)
-	alertMessage := helpers.NewMessage(c.Update.Message.Chat.ID, textList[20])
+	alertMessage := helpers.NewMessage(c.ChatID, textList[20])
 	alertMessage.ParseMode = tgbotapi.ModeMarkdown
 	alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	if _, err = helpers.SendMessage(alertMessage); err != nil {

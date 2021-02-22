@@ -49,7 +49,7 @@ func (c *PlanetBookmarkAddController) Handle(player *pb.Player, update tgbotapi.
 		PlayerID: c.Player.GetID(),
 	})
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "planet.bookmark.add_ok"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "planet.bookmark.add_ok"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

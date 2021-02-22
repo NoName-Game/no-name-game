@@ -64,7 +64,7 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
 	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
 		if i < 1 {
-			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 *%s* ⚔️ *%d* \n",
+			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 <b>%s</b> ⚔️ <b>%d</b> \n",
 				conquerors.GetPlayer().GetUsername(),
 				conquerors.GetNKills(),
 			)
@@ -83,8 +83,8 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.planet_free")
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, conquerorsListMsg)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg := helpers.NewMessage(c.ChatID, conquerorsListMsg)
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),

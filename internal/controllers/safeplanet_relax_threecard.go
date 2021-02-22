@@ -144,7 +144,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		// Verifico se il player ha abbastanza soldi per giocare
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -158,7 +158,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		}
 
 		// Se non è esploso nulla allora posso dare le prime carte
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.start"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.start"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -281,7 +281,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		// Verifico se il player ha abbastanza soldi per giocare
 		if err != nil && strings.Contains(err.Error(), "player dont have enough diamond") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {

@@ -1,5 +1,5 @@
 # PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rango: *%s*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
+player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rango: *%s* -> *%v*/*%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
 player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
 player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
 
@@ -46,6 +46,10 @@ inventory.items.not_found: "L'oggetto che vuoi usare non sembra essere valido."
 inventory.items.confirm: "Confermi di voler usare *%v*?"
 inventory.items.confirm_warning: "\n\n⚠️Attenzione, l'eccedenza verrà automaticamente scartata."
 inventory.items.completed: "Hai usato *%s*."
+
+# Packs
+inventory.packs.what: "Ecco i 🎁 *Rifornimenti* in tuo possesso.\nDesideri usare qualcosa?"
+inventory.packs.completed: "Hai aperto la *cassa di rifornimenti* ed hai trovato:\n\n%s"
 
 # PlayerRank
 rank.soldato: "Soldato"

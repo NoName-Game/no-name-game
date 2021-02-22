@@ -175,6 +175,13 @@ func (c *ShipLaboratoryController) Validator() (hasErrors bool) {
 				"ship.laboratory.wait_validator",
 				finishAt.Format("15:04:05"),
 			)
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+				),
+			)
 
 			return true
 		}
@@ -207,7 +214,7 @@ func (c *ShipLaboratoryController) Stage() {
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
 			// Tolgo momentaneamente Altro dalla pagina di crafting, rimuovere quando ci saranno item craftabili.
-			if category.Slug == "stuff" {
+			if category.Slug == "stuff" || category.Slug == "pack"{
 				continue
 			}
 			row := tgbotapi.NewKeyboardButtonRow(
@@ -402,6 +409,7 @@ func (c *ShipLaboratoryController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", finishAt.Format("15:04:05")),
 		)
+
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
@@ -423,7 +431,7 @@ func (c *ShipLaboratoryController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"ship.laboratory.craft_completed",

@@ -41,6 +41,7 @@ func (logger *Logger) Init() {
 		hook.StacktraceConfiguration.Level = logrus.InfoLevel
 		// hook.StacktraceConfiguration.Skip
 		hook.StacktraceConfiguration.Context = 50
+		hook.SetRelease(os.Getenv("VERSION"))
 		// hook.Stacktrace  Configuration.InAppPrefixes
 		hook.StacktraceConfiguration.IncludeErrorBreadcrumb = true
 		hook.StacktraceConfiguration.Enable = true

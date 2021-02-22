@@ -174,7 +174,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 		))
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.choose_quantity"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.choose_quantity"))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -196,7 +196,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.confirmation",
 				c.Payload.Quantity,
 				rGetResourceByID.GetResource().GetName(),
@@ -228,7 +228,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough resource quantity") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.not_enough_resource"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -240,7 +240,7 @@ func (c *SafePlanetResearchDonationController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.research.donation.completed"),
 		)
 

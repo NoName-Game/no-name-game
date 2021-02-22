@@ -8,9 +8,12 @@ safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la mission
 
 safeplanet.mission.type.planet_finding: "Trova il pianeta"
 safeplanet.mission.type.planet_finding.description: "🔖 *Obbiettivo*:\nTrovare e raggiungere il pianeta 🌏*%s*.\n\nBuona fortuna."
+safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏*%s*"
 
 safeplanet.mission.type.kill_mob: "Uccidi il nemico"
 safeplanet.mission.type.kill_mob.description: "🔖 *Obbiettivo*:\nTrovare 🐺 *%s* avvistato sul pianeta 🌏*%s* e annientarlo.\n\nBuona fortuna."
+safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 *%s* avvistato sul pianeta 🌏*%s*"
 
 safeplanet.mission.type.resources_finding: "Recupero risorse"
 safeplanet.mission.type.resources_finding.description: "🔖 *Obbiettivo*:\nTrovare e recuperare:\n- 💠 *%v* x %s*%v* (%s) %s\n\nBuona fortuna."
+safeplanet.mission.type.resources_finding.description.small: "Trovare *%v* x %s*%v* (%s) %s"

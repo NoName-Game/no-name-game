@@ -101,7 +101,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 	))
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, planetDetailsMsg)
+	msg := helpers.NewMessage(c.ChatID, planetDetailsMsg)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		ResizeKeyboard: true,

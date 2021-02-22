@@ -13,13 +13,13 @@ import (
 )
 
 // ====================================
-// PlayerInventoryItemController
+// PlayerInventoryPackController
 // ====================================
-// Con questo controller il player avrà la possibilità di usare gli item
-// da lui craftati e non. Quindi di beneficiare dei potenziamenti.
+// Con questo controller il player avrà la possibilità di aprire i pacchetti
+// Quindi di beneficiare dei drops.
 // ====================================
 
-type PlayerInventoryItemController struct {
+type PlayerInventoryPackController struct {
 	Controller
 	Payload struct {
 		Item *pb.Item
@@ -29,13 +29,13 @@ type PlayerInventoryItemController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlayerInventoryPackController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.player.inventory.items",
+			Controller: "route.player.inventory.packs",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
@@ -64,15 +64,15 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 // ====================================
 // Validator
 // ====================================
-func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
+func (c *PlayerInventoryPackController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico quale item ha scelto di usare e controllo se il player possiede realmente l'item indicato
 	// ##################################################################################################
 	case 1:
 		var err error
-		var rGetPlayerItems *pb.GetPlayerItemsResponse
-		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		var rGetPlayerPacks *pb.GetPlayerPacksResponse
+		if rGetPlayerPacks, err = config.App.Server.Connection.GetPlayerPacks(helpers.NewContext(1), &pb.GetPlayerPacksRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
@@ -88,7 +88,7 @@ func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
 			}
 		}
 
-		for _, item := range rGetPlayerItems.GetPlayerInventory() {
+		for _, item := range rGetPlayerPacks.GetPlayerInventory() {
 			if itemChoosed == helpers.Trans(c.Player.Language.Slug, "items."+item.Item.Slug) {
 				c.Payload.Item = item.GetItem()
 				return false
@@ -112,14 +112,14 @@ func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *PlayerInventoryItemController) Stage() {
+func (c *PlayerInventoryPackController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// In questo stage recupero tutti gli item del player e li riporto sul tastierino
 	case 0:
 		// Recupero items del player
-		var rGetPlayerItems *pb.GetPlayerItemsResponse
-		if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
+		var rGetPlayerPacks *pb.GetPlayerPacksResponse
+		if rGetPlayerPacks, err = config.App.Server.Connection.GetPlayerPacks(helpers.NewContext(1), &pb.GetPlayerPacksRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
@@ -129,15 +129,9 @@ func (c *PlayerInventoryItemController) Stage() {
 		var keyboardRowItems [][]tgbotapi.KeyboardButton
 
 		// Sorting inventario
-		inv := helpers.SortItemByCategory(rGetPlayerItems.GetPlayerInventory())
+		inv := helpers.SortItemByCategory(rGetPlayerPacks.GetPlayerInventory())
 
 		for _, item := range inv {
-			// Rimuovo amuleti dalla visualizzazione
-			// Nel caso diventassero pìu oggetti creare un metodo dedicato
-			if item.Item.ID == 7 || item.Item.ID == 10 || item.Item.ID == 11 || item.Item.ID == 12 {
-				continue
-			}
-
 			keyboardRowItem := tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
 					fmt.Sprintf(
@@ -161,7 +155,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		// Invio messagio con recap e con selettore categoria
 		msg := helpers.NewMessage(
 			c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "inventory.items.what"),
+			helpers.Trans(c.Player.Language.Slug, "inventory.packs.what"),
 		)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
@@ -185,13 +179,8 @@ func (c *PlayerInventoryItemController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm",
 				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
 			),
-			helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug, c.Payload.Item.Value),
+			helpers.Trans(c.Player.Language.Slug, "items.description."+c.Payload.Item.Slug),
 		)
-
-		// Verifica eccedenza
-		if int32(c.Player.GetLifePoint())+c.Payload.Item.Value > 100 {
-			text += helpers.Trans(c.Player.Language.Slug, "inventory.items.confirm_warning")
-		}
 
 		msg := helpers.NewMessage(c.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeMarkdown
@@ -214,19 +203,34 @@ func (c *PlayerInventoryItemController) Stage() {
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
 	case 2:
 		// Richiamo il ws per usare l'item selezionato
-		if _, err := config.App.Server.Connection.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
+		var drops *pb.OpenPackResponse
+		if drops, err = config.App.Server.Connection.OpenPack(helpers.NewContext(1), &pb.OpenPackRequest{
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
+		var dropResults string
+		// Creo messaggio di recap drop
+		for _, resource := range drops.GetResources() {
+			dropResults += fmt.Sprintf(
+				"- %s %s (*%s*) %s\n",
+				helpers.GetResourceCategoryIcons(resource.GetResourceCategoryID()),
+				resource.GetName(),
+				strings.ToUpper(resource.GetRarity().GetSlug()),
+				helpers.GetResourceBaseIcons(resource.GetBase()))
+		}
+		if len(drops.GetItems()) > 0 {
+			dropResults += "\n"
+			for _, item := range drops.Items {
+				dropResults += fmt.Sprintf("- *%s*\n", helpers.Trans(c.Player.Language.Slug, "items."+item.GetSlug()))
+			}
+		}
+		// Countdown 3-2-1 Drop
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "inventory.items.completed",
-				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
-			),
-		)
+			helpers.Trans(c.Player.Language.Slug, "inventory.packs.completed",dropResults))
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

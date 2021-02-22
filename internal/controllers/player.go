@@ -68,6 +68,18 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}); err != nil {
 		c.Logger.Panic(err)
 	}
+	// *************************
+	// Recupero rank player
+	// *************************
+	var rGetPlayerRankPoint *pb.GetPlayerRankPointResponse
+	if rGetPlayerRankPoint, err = config.App.Server.Connection.GetPlayerRankPoint(helpers.NewContext(1), &pb.GetPlayerRankPointRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var rGetRankByID *pb.GetRankByIDResponse
+	rGetRankByID, _ = config.App.Server.Connection.GetRankByID(helpers.NewContext(1), &pb.GetRankByIDRequest{RankID: c.Player.RankID + 1})
 
 	var amulets int32
 	for _, item := range rGetPlayerItems.GetPlayerInventory() {
@@ -87,6 +99,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		rGetPlayerExperience.GetValue(), rGetLevelByID.GetLevel().GetExperienceNeeded(), // Esperienza
 		c.Player.GetLevel().GetID(), // Livello
 		rank,
+		rGetPlayerRankPoint.GetValue(), rGetRankByID.GetRank().GetPointNeeded(),
 		money, diamond, amulets,
 	)
 
@@ -122,8 +135,8 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		rCountSystemVisited.GetValue(),
 	)
 
-	// msg := services.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "player.intro"))
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapPlayer)
+	// msg := services.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "player.intro"))
+	msg := helpers.NewMessage(c.ChatID, recapPlayer)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

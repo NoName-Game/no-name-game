@@ -119,8 +119,8 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_start"))
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       protectorsKeyboard,
@@ -135,8 +135,8 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_confirm", c.Payload.Username))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.add_player_confirm", c.Payload.Username))
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -168,7 +168,7 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player already in one party") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "player.party.adding_player_already_in_one_party"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -189,14 +189,14 @@ func (c *PlayerPartyAddPlayerController) Stage() {
 			rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
 			"player.party.add.add_player_confirm_to_player", c.Player.GetUsername(),
 		))
-		msgToPlayerAdded.ParseMode = tgbotapi.ModeMarkdown
+		msgToPlayerAdded.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msgToPlayerAdded); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Ritorno conferma
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.add.completed_ok"))
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

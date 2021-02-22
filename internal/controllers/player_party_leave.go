@@ -79,8 +79,8 @@ func (c *PlayerPartyLeaveController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 0:
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.confirm"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.confirm"))
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -112,7 +112,7 @@ func (c *PlayerPartyLeaveController) Stage() {
 			c.Logger.Warning(err)
 
 			// Potrebbero esserci stati degli errori generici
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
@@ -137,7 +137,7 @@ func (c *PlayerPartyLeaveController) Stage() {
 						rGetPlayerByUsername.GetPlayer().GetLanguage().GetSlug(),
 						"player.party.remove.remove_player_confirm_to_player", c.Player.GetUsername(),
 					))
-					msgToPlayerRemoved.ParseMode = tgbotapi.ModeMarkdown
+					msgToPlayerRemoved.ParseMode = tgbotapi.ModeHTML
 					if _, err = helpers.SendMessage(msgToPlayerRemoved); err != nil {
 						c.Logger.Panic(err)
 					}
@@ -145,8 +145,8 @@ func (c *PlayerPartyLeaveController) Stage() {
 			}
 		}
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ok"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.leave.completed_ok"))
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

@@ -208,7 +208,10 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 			var missionController MissionPaylodStruct
 			helpers.UnmarshalPayload(activity.GetPayload(), &missionController)
 
-			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), missionController.MissionID)
+			// Recupero dettagli missione
+			missionDetails := c.MissionRecap(missionController.MissionID)
+
+			tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), missionController.MissionID, missionDetails)
 		}
 
 		return
@@ -223,11 +226,96 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 	}
 
 	// Se sono delle attività non ancora concluse
-	if activity.GetToNotify() || time.Until(finishAt).Minutes() > 0 {
+	if time.Until(finishAt).Minutes() >= 0 {
 		finishTime := math.Abs(math.RoundToEven(time.Since(finishAt).Minutes()))
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.progress", activity.GetController()), finishTime)
-	} else if activity.GetFinished() {
+	} else if activity.GetFinished() || time.Until(finishAt).Minutes() < 0 {
 		tasks = helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("%s.activity.done", activity.GetController()))
+	}
+
+	return
+}
+
+func (c *MenuController) MissionRecap(missionID uint32) (missionRecap string) {
+	var err error
+
+	// Recupero dettagli missione
+	var rGetMission *pb.GetMissionResponse
+	if rGetMission, err = config.App.Server.Connection.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
+		MissionID: missionID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	mission := rGetMission.GetMission()
+
+	switch mission.GetMissionCategory().GetSlug() {
+	// Trovare le risorse
+	case "resources_finding":
+		var missionPayload *pb.MissionResourcesFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enitità risorsa da cercare
+		var rGetResourceByID *pb.GetResourceByIDResponse
+		if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+			ID: missionPayload.GetResourceID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.resources_finding.description.small",
+			missionPayload.GetResourceQty(),
+			helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
+			rGetResourceByID.GetResource().GetName(),
+			rGetResourceByID.GetResource().GetRarity().GetSlug(),
+			helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+		)
+
+	// Trova le risorse
+	case "planet_finding":
+		var missionPayload *pb.MissionPlanetFinding
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero pianeta da trovare
+		var rGetPlanetByID *pb.GetPlanetByIDResponse
+		if rGetPlanetByID, err = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+			PlanetID: missionPayload.GetPlanetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.planet_finding.description.small",
+			rGetPlanetByID.GetPlanet().GetName(),
+		)
+
+	// Uccidi il nemico
+	case "kill_mob":
+		var missionPayload *pb.MissionKillMob
+		helpers.UnmarshalPayload(mission.GetPayload(), &missionPayload)
+
+		// Recupero enemy da Uccidere
+		var rGetEnemyByID *pb.GetEnemyByIDResponse
+		if rGetEnemyByID, err = config.App.Server.Connection.GetEnemyByID(helpers.NewContext(1), &pb.GetEnemyByIDRequest{
+			EnemyID: missionPayload.GetEnemyID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero pianeta di dove si trova il mob
+		var rGetPlanetByMapID *pb.GetPlanetByMapIDResponse
+		if rGetPlanetByMapID, err = config.App.Server.Connection.GetPlanetByMapID(helpers.NewContext(1), &pb.GetPlanetByMapIDRequest{
+			MapID: rGetEnemyByID.GetEnemy().GetPlanetMapID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		missionRecap += helpers.Trans(c.Player.Language.Slug,
+			"safeplanet.mission.type.kill_mob.description.small",
+			rGetEnemyByID.GetEnemy().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetName(),
+		)
 	}
 
 	return

@@ -51,7 +51,7 @@ func (c *SafePlanetCoalitionStatisticsController) Handle(player *pb.Player, upda
 		c.TopMissionCompleted()
 	}
 
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(player.Language.Slug, "safeplanet.coalition.statistics.intro"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.coalition.statistics.intro"))
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -201,7 +201,7 @@ func (c *SafePlanetCoalitionStatisticsController) YouFormatter(username string, 
 
 func (c *SafePlanetCoalitionStatisticsController) SendStatistcs(title, all, you string) {
 	var err error
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, fmt.Sprintf("*%s*\n%s\n\n%s\n%s",
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("*%s*\n%s\n\n%s\n%s",
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s", title)),
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s.description", title)),
 		all,

@@ -30,7 +30,7 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 			Controller: "route.ship.rests",
 		},
 		Configurations: ControllerConfigurations{
-			ControllerBlocked: []string{"hunting", "exploration"},
+			ControllerBlocked: []string{"exploration"},
 			ControllerBack: ControllerBack{
 				To:        &ShipController{},
 				FromStage: 1,
@@ -192,11 +192,20 @@ func (c *ShipRestsController) Stage() {
 		if finishAt, err = helpers.GetEndTime(rStartPlayerRest.GetRestEndTime(), c.Player); err != nil {
 			c.Logger.Panic(err)
 		}
+		// Recupero orario per riprendere attività
+		var playAt time.Time
+		if playAt, err = helpers.GetEndTime(rStartPlayerRest.GetPlayEndTime(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
 
+		var text string
+		text = helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05"))
+		if c.Player.Dead {
+			// Se è morto aggiungo messaggio ripresa attività
+			text += helpers.Trans(c.Player.Language.Slug, "ship.rest.sleep_activity", playAt.Format("15:04:05"))
+		}
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
-			helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05")),
-		)
+		msg := helpers.NewMessage(c.ChatID,text)
 
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -236,7 +245,7 @@ func (c *ShipRestsController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, recapMessage)
+		msg := helpers.NewMessage(c.ChatID, recapMessage)
 		msg.ParseMode = tgbotapi.ModeMarkdown
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

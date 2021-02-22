@@ -153,15 +153,15 @@ func (c *SafePlanetMissionController) Stage() {
 	case 1:
 		// Chiamo il ws e recupero il tipo di missione da effettuare
 		// attraverso il tipo di missione costruisco il corpo del messaggio
-		var rGetMission *pb.GetMissionResponse
-		if rGetMission, err = config.App.Server.Connection.GetMission(helpers.NewContext(1), &pb.GetMissionRequest{
+		var rNewMission *pb.NewMissionResponse
+		if rNewMission, err = config.App.Server.Connection.NewMission(helpers.NewContext(1), &pb.NewMissionRequest{
 			PlayerID: c.Player.GetID(),
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Recupero dettagli missione
-		missionRecap := c.getMissionRecap(rGetMission.GetMission())
+		missionRecap := c.getMissionRecap(rNewMission.GetMission())
 
 		// Invio messaggio di attesa
 		msg := helpers.NewMessage(c.Player.ChatID, missionRecap)

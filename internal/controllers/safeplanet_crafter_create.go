@@ -22,9 +22,9 @@ type SafePlanetCrafterCreateController struct {
 		ItemCategory     string
 		Resources        map[uint32]int32
 		ResourceQuantity int32 // Quantità di risorse aggiunte
-		SingleQuantity	 int32 // Quantità per singolo item
-		ResourceName	 string
- 		AddResource      bool  // Flag per verifica aggiunta nuova risorsa
+		SingleQuantity   int32 // Quantità per singolo item
+		ResourceName     string
+		AddResource      bool // Flag per verifica aggiunta nuova risorsa
 		Price            int32
 	}
 	Controller
@@ -104,7 +104,7 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			if len(resourceName) < 3 {
 				return true
 			} else {
-				c.Payload.ResourceName  = resourceName[2]
+				c.Payload.ResourceName = resourceName[2]
 			}
 
 		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.start") {
@@ -220,7 +220,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		// Clear and exit
 		keyboardRowCategories = append(keyboardRowCategories, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.more")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
 		msg := helpers.NewMessage(c.Player.ChatID, message)
@@ -291,7 +291,6 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				c.Payload.Resources = make(map[uint32]int32)
 			}
 
-
 			// Recupero risorsa
 			var rGetResourceByName *pb.GetResourceByNameResponse
 			if rGetResourceByName, err = config.App.Server.Connection.GetResourceByName(helpers.NewContext(1), &pb.GetResourceByNameRequest{
@@ -313,14 +312,14 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 						// Se il player ha effettivamente la risorsa creo/incremento
 						// Incremento quantitativo risorse
 						if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
-							if c.Payload.Resources[choosedResource.GetID()] + c.Payload.SingleQuantity < resource.Quantity {
+							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity < resource.Quantity {
 								c.Payload.Resources[choosedResource.GetID()] += c.Payload.SingleQuantity
-								c.Payload.Price += int32(10 * choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
+								c.Payload.Price += int32(10*choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
 							}
 						} else if hasResource {
 							// È la prima volta che inserisce questa risorsa
 							c.Payload.Resources[choosedResource.GetID()] = c.Payload.SingleQuantity
-							c.Payload.Price += int32(10 * choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
+							c.Payload.Price += int32(10*choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
 						}
 
 						c.Payload.ResourceQuantity += c.Payload.SingleQuantity
@@ -517,7 +516,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		if err != nil && strings.Contains(err.Error(), "player dont have enough money") {
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di monete
-			errorMsg := helpers.NewMessage(c.Update.Message.Chat.ID,
+			errorMsg := helpers.NewMessage(c.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_money"),
 			)
 

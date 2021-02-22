@@ -26,6 +26,7 @@ type HuntingController struct {
 	Payload struct {
 		CallbackMessageID int
 		MapID             uint32
+		LastMoveType      string
 		PlayerPositionX   int32
 		PlayerPositionY   int32
 		BodySelection     int32
@@ -39,101 +40,6 @@ type HuntingController struct {
 var (
 	// Parti di corpo disponibili per l'attacco
 	bodyParts = [4]string{"helmet", "chest", "glove", "boots"}
-
-	// Hunting Move Actions
-	moveDown = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "down",
-	}
-
-	moveUp = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "up",
-	}
-
-	moveLeft = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "left",
-	}
-
-	moveRight = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "right",
-	}
-
-	moveAction = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "action",
-	}
-
-	moveNoAction = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "move",
-		A:  "no_action",
-	}
-
-	// Hunting Fight Actions
-	fightStart = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "start_fight",
-	}
-
-	fightReturnMap = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "return_map",
-	}
-
-	fightPlayerDie = helpers.InlineDataStruct{
-		C:  "hunting",
-		AT: "fight",
-		A:  "player_die",
-	}
-
-	// Keyboard inline di esplorazione
-	mapKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
-		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
-	)
-
-	tresureKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("❓️", moveAction.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
-		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
-	)
-
-	enemyKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬆️", moveUp.GetDataString())),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⬅️", moveLeft.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", fightStart.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("➡️", moveRight.GetDataString()),
-		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("⬇️", moveDown.GetDataString())),
-	)
-
-	huntingFightKeyboard = [][]tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔼", helpers.FightUp.GetDataString())),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🏃‍♂️💨", helpers.FightReturnMap.GetDataString()),
-			tgbotapi.NewInlineKeyboardButtonData("⚔️", helpers.FightHit.GetDataString()),
-		),
-		tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData("🔽", helpers.FightDown.GetDataString())),
-	}
 )
 
 // ====================================
@@ -282,7 +188,7 @@ func (c *HuntingController) Hunting() {
 
 		// Invio quindi il mesaggio contenente mappa e azioni disponibili
 		msg := helpers.NewMessage(c.Player.ChatID, decodedMap)
-		msg.ReplyMarkup = mapKeyboard
+		msg.ReplyMarkup = helpers.GetMapMovementKeyboard("down")
 		msg.ParseMode = "HTML"
 
 		var huntingMessage tgbotapi.Message
@@ -341,33 +247,36 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 		c.Logger.Panic(err)
 	}
 
+	// Registro a paylaod ultimo movimento eseguito
+	c.Payload.LastMoveType = inlineData.A
+
 	// Eseguo azione
 	switch inlineData.A {
 	case "up":
-		if c.Payload.PlayerPositionX > 0 && !cellGrid[c.Payload.PlayerPositionX-1][c.Payload.PlayerPositionY] {
-			c.Payload.PlayerPositionX--
+		if c.Payload.PlayerPositionX-(int32(1*inlineData.D)) >= 0 && !cellGrid[c.Payload.PlayerPositionX-int32(inlineData.D)][c.Payload.PlayerPositionY] {
+			c.Payload.PlayerPositionX = c.Payload.PlayerPositionX - (int32(1 * inlineData.D))
 			break
 		}
 
 		return
 	case "down":
 		// Se non è un muro posso proseguire
-		if c.Payload.PlayerPositionX < int32(len(cellGrid)-1) && !cellGrid[c.Payload.PlayerPositionX+1][c.Payload.PlayerPositionY] {
-			c.Payload.PlayerPositionX++
+		if c.Payload.PlayerPositionX < int32(len(cellGrid)-int(inlineData.D)) && !cellGrid[c.Payload.PlayerPositionX+int32(inlineData.D)][c.Payload.PlayerPositionY] {
+			c.Payload.PlayerPositionX = c.Payload.PlayerPositionX + (int32(1 * inlineData.D))
 			break
 		}
 
 		return
 	case "left":
-		if c.Payload.PlayerPositionY > 0 && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY-1] {
-			c.Payload.PlayerPositionY--
+		if c.Payload.PlayerPositionY-(int32(1*inlineData.D)) >= 0 && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY-int32(inlineData.D)] {
+			c.Payload.PlayerPositionY = c.Payload.PlayerPositionY - (int32(1 * inlineData.D))
 			break
 		}
 
 		return
 	case "right":
-		if c.Payload.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY+1] {
-			c.Payload.PlayerPositionY++
+		if c.Payload.PlayerPositionY < int32(len(cellGrid)-1) && !cellGrid[c.Payload.PlayerPositionX][c.Payload.PlayerPositionY+int32(inlineData.D)] {
+			c.Payload.PlayerPositionY = c.Payload.PlayerPositionY + (int32(1 * inlineData.D))
 			break
 		}
 
@@ -389,15 +298,17 @@ func (c *HuntingController) movements(inlineData helpers.InlineDataStruct, plane
 
 	// Se l'azione è valida e completa aggiorno risultato
 	msg := helpers.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, decodedMap)
-	msg.ReplyMarkup = &mapKeyboard
+
+	// In base al movimento che è stato fatto modifico tasto centrale
+	msg.ReplyMarkup = helpers.GetMapMovementKeyboard(c.Payload.LastMoveType)
 
 	// Se un player si trova sulla stessa posizione un mob o di un tesoro effettuo il controllo
 	if _, nearMob := helpers.CheckForMob(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); nearMob {
-		msg.ReplyMarkup = &enemyKeyboard
+		msg.ReplyMarkup = &helpers.EnemyKeyboard
 	}
 
 	if _, nearTresure := helpers.CheckForTresure(planetMap, c.Payload.PlayerPositionX, c.Payload.PlayerPositionY); nearTresure {
-		msg.ReplyMarkup = &tresureKeyboard
+		msg.ReplyMarkup = &helpers.TresureKeyboard
 	}
 
 	msg.ParseMode = "HTML"
@@ -461,7 +372,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 		} else if rDropTresure.GetTrap().GetID() > 0 {
 			// Se è una trappola e il player è morto
 			if rDropTresure.GetTrap().GetPlayerDie() {
-				c.PlayerDie()
+				c.PlayerDie(rDropTresure.GetTrap().GetDamage())
 				return
 			}
 
@@ -485,7 +396,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 
 		keyboard := tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData("Ok!", moveNoAction.GetDataString()),
+				tgbotapi.NewInlineKeyboardButtonData("Ok!", helpers.MoveNoAction.GetDataString()),
 			),
 		)
 
@@ -602,11 +513,11 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 	)
 
 	// Inserisco fight keyboard
-	if combactStatusMessage.ReplyMarkup, err = helpers.PlayerFightKeyboard(c.Player, huntingFightKeyboard); err != nil {
+	if combactStatusMessage.ReplyMarkup, err = helpers.PlayerFightKeyboard(c.Player, helpers.HuntingFightKeyboard); err != nil {
 		c.Logger.Panic(err)
 	}
 
-	combactStatusMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactStatusMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -631,7 +542,7 @@ func (c *HuntingController) ReturnToMap(planetMap *pb.PlanetMap) {
 	)
 
 	returnMessage.ParseMode = "HTML"
-	returnMessage.ReplyMarkup = &mapKeyboard
+	returnMessage.ReplyMarkup = helpers.GetMapMovementKeyboard(c.Payload.LastMoveType)
 	if _, err = helpers.SendMessage(returnMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -665,7 +576,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 
 	// Verifico se il PLAYER è morto
 	if rHitEnemy.GetPlayerDie() {
-		c.PlayerDie()
+		c.PlayerDie(rHitEnemy.GetEnemyDamage())
 		return
 	}
 
@@ -703,18 +614,18 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 	}
 }
 
-func (c *HuntingController) PlayerDie() {
+func (c *HuntingController) PlayerDie(damage int32) {
 	// Aggiorno messaggio notificando al player che è morto
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", damage),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, "continue"), fightPlayerDie.GetDataString(),
+				helpers.Trans(c.Player.Language.Slug, "continue"), helpers.FightPlayerDie.GetDataString(),
 			),
 		),
 	)
@@ -763,7 +674,7 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *
 	var keyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				helpers.Trans(c.Player.Language.Slug, "continue"), fightReturnMap.GetDataString(),
+				helpers.Trans(c.Player.Language.Slug, "continue"), helpers.FightReturnMap.GetDataString(),
 			),
 		),
 	)

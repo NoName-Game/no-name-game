@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"errors"
-
 	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"

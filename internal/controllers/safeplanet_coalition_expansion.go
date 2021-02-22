@@ -124,6 +124,8 @@ func (c *SafePlanetExpansionController) Stage() {
 	case 0:
 		var expansionRecap string
 		expansionRecap = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.info")
+		rank := helpers.Trans(c.Player.Language.Slug, "rank."+c.Player.Rank.NameCode)
+		expansionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.player_rank", rank, c.Player.RankID)
 		var keyboardRow [][]tgbotapi.KeyboardButton
 
 		// Recupero quanti pianeti mancano per l'ampliamento del sistema
@@ -191,6 +193,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: playerPosition.GetID(),
+			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -239,6 +242,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		var rGetSafePlanets *pb.GetTeletrasportSafePlanetListResponse
 		if rGetSafePlanets, err = config.App.Server.Connection.GetTeletrasportSafePlanetList(helpers.NewContext(1), &pb.GetTeletrasportSafePlanetListRequest{
 			PlanetID: playerPosition.GetID(),
+			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -254,7 +258,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.confirmation",
 				planet.GetName(),
 				price,
@@ -294,7 +298,7 @@ func (c *SafePlanetExpansionController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID,
+		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.expansion.teleport_ok"),
 		)
 

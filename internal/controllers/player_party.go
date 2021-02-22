@@ -56,7 +56,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 				c.Logger.Panic(err)
 			}
 
-			playerRecap += fmt.Sprintf("- *%s* [[🌏 %s]]\n", player.GetUsername(), currentPosition.GetName())
+			playerRecap += fmt.Sprintf("- <b>%s</b> [🌏 %s]\n", player.GetUsername(), currentPosition.GetName())
 		}
 
 		// Costruisco tastiera gestione party
@@ -78,12 +78,12 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.show",
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.show",
 			rGetPartyDetails.GetOwner().GetUsername(),
 			rGetPartyDetails.GetNPlayers(),
 			playerRecap,
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       partysKeyboard,
@@ -96,8 +96,8 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 	}
 
 	// Il Player non è in un party
-	msg := helpers.NewMessage(c.Update.Message.Chat.ID, helpers.Trans(c.Player.Language.Slug, "player.party.non_in_party"))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "player.party.non_in_party"))
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.party.create")),
