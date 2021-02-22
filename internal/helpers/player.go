@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"errors"
+
 	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -77,8 +78,9 @@ func CheckPlayerHaveActiveActivity(activities []*pb.PlayerActivity, controller s
 
 // GetPlayerPosition - Recupera l'ultima posizione del player
 func GetPlayerPosition(playerID uint32) (position *pb.Planet, err error) {
+	var errSentry error
 	// Tento di recuperare posizione da cache
-	if position, err = GetPlayerPlanetPositionInCache(playerID); err != nil {
+	if position, errSentry = GetPlayerPlanetPositionInCache(playerID); errSentry != nil {
 		// Recupero ultima posizione nota del player
 		var rGetPlayerCurrentPlanet *pb.GetPlayerCurrentPlanetResponse
 		if rGetPlayerCurrentPlanet, err = config.App.Server.Connection.GetPlayerCurrentPlanet(NewContext(1), &pb.GetPlayerCurrentPlanetRequest{
@@ -95,8 +97,8 @@ func GetPlayerPosition(playerID uint32) (position *pb.Planet, err error) {
 		position = rGetPlayerCurrentPlanet.GetPlanet()
 
 		// Creo cache posizione
-		if err = SetPlayerPlanetPositionInCache(playerID, position); err != nil {
-			logrus.Errorf("error creating player position cache: %s", err.Error())
+		if errSentry = SetPlayerPlanetPositionInCache(playerID, position); errSentry != nil {
+			logrus.Warningf("error creating player position cache: %s", errSentry.Error())
 		}
 	}
 
