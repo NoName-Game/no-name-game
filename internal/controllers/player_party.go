@@ -56,7 +56,7 @@ func (c *PlayerPartyController) Handle(player *pb.Player, update tgbotapi.Update
 				c.Logger.Panic(err)
 			}
 
-			playerRecap += fmt.Sprintf("- <b>%s</b> [[🌏 %s]]\n", player.GetUsername(), currentPosition.GetName())
+			playerRecap += fmt.Sprintf("- <b>%s</b> [🌏 %s]\n", player.GetUsername(), currentPosition.GetName())
 		}
 
 		// Costruisco tastiera gestione party
