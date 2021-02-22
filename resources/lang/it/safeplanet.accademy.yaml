@@ -1,5 +1,5 @@
 # Accademy
-safeplanet.accademy.info: "Benvenuto in ⛩*Accademia* esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 *Amuleti* davvero importanti per noi..."
+safeplanet.accademy.info: "Benvenuto in ⛩<b>Accademia</b> esploratore!\n\nNoi Maestri possiamo aiutarti ad apprendere delle abilità uniche sfuttando il potere di alcuni 🧿 <b>Amuleti</b> davvero importanti per noi..."
 safeplanet.accademy.which: "Quale tipologia di abilità vorresti apprendere?"
 safeplanet.accademy.striker: "⚔️ Attaccante"
 safeplanet.accademy.defender: "🛡 Difensore"
@@ -8,8 +8,8 @@ safeplanet.accademy.done: "Nuova abilità appresa correttamente!"
 safeplanet.accademy.no_more_abilities: "Attualmente non ci sono altre abilità per questa tipologia."
 safeplanet.accademy.not_enough_amulets: "❌ Non hai abbastanza amuleti per apprendere l'abilità."
 
-safeplanet.accademy.ability_details: "Ecco a te una nuova abilità!\n\nNome: *%s* - Livello: *%d*\nDescrizione: %s"
-safeplanet.accademy.ability_confirm: "Al momento possiedi 🧿*%d*, per apprendere questa abilità avremmo bisogno di 🧿*%d*"
+safeplanet.accademy.ability_details: "Ecco a te una nuova abilità!\n\nNome: <b>%s</b> - Livello: <b>%d</b>\nDescrizione: %s"
+safeplanet.accademy.ability_confirm: "Al momento possiedi 🧿<b>%d</b>, per apprendere questa abilità avremmo bisogno di 🧿<b>%d</b>"
 
 safeplanet.accademy.ability.accurate: "Preciso"
 safeplanet.accademy.ability.quick: "Rapido"

@@ -1,6 +1,6 @@
 ---
 #MISSION
-exploration.tips: "📖: Perform some explorations in order to recover the planet's materials. *Every* exploration has an initial duration of *10* minutes, by repeating it more than once the duration and the materials recoverable will increase."
+exploration.tips: "📖: Perform some explorations in order to recover the planet's materials. <b>Every</b> exploration has an initial duration of <b>10</b> minutes, by repeating it more than once the duration and the materials recoverable will increase."
 exploration.exploration: "Select the exploration field:"
 exploration.underground: "🔥 Subsoil"
 exploration.surface: "💧 Surface"
@@ -9,8 +9,8 @@ exploration.extraction_recap: "In this exploratory cycle you extracted the follo
 exploration.extraction_ended: "You are back with your new resources!\n\n%s\nYou also earned %v EXP!"
 exploration.extraction_ended_zero: "You have returned without resources!"
 exploration.comeback: "❌ Leave Exploration"
-exploration.wait: "You start off a search for new resources, the next report is expected at *%s*."
-exploration.validator.wait: "You're already busy with an exploration, the next report is expected at *%s*."
-exploration.conqueror_bonus: "\n\n🚩*Conqueror Bonus! (x2)*\nLooks like you know this planet very well! Thanks to this bonus every exploration will provide you *double* the 💠 *materials*!"
+exploration.wait: "You start off a search for new resources, the next report is expected at <b>%s</b>."
+exploration.validator.wait: "You're already busy with an exploration, the next report is expected at <b>%s</b>."
+exploration.conqueror_bonus: "\n\n🚩*Conqueror Bonus! (x2)*\nLooks like you know this planet very well! Thanks to this bonus every exploration will provide you <b>double</b> the 💠 <b>materials</b>!"
 exploration.continue: "Keep exploring"
 exploration.breaker.continue: "Continue Exploration"

@@ -149,7 +149,7 @@ func (c *ShipTravelManualController) Stage() {
 	// In questo stage chiedo al player di inserire le coordinate
 	case 0:
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.manual.info"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -249,7 +249,7 @@ func (c *ShipTravelManualController) Stage() {
 				msgNearestStars,
 			),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowStars,
@@ -284,7 +284,7 @@ func (c *ShipTravelManualController) Stage() {
 		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishAt.Format("15:04:05 01/02")),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

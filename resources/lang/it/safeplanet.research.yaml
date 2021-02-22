@@ -1,11 +1,11 @@
 # Research
-safeplanet.coalition.research.info: "Benvenuto nel centro 🔬 *Ricerca*.\n\nDonando delle risorse alla Coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque."
-safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita ancora di 💠*%d* (*%s*) per esser completata."
+safeplanet.coalition.research.info: "Benvenuto nel centro 🔬 <b>Ricerca</b>.\n\nDonando delle risorse alla Coalizione aiuterai la ricerca a scoprire nuove risorse accessibili a tutti ovunque."
+safeplanet.coalition.research.recap: "La ricerca attiva in questo momento necessita ancora di 💠<b>%d</b> (<b>%s</b>) per esser completata."
 safeplanet.coalition.research.done: "\n🎉 Complimenti esploratori!\nGrazie al vostro aiuto il nostro team ora può elaborare i dati e trovare nuove risorse.\nTorna a breve per scoprire i progressi."
 
 # Research - Donations
 safeplanet.coalition.research.donation.choose_reseource: "Quale risorsa vuoi donare?"
 safeplanet.coalition.research.donation.choose_quantity: "Quante risorsa vuoi donare?"
-safeplanet.coalition.research.donation.confirmation: "Stai per donare *%v* risorse di, *%s*, sicuro di voler continuare?"
+safeplanet.coalition.research.donation.confirmation: "Stai per donare <b>%v</b> risorse di, <b>%s</b>, sicuro di voler continuare?"
 safeplanet.coalition.research.donation.completed: "La tua donazione è stata registrata correttamente!"
 safeplanet.coalition.research.donation.not_enough_resource: "Non hai abbastanza risorse per poter procedere alla donazione."

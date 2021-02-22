@@ -187,7 +187,7 @@ func (c *TitanPlanetTackleController) Tackle() {
 		}
 
 		var tackleMessage tgbotapi.Message
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if tackleMessage, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -300,7 +300,7 @@ func (c *TitanPlanetTackleController) Fight(inlineData helpers.InlineDataStruct,
 		c.Logger.Panic(err)
 	}
 
-	combactStatusMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactStatusMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -380,7 +380,7 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 	}
 
 	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -403,7 +403,7 @@ func (c *TitanPlanetTackleController) PlayerDie() {
 	)
 
 	playerDieMessage.ReplyMarkup = &keyboard
-	playerDieMessage.ParseMode = tgbotapi.ModeMarkdown
+	playerDieMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -425,7 +425,7 @@ func (c *TitanPlanetTackleController) TitanDie(titan *pb.Titan) {
 		),
 	)
 
-	titanDieMessage.ParseMode = tgbotapi.ModeMarkdown
+	titanDieMessage.ParseMode = tgbotapi.ModeHTML
 	titanDieMessage.ReplyMarkup = &keyboard
 	if _, err := helpers.SendMessage(titanDieMessage); err != nil {
 		c.Logger.Panic(err)
@@ -513,7 +513,7 @@ func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct,
 		)
 
 		recapMessage := helpers.NewEditMessage(c.Player.ChatID, c.Update.CallbackQuery.Message.MessageID, recap)
-		recapMessage.ParseMode = tgbotapi.ModeMarkdown
+		recapMessage.ParseMode = tgbotapi.ModeHTML
 		recapMessage.ReplyMarkup = &keyboard
 		if _, err := helpers.SendMessage(recapMessage); err != nil {
 			c.Logger.Panic(err)

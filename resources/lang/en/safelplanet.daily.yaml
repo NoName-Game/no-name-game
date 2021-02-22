@@ -1,4 +1,4 @@
 ---
 #Daily Reward
-safeplanet.coalition.daily_reward: "Here's your daily reward:\n🏵 *%v* \n💰 *%v*\n💎 *%v*\n📦 *%v*"
+safeplanet.coalition.daily_reward: "Here's your daily reward:\n🏵 <b>%v</b> \n💰 <b>%v</b>\n💎 <b>%v</b>\n📦 <b>%v</b>"
 safeplanet.coalition.daily_reward_already_taken: "It seems you have already taken your daily reward, come back tomorrow."

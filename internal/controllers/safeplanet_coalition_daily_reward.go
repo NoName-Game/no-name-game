@@ -66,7 +66,7 @@ func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, upd
 	}
 
 	msg := helpers.NewMessage(c.ChatID, dailyRewardMessage)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}

@@ -52,7 +52,7 @@ func (c *SafePlanetCoalitionStatisticsController) Handle(player *pb.Player, upda
 	}
 
 	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.coalition.statistics.intro"))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "safeplanet.coalition.statistics.top_kill_enemy")),
@@ -192,22 +192,22 @@ func (c *SafePlanetCoalitionStatisticsController) TopKillEnemy() {
 }
 
 func (c *SafePlanetCoalitionStatisticsController) AllFormatter(index int, username string, result int64) string {
-	return fmt.Sprintf("%v) %s *%v*\n", index, username, result)
+	return fmt.Sprintf("%v) %s <b>(%v)</b>\n", index, username, result)
 }
 
 func (c *SafePlanetCoalitionStatisticsController) YouFormatter(username string, result int64) string {
-	return fmt.Sprintf("*%s:* *%v*\n", username, result)
+	return fmt.Sprintf("<b>%s:</b> <b>(%v)</b>\n", username, result)
 }
 
 func (c *SafePlanetCoalitionStatisticsController) SendStatistcs(title, all, you string) {
 	var err error
-	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("*%s*\n%s\n\n%s\n%s",
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("<b>%s</b>\n%s\n\n%s\n%s",
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s", title)),
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s.description", title)),
 		all,
 		you,
 	))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}

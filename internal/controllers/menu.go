@@ -50,7 +50,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	recap := c.GetRecap(currentPosition)
 
 	msg := helpers.NewMessage(c.Player.ChatID, recap)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		Keyboard:       c.GetKeyboard(currentPosition),
 		ResizeKeyboard: true,
@@ -288,6 +288,8 @@ func (c *MenuController) MissionRecap(missionID uint32) (missionRecap string) {
 		missionRecap += helpers.Trans(c.Player.Language.Slug,
 			"safeplanet.mission.type.planet_finding.description.small",
 			rGetPlanetByID.GetPlanet().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 
 	// Uccidi il nemico
@@ -315,6 +317,8 @@ func (c *MenuController) MissionRecap(missionID uint32) (missionRecap string) {
 			"safeplanet.mission.type.kill_mob.description.small",
 			rGetEnemyByID.GetEnemy().GetName(),
 			rGetPlanetByMapID.GetPlanet().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 	}
 

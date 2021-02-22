@@ -204,7 +204,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.intro"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       categoriesKeyboard,
@@ -253,7 +253,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.chose_rarity"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       raritiesKeyboard,
@@ -300,7 +300,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("rarity.%s", rGetRarityByID.GetRarity().GetSlug())),                    // rarity
 			rGetCreateShipInfo.GetPrice(),
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -354,7 +354,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.start", finishAt.Format("15:04:05 01/02")),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -406,7 +406,7 @@ func (c *SafePlanetHangarCreateController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.hangar.create.end", ship.GetName()))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

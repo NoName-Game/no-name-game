@@ -10,10 +10,10 @@ notification.activity.route.safeplanet.crafter.create: "The gunsmith has complet
 notification.activity.route.death: "You recovered your energy!"
 notification.activity.route.ship.rests: "You recovered your energy!"
 #NOTIFICATIONS - ACHIEVEMENT
-notification.achievement.message: "🎯 Achievement *obtained*!\n\nYou accomplished: *%s*\n*Reward*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.achievement.message: "🎯 Achievement <b>obtained</b>!\n\nYou accomplished: <b>%s<b>\n</b>Reward</b>:\n💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
 #NOTIFICATIONS - TITAN
-notification.titan_drop.message: "️☠️ 👁 *%s* defeated! ☠️\n\nYour hits inflicted *%v* damage!\nThanks to your participation you obtained:\n%s\n\nThe titan left on the ground something very special:\n*%s*"
-notification.titan_drop.base: "💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.titan_drop.message: "️☠️ 👁 <b>%s</b> defeated! ☠️\n\nYour hits inflicted <b>%v</b> damage!\nThanks to your participation you obtained:\n%s\n\nThe titan left on the ground something very special:\n<b>%s</b>"
+notification.titan_drop.base: "💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
 notification.titan_drop.armor.helmet: "👨🏼‍🚀 %s (%s)"
 notification.titan_drop.armor.glove: "🦾 %s (%s)"
 notification.titan_drop.armor.chest: "🥼 %s (%s)"
