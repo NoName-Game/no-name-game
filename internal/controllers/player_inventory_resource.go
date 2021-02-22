@@ -60,7 +60,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	for _, resource := range resources {
 		if resource.GetQuantity() > 0 {
 			recapResources += fmt.Sprintf(
-				"- %s %v x %s (<b>(%s)</b>) %s\n",
+				"- %s %v x %s (<b>%s</b>) %s\n",
 				helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
 				resource.GetQuantity(),
 				resource.GetResource().GetName(),

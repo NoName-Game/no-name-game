@@ -7,21 +7,12 @@ safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: <b>%v!</b>
 safeplanet.mission.reward: "<b>Complimenti!</b>\nSei riuscito a completare la missione, guadagnando così:\n +<b>%v!</b>💰\n+<b>%v!</b>💎\n+<b>%v!</b> Exp.\nLa Coalizione ti rigrazia!"
 
 safeplanet.mission.type.planet_finding: "Trova il pianeta"
-<<<<<<< HEAD
-safeplanet.mission.type.planet_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e raggiungere il pianeta 🌏<b>%s</b>.\n\nBuona fortuna."
-safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏<b>%s</b>"
+safeplanet.mission.type.planet_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫%s (%v).\n\nBuona fortuna."
+safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫%s (%v)"
 
 safeplanet.mission.type.kill_mob: "Uccidi il nemico"
-safeplanet.mission.type.kill_mob.description: "🔖 <b>Obbiettivo</b>:\nTrovare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> e annientarlo.\n\nBuona fortuna."
-safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b>"
-=======
-safeplanet.mission.type.planet_finding.description: "🔖 *Obbiettivo*:\nTrovare e raggiungere il pianeta 🌏*%s* nel sistema 💫%s (%v).\n\nBuona fortuna."
-safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏*%s* nel sistema 💫%s (%v)"
-
-safeplanet.mission.type.kill_mob: "Uccidi il nemico"
-safeplanet.mission.type.kill_mob.description: "🔖 *Obbiettivo*:\nTrovare 🐺 *%s* avvistato sul pianeta 🌏*%s* del sistema 💫%s (%v) e annientarlo.\n\nBuona fortuna."
-safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 *%s* avvistato sul pianeta 🌏*%s* del sistema 💫%s (%v)"
->>>>>>> develop
+safeplanet.mission.type.kill_mob.description: "🔖 <b>Obbiettivo</b>:\nTrovare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫%s (%v) e annientarlo.\n\nBuona fortuna."
+safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫%s (%v)"
 
 safeplanet.mission.type.resources_finding: "Recupero risorse"
 safeplanet.mission.type.resources_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e recuperare:\n- 💠 <b>%v</b> x %s<b>%v</b> (%s) %s\n\nBuona fortuna."

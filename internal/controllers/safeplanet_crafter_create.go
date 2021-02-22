@@ -160,6 +160,17 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 				finishAt.Format("15:04"),
 			)
 
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					),
+				),
+			)
+
 			return true
 		}
 	}
