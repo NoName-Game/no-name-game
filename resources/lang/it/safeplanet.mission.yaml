@@ -3,7 +3,7 @@ safeplanet.mission.info: "Benvenuto nel centro <b>missioni</b>.\nAbbiamo un'infi
 safeplanet.mission.start: "Avvia Missione"
 safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
 safeplanet.mission.check: "Non hai completato la missione in corso.\nCosa vuoi fare?"
-safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: <b>%v!</b>\n\n<b🗃 Codice Missione</b>: #M%v\n"
+safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: <b>%v!</b>\n\n<b>🗃 Codice Missione</b>: #M%v\n"
 safeplanet.mission.reward: "<b>Complimenti!</b>\nSei riuscito a completare la missione, guadagnando così:\n +<b>%v!</b>💰\n+<b>%v!</b>💎\n+<b>%v!</b> Exp.\nLa Coalizione ti rigrazia!"
 
 safeplanet.mission.type.planet_finding: "Trova il pianeta"

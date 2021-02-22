@@ -196,12 +196,12 @@ func (c *SafePlanetCoalitionStatisticsController) AllFormatter(index int, userna
 }
 
 func (c *SafePlanetCoalitionStatisticsController) YouFormatter(username string, result int64) string {
-	return fmt.Sprintf("<b>(%s:)</b> <b>(%v)</b>\n", username, result)
+	return fmt.Sprintf("<b>%s:</b> <b>(%v)</b>\n", username, result)
 }
 
 func (c *SafePlanetCoalitionStatisticsController) SendStatistcs(title, all, you string) {
 	var err error
-	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("<b>(%s)</b>\n%s\n\n%s\n%s",
+	msg := helpers.NewMessage(c.ChatID, fmt.Sprintf("<b>%s</b>\n%s\n\n%s\n%s",
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s", title)),
 		helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("safeplanet.coalition.statistics.%s.description", title)),
 		all,

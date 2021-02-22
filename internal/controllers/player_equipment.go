@@ -124,7 +124,7 @@ func (c *PlayerEquipmentController) Stage() {
 		// ******************
 
 		var currentArmorsEquipment string
-		currentArmorsEquipment = fmt.Sprintf("<b>(%s)</b>:", helpers.Trans(c.Player.Language.Slug, "armor"))
+		currentArmorsEquipment = fmt.Sprintf("<b>%s</b>:", helpers.Trans(c.Player.Language.Slug, "armor"))
 
 		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
 		if rGetPlayerArmors, err = config.App.Server.Connection.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
@@ -140,7 +140,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 			for _, armor := range armors {
 				if armor != nil {
-					currentArmorsEquipment += fmt.Sprintf("\n%s \\[<b>(%s)</b>] (%s)\nDEF: <b>(%v)</b> | EVS: <b>(%v)</b> | HLV: <b>(%v)</b>\n",
+					currentArmorsEquipment += fmt.Sprintf("\n%s [<b>%s</b>] (%s)\nDEF: <b>%v</b> | EVS: <b>%v</b> | HLV: <b>%v</b>\n",
 						helpers.Trans(c.Player.Language.Slug, armor.GetArmorCategory().GetSlug()+"_emoji"),
 						armor.Name, strings.ToUpper(armor.GetRarity().GetSlug()),
 						math.Round(armor.Defense),
@@ -157,7 +157,7 @@ func (c *PlayerEquipmentController) Stage() {
 		// Recupero arma equipaggiata
 		// ******************
 		var currentWeaponsEquipment string
-		currentWeaponsEquipment = fmt.Sprintf("<b>(%s)</b>:", helpers.Trans(c.Player.Language.Slug, "weapon"))
+		currentWeaponsEquipment = fmt.Sprintf("<b>%s</b>:", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
 		if rGetPlayerWeaponEquippedResponse, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
@@ -168,7 +168,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
 			currentWeaponsEquipment += fmt.Sprintf(
-				"\n<b>(%s)</b> (<b>(%s)</b>)\nDamage: <b>(%v)</b> | Precision: <b>(%v)</b>",
+				"\n<b>%s</b> (<b>%s</b>)\nDamage: <b>%v</b> | Precision: <b>%v</b>",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
 				math.Round(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage()),
