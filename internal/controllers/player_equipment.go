@@ -124,7 +124,7 @@ func (c *PlayerEquipmentController) Stage() {
 		// ******************
 
 		var currentArmorsEquipment string
-		currentArmorsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "armor"))
+		currentArmorsEquipment = fmt.Sprintf("<b>(%s)</b>:", helpers.Trans(c.Player.Language.Slug, "armor"))
 
 		var rGetPlayerArmors *pb.GetPlayerArmorsEquippedResponse
 		if rGetPlayerArmors, err = config.App.Server.Connection.GetPlayerArmorsEquipped(helpers.NewContext(1), &pb.GetPlayerArmorsEquippedRequest{
@@ -140,7 +140,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 			for _, armor := range armors {
 				if armor != nil {
-					currentArmorsEquipment += fmt.Sprintf("\n%s \\[*%s*] (%s)\nDEF: *%v* | EVS: *%v* | HLV: *%v*\n",
+					currentArmorsEquipment += fmt.Sprintf("\n%s \\[<b>(%s)</b>] (%s)\nDEF: <b>(%v)</b> | EVS: <b>(%v)</b> | HLV: <b>(%v)</b>\n",
 						helpers.Trans(c.Player.Language.Slug, armor.GetArmorCategory().GetSlug()+"_emoji"),
 						armor.Name, strings.ToUpper(armor.GetRarity().GetSlug()),
 						math.Round(armor.Defense),
@@ -157,7 +157,7 @@ func (c *PlayerEquipmentController) Stage() {
 		// Recupero arma equipaggiata
 		// ******************
 		var currentWeaponsEquipment string
-		currentWeaponsEquipment = fmt.Sprintf("*%s*:", helpers.Trans(c.Player.Language.Slug, "weapon"))
+		currentWeaponsEquipment = fmt.Sprintf("<b>(%s)</b>:", helpers.Trans(c.Player.Language.Slug, "weapon"))
 
 		var rGetPlayerWeaponEquippedResponse *pb.GetPlayerWeaponEquippedResponse
 		if rGetPlayerWeaponEquippedResponse, err = config.App.Server.Connection.GetPlayerWeaponEquipped(helpers.NewContext(1), &pb.GetPlayerWeaponEquippedRequest{
@@ -168,7 +168,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		if rGetPlayerWeaponEquippedResponse.GetWeapon() != nil {
 			currentWeaponsEquipment += fmt.Sprintf(
-				"\n*%s* (*%s*)\nDamage: *%v* | Precision: *%v*",
+				"\n<b>(%s)</b> (<b>(%s)</b>)\nDamage: <b>(%v)</b> | Precision: <b>(%v)</b>",
 				rGetPlayerWeaponEquippedResponse.GetWeapon().GetName(),
 				strings.ToUpper(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRarity().GetSlug()),
 				math.Round(rGetPlayerWeaponEquippedResponse.GetWeapon().GetRawDamage()),
@@ -187,7 +187,7 @@ func (c *PlayerEquipmentController) Stage() {
 				currentWeaponsEquipment,
 			),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armors")),
@@ -276,7 +276,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
 					mainMessage += fmt.Sprintf(
-						"\n*%s* (%s) - \\[%v, %v%%, %v%%]", armor.Name,
+						"\n<b>(%s)</b> (%s) - \\[%v, %v%%, %v%%]", armor.Name,
 						strings.ToUpper(armor.Rarity.Slug),
 						math.Round(armor.Defense),
 						math.Round(armor.Evasion),
@@ -317,7 +317,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					mainMessage += fmt.Sprintf(
-						"\n*%s* (%s) - \\[%v, %v%%, %v]", weapon.Name,
+						"\n<b>(%s)</b> (%s) - \\[%v, %v%%, %v]", weapon.Name,
 						strings.ToUpper(weapon.Rarity.Slug),
 						math.Round(weapon.RawDamage),
 						math.Round(weapon.Precision),
@@ -345,7 +345,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, mainMessage)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowCategories,
@@ -436,7 +436,7 @@ func (c *PlayerEquipmentController) Stage() {
 		if equipmentError {
 			// Invio messaggio error
 			msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.equip.error"))
-			msg.ParseMode = tgbotapi.ModeMarkdown
+			msg.ParseMode = tgbotapi.ModeHTML
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
@@ -452,7 +452,7 @@ func (c *PlayerEquipmentController) Stage() {
 
 		// Invio messaggio per conferma equipaggiamento
 		msg := helpers.NewMessage(c.ChatID, confirmMessage)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -540,7 +540,7 @@ func (c *PlayerEquipmentController) Stage() {
 		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.equip.completed"),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

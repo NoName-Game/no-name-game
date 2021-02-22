@@ -100,7 +100,7 @@ func (c *SetupController) Stage() {
 	case 0:
 		// Invio messaggio
 		msgIntro := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.intro", c.Player.Username))
-		msgIntro.ParseMode = tgbotapi.ModeMarkdown
+		msgIntro.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msgIntro); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -121,7 +121,7 @@ func (c *SetupController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.select_timezone"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboard,
@@ -163,7 +163,7 @@ func (c *SetupController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.select_language"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboard,
@@ -197,7 +197,7 @@ func (c *SetupController) Stage() {
 
 		// Mando messaggio fine confiurazione
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "setup.end"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

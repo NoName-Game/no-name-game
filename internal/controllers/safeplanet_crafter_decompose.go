@@ -136,7 +136,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 		)
 
 		msg := helpers.NewMessage(c.Player.ChatID, startMsg)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armor")),
@@ -202,7 +202,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 		))
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.which"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       rowsKeyboard,
@@ -245,7 +245,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			itemDetails,
 		))
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -302,7 +302,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 		if len(decomposeResources) > 0 {
 			for _, resource := range decomposeResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (*%s*) %s\n",
+					"- %s %v x %s (<b>(%s)</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,
@@ -313,7 +313,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.completed", recapList))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

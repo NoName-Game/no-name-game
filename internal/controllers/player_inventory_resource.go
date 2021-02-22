@@ -60,7 +60,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	for _, resource := range resources {
 		if resource.GetQuantity() > 0 {
 			recapResources += fmt.Sprintf(
-				"- %s %v x %s (*%s*) %s\n",
+				"- %s %v x %s (<b>(%s)</b>) %s\n",
 				helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
 				resource.GetQuantity(),
 				resource.GetResource().GetName(),
@@ -84,7 +84,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		buf := strings.Split(finalResource, "\n")
 		curr := ""
 		for _, s := range buf {
-			if len(curr + " " + s) <= 2048 {
+			if len(curr+" "+s) <= 2048 {
 				curr += " " + s + "\n"
 			} else {
 				out = append(out, curr)
@@ -95,7 +95,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		out = append(out, curr)
 		for _, text := range out {
 			msg := helpers.NewMessage(c.ChatID, text)
-			msg.ParseMode = tgbotapi.ModeMarkdown
+			msg.ParseMode = tgbotapi.ModeHTML
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
@@ -108,7 +108,7 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		}
 	} else {
 		msg := helpers.NewMessage(c.ChatID, finalResource)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
@@ -119,7 +119,6 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 			c.Logger.Panic(err)
 		}
 	}
-
 
 }
 

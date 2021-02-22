@@ -119,7 +119,7 @@ func (c *SafePlanetTitanController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Player.ChatID, restsRecap)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
@@ -154,7 +154,7 @@ func (c *SafePlanetTitanController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.teleport"),
 		)
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
