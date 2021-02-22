@@ -4,6 +4,7 @@ safeplanet.mission.start: "Avvia Missione"
 safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
 safeplanet.mission.check: "Non hai completato la missione in corso.\nCosa vuoi fare?"
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: *%v*!\n\n*🗃 Codice Missione*: #M%v\n"
+safeplanet.mission.quotation: "📊 *Quotazione (attuale)*: +*%v*💰 +*%v*💎 +*%v*Exp\n"
 safeplanet.mission.reward: "*Complimenti!*\nSei riuscito a completare la missione, guadagnando così:\n +*%v*💰\n+*%v*💎\n+*%v* Exp.\nLa Coalizione ti rigrazia!"
 
 safeplanet.mission.type.planet_finding: "Trova il pianeta"
