@@ -1,9 +1,9 @@
 ---
 #MENU
-menu.borad_system: "*BoardSystem v%s*\n"
+menu.borad_system: "<b>BoardSystem v%s</b>\n"
 menu.general: "🌏 %s \n%s \n\n"
 #Task
-menu.tasks: "⏱ *Activitiy List:*\n"
+menu.tasks: "⏱ <b>Activitiy List:</b>\n"
 #Safeplanet
 menu.safeplanet: "You're on 🏟<b>%s</b>, <b>safe</b> planet and protected area for <b>everyone</b>!✌️\n\n"
 #Titanplanet
