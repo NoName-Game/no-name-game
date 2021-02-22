@@ -116,7 +116,7 @@ func (c *SafePlanetBankController) Stage() {
 				rGetPlayerEconomy.GetValue(),
 			),
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit")),
@@ -159,7 +159,7 @@ func (c *SafePlanetBankController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, mainMessage)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowQuantities,
@@ -203,7 +203,7 @@ func (c *SafePlanetBankController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, text)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

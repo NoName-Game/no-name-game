@@ -94,7 +94,7 @@ func (c *ShipTravelRescueController) Stage() {
 	// ##################################################################################################
 	case 0:
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.info"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.diamond")),
@@ -116,7 +116,7 @@ func (c *ShipTravelRescueController) Stage() {
 	case 1:
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "ship.travel.rescue.confirm"))
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -175,7 +175,7 @@ func (c *ShipTravelRescueController) Stage() {
 			edited := helpers.NewEditMessage(c.Player.ChatID, msgInit.MessageID,
 				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("ship.travel.rescue.countdown"), i),
 			)
-			edited.ParseMode = tgbotapi.ModeMarkdown
+			edited.ParseMode = tgbotapi.ModeHTML
 
 			if _, err = helpers.SendMessage(edited); err != nil {
 				c.Logger.Panic(err)

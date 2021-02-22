@@ -52,7 +52,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 	// #####################################
 	if !rGetPlayerGuild.GetInGuild() {
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "player.guild.player_not_in_one_guild"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
@@ -135,7 +135,7 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 		guildDetails,
 		playersList,
 	))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),

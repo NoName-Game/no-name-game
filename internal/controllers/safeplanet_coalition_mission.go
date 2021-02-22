@@ -139,7 +139,7 @@ func (c *SafePlanetMissionController) Stage() {
 
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.info"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -165,7 +165,7 @@ func (c *SafePlanetMissionController) Stage() {
 
 		// Invio messaggio di attesa
 		msg := helpers.NewMessage(c.Player.ChatID, missionRecap)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -190,7 +190,7 @@ func (c *SafePlanetMissionController) Stage() {
 				rGetMissionReward.GetExp(),
 			),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -254,6 +254,8 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 		missionRecap += helpers.Trans(c.Player.Language.Slug,
 			"safeplanet.mission.type.planet_finding.description",
 			rGetPlanetByID.GetPlanet().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 
 	// Uccidi il nemico
@@ -281,6 +283,8 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 			"safeplanet.mission.type.kill_mob.description",
 			rGetEnemyByID.GetEnemy().GetName(),
 			rGetPlanetByMapID.GetPlanet().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 	}
 

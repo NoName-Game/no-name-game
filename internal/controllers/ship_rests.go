@@ -164,7 +164,7 @@ func (c *ShipRestsController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.Player.ChatID, restsRecap)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRow,
@@ -205,9 +205,9 @@ func (c *ShipRestsController) Stage() {
 			text += helpers.Trans(c.Player.Language.Slug, "ship.rest.sleep_activity", playAt.Format("15:04:05"))
 		}
 		// Invio messaggio
-		msg := helpers.NewMessage(c.ChatID,text)
+		msg := helpers.NewMessage(c.ChatID, text)
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup")),
@@ -246,7 +246,7 @@ func (c *ShipRestsController) Stage() {
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, recapMessage)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(

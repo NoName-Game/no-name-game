@@ -401,7 +401,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 		)
 
 		tresureMessage.ReplyMarkup = &keyboard
-		tresureMessage.ParseMode = tgbotapi.ModeMarkdown
+		tresureMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(tresureMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -608,7 +608,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 	)
 
 	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(combactMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -631,7 +631,7 @@ func (c *HuntingController) PlayerDie(damage int32) {
 	)
 
 	playerDieMessage.ReplyMarkup = &keyboard
-	playerDieMessage.ParseMode = tgbotapi.ModeMarkdown
+	playerDieMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
 		c.Logger.Panic(err)
 	}
@@ -679,7 +679,7 @@ func (c *HuntingController) EnemyDie(rHitEnemy *pb.HitEnemyResponse, planetMap *
 		),
 	)
 
-	enemyDieMessage.ParseMode = tgbotapi.ModeMarkdown
+	enemyDieMessage.ParseMode = tgbotapi.ModeHTML
 	enemyDieMessage.ReplyMarkup = &keyboard
 	if _, err := helpers.SendMessage(enemyDieMessage); err != nil {
 		c.Logger.Panic(err)

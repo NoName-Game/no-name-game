@@ -160,6 +160,14 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 				finishAt.Format("15:04"),
 			)
 
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+				),
+			)
+
 			return true
 		}
 	}
@@ -181,7 +189,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		)
 
 		msg := helpers.NewMessage(c.Player.ChatID, startMsg)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armor")),
@@ -393,7 +401,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					c.Logger.Panic(err)
 				}
 
-				recipe += fmt.Sprintf("- *%v* x %s %s (%s) %s \n",
+				recipe += fmt.Sprintf("- <b>%v</b> x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
@@ -415,7 +423,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, msgContent)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowResources,
@@ -435,7 +443,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug,
 			"safeplanet.crafting.how_many",
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
@@ -471,7 +479,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					baseResources = "🔬Base"
 				}
 
-				recipe += fmt.Sprintf("- *%v* x %s %s (%s) %s \n",
+				recipe += fmt.Sprintf("- <b>%v</b> x %s %s (%s) %s \n",
 					quantity,
 					helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 					rGetResourceByID.GetResource().Name,
@@ -486,7 +494,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			c.Payload.Price,
 			recipe,
 		))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -540,7 +548,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		msg = helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.wait", finishAt.Format("15:04")),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -563,7 +571,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, endCraftMessage)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

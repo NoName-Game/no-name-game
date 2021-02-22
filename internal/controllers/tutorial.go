@@ -126,7 +126,7 @@ func (c *TutorialController) Stage() {
 		firstUseMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_use_item"),
 		)
-		firstUseMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstUseMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstUseMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -145,7 +145,7 @@ func (c *TutorialController) Stage() {
 		firstMissionMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_exploration"),
 		)
-		firstMissionMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstMissionMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstMissionMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -163,7 +163,7 @@ func (c *TutorialController) Stage() {
 		firstWeaponMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_weapon_equipped"),
 		)
-		firstWeaponMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstWeaponMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstWeaponMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -181,7 +181,7 @@ func (c *TutorialController) Stage() {
 		firstHuntingMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_hunting"),
 		)
-		firstHuntingMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstHuntingMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstHuntingMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -200,7 +200,7 @@ func (c *TutorialController) Stage() {
 		firstTravelMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_travel"),
 		)
-		firstTravelMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstTravelMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstTravelMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -228,7 +228,7 @@ func (c *TutorialController) Stage() {
 		msg := helpers.NewMessage(c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.exploring", finishAt.Format("15:04:05 01/02")),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -243,7 +243,7 @@ func (c *TutorialController) Stage() {
 		firstSafeMessage := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "route.tutorial.first_safeplanet"),
 		)
-		firstSafeMessage.ParseMode = tgbotapi.ModeMarkdown
+		firstSafeMessage.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(firstSafeMessage); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -283,7 +283,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 
 	// Invio il primo messaggio per eliminare la tastiera
 	initMessage := helpers.NewMessage(c.ChatID, "...")
-	initMessage.ParseMode = tgbotapi.ModeMarkdown
+	initMessage.ParseMode = tgbotapi.ModeHTML
 	initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	if _, err = helpers.SendMessage(initMessage); err != nil {
 		return err
@@ -296,7 +296,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 
 	var firstMessageConfig tgbotapi.MessageConfig
 	firstMessageConfig = helpers.NewMessage(c.Player.ChatID, textList[0])
-	firstMessageConfig.ParseMode = tgbotapi.ModeMarkdown
+	firstMessageConfig.ParseMode = tgbotapi.ModeHTML
 
 	var firstMessage tgbotapi.Message
 	firstMessage, err = helpers.SendMessage(firstMessageConfig)
@@ -308,7 +308,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 	for i := 1; i <= 7; i++ {
 		time.Sleep(1 * time.Second)
 		edited := helpers.NewEditMessage(c.Player.ChatID, firstMessage.MessageID, textList[i])
-		edited.ParseMode = tgbotapi.ModeMarkdown
+		edited.ParseMode = tgbotapi.ModeHTML
 
 		if _, err = helpers.SendMessage(edited); err != nil {
 			return err
@@ -323,7 +323,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 
 	var secondMessageConfig tgbotapi.MessageConfig
 	secondMessageConfig = helpers.NewMessage(c.Player.ChatID, secondSetText)
-	secondMessageConfig.ParseMode = tgbotapi.ModeMarkdown
+	secondMessageConfig.ParseMode = tgbotapi.ModeHTML
 
 	var secondMessage tgbotapi.Message
 	if secondMessage, err = helpers.SendMessage(secondMessageConfig); err != nil {
@@ -341,7 +341,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 			secondMessage.MessageID,
 			currentMessage,
 		)
-		edited.ParseMode = tgbotapi.ModeMarkdown
+		edited.ParseMode = tgbotapi.ModeHTML
 		if secondMessage, err = helpers.SendMessage(edited); err != nil {
 			return
 		}
@@ -358,7 +358,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 
 	var thirdMessageConfig tgbotapi.MessageConfig
 	thirdMessageConfig = helpers.NewMessage(c.Player.ChatID, thirdSetText)
-	thirdMessageConfig.ParseMode = tgbotapi.ModeMarkdown
+	thirdMessageConfig.ParseMode = tgbotapi.ModeHTML
 
 	var thirdMessage tgbotapi.Message
 	if thirdMessage, err = helpers.SendMessage(thirdMessageConfig); err != nil {
@@ -376,7 +376,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 			thirdMessage.MessageID,
 			currentMessage,
 		)
-		edited.ParseMode = tgbotapi.ModeMarkdown
+		edited.ParseMode = tgbotapi.ModeHTML
 
 		if thirdMessage, err = helpers.SendMessage(edited); err != nil {
 			return
@@ -388,7 +388,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 	// Mando messaggio allert
 	time.Sleep(2 * time.Second)
 	alertMessage := helpers.NewMessage(c.ChatID, textList[20])
-	alertMessage.ParseMode = tgbotapi.ModeMarkdown
+	alertMessage.ParseMode = tgbotapi.ModeHTML
 	alertMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	if _, err = helpers.SendMessage(alertMessage); err != nil {
 		return err
@@ -400,7 +400,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 	time.Sleep(2 * time.Second)
 	var fourthMessageConfig tgbotapi.MessageConfig
 	fourthMessageConfig = helpers.NewMessage(c.Player.ChatID, textList[21])
-	fourthMessageConfig.ParseMode = tgbotapi.ModeMarkdown
+	fourthMessageConfig.ParseMode = tgbotapi.ModeHTML
 
 	var fourthMessage tgbotapi.Message
 	if fourthMessage, err = helpers.SendMessage(fourthMessageConfig); err != nil {
@@ -416,7 +416,7 @@ func (c *TutorialController) sendIntroMessage() (err error) {
 			textList[i],
 		)
 
-		edited.ParseMode = tgbotapi.ModeMarkdown
+		edited.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(edited); err != nil {
 			return err
 		}
