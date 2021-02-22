@@ -1,5 +1,5 @@
 # Expansion
-safeplanet.coalition.expansion.info: "Benvenuto nel centro 💫 *Espansione*.\n\nBy increasing *Rank* you will have the opportunity to explore the outer systems!\n\n"
+safeplanet.coalition.expansion.info: "Benvenuto nel centro 💫 *Espansione*.\n\nAumentando il tuo *Rango* avrai la possibilità di visitare nuovi sistemi!\n\n"
 safeplanet.coalition.expansion.last_system: "Ultimo sistema scoperto: 💫 *%s*\n"
 safeplanet.coalition.expansion.recap_planets: "❌ Mancano da esplorare 🌏*%d* pianeti, su *%d* totali."
 safeplanet.coalition.expansion.recap_planets_done: "\n✅ Tutti i 🌏 pianeti del sistema sono stati esplorati"
