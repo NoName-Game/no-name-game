@@ -136,7 +136,7 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 
 	// Invio notifica
 	msg := helpers.NewMessage(playerTitanDrop.GetPlayer().GetChatID(), text)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
 		logrus.Panic(err)
 	}
@@ -169,7 +169,7 @@ func handleAchievementNotification(playerAchievement *pb.PlayerAchievement) {
 
 	// Invio notifica
 	msg := helpers.NewMessage(playerAchievement.GetPlayer().GetChatID(), text)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
 		logrus.Panic(err)
 	}
@@ -203,7 +203,7 @@ func handleActivityNotification(activity *pb.PlayerActivity) {
 	text := helpers.Trans(rGetPlayerByID.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("notification.activity.%s", activity.Controller))
 
 	msg := helpers.NewMessage(rGetPlayerByID.GetPlayer().GetChatID(), text)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
 		logrus.Panic(err)
 	}

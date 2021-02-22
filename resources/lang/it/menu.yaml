@@ -1,17 +1,17 @@
 # MENU
-menu.borad_system: "*BoardSystem v%s*\n"
+menu.borad_system: "<b>BoardSystem v%s</b>\n"
 menu.general: "🌏 %s \n%s \n\n"
 
 # Task
-menu.tasks: "⏱ *Lista Attività:*\n"
+menu.tasks: "⏱ <b>Lista Attività:</b>\n"
 
 # Safeplanet
-menu.safeplanet: "Ti trovi su 🏟*%s* pianeta *sicuro* e area protetta per *tutti*!✌️\n\n"
+menu.safeplanet: "Ti trovi su 🏟<b>%s</b> pianeta <b>sicuro</b> e area protetta per <b>tutti</b>!✌️\n\n"
 
 # Titanplanet
-menu.titanplanet: "Ti trovi sul pianeta 🌏*%s* dimora del Titano 👁 *%s*.\n\n"
-menu.titanplanet.titan_alive: "Solo la ☠️ *morte* regna su questo pianeta...\n\n"
+menu.titanplanet: "Ti trovi sul pianeta 🌏<b>%s</b> dimora del Titano 👁 <b>%s</b>.\n\n"
+menu.titanplanet.titan_alive: "Solo la ☠️ <b>morte</b> regna su questo pianeta...\n\n"
 menu.titanplanet.titan_dead: "Sconfitto da valorosi viaggiatori! Ora tutto sembra tranquillo.\n\n"
 
 # Travel
-menu.travel: "In 🚀viaggio da 🌏*%s* verso 🌏*%s*...\n\n"
+menu.travel: "In 🚀viaggio da 🌏<b>%s</b> verso 🌏<b>%s</b>...\n\n"

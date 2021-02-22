@@ -137,7 +137,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// msg := services.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "player.intro"))
 	msg := helpers.NewMessage(c.ChatID, recapPlayer)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory")),

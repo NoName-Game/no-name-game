@@ -10,11 +10,11 @@ notification.activity.route.death: "Hai recuperato le energie!"
 notification.activity.route.ship.rests: "Hai recuperato le energie!"
 
 # NOTIFICATIONS - ACHIEVEMENT
-notification.achievement.message: "🎯 Achievement *completato*!\n\nHai portato a termine: *%s*\n*Ricompensa*:\n💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.achievement.message: "🎯 Achievement <b>completato</b>!\n\nHai portato a termine: <b>%s</b>\n<b>Ricompensa</b>:\n💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
 
 # NOTIFICATIONS - TITAN
-notification.titan_drop.message: "️☠️ 👁 *%s* è stato sconfitto! ☠️\n\nI tuoi attacchi hanno inflitto *%v* danni!\nPer aver partecipato allo scontro riesci a recuperare:\n%s\n\nIl titano lascia a terra anche qualcosa di davvero speciale:\n*%s*"
-notification.titan_drop.base: "💰 *%v*\n💎 *%v*\n🏵 *%v*"
+notification.titan_drop.message: "️☠️ 👁 <b>%s</b> è stato sconfitto! ☠️\n\nI tuoi attacchi hanno inflitto <b>%v</b> danni!\nPer aver partecipato allo scontro riesci a recuperare:\n%s\n\nIl titano lascia a terra anche qualcosa di davvero speciale:\n<b>%s</b>"
+notification.titan_drop.base: "💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
 notification.titan_drop.armor.helmet: "👨🏼‍🚀 %s (%s)"
 notification.titan_drop.armor.glove: "🦾 %s (%s)"
 notification.titan_drop.armor.chest: "🥼 %s (%s)"

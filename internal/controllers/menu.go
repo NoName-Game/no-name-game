@@ -50,7 +50,7 @@ func (c *MenuController) Handle(player *pb.Player, update tgbotapi.Update) {
 	recap := c.GetRecap(currentPosition)
 
 	msg := helpers.NewMessage(c.Player.ChatID, recap)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		Keyboard:       c.GetKeyboard(currentPosition),
 		ResizeKeyboard: true,

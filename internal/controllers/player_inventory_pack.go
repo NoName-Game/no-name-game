@@ -157,7 +157,7 @@ func (c *PlayerInventoryPackController) Stage() {
 			c.ChatID,
 			helpers.Trans(c.Player.Language.Slug, "inventory.packs.what"),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       keyboardRowItems,
@@ -183,7 +183,7 @@ func (c *PlayerInventoryPackController) Stage() {
 		)
 
 		msg := helpers.NewMessage(c.ChatID, text)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -214,7 +214,7 @@ func (c *PlayerInventoryPackController) Stage() {
 		// Creo messaggio di recap drop
 		for _, resource := range drops.GetResources() {
 			dropResults += fmt.Sprintf(
-				"- %s %s (*%s*) %s\n",
+				"- %s %s (<b>%s</b>) %s\n",
 				helpers.GetResourceCategoryIcons(resource.GetResourceCategoryID()),
 				resource.GetName(),
 				strings.ToUpper(resource.GetRarity().GetSlug()),
@@ -223,15 +223,15 @@ func (c *PlayerInventoryPackController) Stage() {
 		if len(drops.GetItems()) > 0 {
 			dropResults += "\n"
 			for _, item := range drops.Items {
-				dropResults += fmt.Sprintf("- *%s*\n", helpers.Trans(c.Player.Language.Slug, "items."+item.GetSlug()))
+				dropResults += fmt.Sprintf("- <b>%s</b>\n", helpers.Trans(c.Player.Language.Slug, "items."+item.GetSlug()))
 			}
 		}
 		// Countdown 3-2-1 Drop
 
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "inventory.packs.completed",dropResults))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+			helpers.Trans(c.Player.Language.Slug, "inventory.packs.completed", dropResults))
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

@@ -214,7 +214,7 @@ func (c *ShipLaboratoryController) Stage() {
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		for _, category := range rGetAllItemCategories.GetItemCategories() {
 			// Tolgo momentaneamente Altro dalla pagina di crafting, rimuovere quando ci saranno item craftabili.
-			if category.Slug == "stuff" || category.Slug == "pack"{
+			if category.Slug == "stuff" || category.Slug == "pack" {
 				continue
 			}
 			row := tgbotapi.NewKeyboardButtonRow(
@@ -346,10 +346,10 @@ func (c *ShipLaboratoryController) Stage() {
 			// Se la risorsa non è stata ancora scoperta mostro ???
 			resourceName := rGetResourceByID.GetResource().GetName()
 			if !rGetResourceByID.GetResource().GetEnabled() {
-				resourceName = "*???*"
+				resourceName = "<b>???</b>"
 			}
 
-			itemsRecipeList += fmt.Sprintf("%s %s%s (%s) %s - %v/*%v*\n",
+			itemsRecipeList += fmt.Sprintf("%s %s%s (%s) %s - %v/<b>%v</b>\n",
 				haveQuantity,
 				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()), resourceName,
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
@@ -367,7 +367,7 @@ func (c *ShipLaboratoryController) Stage() {
 			),
 		)
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(
@@ -410,7 +410,7 @@ func (c *ShipLaboratoryController) Stage() {
 			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.wait", finishAt.Format("15:04:05")),
 		)
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -438,7 +438,7 @@ func (c *ShipLaboratoryController) Stage() {
 				helpers.Trans(c.Player.Language.Slug, "items."+rLaboratoryEndCrafting.GetItem().GetSlug()),
 			),
 		)
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),

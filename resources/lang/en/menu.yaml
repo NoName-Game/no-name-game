@@ -5,10 +5,10 @@ menu.general: "🌏 %s \n%s \n\n"
 #Task
 menu.tasks: "⏱ *Activitiy List:*\n"
 #Safeplanet
-menu.safeplanet: "You're on 🏟*%s*, *safe* planet and protected area for *everyone*!✌️\n\n"
+menu.safeplanet: "You're on 🏟<b>%s</b>, <b>safe</b> planet and protected area for <b>everyone</b>!✌️\n\n"
 #Titanplanet
-menu.titanplanet: "You're on the planet 🌏*%s*, lair of the Titan 👁 *%s*.\n\n"
-menu.titanplanet.titan_alive: "Only ☠️ *death* reigns on this planet...\n\n"
+menu.titanplanet: "You're on the planet 🌏<b>%s</b>, lair of the Titan 👁 <b>%s</b>.\n\n"
+menu.titanplanet.titan_alive: "Only ☠️ <b>death</b> reigns on this planet...\n\n"
 menu.titanplanet.titan_dead: "Defeated by heroic explorers! Now everything seems quiet.\n\n"
 #Travel
-menu.travel: "In a 🚀voyage from 🌏*%s* to 🌏*%s*...\n\n"
+menu.travel: "In a 🚀voyage from 🌏<b>%s</b> to 🌏<b>%s</b>...\n\n"
