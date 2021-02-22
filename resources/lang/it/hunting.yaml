@@ -3,7 +3,7 @@ hunting.init: "Decidi di esplorare l'area circostante..."
 hunting.leave: "⬅️ Scappa"
 
 # Tresure
-tresure.found.resource: "<b>Fantastico!</b>\nHai trovato una 💠 Risorsa: %s<</b>b>%s</b> (%s) %s"
+tresure.found.resource: "<b>Fantastico!</b>\nHai trovato una 💠 Risorsa: %s<b>%s</b> (%s) %s"
 tresure.found.item: "Incredulo davanti e te scopri 🔩<b>%s</b>"
 tresure.found.transaction: "Ti avvicini a qualcosa di luccicante, guardi meglio e scopri di aver trovato <b>%v</b>💰"
 tresure.found.nothing: "Uhmm... sembra essere vuoto, peccato!"
