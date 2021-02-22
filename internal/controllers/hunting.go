@@ -517,7 +517,7 @@ func (c *HuntingController) fight(inlineData helpers.InlineDataStruct, planetMap
 		c.Logger.Panic(err)
 	}
 
-	combactStatusMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactStatusMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(combactStatusMessage); err != nil {
 		c.Logger.Panic(err)
 	}

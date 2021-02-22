@@ -13,7 +13,7 @@ combat.damage: "⚔️ Fight report ⚔️\n\nYou attacked the enemy inflicting 
 combat.enemy_dodge: "⚔️ Fight report ⚔️\n\nYou attacked the enemy but it was able to *dodge* the hit, it turns around quickly and inflicts you *%d* damage!"
 combat.player_dodge: "⚔️ Fight report ⚔️\n\nYou were able to *dodge* the enemy hit, with a rapid hit you're able to deal him *%d* damage!"
 combat.player_killed: "⚔️ Fight report ⚔️\n\nThe enemy inflict you *%d* damage and *defeated* you in battle!\nYou return to your base on your death bed, you'll need some time to restore your energy..."
-combat.card: "You decide to engage in a battle with:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nYou're aiming at: *%s*\nWeapon equipped:\n*%s* (🛠 *%v*)"
+combat.card: "You decide to engage in a battle with:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nYou're aiming at: <b>%s</b>\nWeapon equipped:\n<b>%s</b> (🛠 <b>%v</b>)"
 combat.mob_killed: "You *defeated* the enemy!\nYou retrieve from the battle:\n%s"
 combat.found.nothing: "\nToo bad, this time you found nothing!"
 combat.found.resource: "\n%s*%s* (%s) %s"

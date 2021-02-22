@@ -2,8 +2,6 @@ package helpers
 
 import (
 	"errors"
-	"strings"
-
 	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -62,8 +60,6 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 
 		return player, err
 	}
-
-	player.Username = strings.ReplaceAll(player.Username, "_", "\\_")
 
 	return
 }
