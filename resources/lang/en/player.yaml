@@ -28,7 +28,7 @@ inventory.weapons.no_one: "You don't own any weapon you can equip"
 inventory.weapons.what: "Which one from your 🗡<b>Weapons</b> would you like to equip?"
 inventory.weapons.zero_equipment: "\n❌ None\n"
 #Equip
-inventory.equip.equipped: "*Your current equipment:*"
+inventory.equip.equipped: "<b>Your current equipment:</b>"
 inventory.equip.error: "It's not possible to equip the item chosen by you."
 inventory.equip.confirm: "Do you confirm you want to equip <b>%s</b>?"
 inventory.equip.confirm_weapon: "Do you confirm you want to equip the weapon <b>%s</b>, replacing <b>%s</b>?"
