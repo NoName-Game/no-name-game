@@ -13,7 +13,7 @@ player.party.create.created: "Party successfully created! Now you can invite oth
 player.party.add.add_player_start: "Insert the username of the explorer that you want to add:"
 player.party.add.add_player_confirm: "Are you sure you want to add %s in your party?"
 player.party.add.completed_ok: "Explorer successfully added"
-player.party.add.add_player_confirm_to_player: "You have been added to <b>%s</b>'s Party"
+player.party.add.add_player_confirm_to_player: "You have been added to <b>%s's</b> Party"
 #Remove
 player.party.remove.remove_player_start: "Insert the username of the explorer that you want to remove or select him from the list down below:"
 player.party.remove.remove_player_confirm: "Are you sure you want to remove %s from your party?"
