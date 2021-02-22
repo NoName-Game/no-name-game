@@ -5,7 +5,7 @@ notification.activity.route.hunting: "Informazioni ritornate con successo!"
 notification.activity.route.safeplanet.hangar.repair: "Riparazione della nave ultimata!"
 notification.activity.route.safeplanet.hangar.create: "Crezione nave completata"
 notification.activity.route.ship.travel.finding: "Nuovo pianeta raggiunto!"
-notification.activity.route.safeplanet.crafter: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
+notification.activity.route.safeplanet.crafter.create: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
 notification.activity.route.death: "Hai recuperato le energie!"
 notification.activity.route.ship.rests: "Hai recuperato le energie!"
 
