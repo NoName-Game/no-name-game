@@ -214,6 +214,20 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 		mission.ID,
 	)
 
+	// Recupero quotazione della missione allo stato attuale
+	var rCheckMissionReward *pb.CheckMissionRewardResponse
+	if rCheckMissionReward, err = config.App.Server.Connection.CheckMissionReward(helpers.NewContext(1), &pb.CheckMissionRewardRequest{
+		MissionID: mission.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	missionRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.quotation",
+		rCheckMissionReward.GetMoney(),
+		rCheckMissionReward.GetDiamond(),
+		rCheckMissionReward.GetExp(),
+	)
+
 	// Verifico quale tipologia di missione è stata estratta
 	switch mission.GetMissionCategory().GetSlug() {
 	// Trova il pianeta
