@@ -14,7 +14,7 @@ combat.damage: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico inflig
 combat.enemy_dodge: "⚔️ Rapporto scontro ⚔️\n\nHai attaccato il nemico ma è riuscito a *schivare* il colpo, si gira di scatto riuscendo ad infliggerti *%d* danni!"
 combat.player_dodge: "⚔️ Rapporto scontro ⚔️\n\nSei riuscito a *schivare* il colpo nemico, con un colpo deciso riesci a infliggergli *%d* danni!"
 combat.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico ti ha inflitto *%v* danni ed è riuscito a *sconfiggerti* in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
-combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nStai mirando a: *%s*\nArma equipaggiata:\n*%s* (🛠 *%v*)"
+combat.card: "Decidi di affrontare uno scontro contro:\n\n🐺 %s (%s)\n❤️ %d/%d\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nStai mirando a: <b>%s</b>\nArma equipaggiata:\n<b>%s</b> (🛠 <b>%v</b>)"
 combat.mob_killed: "Sei riuscito a *sconfiggere* il nemico!\nDallo scontro riesci a recuperare:\n%s"
 combat.found.nothing: "\nQuesta volta non hai trovato nulla, che sfortuna!"
 combat.found.resource: "\n%s*%s* (%s) %s"
