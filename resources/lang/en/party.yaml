@@ -5,7 +5,7 @@ player.party.already_in_party: "⚠️ It seems you're already in a party."
 player.party.adding_player_already_in_one_party: "⚠️ The explorer you suggested is already in a party."
 player.party.party_limit_reached: "⚠️ The party has reached the maximum allowed number of participants."
 #Show
-player.party.show: "🔰 Party of *%s*\n\n👨🏼‍🚀 Explorers (%v/3):\n%s"
+player.party.show: "🔰 Party di <b>%s</b>\n\n👨🏼‍🚀 Esploratori (%v/3):\n%s"
 #Create
 player.party.non_in_party: "Currently you don't belong to any party, you can create one, or get invited to face adventures with your teammates.\n\n📖: You can create a party and add up to 3 explorers."
 player.party.create.created: "Party successfully created! Now you can invite other explorers."
@@ -13,14 +13,14 @@ player.party.create.created: "Party successfully created! Now you can invite oth
 player.party.add.add_player_start: "Insert the username of the explorer that you want to add:"
 player.party.add.add_player_confirm: "Are you sure you want to add %s in your party?"
 player.party.add.completed_ok: "Explorer successfully added"
-player.party.add.add_player_confirm_to_player: "You have been added to %s's Party"
+player.party.add.add_player_confirm_to_player: "Sei stato aggiunto al party di <b>%s</b>"
 #Remove
 player.party.remove.remove_player_start: "Insert the username of the explorer that you want to remove or select him from the list down below:"
 player.party.remove.remove_player_confirm: "Are you sure you want to remove %s from your party?"
 player.party.remove.remove_completed_ok: "The explorer has been removed from your party!"
 player.party.remove.remove_completed_ko: "⚠️ It wasn't possible to remove the explorer from your party."
-player.party.remove.remove_player_confirm_to_player: "You have been removed from %s's Party*"
+player.party.remove.remove_player_confirm_to_player: "Sei stato rimosso dal party di <b>%s</b>"
 #Leave
-player.party.leave.confirm: "⚠️Are you sure you want to *leave* this party?"
+player.party.leave.confirm: "⚠️ Sei sicuro di voler <b>abbandonare</b> questo party?"
 player.party.leave.completed_ok: "You have successfully left the party."
 player.party.leave.completed_ko: "⚠️ It wasn't possible to leave the party."
