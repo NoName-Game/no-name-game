@@ -1,6 +1,6 @@
 ---
 #Expansion
-safeplanet.coalition.expansion.info: "Welcome to the 💫 *Expansion* center.\n\nBy exploring all the planets currently known, you'll help the Coalition to expand our borders.\n\n"
+safeplanet.coalition.expansion.info: "Welcome to the 💫 *Expansion* center.\n\nBy increasing *Rank* you will have the opportunity to explore the outer systems!\n\n"
 safeplanet.coalition.expansion.last_system: "Last system discovered: 💫 *%s*\n"
 safeplanet.coalition.expansion.recap_planets: "\n❌ There are still missing 🌏*%d* planets to explore, out of *%d* totally."
 safeplanet.coalition.expansion.recap_planets_done: "\n✅ All the 🌏 planets of the system have been explored"
