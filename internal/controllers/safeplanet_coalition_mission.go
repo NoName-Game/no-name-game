@@ -254,6 +254,8 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 		missionRecap += helpers.Trans(c.Player.Language.Slug,
 			"safeplanet.mission.type.planet_finding.description",
 			rGetPlanetByID.GetPlanet().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 
 	// Uccidi il nemico
@@ -281,6 +283,8 @@ func (c *SafePlanetMissionController) getMissionRecap(mission *pb.Mission) (miss
 			"safeplanet.mission.type.kill_mob.description",
 			rGetEnemyByID.GetEnemy().GetName(),
 			rGetPlanetByMapID.GetPlanet().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetName(),
+			rGetPlanetByMapID.GetPlanet().GetPlanetSystem().GetID(),
 		)
 	}
 
