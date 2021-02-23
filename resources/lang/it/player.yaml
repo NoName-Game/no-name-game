@@ -52,7 +52,13 @@ inventory.packs.what: "Ecco i 🎁 <b>Rifornimenti</b> in tuo possesso.\nDesider
 inventory.packs.completed: "Hai aperto la <b>cassa di rifornimenti</b> ed hai trovato:\n\n%s"
 
 # PlayerRank
-rank.soldato: "Soldato"
-rank.caporale: "Caporale"
-rank.maresciallo: "Maresciallo"
-rank.generale: "Generale"
+rank.viaggiatore_locale: "Viaggiatore Locale"
+rank.navigatore_sprovveduto: "Navigatore Sprovveduto"
+rank.pilota_inesperto: "Pilota Inesperto"
+rank.pilota_provetto: "Pilota Provetto"
+rank.pilota_esperto: "Pilota Esperto"
+rank.istruttore: "Istruttore di Volo"
+rank.esploratore_galattico: "Esploratore Galattico"
+rank.esploratore_universale: "Esploratore Universale"
+rank.campione_galattico: "Campione Galattico"
+rank.campione: "Campione dei Sistemi"
