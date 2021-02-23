@@ -3,12 +3,12 @@
 menu.borad_system: "<b>BoardSystem v%s</b>\n"
 menu.general: "🌏 %s \n%s \n\n"
 #Task
-menu.tasks: "⏱ <b>Activitiy List:</b>\n"
+menu.tasks: "⏱ <b>Lista Attività:</b>\n"
 #Safeplanet
-menu.safeplanet: "You're on 🏟<b>%s</b>, <b>safe</b> planet and protected area for <b>everyone</b>!✌️\n\n"
+menu.safeplanet: "Ti trovi su 🏟<b>%s</b> pianeta <b>sicuro</b> e area protetta per <b>tutti</b>!✌️\n\n"
 #Titanplanet
-menu.titanplanet: "You're on the planet 🌏<b>%s</b>, lair of the Titan 👁 <b>%s</b>.\n\n"
-menu.titanplanet.titan_alive: "Only ☠️ <b>death</b> reigns on this planet...\n\n"
+menu.titanplanet: "Ti trovi sul pianeta 🌏<b>%s</b> dimora del Titano 👁 <b>%s</b>.\n\n"
+menu.titanplanet.titan_alive: "Solo la ☠️ <b>morte</b> regna su questo pianeta...\n\n"
 menu.titanplanet.titan_dead: "Defeated by heroic explorers! Now everything seems quiet.\n\n"
 #Travel
-menu.travel: "In a 🚀voyage from 🌏<b>%s</b> to 🌏<b>%s</b>...\n\n"
+menu.travel: "In 🚀viaggio da 🌏<b>%s</b> verso 🌏<b>%s</b>...\n\n"
