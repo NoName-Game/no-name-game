@@ -158,7 +158,7 @@ func UseItem(player *pb.Player, itemID uint32, MessageID int) (err error) {
 		),
 	)
 	combactMessage.ReplyMarkup = &keyboard
-	combactMessage.ParseMode = tgbotapi.ModeMarkdown
+	combactMessage.ParseMode = tgbotapi.ModeHTML
 	if _, err = SendMessage(combactMessage); err != nil {
 		return err
 	}

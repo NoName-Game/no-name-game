@@ -1,10 +1,10 @@
 # Bank
 safeplanet.bank.info: "💰 Benvenuto alla succursale della banca Dipper&Co."
-safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: *%v*💰\nDeposito corrente: *%v*💰\n\n📖: Ricorda, depositare in banca ti assicurerà di mettere al sicuro i tuoi risparmi *gratuitamente*, al ritiro invece verrà applicata un commissione del *20%%* sulla transazione."
+safeplanet.bank.account_details: "Ecco i dettagli del suo conto:\nIn tuo possesso: <b>%v</b>💰\nDeposito corrente: <b>%v</b>💰\n\n📖: Ricorda, depositare in banca ti assicurerà di mettere al sicuro i tuoi risparmi <b>gratuitamente</b>, al ritiro invece verrà applicata un commissione del <b>20%%</b> sulla transazione."
 safeplanet.bank.deposit: "🔽 Deposito"
 safeplanet.bank.deposit_message: "Quanto desidera depositare?\n\nPuò indicare anche manualmente l'importo che desidera depositare."
 
 safeplanet.bank.withdraws: "🔼 Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desidera prelevare?\n\nPuò indicare anche manualmente l'importo che desidera prelevare."
-safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con *successo*!\n\nI nostri servizi sono sempre a sua disposizione."
+safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con <b>successo</b>!\n\nI nostri servizi sono sempre a sua disposizione."
 safeplanet.bank.transaction_error: "Non è stato possibile completare la transazione! Riprovi più tardi."

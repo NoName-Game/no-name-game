@@ -151,7 +151,7 @@ func (c *Controller) RegisterError(err error) {
 
 	// Invio il messaggio in caso di errore e chiudo
 	validatorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "validator.error"))
-	validatorMsg.ParseMode = tgbotapi.ModeMarkdown
+	validatorMsg.ParseMode = tgbotapi.ModeHTML
 	validatorMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -182,7 +182,7 @@ func (c *Controller) Validate() {
 
 	// Invio il messaggio in caso di errore e chiudo
 	validatorMsg := helpers.NewMessage(c.ChatID, c.Validation.Message)
-	validatorMsg.ParseMode = tgbotapi.ModeMarkdown
+	validatorMsg.ParseMode = tgbotapi.ModeHTML
 	if c.Validation.ReplyKeyboard.Keyboard != nil {
 		validatorMsg.ReplyMarkup = c.Validation.ReplyKeyboard
 	}

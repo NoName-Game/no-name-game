@@ -63,7 +63,7 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 		helpers.Trans(player.Language.Slug, "safeplanet.hangar.intro"),
 		recapShip,
 	))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.hangar.ships")),

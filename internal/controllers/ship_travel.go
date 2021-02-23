@@ -81,7 +81,7 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.tip"),
 		))
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, travel)),

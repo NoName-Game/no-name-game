@@ -1,6 +1,6 @@
 ---
 #MISSION
-exploration.tips: "📖: Esegui delle esplorazioni per il recupero del materiale proprio del pianeta.<b>Ogni</b> esplorazione ha una durata iniziale di <b>10</b> minuti, ripetendo più volte l'esplorazione la durata e i materiali da te recuperabili aumenteranno."
+exploration.tips: "📖: Perform some explorations in order to recover the planet's materials. <b>Every</b> exploration has an initial duration of <b>10</b> minutes, by repeating it more than once the duration and the materials recoverable will increase."
 exploration.exploration: "Select the exploration field:"
 exploration.underground: "🔥 Subsoil"
 exploration.surface: "💧 Surface"
@@ -9,8 +9,8 @@ exploration.extraction_recap: "In this exploratory cycle you extracted the follo
 exploration.extraction_ended: "You are back with your new resources!\n\n%s\nYou also earned %v EXP!"
 exploration.extraction_ended_zero: "You have returned without resources!"
 exploration.comeback: "❌ Leave Exploration"
-exploration.wait: "Ti incammini alla ricerca di nuove risorse, il prossimo rapporto è previsto alle <b>%s</b>."
-exploration.validator.wait: "Stai già effettuando un'esplorazione, il prossimo rapporto è previsto alle <b>%s</b>."
-exploration.conqueror_bonus: "\n\n🚩<b>Bonus Conquistatore! (x2)</b>\nSembra che tu conosca molto bene questo pianeta! Grazie a questo bonus ogni ricerca ti fornirà il <b>doppio</b> di 💠 <b>Risorse</b>!"
+exploration.wait: "You start off a search for new resources, the next report is expected at <b>%s</b>."
+exploration.validator.wait: "You're already busy with an exploration, the next report is expected at <b>%s</b>."
+exploration.conqueror_bonus: "\n\n🚩<b>Conqueror Bonus! (x2)</b>\nLooks like you know this planet very well! Thanks to this bonus every exploration will provide you <b>double</b> the 💠 <b>materials</b>!"
 exploration.continue: "Keep exploring"
 exploration.breaker.continue: "Continue Exploration"

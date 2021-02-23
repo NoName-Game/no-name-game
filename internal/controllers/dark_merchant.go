@@ -157,7 +157,7 @@ func (c *DarkMerchantController) Stage() {
 		))
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.intro", rGetPlayerEconomy.GetValue()))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
 			Keyboard:       itemsKeyboard,
@@ -175,7 +175,7 @@ func (c *DarkMerchantController) Stage() {
 	case 1:
 		// Invio messaggio
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.quantity"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1"),
@@ -218,7 +218,7 @@ func (c *DarkMerchantController) Stage() {
 			c.Payload.Quantity*c.Payload.Price,       // Costo
 		))
 
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
@@ -261,7 +261,7 @@ func (c *DarkMerchantController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "darkmerchant.completed"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),

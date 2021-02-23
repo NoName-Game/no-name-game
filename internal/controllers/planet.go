@@ -102,7 +102,7 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	))
 
 	msg := helpers.NewMessage(c.ChatID, planetDetailsMsg)
-	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 		ResizeKeyboard: true,
 		Keyboard:       keyboardRow,

@@ -124,7 +124,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.intro"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			Keyboard:       keyboardRows,
 			ResizeKeyboard: true,
@@ -159,7 +159,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 
 		// Se non è esploso nulla allora posso dare le prime carte
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.start"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1️⃣"),
@@ -196,7 +196,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
 			for _, resource := range winningResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (*%s*) %s\n",
+					"- %s %v x %s (<b>%s</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,
@@ -214,7 +214,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 
 			// Invio messggio con ancora le 3 scelte di carte
 			msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s \n%s", loseMessage, recapList))
-			msg.ParseMode = tgbotapi.ModeMarkdown
+			msg.ParseMode = tgbotapi.ModeHTML
 			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
@@ -238,7 +238,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		}
 
 		resourceFound := fmt.Sprintf(
-			"%s %s (*%s*) %s\n",
+			"%s %s (<b>%s</b>) %s\n",
 			helpers.GetResourceCategoryIcons(rThreeCardGameCheckResponse.GetResource().GetResourceCategoryID()),
 			rThreeCardGameCheckResponse.GetResource().Name,
 			rThreeCardGameCheckResponse.GetResource().Rarity.Slug,
@@ -250,7 +250,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 
 		// Invio messggio con ancora le 3 scelte di carte
 		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s \n%s", winMessage, recapList))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1️⃣"),
@@ -305,7 +305,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 			recapList = helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.recap")
 			for _, resource := range winningResources {
 				recapList += fmt.Sprintf(
-					"- %s %v x %s (*%s*) %s\n",
+					"- %s %v x %s (<b>%s</b>) %s\n",
 					helpers.GetResourceCategoryIcons(resource.Resource.GetResourceCategoryID()),
 					resource.Quantity,
 					resource.Resource.Name,
@@ -317,7 +317,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 
 		// Invio messggio con ancora le 3 scelte di carte
 		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s \n%s", recoverMessage, recapList))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("1️⃣"),
@@ -350,7 +350,7 @@ func (c *SafePlanetRelaxThreeCardController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.threecards.play.end_game"))
-		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}

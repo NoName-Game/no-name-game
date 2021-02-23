@@ -1,13 +1,13 @@
 # PLAYER
-player.datails.card: "👨🏼‍🚀 *%s* \n♥️ *%v*/%v HP\n🏵 Exp: *%v*/*%v* 🎖LvL: *%v*\n🏷 Rango: *%s* -> *%v*/*%v*\n💰 *%v* 💎 *%v* 🧿 *%v*\n"
-player.datails.planet_visited: "\n🌏 *Pianeti* visitati: *%d*"
-player.datails.system_visited: "\n💫 *Sistemi* visitati: *%d*"
+player.datails.card: "👨🏼‍🚀 <b>%s</b> \n♥️ <b>%v</b>/%v HP\n🏵 Exp: <b>%v</b>/<b>%v</b> 🎖LvL: <b>%v</b>\n🏷 Rango: <b>%s</b> -> <b>%v</b>/<b>%v</b>\n💰 <b>%v</b> 💎 <b>%v</b> 🧿 <b>%v</b>\n"
+player.datails.planet_visited: "\n🌏 <b>Pianeti</b> visitati: <b>%d</b>"
+player.datails.system_visited: "\n💫 <b>Sistemi</b> visitati: <b>%d</b>"
 
 # Guild
 player.guild.members: "Lista Membri:\n"
-player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢*Gilda*.\n\nVisita la 💈*Coalizione* per trovare nuovi gruppi."
-player.guild.guild_details: "💢 Nome Gilda: *%s*\n🎓 Punti Gilda: *%v*\n👑 Fondatore: *%s*"
-player.guild.player_details: "👨🏼‍🚀 *%s* - 🎓 *%v*\n🌏 %s\n\n"
+player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢<b>Gilda</b>.\n\nVisita la 💈<b>Coalizione</b> per trovare nuovi gruppi."
+player.guild.guild_details: "💢 Nome Gilda: <b>%s</b>\n🎓 Punti Gilda: <b>%v</b>\n👑 Fondatore: <b>%s</b>"
+player.guild.player_details: "👨🏼‍🚀 <b>%s</b> - 🎓 <b>%v</b>\n🌏 %s\n\n"
 
 # Achievement
 achievement.category.general: "Generale"
@@ -19,40 +19,46 @@ achievement.kill-enemies-50: "Uccidi i nemici (50)"
 achievement.kill-enemies-100: "Uccidi i nemici (100)"
 
 player.achievement.intro: "Ecco qui la la lista dei tuoi obbiettivi da esploratore che hai raggiunto e che devi raggiungere:"
-player.achievement.category_recap: "Obbiettivi raggiunti per la categoria *%s*:\n\n%s"
+player.achievement.category_recap: "Obbiettivi raggiunti per la categoria <b>%s</b>:\n\n%s"
 
 # Inventory
-inventory.intro: "Cosa vuoi gestire dal tuo 🎒*inventario*?"
-inventory.recap.resource: "Ecco le 💠 *Risorse* in tuo possesso:"
+inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>inventario</b>?"
+inventory.recap.resource: "Ecco le 💠 <b>Risorse</b> in tuo possesso:"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
-inventory.armors.what: "Quale tra le tue 🛡*Armature* vorresti equipaggiare?"
+inventory.armors.what: "Quale tra le tue 🛡<b>Armature</b> vorresti equipaggiare?"
 inventory.armors.zero_equipment: "\n❌ Nessuna\n"
 inventory.weapons.no_one: "Non possiedi nessun'arma da poter equipaggiare"
-inventory.weapons.what: "Quale tra le tue 🗡*Armi* vorresti equipaggiare?"
+inventory.weapons.what: "Quale tra le tue 🗡<b>Armi</b> vorresti equipaggiare?"
 inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 
 # Equip
-inventory.equip.equipped: "*Il tuo attuale equipaggiamento:*"
+inventory.equip.equipped: "<b>Il tuo attuale equipaggiamento:</b>"
 inventory.equip.error: "Non è possibile equipaggiare l'item da te scelto."
-inventory.equip.confirm: "Confermi di voler equipaggiare *%s*?"
-inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma *%s*, sostituendo *%s*?"
-inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura *%s*, sostituendo *%s*?"
-inventory.equip.completed: "Nuovo equipaggiamento *confermato!*"
+inventory.equip.confirm: "Confermi di voler equipaggiare <b>%s</b>?"
+inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma <b>%s</b>, sostituendo <b>%s</b>?"
+inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura <b>%s</b>, sostituendo <b>%s</b>?"
+inventory.equip.completed: "Nuovo equipaggiamento <b>confermato!</b>"
 
 # Items
-inventory.items.what: "Ecco gli 🔩 *Oggetti* in tuo possesso.\nDesideri usare qualcosa?"
+inventory.items.what: "Ecco gli 🔩 <b>Oggetti</b> in tuo possesso.\nDesideri usare qualcosa?"
 inventory.items.not_found: "L'oggetto che vuoi usare non sembra essere valido."
-inventory.items.confirm: "Confermi di voler usare *%v*?"
+inventory.items.confirm: "Confermi di voler usare <b>%v</b>?"
 inventory.items.confirm_warning: "\n\n⚠️Attenzione, l'eccedenza verrà automaticamente scartata."
-inventory.items.completed: "Hai usato *%s*."
+inventory.items.completed: "Hai usato <b>%s</b>."
 
 # Packs
-inventory.packs.what: "Ecco i 🎁 *Rifornimenti* in tuo possesso.\nDesideri usare qualcosa?"
-inventory.packs.completed: "Hai aperto la *cassa di rifornimenti* ed hai trovato:\n\n%s"
+inventory.packs.what: "Ecco i 🎁 <b>Rifornimenti</b> in tuo possesso.\nDesideri usare qualcosa?"
+inventory.packs.completed: "Hai aperto la <b>cassa di rifornimenti</b> ed hai trovato:\n\n%s"
 
 # PlayerRank
-rank.soldato: "Soldato"
-rank.caporale: "Caporale"
-rank.maresciallo: "Maresciallo"
-rank.generale: "Generale"
+rank.viaggiatore_locale: "Viaggiatore Locale"
+rank.navigatore_sprovveduto: "Navigatore Sprovveduto"
+rank.pilota_inesperto: "Pilota Inesperto"
+rank.pilota_provetto: "Pilota Provetto"
+rank.pilota_esperto: "Pilota Esperto"
+rank.istruttore: "Istruttore di Volo"
+rank.esploratore_galattico: "Esploratore Galattico"
+rank.esploratore_universale: "Esploratore Universale"
+rank.campione_galattico: "Campione Galattico"
+rank.campione: "Campione dei Sistemi"
