@@ -372,9 +372,16 @@ func (c *ExplorationController) Stage() {
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
+		var quickEnd bool
+		quickEnd = false
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+			// Player ha annullato prima l'esplorazione
+			quickEnd = true
+		}
 		var rExplorationEnd *pb.ExplorationEndResponse
 		if rExplorationEnd, err = config.App.Server.Connection.ExplorationEnd(helpers.NewContext(1), &pb.ExplorationEndRequest{
 			PlayerID: c.Player.ID,
+			QuickEnd: quickEnd,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
