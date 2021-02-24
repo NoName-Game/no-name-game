@@ -1,11 +1,12 @@
 # Guild
 safeplanet.coalition.protectors.info: "Benvenuto nella sala dei 💢 <b>Protettori</b>.\n\nOgni giorno incontriamo nuovi 👨🏼‍🚀<b>esploratori</b> che cercano una casa o un gruppo con cui stare, qui hai la possibilità di farlo."
-safeplanet.coalition.protectors.player_protectors_details: "\n\nLa tua gilda attuale: <b>%s</b>"
+safeplanet.coalition.protectors.player_protectors_details: "\n\nLa tua gilda attuale: <b>%s</b>\nNumero Esploratori: %v/20"
 safeplanet.coalition.protectors.protectors_name_already_taken: "Il nome da te scelto è già stato scelto."
 safeplanet.coalition.protectors.protectors_name_not_exists: "La gilda da te indicata non sembra esser corretta."
 safeplanet.coalition.protectors.player_already_in_one_protectors: "Sembra tu sia già in una gilda, prima di crearne una nuova devi abbandonare quella attuale."
 safeplanet.coalition.protectors.adding_player_already_in_one_protectors: "Il player da te indicato è già in una gilda."
 safeplanet.coalition.protectors.protectors_player_not_exists: "Non è stato trovato nessun esploratore con quel nome."
+safeplanet.coalition.protectors.max_player_reached: "È stato raggiunto il numero massimo di esploratori."
 
 safeplanet.coalition.protectors.create_start: "Inserisci il nome della 💢<b>Gilda</b> che vuoi creare"
 safeplanet.coalition.protectors.create_accessibility: "Indicaci il tipo di visibilità che vuoi dare al tuo gruppo?\n\n<b>Pubblica</b>: tutti potranno accedere alla tua gilda.\n<b>Privata</b>: solo il fondatore potrà aggiungere player alla gida."
