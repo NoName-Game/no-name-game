@@ -12,7 +12,7 @@ tresure.found.trap: "AH! You stumbled upon a <b>trap</b>, you lose 💔<b>%v</b>
 combat.damage: "⚔️ Battle log ⚔️\n\nYou attacked the enemy dealing <b>%d</b> damage!\nHowever, the enemy was able to hit you and deal <b>%d</b> damage!"
 combat.enemy_dodge: "⚔️ Battle log ⚔️\n\nYou attacked the enemy but he succesfully <b>dodged</b> the hit, he turns around quickly and deals you <b>%d</b> damage!"
 combat.player_dodge: "⚔️ Battle log ⚔️\n\nYou succesfully <b>dodged</b> the enemy's attack, with a rapid hit you're able to deal him <b>%d</b> damage!"
-combat.player_killed: "⚔️ Battle log ⚔️\n\nThe enemy has dealt you <b>%v</b> damage and has <b>defeated</b> you in battle!\nYou crawl back to the base on death's door, it will take some time to fully recover..."
+combat.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico ti ha inflitto <b>%d</b> danni ed è riuscito a <b>sconfiggerti</b> in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
 combat.card: "You decide to engage in a battle with:\n\n🐺 %s (%s)\n❤️ %d/%d\\n\n👨🏼‍🚀 %s\n❤️ %v/%v\n\nYou're aiming at: <b>%s</b>\nWeapon equipped:\n<b>%s</b> (🛠 <b>%v</b>)"
 combat.mob_killed: "You <b>defeated</b> the enemy!\nYou retrieve from the battle:\n%s"
 combat.found.nothing: "\nToo bad, this time you found nothing!"
