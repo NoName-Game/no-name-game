@@ -22,11 +22,9 @@ ship.travel.complete_diamond_error: "It wasn't possible to complete the operatio
 ship.travel.reachable: "✅ Reachable"
 ship.travel.unreachable: "❌ Not Reachable"
 #Travel manual
-ship.travel.manual.info: "Insert crypted coordinates to get some travel info.\n\n📖: The travel coordinates can be retrieved from a planet's detail page"
+ship.travel.manual.info: "Enter encrypted coordinates in ordere to retrieve travel information.\n\n📖: Travel coordinates can be found on the detail page of a planet"
 ship.travel.manual.trip_details: "Travel info for the given coordinates:"
-
-ship.error.rank: "Your Rank is too low to travel to this planet!"
-
+ship.error.rank: "Your rank is too low to travel towards this planet!"
 #Rests
 ship.rests: "It seems like you need some rest, do you want to recover some energy?"
 ship.rests.full_rest_time: "\n\n⏱: There will be needed <b>%v</b> minutes for your <b>total</b> energy recovery."
@@ -47,7 +45,7 @@ ship.laboratory.categories.stuff: "🔩 Others"
 ship.laboratory.info: "📖: In your ship's laboratory you can produce some items through the use of some resources, needed to help you with the trip."
 ship.laboratory.type: "Which category of items are you interested at crafting?"
 ship.laboratory.what: "Which item would you like to craft?"
-ship.laboratory.you_need: "To craft <b>%s</b> the following resources will be consumed:\n\n%s\nDo you want to continue?"
+ship.laboratory.you_need: "In order to realize <b>%s</b> the following resources will be used:\n\n%s\nDo you wish to proceed?"
 ship.laboratory.craft_completed: "Your item has been crafted correctly.\nYou obtained <b>%s</b>!"
 ship.laboratory.no_resource_to_craft: "Unfortunately you're missing some resources to complete your item, try again when you're going to have them all."
 ship.laboratory.wait: "Production <b>started</b>!\nThe end of your item's production is expected to be at <b>%s</b>, come back later."
@@ -56,7 +54,7 @@ ship.laboratory.item_does_not_exist: "The chosen item doesn't exist!"
 #Rescue
 ship.travel.rescue.info: "🧰 Did you get stuck on this planet?\n\nRequest support to the Coalition.\nThrough a signal the Coalition can teleport you directly to the nearest secure planet.\n\nTo proceed with the rescue <b>1</b>💎 will be needed"
 ship.travel.rescue.diamond: "💎 Request Rescue 💎"
-ship.travel.rescue.confirm: "<b>Are you sure you want to ask for a rescue?</b>\n⚠️: <b>1</b>💎 Will be used"
+ship.travel.rescue.confirm: "<b>Are you sure you want to call for rescue?</b>\n⚠️ <b>1</b> 💎 will be used."
 ship.travel.rescue.confirmed: "Rescue request sent successfully, the Coalition replies!"
 ship.travel.rescue.countdown.init: "You lift up your 💎 upward and feel a force passing through all your body..."
 ship.travel.rescue.countdown: "The Teleportation will begin in <b>%d</b>!"

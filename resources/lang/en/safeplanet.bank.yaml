@@ -1,10 +1,10 @@
 ---
 #Bank
-safeplanet.bank.info: "💰 Welcome to the branch of the Dipper&Co bank."
-safeplanet.bank.account_details: "Here are your account details:\nIn your possession: <b>%v</b>💰\nCurrent deposit: <b>%v</b>💰\n\n📖: Remember, a deposit in bank will protect your savings <b>freely</b>, however at withdrawal there will be applied a commission of <b>20%%</b> on the transaction."
+safeplanet.bank.info: "💰 Welcome to the local branch of the Dipper&Co bank."
+safeplanet.bank.account_details: "Here are your account details:\nIn your possession: <b>%v</b>💰\nCurrent deposit: <b>%v</b>💰\n\n📖: Remember, a deposit in the bank will protect your savings <b>for free</b>, however there will be a commission of <b>20%%</b> on every withdrawal."
 safeplanet.bank.deposit: "🔽 Deposit"
-safeplanet.bank.deposit_message: "How much would you like to deposit?\n\nYou can even input manually the amount that you wish to deposit."
+safeplanet.bank.deposit_message: "How much would you like to deposit?\n\nYou can also input manually the amount that you wish to deposit."
 safeplanet.bank.withdraws: "🔼 Withdraw"
-safeplanet.bank.withdraws_message: "How much would you like to withdraw?\n\nYou can even input manually the amount you wish to withdraw."
-safeplanet.bank.operation_done: "🧾 Your transactions has been completed <b>successfully</b>!\n\nOur services are always on your disposal."
+safeplanet.bank.withdraws_message: "How much would you like to withdraw?\n\nYou can also input manually the amount you wish to withdraw."
+safeplanet.bank.operation_done: "🧾 Your transactions has been completed <b>successfully</b>!\n\nOur services are always at your disposal."
 safeplanet.bank.transaction_error: "It wasn't possible to complete the transaction! Try again later."
