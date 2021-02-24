@@ -51,6 +51,9 @@ rarity.UR: "Ultra Raro"
 rarity.L: "Leggendario"
 rarity.X: "Sperimentale"
 
+# INFO
+info: "Benvenuto nell'universo di 💫 <b>NoName</b> 💫! <b>Viaggia</b>, <b>raccogli risorse</b> e <b>sconfiggi i nemici</b> che popolano i pianeti!\nAlleati con gli altri esploratori per formare <b>Gilde</b>. Conquista l'universo e scopri il tuo <b>Destino</b>!\n\n❌ <b>REGOLAMENTO</b> 🧑‍⚖️\nPuoi leggere il regolamento di gioco qui:\nhttps://telegra.ph/Regolamento-NoName-02-24\n Il bot è attualmente in BETA, per qualsiasi informazione, aiuto o segnalazione potete contattare gli sviluppatori su @reloonfire , @casteponters e @nonamegroupofficial.\n\nUn ringraziamento speciale a @JackTheDipper,@Zipizz,@dom89x,@Stealdi,@Hi_im_Beasty,@tdjj05 per tutto il supporto dato dalla nascita alla prima pubblicazione!"
+
 ################################################################################################################
 # EVENTS
 titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
