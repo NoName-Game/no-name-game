@@ -106,7 +106,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		// Il Player deve terminare prima l'esplorazione in corso
 		if !rExplorationCheck.GetFinishExploration() {
 			// Verificio se il player vuole forzare il ritorno alla base
-			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.cancel") {
 				c.CurrentState.Stage = 4
 				return false
 			}
@@ -129,7 +129,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 						helpers.Trans(c.Player.Language.Slug, "exploration.breaker.continue"),
 					),
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "exploration.comeback"),
+						helpers.Trans(c.Player.Language.Slug, "exploration.cancel"),
 					),
 				),
 			)
@@ -142,7 +142,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.cancel") {
 			c.CurrentState.Stage = 4
 			return false
 		}
@@ -324,7 +324,7 @@ func (c *ExplorationController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.cancel")),
 			),
 		)
 
@@ -365,6 +365,12 @@ func (c *ExplorationController) Stage() {
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
+			),
+		)
 
 		// Aggiorno lo stato
 		c.CurrentState.Stage = 2
@@ -372,9 +378,16 @@ func (c *ExplorationController) Stage() {
 
 	// Ritorno il messaggio con gli elementi droppati
 	case 4:
+		var quickEnd bool
+		quickEnd = false
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+			// Player ha annullato prima l'esplorazione
+			quickEnd = true
+		}
 		var rExplorationEnd *pb.ExplorationEndResponse
 		if rExplorationEnd, err = config.App.Server.Connection.ExplorationEnd(helpers.NewContext(1), &pb.ExplorationEndRequest{
 			PlayerID: c.Player.ID,
+			QuickEnd: quickEnd,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
