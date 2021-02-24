@@ -26,6 +26,8 @@ ship.travel.unreachable: "❌ Non Raggiungibile"
 ship.travel.manual.info: "Inserisci delle coordinate cryptate per recupeare le informazioni di viaggio.\n\n📖: Le coordinate di viaggio possono esser recuperare dalla pagina dettaglio di un pianeta"
 ship.travel.manual.trip_details: "Dettagli viaggio per le coordinate inserite:"
 
+ship.error.rank: "Il tuo Rango è troppo basso per viaggiare a questo pianeta!"
+
 # Rests
 ship.rests: "Sembra che tu abbia bisogno di un po' di riposo, desideri recuperare le tue energie?"
 ship.rests.full_rest_time: "\n\n⏱: Saranno necessari <b>%v</b> minuti al recupero <b>totale</b> delle forze."
