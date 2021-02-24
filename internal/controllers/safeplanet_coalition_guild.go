@@ -55,7 +55,7 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		// Se il player è owner dell gruppo allora vede il tasto per gestire gli altri player
 		if rGetPlayerGuild.GetGuild().GetOwnerID() == c.Player.ID {
 			keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.add_player")),
+				//tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.add_player")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.remove_player")),
 			))
 		}
