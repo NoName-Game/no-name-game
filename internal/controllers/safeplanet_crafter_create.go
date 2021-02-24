@@ -100,7 +100,7 @@ func (c *SafePlanetCrafterCreateController) Validator() (hasErrors bool) {
 			c.Payload.AddResource = true
 
 			// Recupero risorsa da messaggio, e se non rispecchia le specifiche ritorno errore
-			resourceName := strings.Split(strings.Split(c.Update.Message.Text, " (")[0], " ")
+			resourceName := strings.SplitN(strings.Split(c.Update.Message.Text, " (")[0], " ", 3)
 			if len(resourceName) < 3 {
 				return true
 			} else {
