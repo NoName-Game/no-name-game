@@ -400,6 +400,10 @@ func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.Keyboard
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 	})
 
+	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
+	})
+
 	return keyboardRow
 }
 
