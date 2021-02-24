@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -131,8 +132,12 @@ func (c *ShipTravelManualController) Validator() (hasErrors bool) {
 			PlayerID:   c.Player.GetID(),
 			Coordinate: c.Update.Message.Text,
 		}); err != nil {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-
+			if strings.Contains(err.Error(),"player rank below player system id") {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.error.rank")
+			} else {
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
+			}
+			
 			return true
 		}
 	}

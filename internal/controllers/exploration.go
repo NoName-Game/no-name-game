@@ -142,7 +142,7 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 	case 3:
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.continue") {
 			return false
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.cancel") {
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
 			c.CurrentState.Stage = 4
 			return false
 		}
@@ -326,7 +326,7 @@ func (c *ExplorationController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.continue")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.cancel")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "exploration.comeback")),
 			),
 		)
 
@@ -382,7 +382,7 @@ func (c *ExplorationController) Stage() {
 	case 4:
 		var quickEnd bool
 		quickEnd = false
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.comeback") {
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "exploration.cancel") {
 			// Player ha annullato prima l'esplorazione
 			quickEnd = true
 		}
