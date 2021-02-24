@@ -336,7 +336,7 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 
 	// Verifico se il PLAYER è morto
 	if rHitTitan.GetPlayerDie() {
-		c.PlayerDie()
+		c.PlayerDie(rHitTitan.GetTitanDamage())
 		return
 	}
 
@@ -386,12 +386,12 @@ func (c *TitanPlanetTackleController) Hit(titan *pb.Titan, inlineData helpers.In
 	}
 }
 
-func (c *TitanPlanetTackleController) PlayerDie() {
+func (c *TitanPlanetTackleController) PlayerDie(titanDamage int32) {
 	// Aggiorno messaggio notificando al player che è morto
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed"),
+		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", titanDamage),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -490,7 +490,7 @@ func (c *TitanPlanetTackleController) Event(inlineData helpers.InlineDataStruct,
 
 		// Verifico se il PLAYER è morto
 		if rTitanEventSubmitAnswer.GetPlayerDie() {
-			c.PlayerDie()
+			c.PlayerDie(int32(rTitanEventSubmitAnswer.GetTitanDamage()))
 			return
 		}
 
