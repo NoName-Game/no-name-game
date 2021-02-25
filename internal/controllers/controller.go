@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"fmt"
-
-	"github.com/sirupsen/logrus"
-
 	"bitbucket.org/no-name-game/nn-telegram/config"
+	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
@@ -52,6 +50,7 @@ type ControllerConfigurations struct {
 	ControllerBlocked []string
 	ControllerBack    ControllerBack
 	PlanetType        []string
+	BreakerPerStage   map[int32][]string
 }
 
 type ControllerBack struct {
@@ -196,87 +195,95 @@ func (c *Controller) Validate() {
 // delle azioni che permetteranno di concludere
 func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterface) (backed bool) {
 	if c.Update.Message != nil {
-		switch c.Update.Message.Text {
-		// Questo braker forza il player a tornare al menu precedente senza cancellare lo stato
-		case helpers.Trans(c.Player.Language.Slug, "route.breaker.back"):
-			if c.CurrentState.Stage > canBackFromStage {
-				c.CurrentState.Stage = 0
-				return
-			}
-
-			// Cancello stato dalla memoria
-			helpers.DelCurrentControllerCache(c.Player.ID)
-
-			// Se è stato settato un controller esco
-			if controller != nil {
-				// Rimuovo testo messaggio
-				c.Update.Message.Text = ""
-				controller.Handle(c.Player, c.Update)
-				backed = true
-				return
-			}
-
-			new(MenuController).Handle(c.Player, c.Update)
-			backed = true
+		if _, ok := c.Configurations.BreakerPerStage[c.CurrentState.Stage]; !ok {
+			// Se non ha quella chiave c'è un problema
 			return
-
-		// Questo braker forza il player a tornare al menù precedente
-		case helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"):
-			// Cancello stato dalla memoria
-			helpers.DelCurrentControllerCache(c.Player.ID)
-			_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
-
-			if controller != nil {
-				// Rimuovo testo messaggio
-				c.Update.Message.Text = ""
-				controller.Handle(c.Player, c.Update)
-				backed = true
-				return
-			}
-
-			new(MenuController).Handle(c.Player, c.Update)
-			backed = true
-			return
-
-		// Questo braker forza il player a tornare al menù principale cancellando l'attività
-		case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
-			if !c.Player.GetDead() {
-				// Cancello stato da cache
-				helpers.DelCurrentControllerCache(c.Player.ID)
-				_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
-
-				// Call menu controller
-				new(MenuController).Handle(c.Player, c.Update)
-
-				backed = true
-				return
-			}
-		case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
-			if !c.Player.GetDead() {
-				// Cancello stato da cache
-				helpers.DelCurrentControllerCache(c.Player.ID)
-				_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
-
-				// Call menu controller
-				new(MenuController).Handle(c.Player, c.Update)
-
-				backed = true
-				return
-			}
 		}
+		breakers := c.Configurations.BreakerPerStage[c.CurrentState.Stage]
+		breakers = append(breakers, c.Configurations.CustomBreaker...)
+		if helpers.MessageInCustomBreakers(c.Update.Message.Text, c.Player.Language.Slug, breakers) {
+			switch c.Update.Message.Text {
+			// Questo braker forza il player a tornare al menu precedente senza cancellare lo stato
+			case helpers.Trans(c.Player.Language.Slug, "route.breaker.back"):
+				if c.CurrentState.Stage > canBackFromStage {
+					c.CurrentState.Stage = 0
+					return
+				}
 
-		// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
-		// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
-		c.Configurations.CustomBreaker = append(c.Configurations.CustomBreaker, "route.breaker.continue")
-		if helpers.MessageInCustomBreakers(c.Update.Message.Text, c.Player.Language.Slug, c.Configurations.CustomBreaker) {
-			// Cancello stato dalla memoria
-			helpers.DelCurrentControllerCache(c.Player.ID)
+				// Cancello stato dalla memoria
+				helpers.DelCurrentControllerCache(c.Player.ID)
 
-			// Call menu controller
-			new(MenuController).Handle(c.Player, c.Update)
+				// Se è stato settato un controller esco
+				if controller != nil {
+					// Rimuovo testo messaggio
+					c.Update.Message.Text = ""
+					controller.Handle(c.Player, c.Update)
+					backed = true
+					return
+				}
 
-			backed = true
-			return
+				new(MenuController).Handle(c.Player, c.Update)
+				backed = true
+				return
+
+			// Questo braker forza il player a tornare al menù precedente
+			case helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"):
+				// Cancello stato dalla memoria
+				helpers.DelCurrentControllerCache(c.Player.ID)
+				_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
+				if controller != nil {
+					// Rimuovo testo messaggio
+					c.Update.Message.Text = ""
+					controller.Handle(c.Player, c.Update)
+					backed = true
+					return
+				}
+
+				new(MenuController).Handle(c.Player, c.Update)
+				backed = true
+				return
+
+			// Questo braker forza il player a tornare al menù principale cancellando l'attività
+			case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
+				if !c.Player.GetDead() {
+					// Cancello stato da cache
+					helpers.DelCurrentControllerCache(c.Player.ID)
+					_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
+					// Call menu controller
+					new(MenuController).Handle(c.Player, c.Update)
+
+					backed = true
+					return
+				}
+			case helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"):
+				if !c.Player.GetDead() {
+					// Cancello stato da cache
+					helpers.DelCurrentControllerCache(c.Player.ID)
+					_ = helpers.DelControllerCacheData(c.Player.ID, c.CurrentState.Controller)
+
+					// Call menu controller
+					new(MenuController).Handle(c.Player, c.Update)
+
+					backed = true
+					return
+				}
+			}
+
+			// Continua - mantiene lo stato attivo ma ti forza a tornare al menù
+			// usato principalemente per notificare che esiste già un'attività in corso (Es. Missione)
+			c.Configurations.CustomBreaker = append(c.Configurations.CustomBreaker, "route.breaker.continue")
+			if helpers.MessageInCustomBreakers(c.Update.Message.Text, c.Player.Language.Slug, c.Configurations.CustomBreaker) {
+				// Cancello stato dalla memoria
+				helpers.DelCurrentControllerCache(c.Player.ID)
+
+				// Call menu controller
+				new(MenuController).Handle(c.Player, c.Update)
+
+				backed = true
+				return
+			}
 		}
 	}
 

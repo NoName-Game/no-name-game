@@ -34,6 +34,9 @@ func (c *PlayerPartyLeaveController) Handle(player *pb.Player, update tgbotapi.U
 				To:        &PlayerPartyController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
@@ -94,11 +97,11 @@ func (c *PlayerPartyLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		c.CurrentState.Stage = 2
+		c.CurrentState.Stage = 1
 	// ##################################################################################################
 	// Levo player dal party
 	// ##################################################################################################
-	case 2:
+	case 1:
 		// Recupero party player
 		var rGetPartyDetails *pb.GetPartyDetailsResponse
 		rGetPartyDetails, _ = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{

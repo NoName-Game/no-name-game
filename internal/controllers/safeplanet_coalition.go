@@ -32,6 +32,9 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
