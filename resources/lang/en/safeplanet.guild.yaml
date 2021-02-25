@@ -18,6 +18,7 @@ safeplanet.coalition.protectors.join_confirm: "Do you confirm that you want to j
 safeplanet.coalition.protectors.join_completed_ok: "From this moment you're part of the guild!"
 safeplanet.coalition.protectors.leave_confirm: "Are you sure you want to leave the <b>%s</b>?"
 safeplanet.coalition.protectors.leave_completed_ok: "Now you don't belong to any group anymore."
+safeplanet.coalition.protectors.leave_owner_ko: "L'owner della gilda non può abbandore senza aver nominato prima un nuovo leader."
 safeplanet.coalition.protectors.add_player_start: "Insert the username of the explorer that you want to add:"
 safeplanet.coalition.protectors.add_player_confirm: "Are you sure you want to add %s in your guild?"
 safeplanet.coalition.protectors.add_completed_ok: "The explorer has been added to your guild!"
@@ -25,3 +26,14 @@ safeplanet.coalition.protectors.remove_player_start: "Insert the username of the
 safeplanet.coalition.protectors.remove_player_confirm: "Are you sure you want to remove %s from your guild?"
 safeplanet.coalition.protectors.remove_completed_ok: "The explorer has been removed from your guild!"
 safeplanet.coalition.protectors.remove_completed_ko: "It wasn't possible to remove the explorer from your guild."
+
+safeplanet.coalition.protectors.change_leader_start: "Selezione l'esploratore che vuoi nominare leader:"
+safeplanet.coalition.protectors.change_leader_confirm: "Sei sicuro di voler nominare %s come leader dalla tua gilda?"
+safeplanet.coalition.protectors.change_leader_completed_ok: "L'esploratore è stato promosso a leader dalla tua gilda!"
+safeplanet.coalition.protectors.change_leader_completed_ko: "Non è stato possibile promuovere l'esploratore dalla tua gilda."
+
+safeplanet.coalition.protectors.not_owner: "Non sei il proprietario della gilda!"
+safeplanet.coalition.protectors.switch: "Attualmente la tua gilda è in modalità <b>%s</b>, vuoi cambiare?"
+safeplanet.coalition.protectors.switch_conferm: "Visibilità gilda cambiata con successo!"
+
+safeplanet.coalition.protectors.cannot_join: "La <b>Gilda</b> selezionata è privata!"

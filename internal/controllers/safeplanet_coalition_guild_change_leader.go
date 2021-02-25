@@ -8,9 +8,9 @@ import (
 )
 
 // ====================================
-// SafePlanetProtectorsRemovePlayerController
+// SafePlanetProtectorsChangeLeaderController
 // ====================================
-type SafePlanetProtectorsRemovePlayerController struct {
+type SafePlanetProtectorsChangeLeaderController struct {
 	Payload struct {
 		Username string
 	}
@@ -20,13 +20,13 @@ type SafePlanetProtectorsRemovePlayerController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsChangeLeaderController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.protectors.remove_player",
+			Controller: "route.safeplanet.coalition.protectors.change_leader",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
@@ -35,9 +35,6 @@ func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, u
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
-			BreakerPerStage: map[int32][]string{
-				0: {"route.breaker.menu"},
-			},
 		},
 	}) {
 		return
@@ -59,7 +56,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, u
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
+func (c *SafePlanetProtectorsChangeLeaderController) Validator() bool {
 	var err error
 	switch c.CurrentState.Stage {
 	case 0:
@@ -70,6 +67,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
+
 		if rGetPlayerGuild.GetGuild().GetOwnerID() != c.Player.ID {
 			c.CurrentState.Completed = true
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.not_owner")
@@ -80,12 +78,30 @@ func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
 	// Verifico se il player scelto esisteo
 	// ##################################################################################################
 	case 1:
-		var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
-		rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
-			Username: c.Update.Message.Text,
-		})
+		// Recupero gilda player
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
 
-		if rGetPlayerByUsername.GetPlayer().GetID() <= 0 || c.Update.Message.Text == "" {
+		// Ciclo tutta la lista degli esploratori nella gilda
+		var rGetPlayersGuild *pb.GetPlayersGuildResponse
+		if rGetPlayersGuild, err = config.App.Server.Connection.GetPlayersGuild(helpers.NewContext(1), &pb.GetPlayersGuildRequest{
+			GuildID: rGetPlayerGuild.GetGuild().GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var found bool
+		for _, player := range rGetPlayersGuild.GetPlayers() {
+			if player.GetUsername() == c.Update.Message.Text {
+				found = true
+			}
+		}
+
+		if !found || c.Update.Message.Text == "" {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_player_not_exists")
 			return true
 		}
@@ -106,7 +122,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
+func (c *SafePlanetProtectorsChangeLeaderController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
@@ -145,7 +161,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_player_start"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.change_leader_start"))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -161,7 +177,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 	// Chiedo Conferma al player
 	// ##################################################################################################
 	case 1:
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_player_confirm", c.Payload.Username))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.change_leader_confirm", c.Payload.Username))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -189,7 +205,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		if _, err = config.App.Server.Connection.RemovePlayerToGuild(helpers.NewContext(1), &pb.RemovePlayerToGuildRequest{
+		if _, err = config.App.Server.Connection.ChangeLeaderGuild(helpers.NewContext(1), &pb.ChangeLeaderGuildRequest{
 			PlayerUsername: c.Payload.Username,
 			GuildID:        rGetPlayerGuild.GetGuild().GetID(),
 		}); err != nil {
@@ -197,7 +213,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 
 			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
 			errorMsg := helpers.NewMessage(c.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_completed_ko"),
+				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.change_leader_completed_ko"),
 			)
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
@@ -207,7 +223,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 			return
 		}
 
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.remove_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.change_leader_completed_ok"))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

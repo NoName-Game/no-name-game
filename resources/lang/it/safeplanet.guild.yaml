@@ -20,6 +20,7 @@ safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte 
 
 safeplanet.coalition.protectors.leave_confirm: "Sei sicuro di voler abbandonare i <b>%s</b>?"
 safeplanet.coalition.protectors.leave_completed_ok: "Ora non appartieni più a nessun gruppo."
+safeplanet.coalition.protectors.leave_owner_ko: "L'owner della gilda non può abbandore senza aver nominato prima un nuovo leader."
 
 safeplanet.coalition.protectors.add_player_start: "Inserisci lo username dell'esploratore che vuoi aggiungere:"
 safeplanet.coalition.protectors.add_player_confirm: "Sei sicuro di voler aggiungere %s alla tua gilda?"
@@ -29,3 +30,14 @@ safeplanet.coalition.protectors.remove_player_start: "Inserisci lo username dell
 safeplanet.coalition.protectors.remove_player_confirm: "Sei sicuro di voler rimuovere %s dalla tua gilda?"
 safeplanet.coalition.protectors.remove_completed_ok: "L'esploratore è stato rimosso dalla tua gilda!"
 safeplanet.coalition.protectors.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dalla tua gilda."
+
+safeplanet.coalition.protectors.change_leader_start: "Selezione l'esploratore che vuoi nominare leader:"
+safeplanet.coalition.protectors.change_leader_confirm: "Sei sicuro di voler nominare %s come leader dalla tua gilda?"
+safeplanet.coalition.protectors.change_leader_completed_ok: "L'esploratore è stato promosso a leader dalla tua gilda!"
+safeplanet.coalition.protectors.change_leader_completed_ko: "Non è stato possibile promuovere l'esploratore dalla tua gilda."
+
+safeplanet.coalition.protectors.not_owner: "Non sei il proprietario della gilda!"
+safeplanet.coalition.protectors.switch: "Attualmente la tua gilda è in modalità <b>%s</b>, vuoi cambiare?"
+safeplanet.coalition.protectors.switch_conferm: "Visibilità gilda cambiata con successo!"
+
+safeplanet.coalition.protectors.cannot_join: "La <b>Gilda</b> selezionata è privata!"
