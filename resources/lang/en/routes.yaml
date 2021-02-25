@@ -65,6 +65,8 @@ route.safeplanet.coalition.protectors.join: "🔍 Find"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Leave Guild"
 route.safeplanet.coalition.protectors.add_player: "➕ Add explorer"
 route.safeplanet.coalition.protectors.remove_player: "➖ Remove explorer"
+route.safeplanet.coalition.protectors.switch: "Cambia Visibilità"
+
 #Titan planet
 route.titanplanet.tackle: "Take on 👁 Titan"
 #Breaker

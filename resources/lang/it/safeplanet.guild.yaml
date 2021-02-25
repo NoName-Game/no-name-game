@@ -31,5 +31,7 @@ safeplanet.coalition.protectors.remove_completed_ok: "L'esploratore è stato rim
 safeplanet.coalition.protectors.remove_completed_ko: "Non è stato possibile rimuovere l'esploratore dalla tua gilda."
 
 safeplanet.coalition.protectors.not_owner: "Non sei il proprietario della gilda!"
-safeplanet.coalition.protectors.switch: "Attualmente la tua gilda è in modalità %s, vuoi cambiare?"
+safeplanet.coalition.protectors.switch: "Attualmente la tua gilda è in modalità <b>%s</b>, vuoi cambiare?"
 safeplanet.coalition.protectors.switch_conferm: "Visibilità gilda cambiata con successo!"
+
+safeplanet.coalition.protectors.cannot_join: "La <b>Gilda</b> selezionata è privata!"
