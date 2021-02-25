@@ -416,13 +416,13 @@ func (c *Controller) InTutorial() bool {
 // Verifico se il player si trova su un pianeta sicuro
 func (c *Controller) CheckInTitanPlanet(position *pb.Planet) (inTitanPlanet bool, titan *pb.Titan) {
 	// Verifico se il pianeta corrente è occupato da un titano
-	var rGetTitanByPlanetID *pb.GetTitanByPlanetIDResponse
-	rGetTitanByPlanetID, _ = config.App.Server.Connection.GetTitanByPlanetID(helpers.NewContext(1), &pb.GetTitanByPlanetIDRequest{
+	var rCheckTitanAliveByPlanetID *pb.CheckTitanAliveByPlanetIDResponse
+	rCheckTitanAliveByPlanetID, _ = config.App.Server.Connection.CheckTitanAliveByPlanetID(helpers.NewContext(1), &pb.CheckTitanAliveByPlanetIDRequest{
 		PlanetID: position.GetID(),
 	})
 
-	if rGetTitanByPlanetID.GetTitan().GetID() > 0 {
-		return true, rGetTitanByPlanetID.GetTitan()
+	if rCheckTitanAliveByPlanetID.GetTitan().GetID() > 0 {
+		return true, rCheckTitanAliveByPlanetID.GetTitan()
 	}
 
 	return false, nil
