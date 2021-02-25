@@ -1,5 +1,5 @@
 ---
 #CONQUEROR
-conqueror.intro: "🚩<b>Conquer the Planet!</b>\nProve your worth by defeating enemies during explorations.\n\n📖: Climbing the leaderboard will allow you to receive bonuses from the activities on this planet. La classifica viene resettata settimanalmente.\n\n"
+conqueror.intro: "🚩<b>Conquer the Planet!</b>\nProve your worth by defeating enemies during the hunting.\n\n📖: Climbing the leaderboard will allow you to receive bonuses from the activities on this planet. La classifica viene resettata settimanalmente.\n\n"
 conqueror.planet_free: "No explorer fought for this planet yet."
 conqueror.list.intro: "Here the best explorers for this planet:\n"
