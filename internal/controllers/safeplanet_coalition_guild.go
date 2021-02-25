@@ -72,11 +72,22 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		),
 	))
 
+	// Recupero lista partecipanti gilda
+	var rGetPlayersGuild *pb.GetPlayersGuildResponse
+	if rGetPlayersGuild, err = config.App.Server.Connection.GetPlayersGuild(helpers.NewContext(1), &pb.GetPlayersGuildRequest{
+		GuildID: rGetPlayerGuild.GetGuild().GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
 	// Message
 	var protectorsMessage string
 	protectorsMessage = helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.info")
 	if rGetPlayerGuild.GetInGuild() {
-		protectorsMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.player_protectors_details", rGetPlayerGuild.GetGuild().GetName())
+		protectorsMessage += helpers.Trans(player.Language.Slug, "safeplanet.coalition.protectors.player_protectors_details",
+			rGetPlayerGuild.GetGuild().GetName(),
+			len(rGetPlayersGuild.GetPlayers()),
+		)
 	}
 
 	msg := helpers.NewMessage(c.ChatID, protectorsMessage)

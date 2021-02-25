@@ -74,3 +74,6 @@ route.breaker.continue: "Continua"
 route.breaker.menu: "⬅️ Torna al menu"
 route.breaker.back: "⬅️ Indietro"
 route.breaker.clears: "⬅️ Abbandona"
+
+#INFO
+route.info: "🗒 Info"

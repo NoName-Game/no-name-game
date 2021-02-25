@@ -92,6 +92,9 @@ var routes = map[string]reflect.Type{
 
 	// Conqueror
 	"route.conqueror": reflect.TypeOf((*controllers.ConquerorController)(nil)).Elem(),
+
+	// Info
+	"route.info": reflect.TypeOf((*controllers.InfoController)(nil)).Elem(),
 }
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing
