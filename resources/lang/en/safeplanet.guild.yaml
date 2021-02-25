@@ -25,3 +25,7 @@ safeplanet.coalition.protectors.remove_player_start: "Insert the username of the
 safeplanet.coalition.protectors.remove_player_confirm: "Are you sure you want to remove %s from your guild?"
 safeplanet.coalition.protectors.remove_completed_ok: "The explorer has been removed from your guild!"
 safeplanet.coalition.protectors.remove_completed_ko: "It wasn't possible to remove the explorer from your guild."
+safeplanet.coalition.protectors.not_owner: "Non sei il proprietario della gilda!"
+safeplanet.coalition.protectors.switch: "Attualmente la tua gilda è in modalità <b>%s</b>, vuoi cambiare?"
+safeplanet.coalition.protectors.switch_conferm: "Visibilità gilda cambiata con successo!"
+safeplanet.coalition.protectors.cannot_join: "La <b>Gilda</b> selezionata è privata!"
