@@ -77,6 +77,16 @@ func (c *SafePlanetProtectorsJoinController) Validator() bool {
 			return true
 		}
 
+		var rGetGuildByName *pb.GetGuildByNameResponse
+		if rGetGuildByName, err = config.App.Server.Connection.GetGuildByName(helpers.NewContext(1), &pb.GetGuildByNameRequest{GuildName: c.Update.Message.Text}); err != nil {
+			c.Logger.Panic(err)
+		}
+		if rGetGuildByName.GetGuild().GetGuildType() {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.cannot_join")
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"))))
+			return true
+		}
+
 		c.Payload.Name = c.Update.Message.Text
 	// ##################################################################################################
 	// Verifico Conferma
