@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -107,9 +109,19 @@ func (c *SafePlanetProtectorsLeaveController) Stage() {
 	// Abbandono gilda
 	// ##################################################################################################
 	case 1:
-		if _, err = config.App.Server.Connection.LeaveGuild(helpers.NewContext(1), &pb.LeaveGuildRequest{
+		_, err = config.App.Server.Connection.LeaveGuild(helpers.NewContext(1), &pb.LeaveGuildRequest{
 			PlayerID: c.Player.ID,
-		}); err != nil {
+		})
+
+		if err != nil && strings.Contains(err.Error(), "owner cant leave guild") {
+			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_owner_ko"))
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil {
 			c.Logger.Panic(err)
 		}
 

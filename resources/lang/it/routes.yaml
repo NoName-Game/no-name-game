@@ -65,7 +65,8 @@ route.safeplanet.coalition.protectors.join: "🔍 Cerca"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Abbandona Gilda"
 route.safeplanet.coalition.protectors.add_player: "➕ Aggiungi esploratore"
 route.safeplanet.coalition.protectors.remove_player: "➖ Rimuovi esploratore"
-route.safeplanet.coalition.protectors.switch: "Cambia Visibilità"
+route.safeplanet.coalition.protectors.change_leader: "👑 Cambia Leader"
+route.safeplanet.coalition.protectors.switch: "👀 Cambia Visibilità"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
