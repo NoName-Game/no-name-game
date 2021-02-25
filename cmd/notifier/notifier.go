@@ -90,6 +90,13 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Info("[*] Achievement %d recovered", playerTitanDrop.ID)
+
+			// Aggiorno lo stato levando la notifica
+			if _, err = config.App.Server.Connection.SetTitanDropNotified(helpers.NewContext(1), &pb.SetTitanDropNotifiedRequest{
+				TitanDropID: playerTitanDrop.GetID(),
+			}); err != nil {
+				logrus.Panic(err)
+			}
 		}
 	}()
 
@@ -156,6 +163,13 @@ func handleAchievementNotification(playerAchievement *pb.PlayerAchievement) {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Info("[*] Achievement %d recovered", playerAchievement.ID)
+
+			// Aggiorno lo stato levando la notifica
+			if _, err = config.App.Server.Connection.SetPlayerAchievementNotified(helpers.NewContext(1), &pb.SetPlayerAchievementNotifiedRequest{
+				AchievementID: playerAchievement.ID,
+			}); err != nil {
+				logrus.Panic(err)
+			}
 		}
 	}()
 
