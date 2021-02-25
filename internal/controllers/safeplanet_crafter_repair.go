@@ -38,6 +38,11 @@ func (c *SafePlanetCrafterRepairController) Handle(player *pb.Player, update tgb
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

@@ -47,6 +47,13 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 				To:        &ShipController{},
 				FromStage: 1,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.back"},
+				3: {"route.breaker.back"},
+				4: {"route.breaker.continue"},
+			},
 		},
 	}) {
 		return

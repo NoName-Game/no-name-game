@@ -42,6 +42,12 @@ func (c *SafePlanetHangarRepairController) Handle(player *pb.Player, update tgbo
 				FromStage: 1,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
+				3: {"route.breaker.continue"},
+			},
 		},
 	}) {
 		return
@@ -134,6 +140,14 @@ func (c *SafePlanetHangarRepairController) Validator() (hasErrors bool) {
 				c.Player.Language.Slug,
 				"safeplanet.hangar.wait",
 				finishAt.Format("15:04:05"),
+			)
+			// Aggiungi possibilità di velocizzare
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
+					),
+				),
 			)
 
 			return true

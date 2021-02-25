@@ -36,6 +36,9 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
