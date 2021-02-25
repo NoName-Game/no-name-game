@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strings"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -14,7 +12,8 @@ import (
 // ====================================
 type SafePlanetProtectorsSwitchController struct {
 	Payload struct {
-		Username string
+		Visibility bool
+		GuildID uint32
 	}
 	Controller
 }
@@ -28,7 +27,7 @@ func (c *SafePlanetProtectorsSwitchController) Handle(player *pb.Player, update 
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.protectors.add_player",
+			Controller: "route.safeplanet.coalition.protectors.switch",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
@@ -69,7 +68,7 @@ func (c *SafePlanetProtectorsSwitchController) Validator() bool {
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
-		if rGetPlayerGuild.GetGuild().GetOwnerID() == c.Player.ID {
+		if rGetPlayerGuild.GetGuild().GetOwnerID() != c.Player.ID {
 			c.CurrentState.Completed = true
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.not_owner")
 
@@ -101,10 +100,29 @@ func (c *SafePlanetProtectorsSwitchController) Stage() {
 		// Aggiungo torna al menu
 		var protectorsKeyboard [][]tgbotapi.KeyboardButton
 		protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		))
 
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.add_player_start"))
+		// Verifico sia fondatore
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var visibility string
+		if rGetPlayerGuild.GetGuild().GetGuildType() {
+			visibility = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.private")
+		} else {
+			visibility = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.public")
+		}
+
+		c.Payload.Visibility = rGetPlayerGuild.GetGuild().GetGuildType()
+		c.Payload.GuildID = rGetPlayerGuild.GetGuild().GetID()
+
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.switch", visibility))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
@@ -117,55 +135,18 @@ func (c *SafePlanetProtectorsSwitchController) Stage() {
 
 		c.CurrentState.Stage = 1
 	// ##################################################################################################
-	// Chiedo Conferma al player
-	// ##################################################################################################
-	case 1:
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.add_player_confirm", c.Payload.Username))
-		msg.ParseMode = tgbotapi.ModeHTML
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
-			),
-		)
-
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		c.CurrentState.Stage = 2
-	// ##################################################################################################
 	// Salvo e associo player alla gilda
 	// ##################################################################################################
-	case 2:
+	case 1:
 		// Recuero gilda corrente
-		var rGetPlayerGuild *pb.GetPlayerGuildResponse
-		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
-			PlayerID: c.Player.ID,
+		if _, err = config.App.Server.Connection.ChangeGuildVisibility(helpers.NewContext(1), &pb.ChangeVisibilityGuildRequest{
+			Visibility: !c.Payload.Visibility,
+			GuildID: c.Payload.GuildID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
-		_, err = config.App.Server.Connection.AddPlayerToGuild(helpers.NewContext(1), &pb.AddPlayerToGuildRequest{
-			PlayerUsername: c.Payload.Username,
-			GuildID:        rGetPlayerGuild.GetGuild().GetID(),
-		})
 
-		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
-			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.adding_player_already_in_one_protectors"),
-			)
-			if _, err = helpers.SendMessage(errorMsg); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			c.CurrentState.Completed = true
-			return
-		}
-
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.add_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.switch_conferm"))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

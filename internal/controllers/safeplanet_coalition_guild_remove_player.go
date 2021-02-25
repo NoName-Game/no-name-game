@@ -67,7 +67,7 @@ func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
-		if rGetPlayerGuild.GetGuild().GetOwnerID() == c.Player.ID {
+		if rGetPlayerGuild.GetGuild().GetOwnerID() != c.Player.ID {
 			c.CurrentState.Completed = true
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.not_owner")
 

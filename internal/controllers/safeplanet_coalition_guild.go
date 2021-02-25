@@ -56,6 +56,7 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		if rGetPlayerGuild.GetGuild().GetOwnerID() == c.Player.ID {
 			keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
 				//tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.add_player")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.switch")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.remove_player")),
 			))
 		}
