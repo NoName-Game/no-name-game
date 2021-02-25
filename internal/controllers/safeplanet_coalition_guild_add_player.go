@@ -60,6 +60,28 @@ func (c *SafePlanetProtectorsAddPlayerController) Handle(player *pb.Player, upda
 // ====================================
 func (c *SafePlanetProtectorsAddPlayerController) Validator() bool {
 	var err error
+
+	// Recupero gilda player
+	var rGetPlayerGuild *pb.GetPlayerGuildResponse
+	if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Verifico se sono presenti più di 20 player
+	var rGetPlayersGuild *pb.GetPlayersGuildResponse
+	if rGetPlayersGuild, err = config.App.Server.Connection.GetPlayersGuild(helpers.NewContext(1), &pb.GetPlayersGuildRequest{
+		GuildID: rGetPlayerGuild.GetGuild().GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	if len(rGetPlayersGuild.GetPlayers()) >= 20 {
+		c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.max_player_reached")
+		return true
+	}
+
 	switch c.CurrentState.Stage {
 	case 0:
 		// Verifico sia fondatore
