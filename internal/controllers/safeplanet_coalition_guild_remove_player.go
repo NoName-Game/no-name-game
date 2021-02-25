@@ -57,7 +57,22 @@ func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, u
 // Validator
 // ====================================
 func (c *SafePlanetProtectorsRemovePlayerController) Validator() bool {
+	var err error
 	switch c.CurrentState.Stage {
+	case 0:
+		// Verifico sia fondatore
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+		if rGetPlayerGuild.GetGuild().GetOwnerID() != c.Player.ID {
+			c.CurrentState.Completed = true
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.not_owner")
+
+			return true
+		}
 	// ##################################################################################################
 	// Verifico se il player scelto esisteo
 	// ##################################################################################################

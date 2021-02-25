@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strings"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -10,22 +8,27 @@ import (
 )
 
 // ====================================
-// SafePlanetProtectorsLeaveController
+// SafePlanetProtectorsAddPlayerController
 // ====================================
-type SafePlanetProtectorsLeaveController struct {
+type SafePlanetProtectorsSwitchController struct {
+	Payload struct {
+		Visibility bool
+		GuildID uint32
+	}
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetProtectorsLeaveController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetProtectorsSwitchController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Init Controller
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.coalition.protectors.leave",
+			Controller: "route.safeplanet.coalition.protectors.switch",
+			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
@@ -48,14 +51,30 @@ func (c *SafePlanetProtectorsLeaveController) Handle(player *pb.Player, update t
 	c.Stage()
 
 	// Completo progressione
-	c.Completing(nil)
+	c.Completing(&c.Payload)
 }
 
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetProtectorsLeaveController) Validator() bool {
+func (c *SafePlanetProtectorsSwitchController) Validator() bool {
+	var err error
 	switch c.CurrentState.Stage {
+	case 0:
+		// Verifico sia fondatore
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+		if rGetPlayerGuild.GetGuild().GetOwnerID() != c.Player.ID {
+			c.CurrentState.Completed = true
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.not_owner")
+
+			return true
+		}
+
 	// ##################################################################################################
 	// Verifico Conferma
 	// ##################################################################################################
@@ -71,15 +90,21 @@ func (c *SafePlanetProtectorsLeaveController) Validator() bool {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetProtectorsLeaveController) Stage() {
+func (c *SafePlanetProtectorsSwitchController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
-	// Chiedo al player a quale gilda vuole unirsi
+	// Chiedo al player di indicare quale player vuole aggiungere alla sua gilda
 	// ##################################################################################################
 	case 0:
-		// Verifico/Recupero Gilda player
-		var err error
+		// Aggiungo torna al menu
+		var protectorsKeyboard [][]tgbotapi.KeyboardButton
+		protectorsKeyboard = append(protectorsKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+		))
+
+		// Verifico sia fondatore
 		var rGetPlayerGuild *pb.GetPlayerGuildResponse
 		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
 			PlayerID: c.Player.ID,
@@ -87,18 +112,22 @@ func (c *SafePlanetProtectorsLeaveController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_confirm",
-			rGetPlayerGuild.GetGuild().GetName(),
-		))
+		var visibility string
+		if rGetPlayerGuild.GetGuild().GetGuildType() {
+			visibility = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.private")
+		} else {
+			visibility = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.create_accessibility.public")
+		}
+
+		c.Payload.Visibility = rGetPlayerGuild.GetGuild().GetGuildType()
+		c.Payload.GuildID = rGetPlayerGuild.GetGuild().GetID()
+
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.switch", visibility))
 		msg.ParseMode = tgbotapi.ModeHTML
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
-			),
-		)
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       protectorsKeyboard,
+		}
 
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
@@ -106,26 +135,18 @@ func (c *SafePlanetProtectorsLeaveController) Stage() {
 
 		c.CurrentState.Stage = 1
 	// ##################################################################################################
-	// Abbandono gilda
+	// Salvo e associo player alla gilda
 	// ##################################################################################################
 	case 1:
-		_, err = config.App.Server.Connection.LeaveGuild(helpers.NewContext(1), &pb.LeaveGuildRequest{
-			PlayerID: c.Player.ID,
-		})
-
-		if err != nil && strings.Contains(err.Error(), "owner cant leave guild") {
-			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_owner_ko"))
-			if _, err = helpers.SendMessage(errorMsg); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			c.CurrentState.Completed = true
-			return
-		} else if err != nil {
+		// Recuero gilda corrente
+		if _, err = config.App.Server.Connection.ChangeGuildVisibility(helpers.NewContext(1), &pb.ChangeVisibilityGuildRequest{
+			Visibility: !c.Payload.Visibility,
+			GuildID: c.Payload.GuildID,
+		}); err != nil {
 			c.Logger.Panic(err)
 		}
 
-		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.leave_completed_ok"))
+		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.switch_conferm"))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
