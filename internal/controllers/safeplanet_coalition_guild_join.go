@@ -162,10 +162,15 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 		})
 
 		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
-			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
-			)
+			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"))
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil && strings.Contains(err.Error(), "error guild limit reached") {
+			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.max_player_reached"))
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
 			}
