@@ -38,7 +38,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.clears"},
+				2: {"route.breaker.clears","route.breaker.continue"},
 			},
 		},
 	}) {
