@@ -13,9 +13,9 @@ import (
 )
 
 // ====================================
-// SafePlanetDealerController
+// SafePlanetMarketDealerController
 // ====================================
-type SafePlanetDealerController struct {
+type SafePlanetMarketDealerController struct {
 	Payload struct {
 		ItemID   uint32
 		Quantity int32
@@ -26,18 +26,18 @@ type SafePlanetDealerController struct {
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetDealerController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetMarketDealerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
 	if !c.InitController(Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.dealer",
+			Controller: "route.safeplanet.market.dealer",
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &SafePlanetMarketController{},
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
@@ -68,7 +68,7 @@ func (c *SafePlanetDealerController) Handle(player *pb.Player, update tgbotapi.U
 // ====================================
 // Validator
 // ====================================
-func (c *SafePlanetDealerController) Validator() (hasErrors bool) {
+func (c *SafePlanetMarketDealerController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico quale item vuole comprare il player
@@ -117,7 +117,7 @@ func (c *SafePlanetDealerController) Validator() (hasErrors bool) {
 // ====================================
 // Stage
 // ====================================
-func (c *SafePlanetDealerController) Stage() {
+func (c *SafePlanetMarketDealerController) Stage() {
 	var err error
 	switch c.CurrentState.Stage {
 	// ##################################################################################################

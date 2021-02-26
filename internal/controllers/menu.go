@@ -460,7 +460,7 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	})
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.dealer")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.bank")),
 	})
 

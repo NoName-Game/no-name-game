@@ -44,7 +44,6 @@ route.safeplanet.crafter: "🛠 Armaiolo"
 route.safeplanet.crafter.create: "🛠 Realizza"
 route.safeplanet.crafter.repair: "✨ Ripara Arma"
 route.safeplanet.crafter.decompose: "♻️ Smonta"
-route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.accademy: "⛩ Accademia"
 route.safeplanet.hangar: "🏗 Hangar"
 route.safeplanet.relax: "🎲 Svago"
@@ -52,6 +51,13 @@ route.safeplanet.relax.threecard: "🃏 3 Carte"
 route.safeplanet.hangar.ships: "🚀 Il tuo deposito"
 route.safeplanet.hangar.repair: "✨ Ripara Nave"
 route.safeplanet.hangar.create: "💸 Compra"
+
+# Market
+route.safeplanet.market: "🏬 Mercato"
+route.safeplanet.market.dealer: "⚖️ Mercante"
+route.safeplanet.market.gift: "🧧 Regala"
+
+# Coalition
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.coalition.mission: "🏢 Centro Missioni"
 route.safeplanet.coalition.titan: "👁 Titani"
