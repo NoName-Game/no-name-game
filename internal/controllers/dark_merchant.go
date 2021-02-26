@@ -42,6 +42,12 @@ func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Updat
 				FromStage: 0,
 			},
 			PlanetType: []string{"darkMerchant"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.back"},
+				2: {"route.breaker.clears"},
+				3: {"route.breaker.clears","route.breaker.menu"},
+			},
 		},
 	}) {
 		return

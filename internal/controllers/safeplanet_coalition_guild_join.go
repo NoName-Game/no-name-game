@@ -37,6 +37,10 @@ func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tg
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
-
+	"log"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -40,6 +40,10 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				2: {"route.breaker.back"},
+			},
 		},
 	}) {
 		return
@@ -62,6 +66,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 // Validator
 // ====================================
 func (c *SafePlanetBankController) Validator() (hasErrors bool) {
+	log.Println(c.CurrentState.Stage)
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico tipologia di transazione
@@ -85,6 +90,7 @@ func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *SafePlanetBankController) Stage() {
+
 	var err error
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats

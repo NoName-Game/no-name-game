@@ -34,6 +34,9 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 				To:        &PlayerController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

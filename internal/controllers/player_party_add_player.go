@@ -36,6 +36,9 @@ func (c *PlayerPartyAddPlayerController) Handle(player *pb.Player, update tgbota
 				To:        &PlayerPartyController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
