@@ -346,7 +346,7 @@ func (c *SafePlanetMarketGiftController) Stage() {
 		}
 
 		// Invio messaggio al ricevente
-		msgToReciver := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.gift.ok_to_reciver", c.GetRecapItem(), c.Player.GetUsername()))
+		msgToReciver := helpers.NewMessage(c.Payload.ToPlayerChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.gift.ok_to_reciver", c.GetRecapItem(), c.Player.GetUsername()))
 		msgToReciver.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msgToReciver); err != nil {
 			c.Logger.Panic(err)
