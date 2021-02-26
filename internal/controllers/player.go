@@ -143,6 +143,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.inventory.equip")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
