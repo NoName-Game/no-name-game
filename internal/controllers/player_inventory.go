@@ -29,6 +29,9 @@ func (c *PlayerInventoryController) Handle(player *pb.Player, update tgbotapi.Up
 				To:        &PlayerController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

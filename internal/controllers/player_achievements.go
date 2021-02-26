@@ -38,6 +38,9 @@ func (c *PlayerAchievementsController) Handle(player *pb.Player, update tgbotapi
 				To:        &PlayerController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu","route.breaker.back"},
+			},
 		},
 	}) {
 		return

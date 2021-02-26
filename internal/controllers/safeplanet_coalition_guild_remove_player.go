@@ -35,6 +35,10 @@ func (c *SafePlanetProtectorsRemovePlayerController) Handle(player *pb.Player, u
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
