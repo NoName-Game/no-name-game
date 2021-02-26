@@ -59,6 +59,7 @@ func (c *SafePlanetCoalitionController) Handle(player *pb.Player, update tgbotap
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.statistics")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.info")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),

@@ -400,10 +400,6 @@ func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.Keyboard
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 	})
 
-	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
-	})
-
 	return keyboardRow
 }
 
@@ -437,9 +433,6 @@ func (c *MenuController) TravelKeyboard() [][]tgbotapi.KeyboardButton {
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 		},
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
-		},
 	}
 }
 
@@ -455,9 +448,6 @@ func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
-		},
-		{
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
 		},
 	}
 }
@@ -492,10 +482,6 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
 	})
 
-	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
-	})
-
 	return keyboardRow
 }
 
@@ -517,10 +503,6 @@ func (c *MenuController) TitanPlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
-	})
-
-	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.info")),
 	})
 
 	return keyboardRow
