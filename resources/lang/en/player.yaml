@@ -18,7 +18,7 @@ achievement.kill-enemies-100: "Kill enemies (100)"
 player.achievement.intro: "Here's the list of explorer objectives that you achieved or still have to:"
 player.achievement.category_recap: "Objectives accomplished for the category <b>%s</b>:\n\n%s"
 #Inventory
-inventory.intro: "Cosa vuoi gestire dal tuo 📦<b>inventario</b>?"
+inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>Inventario</b>?"
 inventory.recap.resource: "Here are the 💠 <b>Resources</b> you own:"
 inventory.type: "What part would you like to equip?"
 inventory.armors.no_one: "You don't have any armor to equip."
