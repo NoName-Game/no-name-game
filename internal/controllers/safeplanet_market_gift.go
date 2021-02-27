@@ -91,10 +91,8 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 		switch c.Payload.ItemType {
 		case "resources":
 			// Recupero risorsa da messaggio, e se non rispecchia le specifiche ritorno errore
-			resourceName := strings.Split(c.Update.Message.Text, " ")
-			if len(resourceName) < 3 {
-				return true
-			}
+			resourceNameSplit := strings.Split(c.Update.Message.Text, " (")
+			resourceName := resourceNameSplit[0][5:]
 
 			// Recupero tutte le risorse del player
 			var rGetPlayerResources *pb.GetPlayerResourcesResponse
@@ -105,7 +103,7 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 			}
 
 			for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-				if resource.GetResource().GetName() == resourceName[1] && resource.GetQuantity() > 0 {
+				if resource.GetResource().GetName() == resourceName && resource.GetQuantity() > 0 {
 					c.Payload.ItemID = resource.GetResource().GetID()
 					haveResource = true
 				}
