@@ -105,7 +105,7 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 			}
 
 			for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-				if resource.GetResource().GetName() == resourceName[1] {
+				if resource.GetResource().GetName() == resourceName[1] && resource.GetQuantity() > 0 {
 					c.Payload.ItemID = resource.GetResource().GetID()
 					haveResource = true
 				}
@@ -129,7 +129,7 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 			}
 
 			for _, item := range rGetPlayerItems.GetPlayerInventory() {
-				if helpers.Trans(c.Player.Language.Slug, "items."+item.GetItem().GetSlug()) == itemChoosed {
+				if helpers.Trans(c.Player.Language.Slug, "items."+item.GetItem().GetSlug()) == itemChoosed && item.GetQuantity() > 0 {
 					c.Payload.ItemID = item.GetItem().GetID()
 					haveResource = true
 				}
