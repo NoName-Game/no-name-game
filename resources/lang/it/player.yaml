@@ -22,7 +22,7 @@ player.achievement.intro: "Ecco qui la la lista dei tuoi obbiettivi da esplorato
 player.achievement.category_recap: "Obbiettivi raggiunti per la categoria <b>%s</b>:\n\n%s"
 
 # Inventory
-inventory.intro: "Cosa vuoi gestire dal tuo 📦<b>inventario</b>?"
+inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>Inventario</b>?"
 inventory.recap.resource: "Ecco le 💠 <b>Risorse</b> in tuo possesso:"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
