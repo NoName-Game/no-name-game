@@ -88,12 +88,18 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 		// Verifico se il player possiede la risorsa passata
 		var haveResource bool
 
+		// Recupero nome item che il player vuole usare
+		var itemChoosed string
+		itemSplit := strings.Split(c.Update.Message.Text, " (")
+		if len(itemSplit)-1 > 0 {
+			itemSplit = strings.Split(itemSplit[0], "- ")
+			if len(itemSplit)-1 > 0 {
+				itemChoosed = itemSplit[1]
+			}
+		}
+
 		switch c.Payload.ItemType {
 		case "resources":
-			// Recupero risorsa da messaggio, e se non rispecchia le specifiche ritorno errore
-			resourceNameSplit := strings.Split(c.Update.Message.Text, " (")
-			resourceName := resourceNameSplit[0][5:]
-
 			// Recupero tutte le risorse del player
 			var rGetPlayerResources *pb.GetPlayerResourcesResponse
 			if rGetPlayerResources, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
@@ -103,21 +109,12 @@ func (c *SafePlanetMarketGiftController) Validator() (hasErrors bool) {
 			}
 
 			for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-				if resource.GetResource().GetName() == resourceName && resource.GetQuantity() > 0 {
+				if resource.GetResource().GetName() == itemChoosed && resource.GetQuantity() > 0 {
 					c.Payload.ItemID = resource.GetResource().GetID()
 					haveResource = true
 				}
 			}
 		case "items":
-			// Recupero nome item che il player vuole usare
-			var itemChoosed string
-			itemSplit := strings.Split(c.Update.Message.Text, " (")
-			if len(itemSplit)-1 > 0 {
-				itemSplit = strings.Split(itemSplit[0], " - ")
-				if len(itemSplit)-1 > 0 {
-					itemChoosed = itemSplit[1]
-				}
-			}
 
 			var rGetPlayerItems *pb.GetPlayerItemsResponse
 			if rGetPlayerItems, err = config.App.Server.Connection.GetPlayerItems(helpers.NewContext(1), &pb.GetPlayerItemsRequest{
@@ -220,7 +217,7 @@ func (c *SafePlanetMarketGiftController) Stage() {
 					keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s %s (%s) (%v) %s\n",
+								"%s - %s (%s) (%v) %s\n",
 								helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
 								resource.GetResource().GetName(),
 								strings.ToUpper(resource.GetResource().GetRarity().GetSlug()),
@@ -344,11 +341,11 @@ func (c *SafePlanetMarketGiftController) Stage() {
 		}
 
 		// Invio messaggio al ricevente
-		msgToReciver := helpers.NewMessage(c.Payload.ToPlayerChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.gift.ok_to_reciver", c.GetRecapItem(), c.Player.GetUsername()))
-		msgToReciver.ParseMode = tgbotapi.ModeHTML
-		if _, err = helpers.SendMessage(msgToReciver); err != nil {
-			c.Logger.Panic(err)
-		}
+		// msgToReciver := helpers.NewMessage(c.Payload.ToPlayerChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.gift.ok_to_reciver", c.GetRecapItem(), c.Player.GetUsername()))
+		// msgToReciver.ParseMode = tgbotapi.ModeHTML
+		// if _, err = helpers.SendMessage(msgToReciver); err != nil {
+		// 	c.Logger.Panic(err)
+		// }
 
 		c.CurrentState.Completed = true
 	}
