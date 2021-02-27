@@ -119,7 +119,17 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 	// Appendo Task lista task
 	message += c.GetPlayerTasks()
 
+	// Recupero annuncio
+	message += c.GetAnnuncement()
+
 	return
+}
+
+func (c *MenuController) GetAnnuncement() string {
+	randAnnuncement := helpers.Trans(c.Player.Language.Slug,
+		fmt.Sprintf("menu.annuncement_%v", helpers.RandomInt(1, 3)))
+
+	return fmt.Sprintf("🔖 %s", randAnnuncement)
 }
 
 // CheckInSafePlanet
@@ -335,6 +345,7 @@ func (c *MenuController) GetPlayerTasks() (tasks string) {
 		}
 	}
 
+	tasks += "\n"
 	return
 }
 
@@ -460,7 +471,7 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	})
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.dealer")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market")),
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.bank")),
 	})
 

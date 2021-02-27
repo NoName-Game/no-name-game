@@ -1,0 +1,21 @@
+---
+# Market
+safeplanet.market.info: "Ti trovi al centro del 🏬 <b>Mercato</b> di questo pianeta sicuro."
+
+#Dealer
+safeplanet.dealer.intro: "Welcome to my shop explorer!\n\nHere you'll find products of <b>excellent</b> quality!\nWould you like to buy something?\n\n Your budget: 💰<b>%v</b>"
+safeplanet.dealer.quantity: "What amount would you like to purchase?"
+safeplanet.dealer.confirm: "Perfect! Then tell me, are you sure you want to buy <b>%v</b> quantities of <b>%s</b> for 💰<b>%v</b>?"
+safeplanet.dealer.completed: "And there you go! Have a good day explorer, come back when you want!"
+safeplanet.dealer.not_enough_money: "It seems like you don't have enough money to continue."
+
+# Gift
+safeplanet.gift.intro: "Benvenuto esploratore!\n\nTramite i nostri sistemi puoi recapitare un tuo oggetto come regalo ad un altro esploratore."
+safeplanet.gift.resources: "💠 Regala risorsa"
+safeplanet.gift.items: "🔩 Regala oggetto"
+safeplanet.gift.which: "Cosa vorresti inviare?"
+safeplanet.gift.who: "Inserisci l'username dell'esploratore al quale vuoi regalare l'item"
+safeplanet.gift.confirm: "Sei sicuro di voler inviare 1 x <b>%s</b> a <b>%s</b>?"
+safeplanet.gift.ok: "🎉 Regalo inviato correttamente."
+safeplanet.gift.ko: "❌ Non è stato possibile inviare il regalo, riporova più tardi."
+safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come ragalo da <b>%s</b>"

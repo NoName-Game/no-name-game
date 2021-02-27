@@ -1,6 +1,0 @@
-# Dealer
-safeplanet.dealer.intro: "Benvenuto nel mio negozio esploratore!\n\nDa me troverai prodotti di <b>ottima</b> qualità!\nDesideri acquistare qualcosa?\n\n Il tuo budget: 💰<b>%v</b>"
-safeplanet.dealer.quantity: "Quante quantità ne vorresti acquistare?"
-safeplanet.dealer.confirm: "Perfetto! Allora dimmi, sei sicuro di voler acquistare <b>%v</b> quantità di <b>%s</b> al costo di 💰<b>%v</b>?"
-safeplanet.dealer.completed: "Ed ecco a te! Buona giornata esploratore, torna pure quando vuoi!"
-safeplanet.dealer.not_enough_money: "Sembra tu non abbia abbastanza denaro per continuare."

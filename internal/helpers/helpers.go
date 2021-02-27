@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"encoding/json"
+	"math/rand"
 	"os"
 	"reflect"
 	"strconv"
@@ -89,4 +90,10 @@ func UnmarshalPayload(payload string, funcInterface interface{}) {
 			logrus.Errorf("error unmarshal paylaod: %s", err.Error())
 		}
 	}
+}
+
+// Generate random integer number between two value
+func RandomInt(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(max-min+1) + min
 }
