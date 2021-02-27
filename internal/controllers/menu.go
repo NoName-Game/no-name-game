@@ -127,7 +127,7 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 
 func (c *MenuController) GetAnnuncement() string {
 	randAnnuncement := helpers.Trans(c.Player.Language.Slug,
-		fmt.Sprintf("menu.annuncement_%v", helpers.RandomInt(1, 2)))
+		fmt.Sprintf("menu.annuncement_%v", helpers.RandomInt(1, 3)))
 
 	return fmt.Sprintf("🔖 %s", randAnnuncement)
 }

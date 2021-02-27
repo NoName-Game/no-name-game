@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
-	"log"
+
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -66,7 +66,6 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 // Validator
 // ====================================
 func (c *SafePlanetBankController) Validator() (hasErrors bool) {
-	log.Println(c.CurrentState.Stage)
 	switch c.CurrentState.Stage {
 	// ##################################################################################################
 	// Verifico tipologia di transazione
