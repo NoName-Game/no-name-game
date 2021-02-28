@@ -34,6 +34,9 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 				To:        &PlayerController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
@@ -121,10 +124,19 @@ func (c *PlayerGuildController) Handle(player *pb.Player, update tgbotapi.Update
 			c.Logger.Panic(err)
 		}
 
+		var rGetRankByID *pb.GetRankByIDResponse
+		if rGetRankByID, err = config.App.Server.Connection.GetRankByID(helpers.NewContext(1), &pb.GetRankByIDRequest{
+			RankID: playerDetails.GetRankID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		playersList += helpers.Trans(player.Language.Slug, "player.guild.player_details",
 			playerDetails.GetUsername(),
-			rGetPlayerGuildPoints.GetResult(),
 			playerPosition.GetName(),
+			playerDetails.GetLevelID(),
+			helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("rank.%s", rGetRankByID.GetRank().GetNameCode())),
+			rGetPlayerGuildPoints.GetResult(),
 		)
 	}
 

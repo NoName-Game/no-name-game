@@ -33,6 +33,9 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 				FromStage: 1,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

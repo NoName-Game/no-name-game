@@ -7,16 +7,16 @@ import (
 )
 
 // ====================================
-// SafePlanetRelaxController
+// Market
 // ====================================
-type SafePlanetRelaxController struct {
+type SafePlanetMarketController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetRelaxController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetMarketController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Init Controller
@@ -24,7 +24,7 @@ func (c *SafePlanetRelaxController) Handle(player *pb.Player, update tgbotapi.Up
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.relax",
+			Controller: "route.safeplanet.market",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
@@ -40,12 +40,12 @@ func (c *SafePlanetRelaxController) Handle(player *pb.Player, update tgbotapi.Up
 		return
 	}
 
-	// Invio messaggio
-	msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.relax.intro"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.market.info"))
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.relax.threecard")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.dealer")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.gift")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
@@ -56,10 +56,10 @@ func (c *SafePlanetRelaxController) Handle(player *pb.Player, update tgbotapi.Up
 	}
 }
 
-func (c *SafePlanetRelaxController) Validator() bool {
+func (c *SafePlanetMarketController) Validator() bool {
 	return false
 }
 
-func (c *SafePlanetRelaxController) Stage() {
+func (c *SafePlanetMarketController) Stage() {
 	//
 }

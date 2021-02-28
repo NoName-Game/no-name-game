@@ -40,6 +40,10 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 				FromStage: 1,
 			},
 			PlanetType: []string{"default", "titan"},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+				2: {"exploration.breaker.continue"},
+			},
 		},
 	}) {
 		return

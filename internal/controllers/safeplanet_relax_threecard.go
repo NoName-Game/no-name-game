@@ -40,6 +40,11 @@ func (c *SafePlanetRelaxThreeCardController) Handle(player *pb.Player, update tg
 				FromStage: 1,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.menu"},
+				3: {"route.breaker.clears"},
+			},
 		},
 	}) {
 		return

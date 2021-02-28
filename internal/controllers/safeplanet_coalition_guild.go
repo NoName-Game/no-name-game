@@ -31,6 +31,9 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
@@ -55,8 +58,10 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 		// Se il player è owner dell gruppo allora vede il tasto per gestire gli altri player
 		if rGetPlayerGuild.GetGuild().GetOwnerID() == c.Player.ID {
 			keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.add_player")),
+				// tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.add_player")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.switch")),
 				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.remove_player")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.safeplanet.coalition.protectors.change_leader")),
 			))
 		}
 

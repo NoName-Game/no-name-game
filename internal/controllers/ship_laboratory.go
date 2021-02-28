@@ -47,6 +47,13 @@ func (c *ShipLaboratoryController) Handle(player *pb.Player, update tgbotapi.Upd
 				To:        &ShipController{},
 				FromStage: 1,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.back"},
+				3: {"route.breaker.back"},
+				4: {"route.breaker.continue"},
+			},
 		},
 	}) {
 		return
@@ -359,11 +366,10 @@ func (c *ShipLaboratoryController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID,
-			helpers.Trans(
-				c.Player.Language.Slug,
-				"ship.laboratory.you_need",
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.you_need",
 				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
 				itemsRecipeList,
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.description.%s", rGetItemByID.GetItem().GetSlug()), rGetItemByID.GetItem().GetValue()),
 			),
 		)
 

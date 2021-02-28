@@ -40,6 +40,10 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+				2: {"route.breaker.back"},
+			},
 		},
 	}) {
 		return
@@ -85,6 +89,7 @@ func (c *SafePlanetBankController) Validator() (hasErrors bool) {
 // Stage
 // ====================================
 func (c *SafePlanetBankController) Stage() {
+
 	var err error
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats

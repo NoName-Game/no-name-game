@@ -44,7 +44,6 @@ route.safeplanet.crafter: "🛠 Armaiolo"
 route.safeplanet.crafter.create: "🛠 Realizza"
 route.safeplanet.crafter.repair: "✨ Ripara Arma"
 route.safeplanet.crafter.decompose: "♻️ Smonta"
-route.safeplanet.dealer: "⚖️ Mercante"
 route.safeplanet.accademy: "⛩ Accademia"
 route.safeplanet.hangar: "🏗 Hangar"
 route.safeplanet.relax: "🎲 Svago"
@@ -52,6 +51,13 @@ route.safeplanet.relax.threecard: "🃏 3 Carte"
 route.safeplanet.hangar.ships: "🚀 Il tuo deposito"
 route.safeplanet.hangar.repair: "✨ Ripara Nave"
 route.safeplanet.hangar.create: "💸 Compra"
+
+# Market
+route.safeplanet.market: "🏬 Mercato"
+route.safeplanet.market.dealer: "⚖️ Mercante"
+route.safeplanet.market.gift: "🧧 Regala"
+
+# Coalition
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.coalition.mission: "🏢 Centro Missioni"
 route.safeplanet.coalition.titan: "👁 Titani"
@@ -65,6 +71,8 @@ route.safeplanet.coalition.protectors.join: "🔍 Cerca"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Abbandona Gilda"
 route.safeplanet.coalition.protectors.add_player: "➕ Aggiungi esploratore"
 route.safeplanet.coalition.protectors.remove_player: "➖ Rimuovi esploratore"
+route.safeplanet.coalition.protectors.change_leader: "👑 Cambia Leader"
+route.safeplanet.coalition.protectors.switch: "👀 Cambia Visibilità"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"
@@ -76,4 +84,4 @@ route.breaker.back: "⬅️ Indietro"
 route.breaker.clears: "⬅️ Abbandona"
 
 #INFO
-route.info: "🗒 Info"
+route.info: "🗒 Regolamento"

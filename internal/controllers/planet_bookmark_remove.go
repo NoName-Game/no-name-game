@@ -32,6 +32,9 @@ func (c *PlanetBookmarkRemoveController) Handle(player *pb.Player, update tgbota
 				To:        &PlanetController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

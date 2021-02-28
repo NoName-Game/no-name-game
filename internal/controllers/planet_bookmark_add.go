@@ -32,6 +32,9 @@ func (c *PlanetBookmarkAddController) Handle(player *pb.Player, update tgbotapi.
 				To:        &PlanetController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

@@ -7,7 +7,7 @@ player.datails.system_visited: "\n💫 <b>Sistemi</b> visitati: <b>%d</b>"
 player.guild.members: "Lista Membri:\n"
 player.guild.player_not_in_one_guild: "Al momento non appartieni a nessuna 💢<b>Gilda</b>.\n\nVisita la 💈<b>Coalizione</b> per trovare nuovi gruppi."
 player.guild.guild_details: "💢 Nome Gilda: <b>%s</b>\n🎓 Punti Gilda: <b>%v</b>\n👑 Fondatore: <b>%s</b>"
-player.guild.player_details: "👨🏼‍🚀 <b>%s</b> - 🎓 <b>%v</b>\n🌏 %s\n\n"
+player.guild.player_details: "👨🏼‍🚀 <b>%s</b> 🌏 %s \n🎖 %v 🏷 %s 🎓 <b>%v</b> \n\n"
 
 # Achievement
 achievement.category.general: "Generale"
@@ -22,7 +22,7 @@ player.achievement.intro: "Ecco qui la la lista dei tuoi obbiettivi da esplorato
 player.achievement.category_recap: "Obbiettivi raggiunti per la categoria <b>%s</b>:\n\n%s"
 
 # Inventory
-inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>inventario</b>?"
+inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>Inventario</b>?"
 inventory.recap.resource: "Ecco le 💠 <b>Risorse</b> in tuo possesso:"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."

@@ -29,6 +29,9 @@ func (c *InfoController) Handle(player *pb.Player, update tgbotapi.Update) {
 				To:        &MenuController{},
 				FromStage: 0,
 			},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return

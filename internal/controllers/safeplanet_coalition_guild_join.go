@@ -37,6 +37,10 @@ func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tg
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
+			BreakerPerStage: map[int32][]string{
+				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
@@ -74,6 +78,16 @@ func (c *SafePlanetProtectorsJoinController) Validator() bool {
 
 		if rCheckGuildName.GetGuildNameFree() || c.Update.Message.Text == "" {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.protectors_name_not_exists")
+			return true
+		}
+
+		var rGetGuildByName *pb.GetGuildByNameResponse
+		if rGetGuildByName, err = config.App.Server.Connection.GetGuildByName(helpers.NewContext(1), &pb.GetGuildByNameRequest{GuildName: c.Update.Message.Text}); err != nil {
+			c.Logger.Panic(err)
+		}
+		if rGetGuildByName.GetGuild().GetGuildType() {
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.cannot_join")
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu"))))
 			return true
 		}
 
@@ -162,10 +176,15 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 		})
 
 		if err != nil && strings.Contains(err.Error(), "player already in one guild") {
-			// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
-			errorMsg := helpers.NewMessage(c.ChatID,
-				helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"),
-			)
+			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.player_already_in_one_protectors"))
+			if _, err = helpers.SendMessage(errorMsg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		} else if err != nil && strings.Contains(err.Error(), "error guild limit reached") {
+			errorMsg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.coalition.protectors.max_player_reached"))
 			if _, err = helpers.SendMessage(errorMsg); err != nil {
 				c.Logger.Panic(err)
 			}

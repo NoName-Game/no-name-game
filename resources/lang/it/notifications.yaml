@@ -1,16 +1,18 @@
 # NOTIFICATIONS - ACTIVITY
-notification.activity.route.exploration: "Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
-notification.activity.route.ship.laboratory: "La realizzazione del tuo craft è stata ultimata!"
-notification.activity.route.hunting: "Informazioni ritornate con successo!"
-notification.activity.route.safeplanet.hangar.repair: "Riparazione della nave ultimata!"
-notification.activity.route.safeplanet.hangar.create: "Crezione nave completata"
-notification.activity.route.ship.travel.finding: "Nuovo pianeta raggiunto!"
-notification.activity.route.safeplanet.crafter.create: "L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
-notification.activity.route.death: "Hai recuperato le energie!"
-notification.activity.route.ship.rests: "Hai recuperato le energie!"
+notification.activity.route.exploration: "⠿ Sei rientrato dall'esplorazione, scopri quali risorse hai trovato."
+notification.activity.route.ship.laboratory: "⠿ La realizzazione del tuo craft è stata ultimata!"
+notification.activity.route.hunting: "⠿ Informazioni ritornate con successo!"
+notification.activity.route.safeplanet.hangar.repair: "⠿ Riparazione della nave ultimata!"
+notification.activity.route.safeplanet.hangar.create: "⠿ Crezione nave completata"
+notification.activity.route.ship.travel.finding: "⠿ Nuovo pianeta raggiunto!"
+notification.activity.route.safeplanet.crafter.create: "⠿ L'armaiolo ha terminato il tuo ordine, passa pure a ritirarlo!"
+notification.activity.route.death: "⠿ Hai recuperato le energie!"
+notification.activity.route.ship.rests: "⠿ Hai recuperato le energie!"
 
-# NOTIFICATIONS - ACHIEVEMENT
-notification.achievement.message: "🎯 Achievement <b>completato</b>!\n\nHai portato a termine: <b>%s</b>\n<b>Ricompensa</b>:\n💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
+# NOTIFICATIONS
+notification.level.message: "⠿ <b>Complimenti!</b> Hai raggiunto il livello <b>%v</b>!"
+notification.rank.message: "⠿ <b>Complimenti!</b> Hai raggiunto il rank <b>%s</b>!"
+notification.achievement.message: "🎯 Achievement <b>completato</b>!\nHai portato a termine: <b>%s</b>\n<b>Ricompensa</b>:\n💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
 
 # NOTIFICATIONS - TITAN
 notification.titan_drop.message: "️☠️ 👁 <b>%s</b> è stato sconfitto! ☠️\n\nI tuoi attacchi hanno inflitto <b>%v</b> danni!\nPer aver partecipato allo scontro riesci a recuperare:\n%s\n\nIl titano lascia a terra anche qualcosa di davvero speciale:\n<b>%s</b>"

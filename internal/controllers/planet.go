@@ -37,6 +37,9 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 				FromStage: 0,
 			},
 			PlanetType: []string{"default", "titan"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
+			},
 		},
 	}) {
 		return
