@@ -1,6 +1,6 @@
 ---
 #MISSION
-exploration.tips: "📖: Esegui delle esplorazioni per il recupero del materiale proprio del pianeta. <b>Ogni</b> esplorazione ha una durata iniziale di <b>10</b> minuti, ripetendo più volte l'esplorazione la durata e i materiali da te recuperabili aumenteranno."
+exploration.tips: "📖: Perform exploration in order to retrieve the planet's resources. <b>Every</b> exploration lasts initially <b>10</b> minutes, by repeating it more times both it's duration and the resources you can find will increase."
 exploration.exploration: "Select the exploration field:"
 exploration.underground: "🔥 Subsoil"
 exploration.surface: "💧 Surface"
