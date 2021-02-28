@@ -1,11 +1,11 @@
 ---
 #Market
-safeplanet.market.info: "Ti trovi nel centro del 🏬 <b>Mercato</b> di questo pianeta sicuro."
+safeplanet.market.info: "You are in the 🏬 <b>Market</b> district of this safe planet."
 #Dealer
-safeplanet.dealer.intro: "Benvenuto nel mio negozio esploratore!\n\nDa me troverai prodotti di <b>ottima</b> qualità!\nDesideri acquistare qualcosa?\n\n Il tuo budget: 💰<b>%v</b>"
-safeplanet.dealer.quantity: "Quante quantità ne vorresti acquistare?"
-safeplanet.dealer.confirm: "Perfetto! Allora dimmi, sei sicuro di voler acquistare <b>%v</b> quantità di <b>%s</b> al costo di 💰<b>%v</b>?"
-safeplanet.dealer.completed: "Ed ecco a te! Buona giornata esploratore, torna pure quando vuoi!"
+safeplanet.dealer.intro: "Welcome explorer!\n\nHere you can find products of <b>excellent</b> quality!\nDo you want yo buy something?\n\nYour budget: 💰<b>%v</b>"
+safeplanet.dealer.quantity: "How much wuold you like to buy?"
+safeplanet.dealer.confirm: "Perfect! Are you sure you want to buy <b>%v</b> units of <b>%s</b> for 💰<b>%v</b>?"
+safeplanet.dealer.completed: "Done! Good day to you explorer, come back anytime you want!"
 safeplanet.dealer.not_enough_money: "Sembra tu non abbia abbastanza denaro per continuare."
 #Gift
 safeplanet.gift.intro: "Benvenuto esploratore!\n\nTramite i nostri sistemi puoi recapitare un tuo oggetto come regalo ad un altro esploratore."
