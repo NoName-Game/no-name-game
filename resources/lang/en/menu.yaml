@@ -1,19 +1,18 @@
 ---
 #MENU
 menu.borad_system: "<b>BoardSystem v%s (Beta)</b>\n"
-menu.general: "🌏 %s \n%s \n"
+menu.general: "🌏 %s \n%s\n"
 #Task
-menu.tasks: "\n⏱ <b>Activitiy List:</b>\n"
+menu.tasks: "\n⏱ <b>Activity list:</b>\n"
 #Safeplanet
-menu.safeplanet: "You're on 🏟<b>%s</b>, <b>safe</b> planet and protected area for <b>everyone</b>!✌️\n"
+menu.safeplanet: "You are on 🏟<b>%s</b>, <b>safe</b> planet and protected area for <b>everyone</b>!✌️\n"
 #Titanplanet
-menu.titanplanet: "You're on the planet 🌏<b>%s</b>, lair of the Titan 👁 <b>%s</b>.\n"
+menu.titanplanet: "You are on the planet 🌏<b>%s</b>, lair of the Titan 👁 <b>%s</b>.\n"
 menu.titanplanet.titan_alive: "Only ☠️ <b>death</b> reigns on this planet...\n"
-menu.titanplanet.titan_dead: "Defeated by heroic explorers! Now everything seems quiet.\n"
+menu.titanplanet.titan_dead: "Defeated by brave explorers! Now everything seems quiet.\n"
 #Travel
-menu.travel: "In a 🚀voyage from 🌏<b>%s</b> to 🌏<b>%s</b>...\n"
-
-# Annuncement
-menu.annuncement_1: "Ti aspettiamo su @nonamegroupofficial"
-menu.annuncement_2: "Segui @nonamechangelog per gli ultimi aggiornamenti"
-menu.annuncement_3: "Segui @nonamegamenews per le ultime notizie"
+menu.travel: "🚀Travelling from 🌏<b>%s</b> towards 🌏<b>%s</b>...\n"
+#Annuncement
+menu.annuncement_1: "We're waiting for you on @nonamegroupofficial"
+menu.annuncement_2: "Follow @nonamechangelog for the latests updates"
+menu.annuncement_3: "Follow @nonamegamenews for the latest news"

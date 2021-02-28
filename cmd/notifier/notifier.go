@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -49,18 +50,18 @@ func main() {
 		}
 
 		// ***************
-		// Achievements
+		// Notifications
 		// ***************
 
-		// Recupero tutti gli achievement da notificare
-		var rGetPlayerAchievementToNotify *pb.GetPlayerAchievementToNotifyResponse
-		if rGetPlayerAchievementToNotify, err = config.App.Server.Connection.GetPlayerAchievementToNotify(helpers.NewContext(1), &pb.GetPlayerAchievementToNotifyRequest{}); err != nil {
+		// Recupero tutte le notifiche
+		var rGetNotifications *pb.GetNotificationsResponse
+		if rGetNotifications, err = config.App.Server.Connection.GetNotifications(helpers.NewContext(1), &pb.GetNotificationsRequest{}); err != nil {
 			logrus.Panic(err)
 		}
 
-		logrus.Infof("[*] Player Achievement Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
-		for _, playerAchievement := range rGetPlayerAchievementToNotify.GetPlayerAchievements() {
-			go handleAchievementNotification(playerAchievement)
+		logrus.Infof("[*] Player Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
+		for _, notification := range rGetNotifications.GetNotifications() {
+			go handleNotification(notification)
 		}
 
 		// ***************
@@ -80,6 +81,85 @@ func main() {
 
 		// Sleep for minute
 		time.Sleep(SleepTimer)
+	}
+}
+
+func handleNotification(notification *pb.Notification) {
+	var err error
+	var message string
+
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Infof("[*] Notification %v recovered", notification.ID)
+
+			// Setto messaggio come notificato
+			if _, err = config.App.Server.Connection.SetNotificationNotified(helpers.NewContext(1), &pb.SetNotificationNotifiedRequest{
+				NotificationID: notification.GetID(),
+			}); err != nil {
+				logrus.Panic(err)
+			}
+		}
+	}()
+
+	switch notification.GetNotificationCategory().GetSlug() {
+	case "level":
+		type LevelNotificationPayload struct {
+			LevelID uint32
+		}
+
+		var payload LevelNotificationPayload
+		_ = json.Unmarshal([]byte(notification.GetPayload()), &payload)
+
+		message = helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), "notification.level.message", payload.LevelID)
+	case "rank":
+		type RankNotificationPayload struct {
+			RankID   uint32
+			NameCode string
+		}
+
+		var payload RankNotificationPayload
+		_ = json.Unmarshal([]byte(notification.GetPayload()), &payload)
+
+		message = helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), "notification.rank.message",
+			helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("rank.%s", payload.NameCode)),
+		)
+	case "achievements":
+		type AchievementNotificationPayload struct {
+			AchievementID uint32
+		}
+
+		var payload AchievementNotificationPayload
+		_ = json.Unmarshal([]byte(notification.GetPayload()), &payload)
+
+		// Recupero dettagli achievement
+		var rGetAchievementByID *pb.GetAchievementByIDResponse
+		if rGetAchievementByID, err = config.App.Server.Connection.GetAchievementByID(helpers.NewContext(1), &pb.GetAchievementByIDRequest{
+			AchievementID: payload.AchievementID,
+		}); err != nil {
+			logrus.Panic(err)
+		}
+
+		// Recupero testo da notificare
+		message = helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), "notification.achievement.message",
+			helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", rGetAchievementByID.GetAchievement().GetSlug())), // Achievement
+			rGetAchievementByID.GetAchievement().GetGoldReward(),
+			rGetAchievementByID.GetAchievement().GetDiamondReward(),
+			rGetAchievementByID.GetAchievement().GetExperienceReward(),
+		)
+	}
+
+	// Invio notifica
+	msg := helpers.NewMessage(notification.GetPlayer().GetChatID(), message)
+	msg.ParseMode = tgbotapi.ModeHTML
+	if _, err = helpers.SendMessage(msg); err != nil {
+		logrus.Panic(err)
+	}
+
+	// Setto messaggio come notificato
+	if _, err = config.App.Server.Connection.SetNotificationNotified(helpers.NewContext(1), &pb.SetNotificationNotifiedRequest{
+		NotificationID: notification.GetID(),
+	}); err != nil {
+		logrus.Panic(err)
 	}
 }
 
@@ -151,46 +231,6 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 	// Aggiorno lo stato levando la notifica
 	if _, err = config.App.Server.Connection.SetTitanDropNotified(helpers.NewContext(1), &pb.SetTitanDropNotifiedRequest{
 		TitanDropID: playerTitanDrop.GetID(),
-	}); err != nil {
-		logrus.Panic(err)
-	}
-}
-
-func handleAchievementNotification(playerAchievement *pb.PlayerAchievement) {
-	var err error
-	logrus.Infof("[*] Handle Achievement Notification: %d", playerAchievement.ID)
-
-	defer func() {
-		if err := recover(); err != nil {
-			logrus.Info("[*] Achievement %d recovered", playerAchievement.ID)
-
-			// Aggiorno lo stato levando la notifica
-			if _, err = config.App.Server.Connection.SetPlayerAchievementNotified(helpers.NewContext(1), &pb.SetPlayerAchievementNotifiedRequest{
-				AchievementID: playerAchievement.ID,
-			}); err != nil {
-				logrus.Panic(err)
-			}
-		}
-	}()
-
-	// Recupero testo da notificare
-	text := helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), "notification.achievement.message",
-		helpers.Trans(playerAchievement.GetPlayer().GetLanguage().GetSlug(), fmt.Sprintf("achievement.%s", playerAchievement.GetAchievement().GetSlug())), // Achievement
-		playerAchievement.GetAchievement().GetGoldReward(),
-		playerAchievement.GetAchievement().GetDiamondReward(),
-		playerAchievement.GetAchievement().GetExperienceReward(),
-	)
-
-	// Invio notifica
-	msg := helpers.NewMessage(playerAchievement.GetPlayer().GetChatID(), text)
-	msg.ParseMode = tgbotapi.ModeHTML
-	if _, err = helpers.SendMessage(msg); err != nil {
-		logrus.Panic(err)
-	}
-
-	// Aggiorno lo stato levando la notifica
-	if _, err = config.App.Server.Connection.SetPlayerAchievementNotified(helpers.NewContext(1), &pb.SetPlayerAchievementNotifiedRequest{
-		AchievementID: playerAchievement.ID,
 	}); err != nil {
 		logrus.Panic(err)
 	}
