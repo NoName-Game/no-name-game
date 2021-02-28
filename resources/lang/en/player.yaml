@@ -7,7 +7,7 @@ player.datails.system_visited: "\n💫 <b>Systems</b> visited: <b>%d</b>"
 player.guild.members: "Members List:\n"
 player.guild.player_not_in_one_guild: "Right now you don't belong to any 💢<b>Guild</b>.\n\nVisit the 💈<b>Coalition</b> to find new groups."
 player.guild.guild_details: "💢 Guild Name: <b>%s</b>\n🎓 Guild Points: <b>%v</b>\n👑 Founder: <b>%s</b>"
-player.guild.player_details: "👨🏼‍🚀 <b>%s</b> - 🎓 <b>%v</b>\n🌏 %s\n\n"
+player.guild.player_details: "👨🏼‍🚀 <b>%s</b> 🌏 %s \n🎖 %v 🏷 %s 🎓 <b>%v</b> \n\n"
 #Achievement
 achievement.category.general: "General"
 achievement.category.elimination: "Battle"
