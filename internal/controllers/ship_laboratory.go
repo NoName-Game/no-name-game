@@ -366,11 +366,10 @@ func (c *ShipLaboratoryController) Stage() {
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID,
-			helpers.Trans(
-				c.Player.Language.Slug,
-				"ship.laboratory.you_need",
+			helpers.Trans(c.Player.Language.Slug, "ship.laboratory.you_need",
 				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.%s", rGetItemByID.GetItem().GetSlug())),
 				itemsRecipeList,
+				helpers.Trans(c.Player.Language.Slug, fmt.Sprintf("items.description.%s", rGetItemByID.GetItem().GetSlug()), rGetItemByID.GetItem().GetValue()),
 			),
 		)
 
