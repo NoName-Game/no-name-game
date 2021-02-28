@@ -372,7 +372,7 @@ func (c *HuntingController) action(planetMap *pb.PlanetMap) {
 		} else if rDropTresure.GetTrap().GetID() > 0 {
 			// Se è una trappola e il player è morto
 			if rDropTresure.GetTrap().GetPlayerDie() {
-				c.PlayerDie(rDropTresure.GetTrap().GetDamage())
+				c.PlayerDieByTrap()
 				return
 			}
 
@@ -576,7 +576,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 
 	// Verifico se il PLAYER è morto
 	if rHitEnemy.GetPlayerDie() {
-		c.PlayerDie(rHitEnemy.GetEnemyDamage())
+		c.PlayerDie(rHitEnemy)
 		return
 	}
 
@@ -614,12 +614,39 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 	}
 }
 
-func (c *HuntingController) PlayerDie(damage int32) {
+func (c *HuntingController) PlayerDie(rHitEnemy *pb.HitEnemyResponse) {
+	var moneyLost int32 = 0
+	if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
+		moneyLost = rHitEnemy.GetEnemyDrop().GetTransaction().GetValue()*-1
+	}
 	// Aggiorno messaggio notificando al player che è morto
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", damage),
+		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", rHitEnemy.GetEnemyDamage(), moneyLost),
+	)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				helpers.Trans(c.Player.Language.Slug, "continue"), helpers.FightPlayerDie.GetDataString(),
+			),
+		),
+	)
+
+	playerDieMessage.ReplyMarkup = &keyboard
+	playerDieMessage.ParseMode = tgbotapi.ModeHTML
+	if _, err := helpers.SendMessage(playerDieMessage); err != nil {
+		c.Logger.Panic(err)
+	}
+}
+
+func (c *HuntingController) PlayerDieByTrap() {
+	// Aggiorno messaggio notificando al player che è morto
+	playerDieMessage := helpers.NewEditMessage(
+		c.Player.ChatID,
+		c.Update.CallbackQuery.Message.MessageID,
+		helpers.Trans(c.Player.Language.Slug, "tresure.trap.die"),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

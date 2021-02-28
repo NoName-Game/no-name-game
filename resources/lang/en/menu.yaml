@@ -12,6 +12,8 @@ menu.titanplanet.titan_alive: "Only ☠️ <b>death</b> reigns on this planet...
 menu.titanplanet.titan_dead: "Defeated by heroic explorers! Now everything seems quiet.\n"
 #Travel
 menu.travel: "In a 🚀voyage from 🌏<b>%s</b> to 🌏<b>%s</b>...\n"
+
 # Annuncement
 menu.annuncement_1: "Ti aspettiamo su @nonamegroupofficial"
 menu.annuncement_2: "Segui @nonamechangelog per gli ultimi aggiornamenti"
+menu.annuncement_3: "Segui @nonamegamenews per le ultime notizie"
