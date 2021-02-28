@@ -44,6 +44,7 @@ route.safeplanet.crafter: "🛠 Gunsmith"
 route.safeplanet.crafter.create: "🛠 Create"
 route.safeplanet.crafter.repair: "✨ Repair Weapon"
 route.safeplanet.crafter.decompose: "♻️ Disassemble"
+route.safeplanet.dealer: "⚖️ Dealer"
 route.safeplanet.accademy: "⛩ Academy"
 route.safeplanet.hangar: "🏗 Hangar"
 route.safeplanet.relax: "🎲 Relax"
@@ -52,11 +53,12 @@ route.safeplanet.hangar.ships: "🚀 Your warehouse"
 route.safeplanet.hangar.repair: "✨ Repair Ship"
 route.safeplanet.hangar.create: "💸 Buy"
 
-# Market
+#Market
 route.safeplanet.market: "🏬 Market"
 route.safeplanet.market.dealer: "⚖️ Dealer"
-route.safeplanet.market.gift: "🧧 Regala"
+route.safeplanet.market.gift: "🧧 Gift"
 
+#Coalition
 route.safeplanet.coalition: "💈 Coalition"
 route.safeplanet.coalition.mission: "🏢 Mission Center"
 route.safeplanet.coalition.titan: "👁 Titans"
@@ -70,9 +72,8 @@ route.safeplanet.coalition.protectors.join: "🔍 Find"
 route.safeplanet.coalition.protectors.leave: "🏃‍♂️ Leave Guild"
 route.safeplanet.coalition.protectors.add_player: "➕ Add explorer"
 route.safeplanet.coalition.protectors.remove_player: "➖ Remove explorer"
-route.safeplanet.coalition.protectors.change_leader: "👑 Cambia Leader"
-route.safeplanet.coalition.protectors.switch: "👀 Cambia Visibilità"
-
+route.safeplanet.coalition.protectors.change_leader: "👑 Change Leader"
+route.safeplanet.coalition.protectors.switch: "👀 Change privacy"
 #Titan planet
 route.titanplanet.tackle: "Take on 👁 Titan"
 #Breaker

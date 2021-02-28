@@ -9,7 +9,6 @@ tresure.found.transaction: "You close in on a sparkling object, after a better l
 tresure.found.nothing: "Uhmm... looks like it's empty, what a shame!"
 tresure.found.trap: "AH! You stumbled upon a <b>trap</b>, you lose 💔<b>%v</b>, you're left with ❤️<b>%v</b>!"
 tresure.trap.die: "AH! Sei inciampato in una <b>trappola</b> e perdi i sensi... Ci vorrà un po' per recuperare le energie!"
-
 #Combat
 combat.damage: "⚔️ Battle log ⚔️\n\nYou attacked the enemy dealing <b>%d</b> damage!\nHowever, the enemy was able to hit you and deal <b>%d</b> damage!"
 combat.enemy_dodge: "⚔️ Battle log ⚔️\n\nYou attacked the enemy but he succesfully <b>dodged</b> the hit, he turns around quickly and deals you <b>%d</b> damage!"

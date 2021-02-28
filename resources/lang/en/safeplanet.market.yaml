@@ -1,21 +1,19 @@
 ---
-# Market
-safeplanet.market.info: "Ti trovi al centro del 🏬 <b>Mercato</b> di questo pianeta sicuro."
-
+#Market
+safeplanet.market.info: "You are in the 🏬 <b>Market</b> district of this safe planet."
 #Dealer
-safeplanet.dealer.intro: "Welcome to my shop explorer!\n\nHere you'll find products of <b>excellent</b> quality!\nWould you like to buy something?\n\n Your budget: 💰<b>%v</b>"
-safeplanet.dealer.quantity: "What amount would you like to purchase?"
-safeplanet.dealer.confirm: "Perfect! Then tell me, are you sure you want to buy <b>%v</b> quantities of <b>%s</b> for 💰<b>%v</b>?"
-safeplanet.dealer.completed: "And there you go! Have a good day explorer, come back when you want!"
-safeplanet.dealer.not_enough_money: "It seems like you don't have enough money to continue."
-
-# Gift
-safeplanet.gift.intro: "Benvenuto esploratore!\n\nTramite i nostri sistemi puoi recapitare un tuo oggetto come regalo ad un altro esploratore."
-safeplanet.gift.resources: "💠 Regala risorsa"
-safeplanet.gift.items: "🔩 Regala oggetto"
-safeplanet.gift.which: "Cosa vorresti inviare?"
-safeplanet.gift.who: "Inserisci l'username dell'esploratore al quale vuoi regalare l'item"
-safeplanet.gift.confirm: "Sei sicuro di voler inviare 1 x <b>%s</b> a <b>%s</b>?"
-safeplanet.gift.ok: "🎉 Regalo inviato correttamente."
-safeplanet.gift.ko: "❌ Non è stato possibile inviare il regalo, riporova più tardi."
-safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come ragalo da <b>%s</b>"
+safeplanet.dealer.intro: "Welcome explorer!\n\nHere you can find products of <b>excellent</b> quality!\nDo you want yo buy something?\n\nYour budget: 💰<b>%v</b>"
+safeplanet.dealer.quantity: "How much wuold you like to buy?"
+safeplanet.dealer.confirm: "Perfect! Are you sure you want to buy <b>%v</b> units of <b>%s</b> for 💰<b>%v</b>?"
+safeplanet.dealer.completed: "Done! Good day to you explorer, come back anytime you want!"
+safeplanet.dealer.not_enough_money: "Looks like you don't have enough money to proceed."
+#Gift
+safeplanet.gift.intro: "Welcome explorer!\n\nWith our systems you can send an object as a gift to another player."
+safeplanet.gift.resources: "💠 Send resource"
+safeplanet.gift.items: "🔩 Send item"
+safeplanet.gift.which: "What would you like to send?"
+safeplanet.gift.who: "Insert the username of the player you want to send the gift to"
+safeplanet.gift.confirm: "Are you sure you want to send 1x <b>%s</b> to<b>%s</b>?"
+safeplanet.gift.ok: "🎉Gift sent succesfully."
+safeplanet.gift.ko: "❌Something went wrong, try again later."
+safeplanet.gift.ok_to_reciver: "🎁 You received 1x <b>%s</b> as a gift from <b>%s</b>"
