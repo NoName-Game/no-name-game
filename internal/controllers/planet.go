@@ -89,6 +89,12 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	var keyboardRow [][]tgbotapi.KeyboardButton
+	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.conqueror")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.domain")),
+	))
+
+	// Aggiungo add/remove dai preferiti
 	if rCheckIfPlayerHavePlanetBookmark.GetHaveBookmark() {
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.bookmark.remove")),

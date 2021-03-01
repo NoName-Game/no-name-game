@@ -57,6 +57,8 @@ var routes = map[string]reflect.Type{
 	"route.planet":                 reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 	"route.planet.bookmark.add":    reflect.TypeOf((*controllers.PlanetBookmarkAddController)(nil)).Elem(),
 	"route.planet.bookmark.remove": reflect.TypeOf((*controllers.PlanetBookmarkRemoveController)(nil)).Elem(),
+	"route.planet.conqueror":       reflect.TypeOf((*controllers.PlanetConquerorController)(nil)).Elem(),
+	"route.planet.domain":          reflect.TypeOf((*controllers.PlanetDomainController)(nil)).Elem(),
 
 	// Safe Planet
 	"route.safeplanet.coalition.daily_reward":      reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),
@@ -93,9 +95,6 @@ var routes = map[string]reflect.Type{
 
 	// Titan Planet
 	"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
-
-	// Conqueror
-	"route.conqueror": reflect.TypeOf((*controllers.ConquerorController)(nil)).Elem(),
 
 	// Info
 	"route.info": reflect.TypeOf((*controllers.InfoController)(nil)).Elem(),
