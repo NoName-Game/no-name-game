@@ -35,7 +35,8 @@ route.banned: "Banned"
 route.planet: "🌍 Pianeta"
 route.planet.bookmark.add: "⭐️ Aggiunti ai preferiti"
 route.planet.bookmark.remove: "⭐️ Rimuovi dai preferiti"
-route.conqueror: "🚩 Conquistatore"
+route.planet.conqueror: "🚩 Conquistatore"
+route.planet.domain: "🏴 Dominio"
 
 # Safe planet
 route.safeplanet.coalition.daily_reward: "📦 Ricompensa giornaliera"

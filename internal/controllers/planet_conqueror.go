@@ -61,7 +61,7 @@ func (c *PlanetConquerorController) Handle(player *pb.Player, update tgbotapi.Up
 
 	// Intro msg
 	var conquerorsListMsg string
-	conquerorsListMsg = helpers.Trans(player.Language.Slug, "conqueror.intro")
+	conquerorsListMsg = helpers.Trans(player.Language.Slug, "conqueror.intro", playerPosition.GetName())
 
 	// Eseguo recap conquistatori
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")

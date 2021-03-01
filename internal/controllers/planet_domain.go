@@ -61,7 +61,7 @@ func (c *PlanetDomainController) Handle(player *pb.Player, update tgbotapi.Updat
 
 	// Intro msg
 	var domainsListMsg string
-	domainsListMsg = helpers.Trans(player.Language.Slug, "domain.intro")
+	domainsListMsg = helpers.Trans(player.Language.Slug, "domain.intro", playerPosition.GetName())
 
 	// Eseguo recap conquistatori
 	domainsListMsg += helpers.Trans(player.Language.Slug, "domain.list.intro")
