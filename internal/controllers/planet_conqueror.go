@@ -14,14 +14,14 @@ import (
 // ====================================
 // Conqueror
 // ====================================
-type ConquerorController struct {
+type PlanetConquerorController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlanetConquerorController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Init Controller
@@ -29,11 +29,11 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.conqueror",
+			Controller: "route.planet.conqueror",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &PlanetController{},
 				FromStage: 0,
 			},
 			PlanetType: []string{"default"},
@@ -99,10 +99,10 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 }
 
-func (c *ConquerorController) Validator() bool {
+func (c *PlanetConquerorController) Validator() bool {
 	return false
 }
 
-func (c *ConquerorController) Stage() {
+func (c *PlanetConquerorController) Stage() {
 	//
 }
