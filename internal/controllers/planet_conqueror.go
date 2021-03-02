@@ -66,16 +66,31 @@ func (c *PlanetConquerorController) Handle(player *pb.Player, update tgbotapi.Up
 	// Eseguo recap conquistatori
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
 	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
+		// Recupero gilda player
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: conquerors.GetPlayer().GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var tagGuild string
+		if rGetPlayerGuild.GetGuild().GetTag() != "" {
+			tagGuild = fmt.Sprintf("[%s]", rGetPlayerGuild.GetGuild().GetTag())
+		}
+
 		if i < 1 {
-			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 <b>%s</b> ⚔️ <b>%d</b> \n",
+			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 <b>%s</b> <b>%s</b> ⚔️ <b>%d</b> \n",
+				tagGuild,
 				conquerors.GetPlayer().GetUsername(),
 				conquerors.GetNKills(),
 			)
 			continue
 		}
 
-		conquerorsListMsg += fmt.Sprintf("%d - 👨🏼‍🚀 %s ⚔️ %d\n",
+		conquerorsListMsg += fmt.Sprintf("%d - 👨🏼‍🚀 %s %s ⚔️ %d\n",
 			i+1,
+			tagGuild,
 			conquerors.GetPlayer().GetUsername(),
 			conquerors.GetNKills(),
 		)
