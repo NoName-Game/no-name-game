@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -74,7 +73,6 @@ func (c *ShipTravelRescueController) Validator() (hasErrors bool) {
 	// Verifico che la nave equipaggiata non sia in riparazione
 	// ##################################################################################################
 		for _, state := range c.Data.PlayerActiveStates {
-			log.Println(state.GetController())
 			if state.GetController() == "route.ship.travel.finding" {
 					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
 					return true
