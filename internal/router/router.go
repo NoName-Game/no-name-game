@@ -120,7 +120,7 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 	// Se morto spedisco direttamente al riposo
 	// è necessario effettuare il controllo di hunting in quanto è necessario
 	//  per cancellare le attività in corso
-	if callingRoute != "hunting" {
+	if callingRoute != "hunting" && callingRoute != strings.ToLower(helpers.Trans(player.GetLanguage().GetSlug(), "hunting.leave")) {
 		if player.Dead {
 			invoke(routes["route.ship.rests"], "Handle", player, update)
 			return
