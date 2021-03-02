@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -335,7 +334,6 @@ func (c *ShipTravelManualController) Stage() {
 
 	// Fine esplorazione
 	case 3:
-		log.Println("Here")
 		// Verifico se ha gemmato
 		if c.Payload.CompleteWithDiamond {
 			if _, err := config.App.Server.Connection.EndShipTravelDiamond(helpers.NewContext(1), &pb.EndShipTravelRequest{
