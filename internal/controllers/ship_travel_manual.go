@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -37,7 +39,7 @@ func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.U
 			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
-			ControllerBlocked: []string{"exploration", "hunting"},
+			ControllerBlocked: []string{"exploration", "hunting", "ship.travel.finding"},
 			ControllerBack: ControllerBack{
 				To:        &ShipTravelController{},
 				FromStage: 1,
@@ -45,8 +47,8 @@ func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.U
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu"},
-				3: {"route.breaker.menu","route.breaker.continue"},
+				2: {"route.breaker.menu","route.breaker.continue"},
+				3: {"route.breaker.continue"},
 			},
 		},
 	}) {
@@ -72,7 +74,7 @@ func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.U
 func (c *ShipTravelManualController) Validator() (hasErrors bool) {
 	// Controllo da effettuare sempre
 	var err error
-	var rCheckShipTravel *pb.CheckShipTravelResponse
+	/*var rCheckShipTravel *pb.CheckShipTravelResponse
 	rCheckShipTravel, _ = config.App.Server.Connection.CheckShipTravel(helpers.NewContext(1), &pb.CheckShipTravelRequest{
 		PlayerID: c.Player.ID,
 	})
@@ -127,9 +129,35 @@ func (c *ShipTravelManualController) Validator() (hasErrors bool) {
 
 			return true
 		}
-	}
+	}*/
 
 	switch c.CurrentState.Stage {
+	case 0:
+	// ##################################################################################################
+	// Verifico che la nave equipaggiata non sia in riparazione
+	// ##################################################################################################
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.GetController() == "route.safeplanet.hangar.repair" {
+				var repairingData struct {
+					ShipID uint32
+				}
+
+				_ = json.Unmarshal([]byte(state.GetPayload()), &repairingData)
+
+				// Recupero nave attualemente attiva
+				var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+				if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+					PlayerID: c.Player.GetID(),
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				if rGetPlayerShipEquipped.GetShip().GetID() == repairingData.ShipID {
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
+					return true
+				}
+			}
+		}
 	// ##################################################################################################
 	// In questo stage verifico che il player abbia passato delle coordinate corrette di un pianeta esistente
 	// ##################################################################################################
@@ -307,6 +335,7 @@ func (c *ShipTravelManualController) Stage() {
 
 	// Fine esplorazione
 	case 3:
+		log.Println("Here")
 		// Verifico se ha gemmato
 		if c.Payload.CompleteWithDiamond {
 			if _, err := config.App.Server.Connection.EndShipTravelDiamond(helpers.NewContext(1), &pb.EndShipTravelRequest{
