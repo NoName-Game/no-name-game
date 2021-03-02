@@ -76,6 +76,9 @@ route.safeplanet.coalition.protectors.add_player: "➕ Add explorer"
 route.safeplanet.coalition.protectors.remove_player: "➖ Remove explorer"
 route.safeplanet.coalition.protectors.change_leader: "👑 Change Leader"
 route.safeplanet.coalition.protectors.switch: "👀 Change privacy"
+route.safeplanet.coalition.protectors.change_name: "🖋 Modifica Nome"
+route.safeplanet.coalition.protectors.change_tag: "✒️ Modifica Tag"
+
 #Titan planet
 route.titanplanet.tackle: "Take on 👁 Titan"
 #Breaker

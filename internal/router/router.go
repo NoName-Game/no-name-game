@@ -92,6 +92,8 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.coalition.protectors.change_leader": reflect.TypeOf((*controllers.SafePlanetProtectorsChangeLeaderController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.remove_player": reflect.TypeOf((*controllers.SafePlanetProtectorsRemovePlayerController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.switch":        reflect.TypeOf((*controllers.SafePlanetProtectorsSwitchController)(nil)).Elem(),
+	"route.safeplanet.coalition.protectors.change_name":   reflect.TypeOf((*controllers.SafePlanetProtectorsChangeNameController)(nil)).Elem(),
+	"route.safeplanet.coalition.protectors.change_tag":    reflect.TypeOf((*controllers.SafePlanetProtectorsChangeTagController)(nil)).Elem(),
 
 	// Titan Planet
 	"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
