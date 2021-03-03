@@ -30,6 +30,7 @@ inventory.weapons.zero_equipment: "\n❌ None\n"
 #Equip
 inventory.equip.equipped: "<b>Your current equipment:</b>"
 inventory.equip.error: "The item you selected cannot be equipped."
+inventory.equip.level_lower: "⚠️ Il tuo livello è troppo basso, livello minimo richiesto <b>%v</b>."
 inventory.equip.confirm: "Do you confirm you want to equip <b>%s</b>?"
 inventory.equip.confirm_weapon: "Do you confirm you want to equip the weapon <b>%s</b>, replacing <b>%s</b>?"
 inventory.equip.confirm_armor: "Do you confirm you want to equip the armor <b>%s</b>, replacing <b>%s</b>?"
