@@ -5,7 +5,6 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
 )
 
 // ====================================
@@ -95,7 +94,6 @@ func (c *SafePlanetTitanController) Stage() {
 		// Recupero quali titani sono stati scoperti e quindi raggiungibili
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
 		if rTitanDiscovered, err = config.App.Server.Connection.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
-			log.Println("Ciao Crasho random. ",err)
 			c.Logger.Panic(err)
 		}
 
