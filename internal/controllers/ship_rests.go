@@ -38,7 +38,6 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu"},
 			},
 		},
 	}) {
@@ -74,7 +73,7 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 		if rRestCheck, _ = config.App.Server.Connection.RestCheck(helpers.NewContext(1), &pb.RestCheckRequest{
 			PlayerID: c.Player.GetID(),
 		}); rRestCheck.GetInRest() {
-			c.CurrentState.Stage = 2
+			c.CurrentState.Stage = 1
 		}
 	}
 
@@ -97,18 +96,9 @@ func (c *ShipRestsController) Validator() (hasErrors bool) {
 		}
 
 	// ##################################################################################################
-	// Verifico se il player vuole dormire
-	// ##################################################################################################
-	case 1:
-		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.start") {
-			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
-			return true
-		}
-
-	// ##################################################################################################
 	// Verifico se il player vuole svegliarsi
 	// ##################################################################################################
-	case 2:
+	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup") {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.rests.validator.need_to_wakeup")
 			return true
@@ -128,6 +118,25 @@ func (c *ShipRestsController) Stage() {
 	// Dettaglio riposo
 	// ##################################################################################################
 	case 0:
+		var rStartPlayerRest *pb.StartPlayerRestResponse
+		if rStartPlayerRest, err = config.App.Server.Connection.StartPlayerRest(helpers.NewContext(1), &pb.StartPlayerRestRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero orario fine riposo
+		var finishAt time.Time
+		if finishAt, err = helpers.GetEndTime(rStartPlayerRest.GetRestEndTime(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero orario per riprendere attività
+		var playAt time.Time
+		if playAt, err = helpers.GetEndTime(rStartPlayerRest.GetPlayEndTime(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Recupero informazioni per il recupero totale delle energie
 		var restsInfo *pb.GetRestsInfoResponse
 		if restsInfo, err = config.App.Server.Connection.GetRestsInfo(helpers.NewContext(1), &pb.GetRestsInfoRequest{
@@ -140,31 +149,23 @@ func (c *ShipRestsController) Stage() {
 		var restsRecap string
 		restsRecap = helpers.Trans(c.Player.Language.Slug, "ship.rests")
 		if restsInfo.NeedRests {
-			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.full_rest_time", restsInfo.GetFullRestsTime())
-
 			// Verifico quanto è necessario riposare per tornare in vita/svolgere le attività
 			if restsInfo.GetPlayRestsTime() > 0 {
-				restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.play_rest_time", restsInfo.GetPlayRestsTime())
+				restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.play_rest_time", restsInfo.GetPlayRestsTime(), playAt.Format("15:04:05"))
 			}
+
+			restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.full_rest_time", restsInfo.GetFullRestsTime(), finishAt.Format("15:04:05"))
 		}
+
 		restsRecap += helpers.Trans(c.Player.Language.Slug, "ship.rests.info")
 
 		// Aggiongo bottone start riposo
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		if restsInfo.NeedRests {
 			newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(
-					helpers.Trans(c.Player.Language.Slug, "ship.rests.start"),
-				),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup")),
 			)
 			keyboardRow = append(keyboardRow, newKeyboardRow)
-		}
-
-		// Aggiungo abbandona solo se il player non è morto e quindi obbligato a dormire
-		if !c.Player.GetDead() {
-			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
-			))
 		}
 
 		// Invio messaggio
@@ -182,53 +183,9 @@ func (c *ShipRestsController) Stage() {
 		c.CurrentState.Stage = 1
 
 	// ##################################################################################################
-	// Avvio riposo
-	// ##################################################################################################
-	case 1:
-		var rStartPlayerRest *pb.StartPlayerRestResponse
-		if rStartPlayerRest, err = config.App.Server.Connection.StartPlayerRest(helpers.NewContext(1), &pb.StartPlayerRestRequest{
-			PlayerID: c.Player.GetID(),
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Recupero orario fine riposo
-		var finishAt time.Time
-		if finishAt, err = helpers.GetEndTime(rStartPlayerRest.GetRestEndTime(), c.Player); err != nil {
-			c.Logger.Panic(err)
-		}
-		// Recupero orario per riprendere attività
-		var playAt time.Time
-		if playAt, err = helpers.GetEndTime(rStartPlayerRest.GetPlayEndTime(), c.Player); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		var text string
-		text = helpers.Trans(c.Player.Language.Slug, "ship.rests.sleep", finishAt.Format("15:04:05"))
-		if c.Player.Dead {
-			// Se è morto aggiungo messaggio ripresa attività
-			text += helpers.Trans(c.Player.Language.Slug, "ship.rest.sleep_activity", playAt.Format("15:04:05"))
-		}
-		// Invio messaggio
-		msg := helpers.NewMessage(c.ChatID, text)
-
-		msg.ParseMode = tgbotapi.ModeHTML
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "ship.rests.wakeup")),
-			),
-		)
-
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Aggiorno stato
-		c.CurrentState.Stage = 2
-	// ##################################################################################################
 	// Fine riposo
 	// ##################################################################################################
-	case 2:
+	case 1:
 		var rEndPlayerRest *pb.EndPlayerRestResponse
 		if rEndPlayerRest, err = config.App.Server.Connection.EndPlayerRest(helpers.NewContext(1), &pb.EndPlayerRestRequest{
 			PlayerID: c.Player.GetID(),
