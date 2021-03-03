@@ -35,6 +35,7 @@ inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 # Equip
 inventory.equip.equipped: "<b>Il tuo attuale equipaggiamento:</b>"
 inventory.equip.error: "Non è possibile equipaggiare l'item da te scelto."
+inventory.equip.level_lower: "⚠️ Il tuo livello è troppo basso, livello minimo richiesto <b>%v</b>."
 inventory.equip.confirm: "Confermi di voler equipaggiare <b>%s</b>?"
 inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma <b>%s</b>, sostituendo <b>%s</b>?"
 inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura <b>%s</b>, sostituendo <b>%s</b>?"
