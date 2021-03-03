@@ -218,8 +218,13 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 		playerTitanDrop.GetTitan().GetName(),
 		playerTitanDrop.GetDamageInflicted(),
 		dropBase,
-		dropPlus,
 	)
+
+	if dropPlus != "" {
+		text += helpers.Trans(playerTitanDrop.GetPlayer().GetLanguage().GetSlug(),
+			"notification.titan_drop.message", dropPlus,
+		)
+	}
 
 	// Invio notifica
 	msg := helpers.NewMessage(playerTitanDrop.GetPlayer().GetChatID(), text)
