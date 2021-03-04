@@ -120,17 +120,17 @@ func (c *PlayerInventoryResourceController) GetResourcesRecap() string {
 
 		switch inventory.GetResource().GetRarityID() {
 		case 1:
-			vcCounter++
+			vcCounter += inventory.GetQuantity()
 		case 2:
-			cCounter++
+			cCounter += inventory.GetQuantity()
 		case 3:
-			uCounter++
+			uCounter += inventory.GetQuantity()
 		case 4:
-			rCounter++
+			rCounter += inventory.GetQuantity()
 		case 5:
-			urCounter++
+			urCounter += inventory.GetQuantity()
 		case 6:
-			lCoutner++
+			lCoutner += inventory.GetQuantity()
 		}
 	}
 
