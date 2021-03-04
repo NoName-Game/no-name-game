@@ -20,6 +20,10 @@ player.achievement.category_recap: "Objectives accomplished for the category <b>
 #Inventory
 inventory.intro: "What would you like to do in your 🎒<b>Inventory</b>?"
 inventory.recap.resource: "Here are the 💠 <b>Resources</b> you own:"
+inventory.recap.underground: "🔥 Subsoil"
+inventory.recap.surface: "💧 Surface"
+inventory.recap.atmosphere: "⚡️️ Atmosphere"
+inventory.recap.all: "Quantità per categoria:\n🔥 Sottosuolo: <b>%v</b> \n💧 Superficie: <b>%v</b> \n⚡️️ Atmosfera: <b>%v</b> \n\nQuantità per rarità:\nVC: <b>%v</b> | C: <b>%v</b> | U: <b>%v</b> | R: <b>%v</b> | UR: <b>%v</b> | L: <b>%v</b>\n"
 inventory.type: "What part would you like to equip?"
 inventory.armors.no_one: "You don't have any armor to equip."
 inventory.armors.what: "Which one from your 🛡<b>Armors</b> would you like to equip?"
