@@ -398,9 +398,10 @@ func (c *PlayerEquipmentController) Stage() {
 		equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
 		switch c.Payload.ItemType {
 		case "armors":
-			var rGetArmorByName *pb.GetArmorByNameResponse
-			if rGetArmorByName, err = config.App.Server.Connection.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
-				Name: equipmentName,
+			var rGetArmorByName *pb.GetArmorByPlayerAndNameResponse
+			if rGetArmorByName, err = config.App.Server.Connection.GetArmorByPlayerAndName(helpers.NewContext(1), &pb.GetArmorByPlayerAndNameRequest{
+				Name:     equipmentName,
+				PlayerID: c.Player.ID,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
@@ -441,9 +442,10 @@ func (c *PlayerEquipmentController) Stage() {
 				)
 			}
 		case "weapons":
-			var rGetWeaponByName *pb.GetWeaponByNameResponse
-			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
-				Name: equipmentName,
+			var rGetWeaponByName *pb.GetWeaponByPlayerAndNameResponse
+			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByPlayerAndName(helpers.NewContext(1), &pb.GetWeaponByPlayerAndNameRequest{
+				Name:     equipmentName,
+				PlayerID: c.Player.ID,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
