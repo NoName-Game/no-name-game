@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
+	"encoding/json"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -56,12 +57,38 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 // Validator
 // ====================================
 func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
+	var err error
 	switch c.CurrentState.Stage {
+	case 0:
+		// ##################################################################################################
+		// Verifico che la nave equipaggiata non sia in riparazione
+		// ##################################################################################################
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.GetController() == "route.safeplanet.hangar.repair" {
+				var repairingData struct {
+					ShipID uint32
+				}
+
+				_ = json.Unmarshal([]byte(state.GetPayload()), &repairingData)
+
+				// Recupero nave attualemente attiva
+				var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+				if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+					PlayerID: c.Player.GetID(),
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				if rGetPlayerShipEquipped.GetShip().GetID() == repairingData.ShipID {
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
+					return true
+				}
+			}
+		}
 	// ##################################################################################################
 	// Verifico sei il player ha passato il nome di un titano valido
 	// ##################################################################################################
 	case 1:
-		var err error
 		var rTitanDiscovered *pb.TitanDiscoveredResponse
 		if rTitanDiscovered, err = config.App.Server.Connection.TitanDiscovered(helpers.NewContext(1), &pb.TitanDiscoveredRequest{}); err != nil {
 			c.Logger.Panic(err)
