@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -93,5 +95,23 @@ func AnswerCallbackQuery(tconfig tgbotapi.CallbackConfig) (err error) {
 		return err
 	}
 
+	return
+}
+
+func SplitMessage(message string) (out []string) {
+	buf := strings.Split(message, "\n")
+
+	var curr string
+	for _, s := range buf {
+		if len(curr+" "+s) <= 2048 {
+			curr += fmt.Sprintf(" %s\n", s)
+		} else {
+			out = append(out, curr)
+			curr = ""
+		}
+	}
+
+	// final result
+	out = append(out, curr)
 	return
 }
