@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
-	"encoding/json"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -33,6 +34,7 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 			},
 			PlanetType: []string{"safe"},
 			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
 			},
 		},
