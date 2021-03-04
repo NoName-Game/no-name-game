@@ -395,7 +395,7 @@ func (c *TitanPlanetTackleController) PlayerDie(titanDamage int32) {
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", titanDamage),
+		helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.player_killed", titanDamage),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

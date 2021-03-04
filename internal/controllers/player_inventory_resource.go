@@ -48,17 +48,143 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 	// *******************
 	// Recupero risorse inventario
 	// *******************
+	var resourcesRecap string
+	switch c.Update.Message.Text {
+	case helpers.Trans(c.Player.GetLanguage().GetSlug(), "inventory.recap.underground"):
+		resourcesRecap = c.GetResourcesUnderground()
+	case helpers.Trans(c.Player.GetLanguage().GetSlug(), "inventory.recap.surface"):
+		resourcesRecap = c.GetResourcesSurface()
+	case helpers.Trans(c.Player.GetLanguage().GetSlug(), "inventory.recap.atmosphere"):
+		resourcesRecap = c.GetResourcesAtmosphere()
+	default:
+		resourcesRecap = c.GetResourcesRecap()
+	}
+
+	// Riassumo il tutto
+	var finalResource string
+	finalResource = fmt.Sprintf("%s\n\n%s",
+		helpers.Trans(player.Language.Slug, "inventory.recap.resource"), // Ecco il tuo inventario
+		resourcesRecap,
+	)
+
+	for _, text := range helpers.SplitMessage(finalResource) {
+		if text != "" {
+			msg := helpers.NewMessage(c.ChatID, text)
+			msg.ParseMode = tgbotapi.ModeHTML
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "inventory.recap.underground")),
+					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "inventory.recap.surface")),
+					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "inventory.recap.atmosphere")),
+				),
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
+				),
+			)
+
+			if _, err = helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err)
+			}
+		}
+	}
+}
+
+func (c *PlayerInventoryResourceController) Validator() bool {
+	return false
+}
+
+func (c *PlayerInventoryResourceController) Stage() {
+	//
+}
+
+func (c *PlayerInventoryResourceController) GetResourcesRecap() string {
+	var err error
 	var rGetPlayerResource *pb.GetPlayerResourcesResponse
 	if rGetPlayerResource, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
-		PlayerID: player.GetID(),
+		PlayerID: c.Player.GetID(),
 	}); err != nil {
 		c.Logger.Panic(err)
 	}
 
-	var recapResources string
+	var undergroundCounter, surfaceCounter, atmosphereCounter int32
+	var vcCounter, cCounter, uCounter, rCounter, urCounter, lCoutner int32
+	for _, inventory := range rGetPlayerResource.GetPlayerInventory() {
+		switch inventory.GetResource().GetResourceCategoryID() {
+		case 1:
+			undergroundCounter++
+		case 2:
+			surfaceCounter++
+		case 3:
+			atmosphereCounter++
+		}
 
+		switch inventory.GetResource().GetRarityID() {
+		case 1:
+			vcCounter++
+		case 2:
+			cCounter++
+		case 3:
+			uCounter++
+		case 4:
+			rCounter++
+		case 5:
+			urCounter++
+		case 6:
+			lCoutner++
+		}
+	}
+
+	return helpers.Trans(c.Player.GetLanguage().GetSlug(), "inventory.recap.all",
+		undergroundCounter, surfaceCounter, atmosphereCounter,
+		vcCounter, cCounter, uCounter, rCounter, urCounter, lCoutner,
+	)
+}
+
+func (c *PlayerInventoryResourceController) GetResourcesUnderground() string {
+	var err error
+
+	var rGetPlayerResource *pb.GetPlayerResourcesByCategoryIDResponse
+	if rGetPlayerResource, err = config.App.Server.Connection.GetPlayerResourcesByCategoryID(helpers.NewContext(1), &pb.GetPlayerResourcesByCategoryIDRequest{
+		PlayerID:           c.Player.GetID(),
+		ResourceCategoryID: 1,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	return c.GetResourceList(rGetPlayerResource.GetPlayerInventory())
+}
+
+func (c *PlayerInventoryResourceController) GetResourcesSurface() string {
+	var err error
+
+	var rGetPlayerResource *pb.GetPlayerResourcesByCategoryIDResponse
+	if rGetPlayerResource, err = config.App.Server.Connection.GetPlayerResourcesByCategoryID(helpers.NewContext(1), &pb.GetPlayerResourcesByCategoryIDRequest{
+		PlayerID:           c.Player.GetID(),
+		ResourceCategoryID: 2,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	return c.GetResourceList(rGetPlayerResource.GetPlayerInventory())
+}
+
+func (c *PlayerInventoryResourceController) GetResourcesAtmosphere() string {
+	var err error
+
+	var rGetPlayerResource *pb.GetPlayerResourcesByCategoryIDResponse
+	if rGetPlayerResource, err = config.App.Server.Connection.GetPlayerResourcesByCategoryID(helpers.NewContext(1), &pb.GetPlayerResourcesByCategoryIDRequest{
+		PlayerID:           c.Player.GetID(),
+		ResourceCategoryID: 3,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	return c.GetResourceList(rGetPlayerResource.GetPlayerInventory())
+}
+
+func (c *PlayerInventoryResourceController) GetResourceList(inventory []*pb.PlayerInventory) (recapResources string) {
 	// Ordino l'array per rarità (dal più piccolo al più grande)
-	resources := helpers.SortInventoryByRarity(rGetPlayerResource.GetPlayerInventory())
+	resources := helpers.SortInventoryByRarity(inventory)
 
 	for _, resource := range resources {
 		if resource.GetQuantity() > 0 {
@@ -73,62 +199,5 @@ func (c *PlayerInventoryResourceController) Handle(player *pb.Player, update tgb
 		}
 	}
 
-	// Riassumo il tutto
-	var finalResource string
-	finalResource = fmt.Sprintf("%s\n\n%s",
-		helpers.Trans(player.Language.Slug, "inventory.recap.resource"), // Ecco il tuo inventario
-		recapResources,
-	)
-
-	// Se supero il limite di caratteri invio in pezzi separati
-	if len(finalResource) > 4096 {
-		// smart split
-		var out []string
-		buf := strings.Split(finalResource, "\n")
-		curr := ""
-		for _, s := range buf {
-			if len(curr+" "+s) <= 2048 {
-				curr += " " + s + "\n"
-			} else {
-				out = append(out, curr)
-				curr = ""
-			}
-		}
-		// final result
-		out = append(out, curr)
-		for _, text := range out {
-			msg := helpers.NewMessage(c.ChatID, text)
-			msg.ParseMode = tgbotapi.ModeHTML
-			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
-				),
-			)
-
-			if _, err = helpers.SendMessage(msg); err != nil {
-				c.Logger.Panic(err)
-			}
-		}
-	} else {
-		msg := helpers.NewMessage(c.ChatID, finalResource)
-		msg.ParseMode = tgbotapi.ModeHTML
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
-			),
-		)
-
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err)
-		}
-	}
-
-}
-
-func (c *PlayerInventoryResourceController) Validator() bool {
-	return false
-}
-
-func (c *PlayerInventoryResourceController) Stage() {
-	//
+	return
 }

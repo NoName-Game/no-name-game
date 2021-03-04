@@ -13,6 +13,8 @@ titanplanet.tackle.no_action: "Continua!"
 titanplanet.event.hungry: "\n\nIl Titano si infuria..."
 titanplanet.event.get_ready: "Preparati"
 
+titanplanet.tackle.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico ti ha inflitto <b>%d</b> danni ed è riuscito a <b>sconfiggerti</b> in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
+
 # Events
 titanplanet.event.question_1: "L'aria si fa sempre più fitta... il Titano stà preparando un attacco devastante!"
 titanplanet.event.question_1.answer_1: "Riparati dietro una colonna"
