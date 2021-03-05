@@ -14,14 +14,14 @@ import (
 // ====================================
 // Conqueror
 // ====================================
-type ConquerorController struct {
+type PlanetConquerorController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *PlanetConquerorController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Init Controller
@@ -29,11 +29,11 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.conqueror",
+			Controller: "route.planet.conqueror",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &PlanetController{},
 				FromStage: 0,
 			},
 			PlanetType: []string{"default"},
@@ -61,21 +61,36 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 
 	// Intro msg
 	var conquerorsListMsg string
-	conquerorsListMsg = helpers.Trans(player.Language.Slug, "conqueror.intro")
+	conquerorsListMsg = helpers.Trans(player.Language.Slug, "conqueror.intro", playerPosition.GetName())
 
 	// Eseguo recap conquistatori
 	conquerorsListMsg += helpers.Trans(player.Language.Slug, "conqueror.list.intro")
 	for i, conquerors := range rGetConquerorsByPlanetID.GetConquerors() {
+		// Recupero gilda player
+		var rGetPlayerGuild *pb.GetPlayerGuildResponse
+		if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+			PlayerID: conquerors.GetPlayer().GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var tagGuild string
+		if rGetPlayerGuild.GetGuild().GetTag() != "" {
+			tagGuild = fmt.Sprintf("[%s]", rGetPlayerGuild.GetGuild().GetTag())
+		}
+
 		if i < 1 {
-			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 <b>%s</b> ⚔️ <b>%d</b> \n",
+			conquerorsListMsg += fmt.Sprintf("🚩 👨🏼‍🚀 <b>%s</b> <b>%s</b> ⚔️ <b>%d</b> \n",
+				tagGuild,
 				conquerors.GetPlayer().GetUsername(),
 				conquerors.GetNKills(),
 			)
 			continue
 		}
 
-		conquerorsListMsg += fmt.Sprintf("%d - 👨🏼‍🚀 %s ⚔️ %d\n",
+		conquerorsListMsg += fmt.Sprintf("%d - 👨🏼‍🚀 %s %s ⚔️ %d\n",
 			i+1,
+			tagGuild,
 			conquerors.GetPlayer().GetUsername(),
 			conquerors.GetNKills(),
 		)
@@ -99,10 +114,10 @@ func (c *ConquerorController) Handle(player *pb.Player, update tgbotapi.Update) 
 	}
 }
 
-func (c *ConquerorController) Validator() bool {
+func (c *PlanetConquerorController) Validator() bool {
 	return false
 }
 
-func (c *ConquerorController) Stage() {
+func (c *PlanetConquerorController) Stage() {
 	//
 }

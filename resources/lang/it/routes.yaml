@@ -35,7 +35,8 @@ route.banned: "Banned"
 route.planet: "🌍 Pianeta"
 route.planet.bookmark.add: "⭐️ Aggiunti ai preferiti"
 route.planet.bookmark.remove: "⭐️ Rimuovi dai preferiti"
-route.conqueror: "🚩 Conquistatore"
+route.planet.conqueror: "🚩 Conquistatore"
+route.planet.domain: "🏴 Dominio"
 
 # Safe planet
 route.safeplanet.coalition.daily_reward: "📦 Ricompensa giornaliera"
@@ -73,6 +74,8 @@ route.safeplanet.coalition.protectors.add_player: "➕ Aggiungi esploratore"
 route.safeplanet.coalition.protectors.remove_player: "➖ Rimuovi esploratore"
 route.safeplanet.coalition.protectors.change_leader: "👑 Cambia Leader"
 route.safeplanet.coalition.protectors.switch: "👀 Cambia Visibilità"
+route.safeplanet.coalition.protectors.change_name: "🖋 Modifica Nome"
+route.safeplanet.coalition.protectors.change_tag: "✒️ Modifica Tag"
 
 # Titan planet
 route.titanplanet.tackle: "Affronta 👁 Titano"

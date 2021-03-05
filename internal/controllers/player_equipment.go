@@ -44,9 +44,9 @@ func (c *PlayerEquipmentController) Handle(player *pb.Player, update tgbotapi.Up
 			},
 			BreakerPerStage: map[int32][]string{
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu","route.breaker.back"},
-				3: {"route.breaker.menu","route.breaker.back"},
-				4: {"route.breaker.menu","route.breaker.back"},
+				2: {"route.breaker.menu", "route.breaker.back"},
+				3: {"route.breaker.menu", "route.breaker.back"},
+				4: {"route.breaker.menu", "route.breaker.back"},
 			},
 		},
 	}) {
@@ -299,19 +299,22 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%]", armor.Name,
+						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+						armor.Name,
 						strings.ToUpper(armor.Rarity.Slug),
 						math.Round(armor.Defense),
 						math.Round(armor.Evasion),
 						math.Round(armor.Halving),
+						armor.Rarity.LevelToEuip,
 					)
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s (%s) 🛡",
+								"%s (%s) 🛡 🎖%v",
 								// helpers.Trans(c.Player.Language.Slug, "equip"),
 								armor.Name,
 								strings.ToUpper(armor.Rarity.Slug),
+								armor.Rarity.LevelToEuip,
 							),
 						),
 					)
@@ -340,19 +343,22 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v]", weapon.Name,
+						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v] 🎖%v",
+						weapon.Name,
 						strings.ToUpper(weapon.Rarity.Slug),
 						math.Round(weapon.RawDamage),
 						math.Round(weapon.Precision),
 						weapon.Durability,
+						weapon.Rarity.LevelToEuip,
 					)
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s (%s) -🩸%v",
+								"%s (%s) -🩸%v 🎖%v",
 								weapon.Name,
 								strings.ToUpper(weapon.Rarity.Slug),
 								math.Round(weapon.RawDamage),
+								weapon.Rarity.LevelToEuip,
 							),
 						),
 					)
@@ -392,9 +398,10 @@ func (c *PlayerEquipmentController) Stage() {
 		equipmentName = strings.Split(c.Update.Message.Text, " (")[0]
 		switch c.Payload.ItemType {
 		case "armors":
-			var rGetArmorByName *pb.GetArmorByNameResponse
-			if rGetArmorByName, err = config.App.Server.Connection.GetArmorByName(helpers.NewContext(1), &pb.GetArmorByNameRequest{
-				Name: equipmentName,
+			var rGetArmorByName *pb.GetArmorByPlayerAndNameResponse
+			if rGetArmorByName, err = config.App.Server.Connection.GetArmorByPlayerAndName(helpers.NewContext(1), &pb.GetArmorByPlayerAndNameRequest{
+				Name:     equipmentName,
+				PlayerID: c.Player.ID,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
@@ -404,6 +411,18 @@ func (c *PlayerEquipmentController) Stage() {
 				equipmentError = true
 			}
 			equipmentID = rGetArmorByName.GetArmor().GetID()
+
+			// Verifico che il player possieda il livello necessario per equipaggarla
+			if rGetArmorByName.GetArmor().GetRarity().GetLevelToEuip() > int32(c.Player.GetLevelID()) {
+				errorMsg := helpers.NewMessage(c.ChatID,
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.level_lower", rGetArmorByName.GetArmor().GetRarity().GetLevelToEuip()),
+				)
+				errorMsg.ParseMode = tgbotapi.ModeHTML
+				if _, err = helpers.SendMessage(errorMsg); err != nil {
+					c.Logger.Panic(err)
+				}
+				return
+			}
 
 			// Recupero armatura attualmente equipaggiata per la categoria scelta
 			var rGetPlayerArmorEquippedByCategoryID *pb.GetPlayerArmorEquippedByCategoryIDResponse
@@ -423,9 +442,10 @@ func (c *PlayerEquipmentController) Stage() {
 				)
 			}
 		case "weapons":
-			var rGetWeaponByName *pb.GetWeaponByNameResponse
-			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByName(helpers.NewContext(1), &pb.GetWeaponByNameRequest{
-				Name: equipmentName,
+			var rGetWeaponByName *pb.GetWeaponByPlayerAndNameResponse
+			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByPlayerAndName(helpers.NewContext(1), &pb.GetWeaponByPlayerAndNameRequest{
+				Name:     equipmentName,
+				PlayerID: c.Player.ID,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
@@ -436,6 +456,18 @@ func (c *PlayerEquipmentController) Stage() {
 			}
 
 			equipmentID = rGetWeaponByName.GetWeapon().GetID()
+
+			// Verifico che il player possieda il livello necessario per equipaggarla
+			if rGetWeaponByName.GetWeapon().GetRarity().GetLevelToEuip() > int32(c.Player.GetLevelID()) {
+				errorMsg := helpers.NewMessage(c.ChatID,
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.level_lower", rGetWeaponByName.GetWeapon().GetRarity().GetLevelToEuip()),
+				)
+				errorMsg.ParseMode = tgbotapi.ModeHTML
+				if _, err = helpers.SendMessage(errorMsg); err != nil {
+					c.Logger.Panic(err)
+				}
+				return
+			}
 
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
@@ -524,13 +556,34 @@ func (c *PlayerEquipmentController) Stage() {
 			}
 
 			// Aggiorno con quello nuovo
-			if _, err = config.App.Server.Connection.EquipArmor(helpers.NewContext(1), &pb.EquipArmorRequest{
+			_, err = config.App.Server.Connection.EquipArmor(helpers.NewContext(1), &pb.EquipArmorRequest{
 				PlayerID: c.Player.ID,
 				ArmorID:  c.Payload.EquipID,
 				Equip:    true,
-			}); err != nil {
+			})
+
+			if err != nil && strings.Contains(err.Error(), "level to equip is higher then player level") {
+				// Recupero dettagli arma
+				var rGetArmorByID *pb.GetArmorByIDResponse
+				if rGetArmorByID, err = config.App.Server.Connection.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
+					ArmorID: c.Payload.EquipID,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
+				errorMsg := helpers.NewMessage(c.ChatID,
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.level_lower", rGetArmorByID.GetArmor().GetRarity().GetLevelToEuip()),
+				)
+				errorMsg.ParseMode = tgbotapi.ModeHTML
+				if _, err = helpers.SendMessage(errorMsg); err != nil {
+					c.Logger.Panic(err)
+				}
+				return
+			} else if err != nil {
 				c.Logger.Panic(err)
 			}
+
 		case "weapons":
 			// Recupero arma attualmente equipaggiata
 			var rGetPlayerWeaponEquipped *pb.GetPlayerWeaponEquippedResponse
@@ -550,11 +603,31 @@ func (c *PlayerEquipmentController) Stage() {
 			}
 
 			// Aggiorno equipped
-			if _, err = config.App.Server.Connection.EquipWeapon(helpers.NewContext(1), &pb.EquipWeaponRequest{
+			_, err = config.App.Server.Connection.EquipWeapon(helpers.NewContext(1), &pb.EquipWeaponRequest{
 				PlayerID: c.Player.ID,
 				WeaponID: c.Payload.EquipID,
 				Equip:    true,
-			}); err != nil {
+			})
+
+			if err != nil && strings.Contains(err.Error(), "level to equip is higher then player level") {
+				// Recupero dettagli arma
+				var rGetWeaponByID *pb.GetWeaponByIDResponse
+				if rGetWeaponByID, err = config.App.Server.Connection.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
+					ID: c.Payload.EquipID,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+
+				// Potrebbero esserci stati degli errori come per esempio la mancanza di materie prime
+				errorMsg := helpers.NewMessage(c.ChatID,
+					helpers.Trans(c.Player.Language.Slug, "inventory.equip.level_lower", rGetWeaponByID.GetWeapon().GetRarity().GetLevelToEuip()),
+				)
+				errorMsg.ParseMode = tgbotapi.ModeHTML
+				if _, err = helpers.SendMessage(errorMsg); err != nil {
+					c.Logger.Panic(err)
+				}
+				return
+			} else if err != nil {
 				c.Logger.Panic(err)
 			}
 		}

@@ -74,9 +74,42 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	// Recupero conquistatore
+	var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
+	if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+		PlanetID: playerPosition.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Reucpero gilda conquistatore
+	var rGetPlayerGuild *pb.GetPlayerGuildResponse
+	if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+		PlayerID: rGetCurrentConquerorByPlanetID.GetPlayer().GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var conquerorTag string
+	if rGetPlayerGuild.GetInGuild() {
+		if rGetPlayerGuild.GetGuild().GetTag() != "" {
+			conquerorTag = fmt.Sprintf("[%s]", rGetPlayerGuild.GetGuild().GetTag())
+		}
+	}
+
+	// Recupero dominio
+	var rGetCurrentDomainByPlanetID *pb.GetCurrentDomainByPlanetIDResponse
+	if rGetCurrentDomainByPlanetID, err = config.App.Server.Connection.GetCurrentDomainByPlanetID(helpers.NewContext(1), &pb.GetCurrentDomainByPlanetIDRequest{
+		PlanetID: playerPosition.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
 	// Aggiunto informazioni aggiuntive
-	planetDetailsMsg += fmt.Sprintf("%s\n\n",
+	planetDetailsMsg += fmt.Sprintf("%s\n%s\n%s\n",
 		helpers.Trans(player.Language.Slug, "planet.details.count_visited_player", rCountPlayerVisitedCurrentPlanet.GetValue()),
+		helpers.Trans(player.Language.Slug, "planet.details.conqueror", conquerorTag, rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername()),
+		helpers.Trans(player.Language.Slug, "planet.details.domain", rGetCurrentDomainByPlanetID.GetGuild().GetName()),
 	)
 
 	// Verifico se il player ha già il pianeta tra i preferiti
@@ -89,6 +122,12 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	var keyboardRow [][]tgbotapi.KeyboardButton
+	keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.conqueror")),
+		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.domain")),
+	))
+
+	// Aggiungo add/remove dai preferiti
 	if rCheckIfPlayerHavePlanetBookmark.GetHaveBookmark() {
 		keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet.bookmark.remove")),

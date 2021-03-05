@@ -74,13 +74,6 @@ func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.
 	// Ok! Run!
 	c.Stage()
 
-	// Verifico completamento aggiuntivo per cancellare il messaggio
-	if c.CurrentState.Completed {
-		if err := helpers.DeleteMessage(c.Player.ChatID, c.Payload.CallbackMessageID); err != nil {
-			c.Logger.Panic(err)
-		}
-	}
-
 	// Completo progressione
 	c.Completing(&c.Payload)
 }
@@ -104,6 +97,11 @@ func (c *TitanPlanetTackleController) Stage() {
 		if c.Update.Message != nil {
 			if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.leave") {
 				c.CurrentState.Completed = true
+
+				if err := helpers.DeleteMessage(c.Player.ChatID, c.Payload.CallbackMessageID); err != nil {
+					c.Logger.Panic(err)
+				}
+
 				return
 			}
 		}
@@ -135,6 +133,12 @@ func (c *TitanPlanetTackleController) Tackle() {
 
 	// Se ricevo un messaggio normale probabilmente è un avvio o un abbandona
 	if c.Update.Message != nil {
+		// Se il titano è già stato ucciso esco
+		if rGetTitanByPlanetID.GetTitan().GetKilledAt() != nil {
+			// forzo l'uscita
+			c.CurrentState.Completed = true
+			return
+		}
 		// Se è qualsiasi messaggio diverso da affronta non lo calcolo
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.titanplanet.tackle") {
 			return
@@ -391,7 +395,7 @@ func (c *TitanPlanetTackleController) PlayerDie(titanDamage int32) {
 	playerDieMessage := helpers.NewEditMessage(
 		c.Player.ChatID,
 		c.Update.CallbackQuery.Message.MessageID,
-		helpers.Trans(c.Player.Language.Slug, "combat.player_killed", titanDamage),
+		helpers.Trans(c.Player.Language.Slug, "titanplanet.tackle.player_killed", titanDamage),
 	)
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(

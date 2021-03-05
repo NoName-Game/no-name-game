@@ -24,6 +24,10 @@ player.achievement.category_recap: "Obbiettivi raggiunti per la categoria <b>%s<
 # Inventory
 inventory.intro: "Cosa vuoi gestire dal tuo 🎒<b>Inventario</b>?"
 inventory.recap.resource: "Ecco le 💠 <b>Risorse</b> in tuo possesso:"
+inventory.recap.underground: "🔥 Sottosuolo"
+inventory.recap.surface: "💧 Superficie"
+inventory.recap.atmosphere: "⚡️️ Atmosfera"
+inventory.recap.all: "Quantità per categoria:\n🔥 Sottosuolo: <b>%v</b> \n💧 Superficie: <b>%v</b> \n⚡️️ Atmosfera: <b>%v</b> \n\nQuantità per rarità:\nVC: <b>%v</b> | C: <b>%v</b> | U: <b>%v</b> | R: <b>%v</b> | UR: <b>%v</b> | L: <b>%v</b>\n"
 inventory.type: "Quale tipologia vorresti equipaggiare?"
 inventory.armors.no_one: "Non possiedi nessun'armatura da poter equipaggiare."
 inventory.armors.what: "Quale tra le tue 🛡<b>Armature</b> vorresti equipaggiare?"
@@ -35,6 +39,7 @@ inventory.weapons.zero_equipment: "\n❌ Nessuna\n"
 # Equip
 inventory.equip.equipped: "<b>Il tuo attuale equipaggiamento:</b>"
 inventory.equip.error: "Non è possibile equipaggiare l'item da te scelto."
+inventory.equip.level_lower: "⚠️ Il tuo livello è troppo basso, livello minimo richiesto <b>%v</b>."
 inventory.equip.confirm: "Confermi di voler equipaggiare <b>%s</b>?"
 inventory.equip.confirm_weapon: "Confermi di voler equipaggiare l'arma <b>%s</b>, sostituendo <b>%s</b>?"
 inventory.equip.confirm_armor: "Confermi di voler equipaggiare l'armatura <b>%s</b>, sostituendo <b>%s</b>?"

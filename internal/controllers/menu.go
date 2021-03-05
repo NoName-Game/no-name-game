@@ -95,7 +95,7 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 		)
 
 		// Verifico se il titano è vivo o morto per arricchire il messaggio
-		if c.Titan.GetLifePoint() <= 0 {
+		if c.Titan.GetLifePoint() <= 0 && c.Titan.GetKilledAt() != nil{
 			message += helpers.Trans(c.Player.Language.Slug, "menu.titanplanet.titan_dead")
 		} else {
 			message += helpers.Trans(c.Player.Language.Slug, "menu.titanplanet.titan_alive")
@@ -400,7 +400,6 @@ func (c *MenuController) MainKeyboard(position *pb.Planet) [][]tgbotapi.Keyboard
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
-		tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
 	})
 
 	keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
@@ -455,7 +454,6 @@ func (c *MenuController) ExplorationKeyboard() [][]tgbotapi.KeyboardButton {
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.planet")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.conqueror")),
 		},
 		{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player")),
@@ -500,8 +498,8 @@ func (c *MenuController) SafePlanetKeyboard() [][]tgbotapi.KeyboardButton {
 func (c *MenuController) TitanPlanetKeyboard() [][]tgbotapi.KeyboardButton {
 	var keyboardRow [][]tgbotapi.KeyboardButton
 
-	// Se il titano è vivo il player può affrontarlo
-	if c.Titan.GetLifePoint() > 0 {
+	// Se il titano è vivo il player può affrontarlo+
+	if c.Titan.GetLifePoint() > 0 && c.Titan.GetKilledAt() == nil {
 		keyboardRow = append(keyboardRow, []tgbotapi.KeyboardButton{
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.titanplanet.tackle")),
 		})

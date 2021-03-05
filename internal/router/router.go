@@ -57,6 +57,8 @@ var routes = map[string]reflect.Type{
 	"route.planet":                 reflect.TypeOf((*controllers.PlanetController)(nil)).Elem(),
 	"route.planet.bookmark.add":    reflect.TypeOf((*controllers.PlanetBookmarkAddController)(nil)).Elem(),
 	"route.planet.bookmark.remove": reflect.TypeOf((*controllers.PlanetBookmarkRemoveController)(nil)).Elem(),
+	"route.planet.conqueror":       reflect.TypeOf((*controllers.PlanetConquerorController)(nil)).Elem(),
+	"route.planet.domain":          reflect.TypeOf((*controllers.PlanetDomainController)(nil)).Elem(),
 
 	// Safe Planet
 	"route.safeplanet.coalition.daily_reward":      reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),
@@ -90,12 +92,11 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.coalition.protectors.change_leader": reflect.TypeOf((*controllers.SafePlanetProtectorsChangeLeaderController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.remove_player": reflect.TypeOf((*controllers.SafePlanetProtectorsRemovePlayerController)(nil)).Elem(),
 	"route.safeplanet.coalition.protectors.switch":        reflect.TypeOf((*controllers.SafePlanetProtectorsSwitchController)(nil)).Elem(),
+	"route.safeplanet.coalition.protectors.change_name":   reflect.TypeOf((*controllers.SafePlanetProtectorsChangeNameController)(nil)).Elem(),
+	"route.safeplanet.coalition.protectors.change_tag":    reflect.TypeOf((*controllers.SafePlanetProtectorsChangeTagController)(nil)).Elem(),
 
 	// Titan Planet
 	"route.titanplanet.tackle": reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem(),
-
-	// Conqueror
-	"route.conqueror": reflect.TypeOf((*controllers.ConquerorController)(nil)).Elem(),
 
 	// Info
 	"route.info": reflect.TypeOf((*controllers.InfoController)(nil)).Elem(),
@@ -121,7 +122,7 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 	// Se morto spedisco direttamente al riposo
 	// è necessario effettuare il controllo di hunting in quanto è necessario
 	//  per cancellare le attività in corso
-	if callingRoute != "hunting" {
+	if callingRoute != "hunting" && callingRoute != strings.ToLower(helpers.Trans(player.GetLanguage().GetSlug(), "hunting.leave")) {
 		if player.Dead {
 			invoke(routes["route.ship.rests"], "Handle", player, update)
 			return

@@ -68,6 +68,16 @@ func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.U
 // ====================================
 func (c *ShipTravelRescueController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
+	case 0:
+	// ##################################################################################################
+	// Verifico che la nave equipaggiata non sia in riparazione
+	// ##################################################################################################
+		for _, state := range c.Data.PlayerActiveStates {
+			if state.GetController() == "route.ship.travel.finding" {
+					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
+					return true
+			}
+		}
 	// ##################################################################################################
 	// Verifico se il player ha richiesto il soccorso
 	// ##################################################################################################

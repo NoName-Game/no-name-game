@@ -193,24 +193,8 @@ func (c *ExplorationController) Stage() {
 		var messageExploration string
 		messageExploration = helpers.Trans(c.Player.Language.Slug, "exploration.exploration")
 
-		// Recupero posizione player corrente
-		var playerPosition *pb.Planet
-		if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Verifico se sono conquistatore
-		var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
-		if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
-			PlanetID: playerPosition.GetID(),
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
-
-		// Verifico se il player è un conquistatore
-		if c.Player.ID == rGetCurrentConquerorByPlanetID.GetPlayer().GetID() {
-			messageExploration += helpers.Trans(c.Player.Language.Slug, "exploration.conqueror_bonus")
-		}
+		// Messaggio bonus
+		messageExploration += c.CheckBonus()
 
 		// Invio messaggi con il tipo di missioni come tastierino
 		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s",
@@ -439,6 +423,52 @@ func (c *ExplorationController) Stage() {
 
 		// Completo lo stato
 		c.CurrentState.Completed = true
+	}
+
+	return
+}
+
+// CheckBonus - Metodo di verifica bonus
+func (c *ExplorationController) CheckBonus() (bonunsMessage string) {
+	var err error
+
+	// Recupero posizione player corrente
+	var playerPosition *pb.Planet
+	if playerPosition, err = helpers.GetPlayerPosition(c.Player.ID); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Verifico se sono conquistatore
+	var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
+	if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
+		PlanetID: playerPosition.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Verifico se il player è un conquistatore
+	if c.Player.ID == rGetCurrentConquerorByPlanetID.GetPlayer().GetID() {
+		bonunsMessage += helpers.Trans(c.Player.Language.Slug, "exploration.conqueror_bonus")
+	}
+
+	// Verifico se il player ha bonus dominio
+	var rGetCurrentDomainByPlanetID *pb.GetCurrentDomainByPlanetIDResponse
+	if rGetCurrentDomainByPlanetID, err = config.App.Server.Connection.GetCurrentDomainByPlanetID(helpers.NewContext(1), &pb.GetCurrentDomainByPlanetIDRequest{
+		PlanetID: playerPosition.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	// Recupero gilda player
+	var rGetPlayerGuild *pb.GetPlayerGuildResponse
+	if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	if rGetPlayerGuild.GetGuild().GetID() == rGetCurrentDomainByPlanetID.GetGuild().GetID() {
+		bonunsMessage += helpers.Trans(c.Player.Language.Slug, "exploration.domain_bonus")
 	}
 
 	return
