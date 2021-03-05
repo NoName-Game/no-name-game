@@ -131,14 +131,15 @@ func (c *TitanPlanetTackleController) Tackle() {
 		c.Logger.Panic(err)
 	}
 
+	// Se il titano è già stato ucciso esco
+	if rGetTitanByPlanetID.GetTitan().GetKilledAt() != nil {
+		// forzo l'uscita
+		c.CurrentState.Completed = true
+		return
+	}
+
 	// Se ricevo un messaggio normale probabilmente è un avvio o un abbandona
 	if c.Update.Message != nil {
-		// Se il titano è già stato ucciso esco
-		if rGetTitanByPlanetID.GetTitan().GetKilledAt() != nil {
-			// forzo l'uscita
-			c.CurrentState.Completed = true
-			return
-		}
 		// Se è qualsiasi messaggio diverso da affronta non lo calcolo
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.titanplanet.tackle") {
 			return
