@@ -11,7 +11,7 @@ titanplanet.event.malus: "You try to dodge the Titan's hit, but you fail and suf
 titanplanet.tackle.no_action: "Continue!"
 titanplanet.event.hungry: "\n\nThe Titan flares up..."
 titanplanet.event.get_ready: "Prepare yourself"
-titanplanet.tackle.player_killed: "⚔️ Rapporto scontro ⚔️\n\nIl nemico ti ha inflitto <b>%d</b> danni ed è riuscito a <b>sconfiggerti</b> in combattimento!\nTorni alla base in fin di vita, ci vorrà un po' per recuperare le energie..."
+titanplanet.tackle.player_killed: "⚔️ Battle log ⚔️\n\nThe enemy dealt <b>%d</b> damage and <b>defeated</b> you!\nYou crawl back to the ship on death's door, it'll take some time to recover..."
 #Events
 titanplanet.event.question_1: "The air gets thicker and thicker... the Titan is preparing for a devastating attack!"
 titanplanet.event.question_1.answer_1: "Hide behind a pillar"
