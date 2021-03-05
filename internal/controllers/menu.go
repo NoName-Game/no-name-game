@@ -95,7 +95,7 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 		)
 
 		// Verifico se il titano è vivo o morto per arricchire il messaggio
-		if c.Titan.GetLifePoint() <= 0 && c.Titan.GetKilledAt() != nil{
+		if c.Titan.GetKilledAt() != nil {
 			message += helpers.Trans(c.Player.Language.Slug, "menu.titanplanet.titan_dead")
 		} else {
 			message += helpers.Trans(c.Player.Language.Slug, "menu.titanplanet.titan_alive")
