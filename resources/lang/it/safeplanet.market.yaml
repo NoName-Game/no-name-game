@@ -18,3 +18,16 @@ safeplanet.gift.confirm: "Sei sicuro di voler inviare 1 x <b>%s</b> a <b>%s</b>?
 safeplanet.gift.ok: "🎉 Regalo inviato correttamente."
 safeplanet.gift.ko: "❌ Non è stato possibile inviare il regalo, riporova più tardi."
 safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come ragalo da <b>%s</b>"
+
+# ShareHolder
+safeplanet.shareholder.intro: "Benvenuto nel <b>Bazar Intergalattico 🌐</b>\n\nEcco le risorse da noi in vendita!\n"
+safeplanet.shareholder.what: "Che cosa vuoi fare con <b>%s</b>?\nNe possiedi %d unità."
+safeplanet.shareholder.buy: "Comprare"
+safeplanet.shareholder.sell: "Vendere"
+safeplanet.shareholder.quantity: "Inserisci la quantità di risorse che vuoi %s!\n(Massimo 50 Unità)"
+safeplanet.shareholder.error_no_resources_left: "Le risorse da te richieste <b>non sono disponibili.</b>"
+safeplanet.shareholder.error_no_action: "La risorsa che ha scelto non risulta nel nostro catalogo, provi a visitare le <b>nostre succursali!</b>"
+safeplanet.shareholder.complete.buy: "Hai acquistato correttamente <b>%d x %s</b> ed hai speso <b>%d!</b>"
+safeplanet.shareholder.complete.sell: "Hai venduto correttamente <b>%d x %s</b> ed hai guadagnato <b>%d!</b>"
+safeplanet.shareholder.error_no_money: "Non hai abbastanza monete per concludere l'acquisto!"
+safaplanet.shareholder.error_no_resources: "Non hai abbastanza risorse per concludere la vendità!"
