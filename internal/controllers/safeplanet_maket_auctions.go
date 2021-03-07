@@ -9,14 +9,14 @@ import (
 // ====================================
 // Market
 // ====================================
-type SafePlanetMarketController struct {
+type SafePlanetMarketAuctionsController struct {
 	Controller
 }
 
 // ====================================
 // Handle
 // ====================================
-func (c *SafePlanetMarketController) Handle(player *pb.Player, update tgbotapi.Update) {
+func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tgbotapi.Update) {
 	var err error
 
 	// Init Controller
@@ -24,11 +24,11 @@ func (c *SafePlanetMarketController) Handle(player *pb.Player, update tgbotapi.U
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
-			Controller: "route.safeplanet.market",
+			Controller: "route.safeplanet.market.auctions",
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &MenuController{},
+				To:        &SafePlanetMarketController{},
 				FromStage: 0,
 			},
 			PlanetType: []string{"safe"},
@@ -40,15 +40,16 @@ func (c *SafePlanetMarketController) Handle(player *pb.Player, update tgbotapi.U
 		return
 	}
 
-	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.market.info"))
+	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.market.auctions.info"))
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.dealer")),
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.gift")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.buy")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.sell")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions")),
+
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.me")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
@@ -59,10 +60,10 @@ func (c *SafePlanetMarketController) Handle(player *pb.Player, update tgbotapi.U
 	}
 }
 
-func (c *SafePlanetMarketController) Validator() bool {
+func (c *SafePlanetMarketAuctionsController) Validator() bool {
 	return false
 }
 
-func (c *SafePlanetMarketController) Stage() {
+func (c *SafePlanetMarketAuctionsController) Stage() {
 	//
 }
