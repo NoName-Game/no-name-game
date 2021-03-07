@@ -29,7 +29,7 @@ safeplanet.market.auctions.sell.ok: "L'asta è stata creata con sucesso."
 
 safeplanet.market.auctions.buy.which_category: "Seleziona la categoria appartenente all'item che vuoi mettere all'asta"
 safeplanet.market.auctions.buy.which_item: "Seleziona l'item che vorresti comprare"
-safeplanet.market.auctions.buy.auction_details: "Detagli Asta:\nProprietario: <b>%s</b>\nOggetto: <b>%s</b>"
+safeplanet.market.auctions.buy.auction_details: "Detagli Asta:\nProprietario: <b>%s</b>\nOggetto: <b>%s</b>\n\nPrezzo di partenza: <b>%v</b>\nUltima offerta: <b>%v</b> di <b>%s</b>"
 safeplanet.market.auctions.buy.bid_100: "Offri 100"
 safeplanet.market.auctions.buy.bid_250: "Offri 250"
 safeplanet.market.auctions.buy.bid_500: "Offri 500"

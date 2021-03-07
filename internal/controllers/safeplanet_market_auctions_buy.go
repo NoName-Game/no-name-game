@@ -259,6 +259,14 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Recupero dettagli offerte
+		var rGetAuctionBids *pb.GetAuctionBidsResponse
+		if rGetAuctionBids, err = config.App.Server.Connection.GetAuctionBids(helpers.NewContext(1), &pb.GetAuctionBidsRequest{
+			AuctionID: c.Payload.AuctionID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Recupero dettagli arma
 		var itemDetails string
 		switch rGetAuctionByID.GetAuction().GetItemCategory() {
@@ -271,7 +279,16 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemDetails = rGetArmorByID.GetArmor().GetName()
+			itemDetails = fmt.Sprintf(
+				"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+				rGetArmorByID.GetArmor().Name,
+				strings.ToUpper(rGetArmorByID.GetArmor().Rarity.Slug),
+				math.Round(rGetArmorByID.GetArmor().Defense),
+				math.Round(rGetArmorByID.GetArmor().Evasion),
+				math.Round(rGetArmorByID.GetArmor().Halving),
+				rGetArmorByID.GetArmor().Rarity.LevelToEuip,
+			)
+
 		case pb.AuctionItemCategoryEnum_WEAPON:
 			// Recupero dettagli arma
 			var rGetWeaponByID *pb.GetWeaponByIDResponse
@@ -281,13 +298,23 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemDetails = rGetWeaponByID.GetWeapon().GetName()
+			itemDetails = fmt.Sprintf(
+				"<b>(%s)</b> (%s) - [%v, %v%%, %v] 🎖%v",
+				rGetWeaponByID.GetWeapon().Name,
+				strings.ToUpper(rGetWeaponByID.GetWeapon().Rarity.Slug),
+				math.Round(rGetWeaponByID.GetWeapon().RawDamage),
+				math.Round(rGetWeaponByID.GetWeapon().Precision),
+				rGetWeaponByID.GetWeapon().Durability,
+				rGetWeaponByID.GetWeapon().Rarity.LevelToEuip,
+			)
 		}
 
 		// Chiedo al player di inserire il prezzo minimo di partenza
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.auction_details",
 			rGetAuctionByID.GetAuction().GetPlayer().GetUsername(),
 			itemDetails,
+			rGetAuctionByID.GetAuction().GetMinPrice(),
+			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
 		))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
