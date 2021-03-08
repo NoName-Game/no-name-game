@@ -57,6 +57,7 @@ route.safeplanet.hangar.create: "💸 Compra"
 route.safeplanet.market: "🏬 Mercato"
 route.safeplanet.market.dealer: "⚖️ Mercante"
 route.safeplanet.market.gift: "🧧 Regala"
+route.safeplanet.market.shareholder: "🕋 Bazar (WIP)"
 
 # Coalition
 route.safeplanet.coalition: "💈 Coalizione"
