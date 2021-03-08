@@ -20,7 +20,9 @@ safeplanet.gift.ko: "❌ Non è stato possibile inviare il regalo, riporova più
 safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come ragalo da <b>%s</b>"
 
 # Auctions
-safeplanet.market.auctions.info: "Benvenuto nella sala d'aste, cosa desideri fare?"
+safeplanet.market.auctions.auction_details: "Proprietario: <b>%s</b>\nOggetto: <b>%s</b>\n\nPrezzo di partenza: <b>%v</b>\nUltima offerta: <b>%v</b> di <b>%s</b>"
+safeplanet.market.auctions.info: "Benvenuto nella sala d'aste, cosa desideri fare?\n\n"
+
 safeplanet.market.auctions.sell.which_category: "Seleziona la categoria appartenente all'item che vuoi mettere all'asta"
 safeplanet.market.auctions.sell.which_item: "Seleziona l'item da mettere all'asta"
 safeplanet.market.auctions.sell.min_price: "Scrivi il valore minimo dipartenza dell'asta"
@@ -29,9 +31,11 @@ safeplanet.market.auctions.sell.ok: "L'asta è stata creata con sucesso."
 
 safeplanet.market.auctions.buy.which_category: "Seleziona la categoria appartenente all'item che vuoi mettere all'asta"
 safeplanet.market.auctions.buy.which_item: "Seleziona l'item che vorresti comprare"
-safeplanet.market.auctions.buy.auction_details: "Detagli Asta:\nProprietario: <b>%s</b>\nOggetto: <b>%s</b>\n\nPrezzo di partenza: <b>%v</b>\nUltima offerta: <b>%v</b> di <b>%s</b>"
 safeplanet.market.auctions.buy.bid_100: "Offri 100"
 safeplanet.market.auctions.buy.bid_250: "Offri 250"
 safeplanet.market.auctions.buy.bid_500: "Offri 500"
 safeplanet.market.auctions.buy.confirm_bid: "Sei sicuro di voler affire %v, per un totale di %v?"
 safeplanet.market.auctions.buy.bid_ok: "La tua offerta è stata registrata correttamente"
+
+safeplanet.market.auctions.my_auction.info_recap: "Ecco il recap delle tue aste:\n\n%s"
+safeplanet.market.auctions.my_auction.no_auction: "Nessun'asta è stata registrata a tuo nome"

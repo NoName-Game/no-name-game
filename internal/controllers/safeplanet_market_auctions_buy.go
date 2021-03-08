@@ -267,50 +267,14 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Recupero dettagli arma
+		// Costruisco dettagli item
 		var itemDetails string
-		switch rGetAuctionByID.GetAuction().GetItemCategory() {
-		case pb.AuctionItemCategoryEnum_ARMOR:
-			// Recupero dettagli armatura
-			var rGetArmorByID *pb.GetArmorByIDResponse
-			if rGetArmorByID, err = config.App.Server.Connection.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
-				ArmorID: rGetAuctionByID.GetAuction().GetItemID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			itemDetails = fmt.Sprintf(
-				"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
-				rGetArmorByID.GetArmor().Name,
-				strings.ToUpper(rGetArmorByID.GetArmor().Rarity.Slug),
-				math.Round(rGetArmorByID.GetArmor().Defense),
-				math.Round(rGetArmorByID.GetArmor().Evasion),
-				math.Round(rGetArmorByID.GetArmor().Halving),
-				rGetArmorByID.GetArmor().Rarity.LevelToEuip,
-			)
-
-		case pb.AuctionItemCategoryEnum_WEAPON:
-			// Recupero dettagli arma
-			var rGetWeaponByID *pb.GetWeaponByIDResponse
-			if rGetWeaponByID, err = config.App.Server.Connection.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
-				ID: rGetAuctionByID.GetAuction().GetItemID(),
-			}); err != nil {
-				c.Logger.Panic(err)
-			}
-
-			itemDetails = fmt.Sprintf(
-				"<b>(%s)</b> (%s) - [%v, %v%%, %v] 🎖%v",
-				rGetWeaponByID.GetWeapon().Name,
-				strings.ToUpper(rGetWeaponByID.GetWeapon().Rarity.Slug),
-				math.Round(rGetWeaponByID.GetWeapon().RawDamage),
-				math.Round(rGetWeaponByID.GetWeapon().Precision),
-				rGetWeaponByID.GetWeapon().Durability,
-				rGetWeaponByID.GetWeapon().Rarity.LevelToEuip,
-			)
+		if itemDetails, err = helpers.AuctionItemFormatter(c.Payload.AuctionID); err != nil {
+			c.Logger.Panic(err)
 		}
 
 		// Chiedo al player di inserire il prezzo minimo di partenza
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.auction_details",
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
 			rGetAuctionByID.GetAuction().GetPlayer().GetUsername(),
 			itemDetails,
 			rGetAuctionByID.GetAuction().GetMinPrice(),
@@ -320,8 +284,6 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_250")),
 			),
 			tgbotapi.NewKeyboardButtonRow(

@@ -69,12 +69,13 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.crafter.decompose":      reflect.TypeOf((*controllers.SafePlanetCrafterDecomposeController)(nil)).Elem(),
 
 	// Market
-	"route.safeplanet.market":               reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem(),
-	"route.safeplanet.market.dealer":        reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem(),
-	"route.safeplanet.market.gift":          reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem(),
-	"route.safeplanet.market.auctions":      reflect.TypeOf((*controllers.SafePlanetMarketAuctionsController)(nil)).Elem(),
-	"route.safeplanet.market.auctions.sell": reflect.TypeOf((*controllers.SafePlanetMarketAuctionsSellController)(nil)).Elem(),
-	"route.safeplanet.market.auctions.buy":  reflect.TypeOf((*controllers.SafePlanetMarketAuctionsBuyController)(nil)).Elem(),
+	"route.safeplanet.market":                     reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem(),
+	"route.safeplanet.market.dealer":              reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem(),
+	"route.safeplanet.market.gift":                reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem(),
+	"route.safeplanet.market.auctions":            reflect.TypeOf((*controllers.SafePlanetMarketAuctionsController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.sell":       reflect.TypeOf((*controllers.SafePlanetMarketAuctionsSellController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.buy":        reflect.TypeOf((*controllers.SafePlanetMarketAuctionsBuyController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.my_auction": reflect.TypeOf((*controllers.SafePlanetMarketAuctionsMyAuctionController)(nil)).Elem(),
 
 	"route.safeplanet.accademy":                    reflect.TypeOf((*controllers.SafePlanetAccademyController)(nil)).Elem(),
 	"route.safeplanet.relax":                       reflect.TypeOf((*controllers.SafePlanetRelaxController)(nil)).Elem(),

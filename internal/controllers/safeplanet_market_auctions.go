@@ -48,8 +48,7 @@ func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tg
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.sell")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.me")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.safeplanet.market.auctions.my_auction")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
