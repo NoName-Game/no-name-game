@@ -246,11 +246,19 @@ func (c *SafePlanetMarketShareHolderController) Stage() {
 
 		c.CurrentState.Stage = 3
 	case 3:
+		var t pb.GetBidInfoRequest_BidTypeEnum
+		switch c.Payload.Action {
+		case "buy":
+			t = pb.GetBidInfoRequest_BUY
+		case "sell":
+			t = pb.GetBidInfoRequest_SELL
+		}
 		// Recupero info sulla transazione che sta per effettuare
 		var rGetBidInfo *pb.GetBidInfoResponse
 		if rGetBidInfo, err = config.App.Server.Connection.GetBidInfo(helpers.NewContext(1), &pb.GetBidInfoRequest{
 			ActionID: c.Payload.ActionID,
 			Quantity: c.Payload.Quantity,
+			Type: t,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

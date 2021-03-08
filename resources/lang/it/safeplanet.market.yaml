@@ -32,4 +32,4 @@ safeplanet.shareholder.complete.sell: "Hai venduto correttamente <b>%d x %s</b> 
 safeplanet.shareholder.error_no_money: "Non hai abbastanza monete per concludere l'acquisto!"
 safaplanet.shareholder.error_no_resources: "Non hai abbastanza risorse per concludere la vendità!"
 safeplanet.shareholder.confirm_buy: "Stai per effettuare la transazione, spenderai <b>%d</b>."
-safeplanet.shareholder.confirm_sell: "Stai per effettaure la transazione, guadagnerai <b>%d</b>."
+safeplanet.shareholder.confirm_sell: "Stai per effettuare la transazione, guadagnerai <b>%d</b>."
