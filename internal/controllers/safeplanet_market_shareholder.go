@@ -47,6 +47,7 @@ func (c *SafePlanetMarketShareHolderController) Handle(player *pb.Player, update
 				1: {"route.breaker.menu"},
 				2: {"route.breaker.back","route.breaker.menu","route.breaker.clears"},
 				3: {"route.breaker.back","route.breaker.menu","route.breaker.clears"},
+				4: {"route.breaker.menu","route.breaker.clears"},
 			},
 		},
 	}) {
@@ -120,7 +121,7 @@ func (c *SafePlanetMarketShareHolderController) Validator() (hasErrors bool) {
 		if rGetActionByID, err = config.App.Server.Connection.GetActionByID(helpers.NewContext(1), &pb.GetActionByIDRequest{ID: c.Payload.ActionID}); err != nil {
 			c.Logger.Panic(err)
 		}
-		if rGetActionByID.GetQuantity() < c.Payload.Quantity {
+		if rGetActionByID.GetQuantity() < c.Payload.Quantity  && c.Payload.Action == "buy" {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.shareholder.error_no_resources_left")
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -129,6 +130,10 @@ func (c *SafePlanetMarketShareHolderController) Validator() (hasErrors bool) {
 					),
 				),
 			)
+			return true
+		}
+	case 4:
+		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return true
 		}
 	}
@@ -241,6 +246,31 @@ func (c *SafePlanetMarketShareHolderController) Stage() {
 
 		c.CurrentState.Stage = 3
 	case 3:
+		// Recupero info sulla transazione che sta per effettuare
+		var rGetBidInfo *pb.GetBidInfoResponse
+		if rGetBidInfo, err = config.App.Server.Connection.GetBidInfo(helpers.NewContext(1), &pb.GetBidInfoRequest{
+			ActionID: c.Payload.ActionID,
+			Quantity: c.Payload.Quantity,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+		// Chiedo conferma e stampo alcuni dati relativi alla transazione
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.shareholder.confirm_"+c.Payload.Action, rGetBidInfo.GetValue()))
+		msg.ParseMode = tgbotapi.ModeHTML
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.clears")),
+			),
+		)
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		c.CurrentState.Stage = 4
+	case 4:
 		var t pb.PlaceBidRequest_BidTypeEnum
 		switch c.Payload.Action {
 		case "buy":
