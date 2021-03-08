@@ -70,6 +70,7 @@ var routes = map[string]reflect.Type{
 	"route.safeplanet.market":                      reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem(),
 	"route.safeplanet.market.dealer":               reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem(),
 	"route.safeplanet.market.gift":                 reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem(),
+	"route.safeplanet.market.shareholder":	reflect.TypeOf((*controllers.SafePlanetMarketShareHolderController)(nil)).Elem(),
 	"route.safeplanet.accademy":                    reflect.TypeOf((*controllers.SafePlanetAccademyController)(nil)).Elem(),
 	"route.safeplanet.relax":                       reflect.TypeOf((*controllers.SafePlanetRelaxController)(nil)).Elem(),
 	"route.safeplanet.relax.threecard":             reflect.TypeOf((*controllers.SafePlanetRelaxThreeCardController)(nil)).Elem(),
