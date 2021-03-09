@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"fmt"
-	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -44,9 +43,9 @@ func (c *SafePlanetMarketAuctionsBuyController) Handle(player *pb.Player, update
 			PlanetType: []string{"safe"},
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
-				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu"},
-				3: {"route.breaker.menu", "route.breaker.clears"},
+				1: {"route.breaker.menu", "route.breaker.back"},
+				2: {"route.breaker.menu", "route.breaker.clears", "route.breaker.back"},
+				3: {"route.breaker.menu", "route.breaker.clears", "route.breaker.back"},
 				4: {"route.breaker.menu"},
 			},
 		},
@@ -86,22 +85,51 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 	// Recupero informazioni riguardo l'asta selezionata
 	// ##################################################################################################
 	case 2:
-		auctionSplit := strings.Split(c.Update.Message.Text, "#")
-		if len(auctionSplit)-1 > 0 {
-			var auctionID int
-			if auctionID, err = strconv.Atoi(auctionSplit[1]); err != nil {
-				return true
-			}
+		if strings.Contains(c.Update.Message.Text, "#") {
+			auctionSplit := strings.Split(c.Update.Message.Text, "#")
+			if len(auctionSplit)-1 > 0 {
+				var auctionID int
+				if auctionID, err = strconv.Atoi(auctionSplit[1]); err != nil {
+					return true
+				}
 
-			c.Payload.AuctionID = uint32(auctionID)
+				c.Payload.AuctionID = uint32(auctionID)
+				return false
+			}
 		}
+
+		c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.select_one_auction")
+		return true
 
 	// ##################################################################################################
 	// Verifico l'offerta fatta
 	// ##################################################################################################
 	case 3:
+		// Recupero dettagli asta
+		var rGetAuctionByID *pb.GetAuctionByIDResponse
+		if rGetAuctionByID, err = config.App.Server.Connection.GetAuctionByID(helpers.NewContext(1), &pb.GetAuctionByIDRequest{
+			AuctionID: c.Payload.AuctionID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Verifico che il player non sia l'owner dell'asta
+		if rGetAuctionByID.GetAuction().GetPlayerID() == c.Player.GetID() {
+			c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.error_owner")
+			return true
+		}
+
 		// TODO: Verifico se il player possiede in banca il totale
-		// TODO: Verifico se l'asta è ancora attiva
+
+		// Verifico se l'asta è aperta
+		var closeAt time.Time
+		if closeAt, err = helpers.GetEndTime(rGetAuctionByID.GetAuction().GetCloseAt(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		if time.Now().After(closeAt) {
+			c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.auction_closed")
+		}
 
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100") {
 			c.Payload.Bid = 100
@@ -160,79 +188,97 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 		// Recupero aste per la categoria scelta
 		switch c.Payload.ItemType {
 		case "armors":
-			var rGetAllAuctionsByCategory *pb.GetAllAuctionsByCategoryResponse
-			if rGetAllAuctionsByCategory, err = config.App.Server.Connection.GetAllAuctionsByCategory(helpers.NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+			// Verifico se ci sono delle aste al quale il player ha fatto un'offerta
+			var rGetAllPlayerOfferAuctionsByCategory *pb.GetAllPlayerOfferAuctionsByCategoryResponse
+			if rGetAllPlayerOfferAuctionsByCategory, err = config.App.Server.Connection.GetAllPlayerOfferAuctionsByCategory(helpers.NewContext(1), &pb.GetAllPlayerOfferAuctionsByCategoryRequest{
+				PlayerID:     c.Player.ID,
 				ItemCategory: 0,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
 
-			if len(rGetAllAuctionsByCategory.GetAuctions()) > 0 {
-				// Ciclo aste
-				for _, auction := range rGetAllAuctionsByCategory.GetAuctions() {
+			if len(rGetAllPlayerOfferAuctionsByCategory.GetAuctions()) > 0 {
+				keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.banner_offer_auction")),
+				))
 
+				// Ciclo aste tutte le aste
+				for _, auction := range rGetAllPlayerOfferAuctionsByCategory.GetAuctions() {
 					// Recupero dettagli arma
-					var rGetArmorByID *pb.GetArmorByIDResponse
-					if rGetArmorByID, err = config.App.Server.Connection.GetArmorByID(helpers.NewContext(1), &pb.GetArmorByIDRequest{
-						ArmorID: auction.GetItemID(),
-					}); err != nil {
-						c.Logger.Panic(err)
-					}
+					keyboardRow, _ := helpers.AuctionWeaponKeyboard(auction.GetItemID(), auction.GetID())
+					keyboardRows = append(keyboardRows, keyboardRow)
+				}
+			}
 
-					keyboardRow := tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(
-							fmt.Sprintf(
-								"%s (%s) 🛡 #%v",
-								// helpers.Trans(c.Player.Language.Slug, "equip"),
-								rGetArmorByID.GetArmor().GetName(),
-								rGetArmorByID.GetArmor().GetRarity().GetSlug(),
-								auction.GetID(),
-							),
-						),
-					)
+			// Ciclo tutte le aste
+			var rGetAllAuctionsByCategory *pb.GetAllAuctionsByCategoryResponse
+			if rGetAllAuctionsByCategory, err = config.App.Server.Connection.GetAllAuctionsByCategory(helpers.NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+				ItemCategory: 0,
+				PlayerID:     c.Player.GetID(),
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
 
+			if len(rGetAllAuctionsByCategory.GetAuctions()) > 0 {
+				keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.banner_all_auction")),
+				))
+
+				// Ciclo tutte le aste
+				for _, auction := range rGetAllAuctionsByCategory.GetAuctions() {
+					keyboardRow, _ := helpers.AuctionArmorKeyboard(auction.GetItemID(), auction.GetID())
 					keyboardRows = append(keyboardRows, keyboardRow)
 				}
 			}
 
 		case "weapons":
+			// Verifico se ci sono delle aste al quale il player ha fatto un'offerta
+			var rGetAllPlayerOfferAuctionsByCategory *pb.GetAllPlayerOfferAuctionsByCategoryResponse
+			if rGetAllPlayerOfferAuctionsByCategory, err = config.App.Server.Connection.GetAllPlayerOfferAuctionsByCategory(helpers.NewContext(1), &pb.GetAllPlayerOfferAuctionsByCategoryRequest{
+				PlayerID:     c.Player.ID,
+				ItemCategory: 1,
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			if len(rGetAllPlayerOfferAuctionsByCategory.GetAuctions()) > 0 {
+				keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.banner_offer_auction")),
+				))
+
+				// Ciclo aste tutte le aste
+				for _, auction := range rGetAllPlayerOfferAuctionsByCategory.GetAuctions() {
+					// Recupero dettagli arma
+					keyboardRow, _ := helpers.AuctionWeaponKeyboard(auction.GetItemID(), auction.GetID())
+					keyboardRows = append(keyboardRows, keyboardRow)
+				}
+			}
+
+			// Ciclo tutte le aste per questa categoria
 			var rGetAllAuctionsByCategory *pb.GetAllAuctionsByCategoryResponse
 			if rGetAllAuctionsByCategory, err = config.App.Server.Connection.GetAllAuctionsByCategory(helpers.NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+				PlayerID:     c.Player.GetID(),
 				ItemCategory: 1,
 			}); err != nil {
 				c.Logger.Panic(err)
 			}
 
 			if len(rGetAllAuctionsByCategory.GetAuctions()) > 0 {
-				// Ciclo aste
+				keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.banner_all_auction")),
+				))
+
+				// Ciclo aste tutte le aste
 				for _, auction := range rGetAllAuctionsByCategory.GetAuctions() {
 					// Recupero dettagli arma
-					var rGetWeaponByID *pb.GetWeaponByIDResponse
-					if rGetWeaponByID, err = config.App.Server.Connection.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
-						ID: auction.GetItemID(),
-					}); err != nil {
-						c.Logger.Panic(err)
-					}
-
-					keyboardRow := tgbotapi.NewKeyboardButtonRow(
-						tgbotapi.NewKeyboardButton(
-							fmt.Sprintf(
-								"%s (%s) -🩸%v #%v",
-								rGetWeaponByID.GetWeapon().GetName(),
-								rGetWeaponByID.GetWeapon().GetRarity().GetSlug(),
-								math.Round(rGetWeaponByID.GetWeapon().GetRawDamage()),
-								auction.GetID(),
-							),
-						),
-					)
-
+					keyboardRow, _ := helpers.AuctionWeaponKeyboard(auction.GetItemID(), auction.GetID())
 					keyboardRows = append(keyboardRows, keyboardRow)
 				}
 			}
 		}
 
 		keyboardRows = append(keyboardRows, tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
 		// Mando messaggio
@@ -273,6 +319,29 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		var bidKeyboard [][]tgbotapi.KeyboardButton
+		// Verifico se l'asta è ancora aperta
+		var closeAt time.Time
+		if closeAt, err = helpers.GetEndTime(rGetAuctionByID.GetAuction().GetCloseAt(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		if time.Now().Before(closeAt) {
+			bidKeyboard = append(bidKeyboard,
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100")),
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_250")),
+				),
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_500")),
+				),
+			)
+		}
+
+		bidKeyboard = append(bidKeyboard, tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+		))
+
 		// Chiedo al player di inserire il prezzo minimo di partenza
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
 			rGetAuctionByID.GetAuction().GetPlayer().GetUsername(),
@@ -281,18 +350,10 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
 		))
 		msg.ParseMode = tgbotapi.ModeHTML
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100")),
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_250")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_500")),
-			),
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
-			),
-		)
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
+			ResizeKeyboard: true,
+			Keyboard:       bidKeyboard,
+		}
 
 		// Invio
 		if _, err = helpers.SendMessage(msg); err != nil {
