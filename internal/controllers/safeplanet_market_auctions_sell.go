@@ -47,7 +47,7 @@ func (c *SafePlanetMarketAuctionsSellController) Handle(player *pb.Player, updat
 				1: {"route.breaker.menu"},
 				2: {"route.breaker.menu"},
 				3: {"route.breaker.menu", "route.breaker.clears"},
-				4: {"route.breaker.menu"},
+				4: {"route.breaker.menu", "route.breaker.clears"},
 			},
 		},
 	}) {
