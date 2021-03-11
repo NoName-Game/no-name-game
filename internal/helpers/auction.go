@@ -106,3 +106,43 @@ func AuctionWeaponKeyboard(weaponID uint32, auctionID uint32) (keyboardRow []tgb
 		),
 	), nil
 }
+
+// Verifica se l'armatura si trova in un'asta
+func CheckIfArmorInAuction(playerID uint32, armorID uint32) (inAuction bool, err error) {
+	// Recupero quante aste ci sono per la categoria armi
+	var rGetAllArmorAuction *pb.GetAllAuctionsByCategoryResponse
+	if rGetAllArmorAuction, err = config.App.Server.Connection.GetAllAuctionsByCategory(NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+		ItemCategory: 0,
+		PlayerID:     0, // Non filtro per nessun utente
+	}); err != nil {
+		return
+	}
+
+	for _, auction := range rGetAllArmorAuction.GetAuctions() {
+		if auction.GetItemID() == armorID {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// Verifica se l'arma si trova in un'asta
+func CheckIfWeaponInAuction(playerID uint32, weaponID uint32) (inAuction bool, err error) {
+	// Recupero quante aste ci sono per la categoria armi
+	var rGetAllWeaponAuctions *pb.GetAllAuctionsByCategoryResponse
+	if rGetAllWeaponAuctions, err = config.App.Server.Connection.GetAllAuctionsByCategory(NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+		PlayerID:     0, // Non filtro per nessun utente
+		ItemCategory: 1,
+	}); err != nil {
+		return
+	}
+
+	for _, auction := range rGetAllWeaponAuctions.GetAuctions() {
+		if auction.GetItemID() == weaponID {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}

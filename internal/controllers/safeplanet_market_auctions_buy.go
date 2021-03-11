@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -74,11 +75,15 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 
 	switch c.CurrentState.Stage {
 	case 1:
+		category := strings.Split(c.Update.Message.Text, " (")
+
 		// Verifico qualche categoria di aste vuole vedere
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "armor") {
+		if category[0] == helpers.Trans(c.Player.Language.Slug, "armor") {
 			c.Payload.ItemType = "armors"
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "weapon") {
+		} else if category[0] == helpers.Trans(c.Player.Language.Slug, "weapon") {
 			c.Payload.ItemType = "weapons"
+		} else {
+			return true
 		}
 
 	// ##################################################################################################
@@ -159,14 +164,36 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 	// Faccio scegliere la categoria
 	// ##################################################################################################
 	case 0:
+		// Recupero quante aste ci sono per la categoria armature
+		var rGetAllArmorAuction *pb.GetAllAuctionsByCategoryResponse
+		if rGetAllArmorAuction, err = config.App.Server.Connection.GetAllAuctionsByCategory(helpers.NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+			ItemCategory: 0,
+			PlayerID:     c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero quante aste ci sono per la categoria armi
+		var rGetAllWeaponAuctions *pb.GetAllAuctionsByCategoryResponse
+		if rGetAllWeaponAuctions, err = config.App.Server.Connection.GetAllAuctionsByCategory(helpers.NewContext(1), &pb.GetAllAuctionsByCategoryRequest{
+			PlayerID:     c.Player.GetID(),
+			ItemCategory: 1,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.which_category"))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "armor")),
+				tgbotapi.NewKeyboardButton(
+					fmt.Sprintf("%s (%v)", helpers.Trans(c.Player.Language.Slug, "armor"), len(rGetAllArmorAuction.GetAuctions())),
+				),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "weapon")),
+				tgbotapi.NewKeyboardButton(
+					fmt.Sprintf("%s (%v)", helpers.Trans(c.Player.Language.Slug, "weapon"), len(rGetAllWeaponAuctions.GetAuctions())),
+				),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
@@ -345,6 +372,7 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 		// Chiedo al player di inserire il prezzo minimo di partenza
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
 			rGetAuctionByID.GetAuction().GetPlayer().GetUsername(),
+			closeAt.Format("15:04:05 02/01"),
 			itemDetails,
 			rGetAuctionByID.GetAuction().GetMinPrice(),
 			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),

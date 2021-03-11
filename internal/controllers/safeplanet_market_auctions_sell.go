@@ -103,6 +103,17 @@ func (c *SafePlanetMarketAuctionsSellController) Validator() (hasErrors bool) {
 				c.Logger.Panic(err)
 			}
 
+			// Verifico se è l'armatura già presente in un'asta
+			var inAuction bool
+			if inAuction, err = helpers.CheckIfArmorInAuction(c.Player.ID, rGetArmorByName.GetArmor().GetID()); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			if inAuction {
+				c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.sell.item_already_in_auction")
+				return true
+			}
+
 			// Verifico se appartiene correttamente al player
 			if rGetArmorByName.GetArmor().GetPlayerID() == c.Player.ID {
 				c.Payload.ItemID = rGetArmorByName.GetArmor().GetID()
@@ -117,6 +128,17 @@ func (c *SafePlanetMarketAuctionsSellController) Validator() (hasErrors bool) {
 				PlayerID: c.Player.ID,
 			}); err != nil {
 				c.Logger.Panic(err)
+			}
+
+			// Verifico se è un'arma già presente in un'asta
+			var inAuction bool
+			if inAuction, err = helpers.CheckIfWeaponInAuction(c.Player.ID, rGetWeaponByName.GetWeapon().GetID()); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			if inAuction {
+				c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.sell.item_already_in_auction")
+				return true
 			}
 
 			// Verifico se appartiene correttamente al player
@@ -197,6 +219,11 @@ func (c *SafePlanetMarketAuctionsSellController) Stage() {
 			if len(rGetPlayerArmors.GetArmors()) > 0 {
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmors.GetArmors() {
+					// Posso mettere all'asta solo le armature non equipaggiate
+					if armor.GetEquipped() {
+						continue
+					}
+
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
@@ -226,6 +253,11 @@ func (c *SafePlanetMarketAuctionsSellController) Stage() {
 			if len(rGetPlayerWeapons.GetWeapons()) > 0 {
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
+					// Posso mettere all'asta solo le armi non equipaggiate
+					if weapon.GetEquipped() {
+						continue
+					}
+
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(

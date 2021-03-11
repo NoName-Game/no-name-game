@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"time"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -65,8 +67,15 @@ func (c *SafePlanetMarketAuctionsMyAuctionController) Handle(player *pb.Player, 
 			c.Logger.Panic(err)
 		}
 
+		// Recupero data fine asta
+		var closeAt time.Time
+		if closeAt, err = helpers.GetEndTime(auction.GetCloseAt(), c.Player); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		recapPlayerAuctions += helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
 			auction.GetPlayer().GetUsername(),
+			closeAt.Format("15:04:05 02/01"),
 			itemDetails,
 			auction.GetMinPrice(),
 			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),

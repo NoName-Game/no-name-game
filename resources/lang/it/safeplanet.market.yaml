@@ -35,7 +35,7 @@ safeplanet.shareholder.confirm_buy: "Stai per effettuare la transazione, spender
 safeplanet.shareholder.confirm_sell: "Stai per effettuare la transazione, guadagnerai <b>%d</b>."
 
 # Auctions
-safeplanet.market.auctions.auction_details: "Proprietario: <b>%s</b>\nOggetto: <b>%s</b>\n\nPrezzo di partenza: <b>%v</b>\nUltima offerta: <b>%v</b> di <b>%s</b>"
+safeplanet.market.auctions.auction_details: "Proprietario: <b>%s</b>\nChiusura asta: <b>%v</b>\nOggetto: <b>%s</b>\n\nPrezzo di partenza: <b>%v</b>\nUltima offerta: <b>%v</b> di <b>%s</b>"
 safeplanet.market.auctions.info: "Benvenuto nella sala d'aste, cosa desideri fare?\n\n"
 safeplanet.market.auctions.banner_all_auction: "⬇️ Tutte le aste ⬇️"
 safeplanet.market.auctions.banner_offer_auction: "⬇️ Le tue offerte ⬇️"
@@ -45,6 +45,7 @@ safeplanet.market.auctions.sell.which_item: "Seleziona l'item da mettere all'ast
 safeplanet.market.auctions.sell.min_price: "Scrivi il valore minimo dipartenza dell'asta"
 safeplanet.market.auctions.sell.confirm: "Sei sicuro di voler mettere all'asta %s ad un prezzo base di partenza pari a %v?"
 safeplanet.market.auctions.sell.ok: "L'asta è stata creata con sucesso."
+safeplanet.market.auctions.sell.item_already_in_auction: "L'item selezionato è presente in un'asta."
 
 safeplanet.market.auctions.buy.which_category: "Seleziona la categoria appartenente all'item che vuoi mettere all'asta"
 safeplanet.market.auctions.buy.which_item: "Seleziona l'item che vorresti comprare"

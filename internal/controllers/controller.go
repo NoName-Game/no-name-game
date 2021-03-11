@@ -42,7 +42,6 @@ type Controller struct {
 type ControllerCurrentState struct {
 	Controller string
 	Stage      int32
-	ForceStage int32
 	Completed  bool
 	Payload    interface{}
 }
@@ -91,10 +90,6 @@ func (c *Controller) InitController(controller Controller) bool {
 	// Carico payload e infomazioni controller
 	if c.CurrentState.Stage, err = helpers.GetControllerCacheData(c.Player.ID, c.CurrentState.Controller, &c.CurrentState.Payload); err != nil {
 		c.Logger.Panicf("cant get stage and paylaod controller data: %s", err.Error())
-	}
-
-	if c.CurrentState.ForceStage > 0 {
-		c.CurrentState.Stage = c.CurrentState.ForceStage
 	}
 
 	// Verifico se esistono condizioni per cambiare stato o uscire
