@@ -3,7 +3,6 @@ package helpers
 import (
 	"fmt"
 	"math"
-	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -31,15 +30,7 @@ func AuctionItemFormatter(auctionID uint32) (itemDetails string, err error) {
 			return itemDetails, err
 		}
 
-		itemDetails = fmt.Sprintf(
-			"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
-			rGetArmorByID.GetArmor().Name,
-			strings.ToUpper(rGetArmorByID.GetArmor().Rarity.Slug),
-			math.Round(rGetArmorByID.GetArmor().Defense),
-			math.Round(rGetArmorByID.GetArmor().Evasion),
-			math.Round(rGetArmorByID.GetArmor().Halving),
-			rGetArmorByID.GetArmor().Rarity.LevelToEuip,
-		)
+		itemDetails = ArmorFormatter(rGetArmorByID.GetArmor())
 
 	case pb.AuctionItemCategoryEnum_WEAPON:
 		// Recupero dettagli arma
@@ -50,15 +41,7 @@ func AuctionItemFormatter(auctionID uint32) (itemDetails string, err error) {
 			return itemDetails, err
 		}
 
-		itemDetails = fmt.Sprintf(
-			"<b>(%s)</b> (%s) - [%v, %v%%, %v] 🎖%v",
-			rGetWeaponByID.GetWeapon().Name,
-			strings.ToUpper(rGetWeaponByID.GetWeapon().Rarity.Slug),
-			math.Round(rGetWeaponByID.GetWeapon().RawDamage),
-			math.Round(rGetWeaponByID.GetWeapon().Precision),
-			rGetWeaponByID.GetWeapon().Durability,
-			rGetWeaponByID.GetWeapon().Rarity.LevelToEuip,
-		)
+		itemDetails = WeaponFormatter(rGetWeaponByID.GetWeapon())
 	}
 
 	return

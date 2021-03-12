@@ -322,7 +322,7 @@ func (c *SafePlanetMarketAuctionsSellController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemName = rGetPlayerArmors.GetArmor().GetName()
+			itemName = helpers.ArmorFormatter(rGetPlayerArmors.GetArmor())
 		case "weapons":
 			var rGetPlayerWeapons *pb.GetWeaponByIDResponse
 			if rGetPlayerWeapons, err = config.App.Server.Connection.GetWeaponByID(helpers.NewContext(1), &pb.GetWeaponByIDRequest{
@@ -331,7 +331,7 @@ func (c *SafePlanetMarketAuctionsSellController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemName = rGetPlayerWeapons.GetWeapon().GetName()
+			itemName = helpers.WeaponFormatter(rGetPlayerWeapons.GetWeapon())
 		}
 
 		// Chiedo conferma al player
@@ -346,7 +346,7 @@ func (c *SafePlanetMarketAuctionsSellController) Stage() {
 				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "confirm")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
+				tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 			),
 		)
 

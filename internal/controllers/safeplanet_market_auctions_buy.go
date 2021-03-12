@@ -47,7 +47,7 @@ func (c *SafePlanetMarketAuctionsBuyController) Handle(player *pb.Player, update
 				1: {"route.breaker.menu", "route.breaker.back"},
 				2: {"route.breaker.menu", "route.breaker.clears", "route.breaker.back"},
 				3: {"route.breaker.menu", "route.breaker.clears", "route.breaker.back"},
-				4: {"route.breaker.menu"},
+				4: {"route.breaker.menu", "route.breaker.back"},
 			},
 		},
 	}) {
@@ -110,9 +110,27 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 	// Verifico l'offerta fatta
 	// ##################################################################################################
 	case 3:
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100") {
+			c.Payload.Bid = 100
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_250") {
+			c.Payload.Bid = 250
+		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_500") {
+			c.Payload.Bid = 500
+		} else {
+			return true
+		}
+
 		// Recupero dettagli asta
 		var rGetAuctionByID *pb.GetAuctionByIDResponse
 		if rGetAuctionByID, err = config.App.Server.Connection.GetAuctionByID(helpers.NewContext(1), &pb.GetAuctionByIDRequest{
+			AuctionID: c.Payload.AuctionID,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Recupero dettagli offerte asta
+		var rGetAuctionBids *pb.GetAuctionBidsResponse
+		if rGetAuctionBids, err = config.App.Server.Connection.GetAuctionBids(helpers.NewContext(1), &pb.GetAuctionBidsRequest{
 			AuctionID: c.Payload.AuctionID,
 		}); err != nil {
 			c.Logger.Panic(err)
@@ -124,7 +142,23 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 			return true
 		}
 
-		// TODO: Verifico se il player possiede in banca il totale
+		// Recupero budget player, ovvero i soldi che possiede in banca
+		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
+		if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.GetID(),
+			EconomyType: pb.GetPlayerEconomyRequest_BANK,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		totalBid := rGetAuctionBids.GetTotalBid()
+		currentBid := c.Payload.Bid
+
+		// Verifico se il player possiede in banca il totale
+		if rGetPlayerEconomy.GetValue() < totalBid+currentBid {
+			c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.budget_low")
+			return true
+		}
 
 		// Verifico se l'asta è aperta
 		var closeAt time.Time
@@ -136,15 +170,6 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 			c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.auction_closed")
 		}
 
-		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_100") {
-			c.Payload.Bid = 100
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_250") {
-			c.Payload.Bid = 250
-		} else if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.bid_500") {
-			c.Payload.Bid = 500
-		} else {
-			return true
-		}
 	case 4:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return true
@@ -369,14 +394,27 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back")),
 		))
 
-		// Chiedo al player di inserire il prezzo minimo di partenza
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
+		auctionDetails := helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.auction_details",
 			rGetAuctionByID.GetAuction().GetPlayer().GetUsername(),
 			closeAt.Format("15:04:05 02/01"),
 			itemDetails,
 			rGetAuctionByID.GetAuction().GetMinPrice(),
 			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
-		))
+		)
+
+		// Recupero budget player, ovvero i soldi che possiede in banca
+		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
+		if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+			PlayerID:    c.Player.GetID(),
+			EconomyType: pb.GetPlayerEconomyRequest_BANK,
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		playerBudget := helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.buy.player_budget", rGetPlayerEconomy.GetValue())
+
+		// Chiedo al player di inserire il prezzo minimo di partenza
+		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n%s", auctionDetails, playerBudget))
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
