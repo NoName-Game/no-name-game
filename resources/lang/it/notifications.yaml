@@ -23,3 +23,6 @@ notification.titan_drop.armor.glove: "🦾 %s (%s)"
 notification.titan_drop.armor.chest: "🥼 %s (%s)"
 notification.titan_drop.armor.boots: "🦿 %s (%s)"
 notification.titan_drop.weapon: "🗡 %s (%s)"
+
+# NOTIFICATIONS - AUCTION
+notification.auction.offer_higher: "⠿ La tua offerta per <b>%s</b> è stata superata, non fartelo scappare!"

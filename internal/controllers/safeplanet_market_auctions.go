@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -40,7 +42,12 @@ func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tg
 		return
 	}
 
-	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "safeplanet.market.auctions.info"))
+	msg := helpers.NewMessage(c.ChatID,
+		fmt.Sprintf("%s\n\n%s",
+			helpers.Trans(player.Language.Slug, "safeplanet.market.auctions.info"),
+			helpers.Trans(player.Language.Slug, "safeplanet.market.auctions.tip"),
+		),
+	)
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

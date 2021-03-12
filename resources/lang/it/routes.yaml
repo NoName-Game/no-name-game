@@ -59,10 +59,9 @@ route.safeplanet.market.dealer: "⚖️ Mercante"
 route.safeplanet.market.gift: "🧧 Regala"
 route.safeplanet.market.shareholder: "🕋 Bazar (WIP)"
 route.safeplanet.market.auctions: "💸 Aste"
-route.safeplanet.market.auctions.buy: "Compra all'asta"
-route.safeplanet.market.auctions.sell: "Metti all'asta"
-route.safeplanet.market.auctions.my_offers: "Le tue offerte"
-route.safeplanet.market.auctions.my_auction: "Le tue aste"
+route.safeplanet.market.auctions.buy: "💵 Compra all'asta"
+route.safeplanet.market.auctions.sell: "🗳 Metti all'asta"
+route.safeplanet.market.auctions.my_auction: "🧾 Le tue aste"
 
 # Coalition
 route.safeplanet.coalition: "💈 Coalizione"

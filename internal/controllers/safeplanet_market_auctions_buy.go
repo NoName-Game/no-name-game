@@ -465,6 +465,25 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 		c.CurrentState.Stage = 4
 
 	case 4:
+		// Recupero ultimo offerente
+		var rGetAuctionBids *pb.GetAuctionBidsResponse
+		rGetAuctionBids, _ = config.App.Server.Connection.GetAuctionBids(helpers.NewContext(1), &pb.GetAuctionBidsRequest{
+			AuctionID: c.Payload.AuctionID,
+		})
+
+		if rGetAuctionBids.GetLastBid() != nil {
+			auctionItemDetails, _ := helpers.AuctionItemFormatter(c.Payload.AuctionID)
+
+			// Invio messaggio all'ultimo offerente indicandogli che la sua offerta è stata superata
+			msgToOldOffer := helpers.NewMessage(rGetAuctionBids.GetLastBid().GetPlayer().GetChatID(),
+				helpers.Trans(c.Player.Language.Slug, "notification.auction.offer_higher", auctionItemDetails),
+			)
+			msgToOldOffer.ParseMode = tgbotapi.ModeHTML
+			if _, err = helpers.SendMessage(msgToOldOffer); err != nil {
+				c.Logger.Panic(err)
+			}
+		}
+
 		// Chiamo ws per registrare
 		if _, err = config.App.Server.Connection.NewAuctionBid(helpers.NewContext(1), &pb.NewAuctionBidRequest{
 			AuctionID: c.Payload.AuctionID,
