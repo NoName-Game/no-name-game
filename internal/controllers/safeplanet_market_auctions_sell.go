@@ -120,7 +120,6 @@ func (c *SafePlanetMarketAuctionsSellController) Validator() (hasErrors bool) {
 				haveResource = true
 			}
 
-			haveResource = false
 		case "weapons":
 			var rGetWeaponByName *pb.GetWeaponByPlayerAndNameResponse
 			if rGetWeaponByName, err = config.App.Server.Connection.GetWeaponByPlayerAndName(helpers.NewContext(1), &pb.GetWeaponByPlayerAndNameRequest{

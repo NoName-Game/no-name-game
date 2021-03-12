@@ -41,7 +41,7 @@ func (c *SafePlanetBankController) Handle(player *pb.Player, update tgbotapi.Upd
 			},
 			PlanetType: []string{"safe"},
 			BreakerPerStage: map[int32][]string{
-				0: {"route.breaker.menu"},
+				0: {"route.breaker.menu", "route.breaker.back"},
 				2: {"route.breaker.back"},
 			},
 		},

@@ -168,6 +168,7 @@ func (c *SafePlanetMarketAuctionsBuyController) Validator() (hasErrors bool) {
 
 		if time.Now().After(closeAt) {
 			c.Validation.Message = helpers.Trans(c.Player.GetLanguage().GetSlug(), "safeplanet.market.auctions.buy.auction_closed")
+			return true
 		}
 
 	case 4:
@@ -399,8 +400,13 @@ func (c *SafePlanetMarketAuctionsBuyController) Stage() {
 			closeAt.Format("15:04:05 02/01"),
 			itemDetails,
 			rGetAuctionByID.GetAuction().GetMinPrice(),
-			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
 		)
+
+		if rGetAuctionBids.GetLastBid() != nil {
+			auctionDetails += helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.last_offer",
+				rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
+			)
+		}
 
 		// Recupero budget player, ovvero i soldi che possiede in banca
 		var rGetPlayerEconomy *pb.GetPlayerEconomyResponse

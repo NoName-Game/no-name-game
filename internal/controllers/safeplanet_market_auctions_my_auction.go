@@ -78,8 +78,13 @@ func (c *SafePlanetMarketAuctionsMyAuctionController) Handle(player *pb.Player, 
 			closeAt.Format("15:04:05 02/01"),
 			itemDetails,
 			auction.GetMinPrice(),
-			rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
 		)
+
+		if rGetAuctionBids.GetLastBid() != nil {
+			recapPlayerAuctions += helpers.Trans(c.Player.Language.Slug, "safeplanet.market.auctions.last_offer",
+				rGetAuctionBids.GetTotalBid(), rGetAuctionBids.GetLastBid().GetPlayer().GetUsername(),
+			)
+		}
 
 		recapPlayerAuctions += "\n---------------------------------------\n"
 	}
