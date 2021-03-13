@@ -26,3 +26,5 @@ notification.titan_drop.weapon: "🗡 %s (%s)"
 
 # NOTIFICATIONS - AUCTION
 notification.auction.offer_higher: "⠿ La tua offerta per <b>%s</b> è stata superata, non fartelo scappare!"
+notification.auction.win: "⠿ <b>Complimenti!</b> L'asta <b>#%v</b> è terminata e ti sei aggiudicato la vittoria. Puoi trovare il tuo oggetto nella lista dei tuoi equipaggiamenti."
+notification.auction.close: "⠿ L'asta <b>#%v</b> è terminata e ti sei aggiudicato 💰<b>%v</b> dalla vendita del tuo oggetto."
