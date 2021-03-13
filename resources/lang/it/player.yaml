@@ -51,6 +51,8 @@ inventory.items.not_found: "L'oggetto che vuoi usare non sembra essere valido."
 inventory.items.confirm: "Confermi di voler usare <b>%v</b>?"
 inventory.items.confirm_warning: "\n\n⚠️Attenzione, l'eccedenza verrà automaticamente scartata."
 inventory.items.completed: "Hai usato <b>%s</b>."
+inventory.items.many: "Quanti oggetti vuoi utilizzare?"
+inventory.items.none: "Non possiedi abbastanza oggetti!"
 
 # Packs
 inventory.packs.what: "Ecco i 🎁 <b>Rifornimenti</b> in tuo possesso.\nDesideri usare qualcosa?"
