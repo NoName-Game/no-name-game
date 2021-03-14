@@ -146,6 +146,27 @@ func handleNotification(notification *pb.Notification) {
 			rGetAchievementByID.GetAchievement().GetDiamondReward(),
 			rGetAchievementByID.GetAchievement().GetExperienceReward(),
 		)
+	case "win_auction":
+		type AuctionNotificationPayload struct {
+			AuctionID uint32
+			Bid       int32
+		}
+
+		var payload AuctionNotificationPayload
+		_ = json.Unmarshal([]byte(notification.GetPayload()), &payload)
+
+		message = helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), "notification.auction.win", payload.AuctionID)
+
+	case "close_auction":
+		type AuctionNotificationPayload struct {
+			AuctionID uint32
+			Bid       int32
+		}
+
+		var payload AuctionNotificationPayload
+		_ = json.Unmarshal([]byte(notification.GetPayload()), &payload)
+
+		message = helpers.Trans(notification.GetPlayer().GetLanguage().GetSlug(), "notification.auction.close", payload.AuctionID, payload.Bid)
 	}
 
 	// Invio notifica
@@ -248,6 +269,13 @@ func handleActivityNotification(activity *pb.PlayerActivity) {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Info("[*] Activity %d recovered", activity.ID)
+		}
+
+		// Aggiorno lo stato levando la notifica
+		if _, err = config.App.Server.Connection.SetPlayerActivityNotified(helpers.NewContext(1), &pb.SetPlayerActivityNotifiedRequest{
+			ActivityID: activity.ID,
+		}); err != nil {
+			logrus.Panic(err)
 		}
 	}()
 

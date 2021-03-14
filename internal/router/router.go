@@ -61,16 +61,23 @@ var routes = map[string]reflect.Type{
 	"route.planet.domain":          reflect.TypeOf((*controllers.PlanetDomainController)(nil)).Elem(),
 
 	// Safe Planet
-	"route.safeplanet.coalition.daily_reward":      reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),
-	"route.safeplanet.bank":                        reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
-	"route.safeplanet.crafter":                     reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
-	"route.safeplanet.crafter.create":              reflect.TypeOf((*controllers.SafePlanetCrafterCreateController)(nil)).Elem(),
-	"route.safeplanet.crafter.repair":              reflect.TypeOf((*controllers.SafePlanetCrafterRepairController)(nil)).Elem(),
-	"route.safeplanet.crafter.decompose":           reflect.TypeOf((*controllers.SafePlanetCrafterDecomposeController)(nil)).Elem(),
-	"route.safeplanet.market":                      reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem(),
-	"route.safeplanet.market.dealer":               reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem(),
-	"route.safeplanet.market.gift":                 reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem(),
-	"route.safeplanet.market.shareholder":	reflect.TypeOf((*controllers.SafePlanetMarketShareHolderController)(nil)).Elem(),
+	"route.safeplanet.coalition.daily_reward": reflect.TypeOf((*controllers.SafePlanetCoalitionDailyRewardController)(nil)).Elem(),
+	"route.safeplanet.bank":                   reflect.TypeOf((*controllers.SafePlanetBankController)(nil)).Elem(),
+	"route.safeplanet.crafter":                reflect.TypeOf((*controllers.SafePlanetCrafterController)(nil)).Elem(),
+	"route.safeplanet.crafter.create":         reflect.TypeOf((*controllers.SafePlanetCrafterCreateController)(nil)).Elem(),
+	"route.safeplanet.crafter.repair":         reflect.TypeOf((*controllers.SafePlanetCrafterRepairController)(nil)).Elem(),
+	"route.safeplanet.crafter.decompose":      reflect.TypeOf((*controllers.SafePlanetCrafterDecomposeController)(nil)).Elem(),
+
+	// Market
+	"route.safeplanet.market":                     reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem(),
+	"route.safeplanet.market.dealer":              reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem(),
+	"route.safeplanet.market.gift":                reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem(),
+	"route.safeplanet.market.shareholder":         reflect.TypeOf((*controllers.SafePlanetMarketShareHolderController)(nil)).Elem(),
+	"route.safeplanet.market.auctions":            reflect.TypeOf((*controllers.SafePlanetMarketAuctionsController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.sell":       reflect.TypeOf((*controllers.SafePlanetMarketAuctionsSellController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.buy":        reflect.TypeOf((*controllers.SafePlanetMarketAuctionsBuyController)(nil)).Elem(),
+	"route.safeplanet.market.auctions.my_auction": reflect.TypeOf((*controllers.SafePlanetMarketAuctionsMyAuctionController)(nil)).Elem(),
+
 	"route.safeplanet.accademy":                    reflect.TypeOf((*controllers.SafePlanetAccademyController)(nil)).Elem(),
 	"route.safeplanet.relax":                       reflect.TypeOf((*controllers.SafePlanetRelaxController)(nil)).Elem(),
 	"route.safeplanet.relax.threecard":             reflect.TypeOf((*controllers.SafePlanetRelaxThreeCardController)(nil)).Elem(),

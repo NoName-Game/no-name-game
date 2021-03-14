@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -23,6 +24,7 @@ type PlayerInventoryItemController struct {
 	Controller
 	Payload struct {
 		Item *pb.Item
+		Quantity int32
 	}
 }
 
@@ -100,11 +102,18 @@ func (c *PlayerInventoryItemController) Validator() (hasErrors bool) {
 		}
 
 		return true
+	case 2:
+		// Quantità
+		quantity, err := strconv.Atoi(c.Update.Message.Text)
+		if err != nil || quantity < 1 || quantity > 50 {
+			return true
+		}
 
+		c.Payload.Quantity = int32(quantity)
 	// ##################################################################################################
 	// Verifico la conferma dell'uso
 	// ##################################################################################################
-	case 2:
+	case 3:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "confirm") {
 			return true
 		}
@@ -179,9 +188,25 @@ func (c *PlayerInventoryItemController) Stage() {
 
 		// Avanzo di stage
 		c.CurrentState.Stage = 1
+	case 1:
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.items.many"))
+		msg.ParseMode = tgbotapi.ModeHTML
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("5"),
+				tgbotapi.NewKeyboardButton("10"),
+				tgbotapi.NewKeyboardButton("20"),
+			),
+			tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back"))),
+		)
+		if _, err := helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		c.CurrentState.Stage = 2
 
 	// In questo stage chiedo conferma al player dell'item che itende usare
-	case 1:
+	case 2:
 		var text string
 
 		text = fmt.Sprintf(
@@ -213,24 +238,50 @@ func (c *PlayerInventoryItemController) Stage() {
 		}
 
 		// Aggiorno stato
-		c.CurrentState.Stage = 2
+		c.CurrentState.Stage = 3
 
 	// In questo stage se l'utente ha confermato continuo con con la richiesta
-	case 2:
+	case 3:
 		// Richiamo il ws per usare l'item selezionato
 		if _, err := config.App.Server.Connection.UseItem(helpers.NewContext(1), &pb.UseItemRequest{
 			PlayerID: c.Player.ID,
 			ItemID:   c.Payload.Item.ID,
+			Quantity: uint32(c.Payload.Quantity),
 		}); err != nil {
-			c.Logger.Panic(err)
+			var msg tgbotapi.MessageConfig
+			if strings.Contains(err.Error(), "item quantity less than zero") {
+				// Invia messaggio
+				msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.items.none"))
+			} else {
+				c.Logger.Panic(err)
+			}
+			if _, err = helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err)
+			}
+			c.CurrentState.Completed = true
+			return
+		}
+
+		var text string
+		text = helpers.Trans(c.Player.Language.Slug, "inventory.items.completed",
+			helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
+		)
+		if c.Payload.Item.GetItemCategory().GetSlug() == "ship_support" {
+			// Riporto le informazioni della nave post item
+			var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+			if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{PlayerID: c.Player.ID}); err != nil {
+				c.Logger.Panic(err)
+			}
+			text += fmt.Sprintf("\n\n🚀 <b>%s</b> (<b>%s</b>) - <b>%s</b>\n🔧 <b>%v%%</b> (%s)\n⛽ <b>%v%%</b> (%s)",
+				rGetPlayerShipEquipped.GetShip().GetName(), strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
+				rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
+				rGetPlayerShipEquipped.GetShip().GetIntegrity(), helpers.Trans(c.Player.Language.Slug, "integrity"),
+				rGetPlayerShipEquipped.GetShip().GetTank(), helpers.Trans(c.Player.Language.Slug, "fuel"),
+			)
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.ChatID,
-			helpers.Trans(c.Player.Language.Slug, "inventory.items.completed",
-				helpers.Trans(c.Player.Language.Slug, "items."+c.Payload.Item.Slug),
-			),
-		)
+		msg := helpers.NewMessage(c.ChatID,text)
 		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
