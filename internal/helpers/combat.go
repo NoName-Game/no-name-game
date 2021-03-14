@@ -140,6 +140,7 @@ func UseItem(player *pb.Player, itemID uint32, MessageID int) (err error) {
 	if _, err = config.App.Server.Connection.UseItem(NewContext(1), &pb.UseItemRequest{
 		PlayerID: player.GetID(),
 		ItemID:   rGetItemByID.GetItem().GetID(),
+		Quantity: 1,
 	}); err != nil {
 		return err
 	}
