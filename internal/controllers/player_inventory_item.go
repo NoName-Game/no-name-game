@@ -194,9 +194,9 @@ func (c *PlayerInventoryItemController) Stage() {
 		msg.ParseMode = tgbotapi.ModeHTML
 		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("1"),
+				tgbotapi.NewKeyboardButton("2"),
 				tgbotapi.NewKeyboardButton("5"),
-				tgbotapi.NewKeyboardButton("10"),
-				tgbotapi.NewKeyboardButton("20"),
 			),
 			tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.back"))),
 		)
