@@ -47,7 +47,8 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 			},
 			BreakerPerStage: map[int32][]string{
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu", "route.breaker.back"},
+				2: {"route.breaker.back"},
+				3: {"route.breaker.back"},
 			},
 		},
 	}) {
