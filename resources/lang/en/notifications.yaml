@@ -13,6 +13,7 @@ notification.activity.route.ship.rests: "⠿ You recovered your energies!"
 notification.level.message: "⠿ <b>Congratulations!</b> You reached level <b>%v</b>!"
 notification.rank.message: "⠿ <b>Congratulations!</b> You reached rank <b>%s</b>!"
 notification.achievement.message: "🎯 Achievement <b>completed</b>!\nYou successfully completed: <b>%s</b>\n<b>Reward</b>:\n💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
+
 #NOTIFICATIONS - TITAN
 notification.titan_drop.message: "☠️ 👁 <b>%s</b> has been defetead! ☠️\n\nYour attacks dealt <b>%v</b> damage!\nThanks to your conribution you obtained:\n%s\n\n"
 notification.titan_drop.base: "💰 <b>%v</b>\n💎 <b>%v</b>\n🏵 <b>%v</b>"
@@ -22,3 +23,9 @@ notification.titan_drop.armor.glove: "🦾 %s (%s)"
 notification.titan_drop.armor.chest: "🥼 %s (%s)"
 notification.titan_drop.armor.boots: "🦿 %s (%s)"
 notification.titan_drop.weapon: "🗡 %s (%s)"
+
+# NOTIFICATIONS - AUCTION
+notification.auction.offer_higher: "⠿ La tua offerta per <b>%s</b> è stata superata, non fartelo scappare!"
+notification.auction.win: "⠿ <b>Complimenti!</b> L'asta <b>#%v</b> è terminata e ti sei aggiudicato la vittoria. Puoi trovare il tuo oggetto nella lista dei tuoi equipaggiamenti."
+notification.auction.close: "⠿ L'asta <b>#%v</b> è terminata e ti sei aggiudicato 💰<b>%v</b> dalla vendita del tuo oggetto."
+

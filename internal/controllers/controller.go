@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/config"
 	"fmt"
+
+	"bitbucket.org/no-name-game/nn-telegram/config"
 	"github.com/sirupsen/logrus"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
