@@ -17,7 +17,7 @@ safeplanet.gift.who: "Inserisci l'username dell'esploratore al quale vuoi regala
 safeplanet.gift.confirm: "Sei sicuro di voler inviare 1 x <b>%s</b> a <b>%s</b>?"
 safeplanet.gift.ok: "🎉 Regalo inviato correttamente."
 safeplanet.gift.ko: "❌ Non è stato possibile inviare il regalo, riporova più tardi."
-safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come ragalo da <b>%s</b>"
+safeplanet.gift.ok_to_reciver: "🎁 Hai ricevuto 1 x <b>%s</b> come regalo da <b>%s</b>"
 
 # ShareHolder
 safeplanet.shareholder.intro: "Benvenuto nel <b>Bazar Intergalattico 🌐</b>\n\nEcco le risorse da noi in vendita!\n"
@@ -44,7 +44,7 @@ safeplanet.market.auctions.banner_offer_auction: "⬇️ Le tue offerte ⬇️"
 
 safeplanet.market.auctions.sell.which_category: "Seleziona la categoria appartenente all'item che vuoi mettere all'asta"
 safeplanet.market.auctions.sell.which_item: "Seleziona l'item da mettere all'asta"
-safeplanet.market.auctions.sell.min_price: "Scrivi il valore minimo dipartenza dell'asta"
+safeplanet.market.auctions.sell.min_price: "Scrivi il valore minimo di partenza dell'asta"
 safeplanet.market.auctions.sell.confirm: "Sei sicuro di voler mettere all'asta <b>%s</b> ad un prezzo base di partenza pari a 💰<b>%v?</b>"
 safeplanet.market.auctions.sell.ok: "L'asta è stata creata con sucesso."
 safeplanet.market.auctions.sell.item_already_in_auction: "L'item selezionato è presente in un'asta."
