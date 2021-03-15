@@ -215,22 +215,32 @@ func (c *PlayerInventoryPackController) Stage() {
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
-		var dropResults string
+
 		// Creo messaggio di recap drop
-		for _, resource := range drops.GetResources() {
-			dropResults += fmt.Sprintf(
-				"- %s %s (<b>%s</b>) %s\n",
-				helpers.GetResourceCategoryIcons(resource.GetResourceCategoryID()),
-				resource.GetName(),
-				strings.ToUpper(resource.GetRarity().GetSlug()),
-				helpers.GetResourceBaseIcons(resource.GetBase()))
-		}
-		if len(drops.GetItems()) > 0 {
-			dropResults += "\n"
-			for _, item := range drops.Items {
-				dropResults += fmt.Sprintf("- <b>%s</b>\n", helpers.Trans(c.Player.Language.Slug, "items."+item.GetSlug()))
+		var dropResults string
+
+		// Aggiungo messaggio diamanti
+		dropResults += fmt.Sprintf("- <b>%v</b> x 💎\n", drops.GetDiamonds())
+
+		// Ciclo risorse estratte
+		for resourceID, quantity := range drops.GetResources() {
+			// Reucupero dettagli item
+			var rGetResourceByID *pb.GetResourceByIDResponse
+			if rGetResourceByID, err = config.App.Server.Connection.GetResourceByID(helpers.NewContext(1), &pb.GetResourceByIDRequest{
+				ID: resourceID,
+			}); err != nil {
+				c.Logger.Panic(err)
 			}
+
+			dropResults += fmt.Sprintf(
+				"- <b>%v</b> x %s %s (<b>%s</b>) %s\n",
+				quantity,
+				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
+				rGetResourceByID.GetResource().GetName(),
+				strings.ToUpper(rGetResourceByID.GetResource().GetRarity().GetSlug()),
+				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()))
 		}
+
 		// Countdown 3-2-1 Drop
 
 		// Invio messaggio

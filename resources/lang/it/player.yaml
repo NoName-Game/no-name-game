@@ -55,8 +55,8 @@ inventory.items.many: "Quanti oggetti vuoi utilizzare?"
 inventory.items.none: "Non possiedi abbastanza oggetti!"
 
 # Packs
-inventory.packs.what: "Ecco i 🎁 <b>Rifornimenti</b> in tuo possesso.\nDesideri usare qualcosa?"
-inventory.packs.completed: "Hai aperto la <b>cassa di rifornimenti</b> ed hai trovato:\n\n%s"
+inventory.packs.what: "Ecco i 🎁 <b>Pacchetti</b> in tuo possesso.\nDesideri usare qualcosa?"
+inventory.packs.completed: "Hai aperto il <b>pacchetto</b> ed hai trovato:\n\n%s"
 
 # PlayerRank
 rank.viaggiatore_locale: "Viaggiatore Locale"
