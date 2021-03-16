@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -401,6 +402,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		// Add recipe message
 		var recipe string
+		var vcCounter, cCounter, uCounter, rCounter, urCounter, lCoutner int32
 		if len(c.Payload.Resources) > 0 {
 			for resourceID, quantity := range c.Payload.Resources {
 				var rGetResourceByID *pb.GetResourceByIDResponse
@@ -417,12 +419,34 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 					rGetResourceByID.GetResource().GetRarity().GetSlug(),
 					helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
 				)
+
+				// Incremento contatori
+				switch rGetResourceByID.GetResource().GetRarityID() {
+				case 1:
+					vcCounter += quantity
+				case 2:
+					cCounter += quantity
+				case 3:
+					uCounter += quantity
+				case 4:
+					rCounter += quantity
+				case 5:
+					urCounter += quantity
+				case 6:
+					lCoutner += quantity
+				}
 			}
 		}
 
 		msgContent := helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.choose_resources",
 			c.Payload.Price,
 			recipe,
+		)
+
+		// Aggiungo contatore rarità
+		msgContent += fmt.Sprintf(
+			"🧾 VC: <b>%v</b> | C: <b>%v</b> | U: <b>%v</b> | R: <b>%v</b> | UR: <b>%v</b> | L: <b>%v</b>\n",
+			vcCounter, cCounter, uCounter, rCounter, urCounter, lCoutner,
 		)
 
 		if c.Payload.ResourceQuantity < 20 {
@@ -574,9 +598,29 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		var endCraftMessage string
 		if rCrafterEnd.GetArmor() != nil {
-			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetArmor().GetName())
+			armorDetails := fmt.Sprintf(
+				"<b>%s</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+				rCrafterEnd.GetArmor().Name,
+				strings.ToUpper(rCrafterEnd.GetArmor().Rarity.Slug),
+				math.Round(rCrafterEnd.GetArmor().Defense),
+				math.Round(rCrafterEnd.GetArmor().Evasion),
+				math.Round(rCrafterEnd.GetArmor().Halving),
+				rCrafterEnd.GetArmor().Rarity.LevelToEuip,
+			)
+
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", armorDetails)
 		} else if rCrafterEnd.GetWeapon() != nil {
-			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetWeapon().GetName())
+			weaponDetails := fmt.Sprintf(
+				"<b>%s</b> (%s) - [%v, %v%%, %v] 🎖%v",
+				rCrafterEnd.GetWeapon().Name,
+				strings.ToUpper(rCrafterEnd.GetWeapon().Rarity.Slug),
+				math.Round(rCrafterEnd.GetWeapon().RawDamage),
+				math.Round(rCrafterEnd.GetWeapon().Precision),
+				rCrafterEnd.GetWeapon().Durability,
+				rCrafterEnd.GetWeapon().Rarity.LevelToEuip,
+			)
+
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", weaponDetails)
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, endCraftMessage)

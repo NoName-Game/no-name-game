@@ -38,7 +38,7 @@ func (c *SafePlanetMissionController) Handle(player *pb.Player, update tgbotapi.
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.clears","route.breaker.continue"},
+				2: {"route.breaker.clears", "route.breaker.continue"},
 			},
 		},
 	}) {
@@ -76,6 +76,18 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 	// In questo stage andremo a verificare lo stato della missione
 	// ##################################################################################################
 	case 2:
+		// Verifico se il player ha deciso di abbandonare la missione
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.leave_mission") {
+			if _, err = config.App.Server.Connection.LeaveMission(helpers.NewContext(1), &pb.LeaveMissionRequest{
+				PlayerID: c.Player.GetID(),
+			}); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Stage = 0
+			return
+		}
+
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
@@ -110,7 +122,7 @@ func (c *SafePlanetMissionController) Validator() (hasErrors bool) {
 						helpers.Trans(c.Player.Language.Slug, "route.breaker.continue"),
 					),
 					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+						helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.leave_mission"),
 					),
 				),
 			)

@@ -100,7 +100,7 @@ func (c *PlayerEquipmentController) Validator() (hasErrors bool) {
 	// Verifico conferma equipaggiamento player
 	// ##################################################################################################
 	case 3:
-		if strings.Contains(c.Update.Message.Text, "🩸") || strings.Contains(c.Update.Message.Text, "🛡") {
+		if strings.Contains(c.Update.Message.Text, "🗡") || strings.Contains(c.Update.Message.Text, "🛡") {
 			return false
 		}
 
@@ -299,7 +299,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armature del player
 				for _, armor := range rGetPlayerArmorsByCategoryID.GetArmors() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+						"\n<b>%s</b> (%s) 🛡 [%v, %v%%, %v%%] 🎖%v",
 						armor.Name,
 						strings.ToUpper(armor.Rarity.Slug),
 						math.Round(armor.Defense),
@@ -310,10 +310,13 @@ func (c *PlayerEquipmentController) Stage() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s (%s) 🛡 🎖%v",
+								"%s (%s) 🛡 [%v, %v%%, %v%%] 🎖%v",
 								// helpers.Trans(c.Player.Language.Slug, "equip"),
 								armor.Name,
 								strings.ToUpper(armor.Rarity.Slug),
+								math.Round(armor.Defense),
+								math.Round(armor.Evasion),
+								math.Round(armor.Halving),
 								armor.Rarity.LevelToEuip,
 							),
 						),
@@ -343,7 +346,7 @@ func (c *PlayerEquipmentController) Stage() {
 				// Ciclo armi player
 				for _, weapon := range rGetPlayerWeapons.GetWeapons() {
 					mainMessage += fmt.Sprintf(
-						"\n<b>(%s)</b> (%s) - [%v, %v%%, %v] 🎖%v",
+						"\n<b>(%s)</b> (%s) 🗡 [%v, %v%%, %v] 🎖%v",
 						weapon.Name,
 						strings.ToUpper(weapon.Rarity.Slug),
 						math.Round(weapon.RawDamage),
@@ -354,10 +357,12 @@ func (c *PlayerEquipmentController) Stage() {
 					keyboardRow := tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
-								"%s (%s) -🩸%v 🎖%v",
+								"%s (%s) 🗡 [%v, %v%%, %v] 🎖%v",
 								weapon.Name,
 								strings.ToUpper(weapon.Rarity.Slug),
 								math.Round(weapon.RawDamage),
+								math.Round(weapon.Precision),
+								weapon.Durability,
 								weapon.Rarity.LevelToEuip,
 							),
 						),
