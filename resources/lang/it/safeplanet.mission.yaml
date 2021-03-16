@@ -6,6 +6,7 @@ safeplanet.mission.check: "Non hai completato la missione in corso.\nCosa vuoi f
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: <b>%v!</b>\n\n<b>🗃 Codice Missione</b>: #M%v\n"
 safeplanet.mission.quotation: "📊 <b>Quotazione (attuale)</b>: +<b>%v</b>💰 +<b>%v</b>💎 +<b>%v</b>Exp\n"
 safeplanet.mission.reward: "<b>Complimenti!</b>\nSei riuscito a completare la missione, guadagnando così:\n +<b>%v!</b>💰\n+<b>%v!</b>💎\n+<b>%v!</b> Exp.\nLa Coalizione ti rigrazia!"
+safeplanet.mission.leave_mission: "🏳 Abbandona Missione"
 
 safeplanet.mission.type.planet_finding: "Trova il pianeta"
 safeplanet.mission.type.planet_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫%s (%v).\n\nBuona fortuna."

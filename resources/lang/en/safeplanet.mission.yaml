@@ -7,6 +7,7 @@ safeplanet.mission.check: "You haven't finished your mission yet.\nWhat would yo
 safeplanet.mission.type: "You have been entrusted with the mission: <b>%v</b>!\n\n<b>🗃 Mission Code</b>: #M%v\n"
 safeplanet.mission.quotation: "📊 <b>Quotazione (attuale)</b>: +<b>%v</b>💰 +<b>%v</b>💎 +<b>%v</b>Exp\n"
 safeplanet.mission.reward: "<b>Congratulations!</b>\nYou successfully completed the mission, earning:\n +<b>%v</b>💰\n+<b>%v</b>💎\n+<b>%v</b> Exp.\nThe Coalition thanks you!"
+safeplanet.mission.leave_mission: "🏳 Leave Mission"
 safeplanet.mission.type.planet_finding: "Find the planet"
 safeplanet.mission.type.planet_finding.description: "🔖 <b>Goal</b>:\nFind and reach the planet 🌏<b>%s</b> in system 💫%s (%v).\n\nGood luck."
 safeplanet.mission.type.planet_finding.description.small: "Find and reach the planet 🌏<b>%s</b> in system 💫%s (%v)"
