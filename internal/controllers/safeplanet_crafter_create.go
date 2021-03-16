@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -574,9 +575,29 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		var endCraftMessage string
 		if rCrafterEnd.GetArmor() != nil {
-			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetArmor().GetName())
+			armorDetails := fmt.Sprintf(
+				"<b>%s</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+				rCrafterEnd.GetArmor().Name,
+				strings.ToUpper(rCrafterEnd.GetArmor().Rarity.Slug),
+				math.Round(rCrafterEnd.GetArmor().Defense),
+				math.Round(rCrafterEnd.GetArmor().Evasion),
+				math.Round(rCrafterEnd.GetArmor().Halving),
+				rCrafterEnd.GetArmor().Rarity.LevelToEuip,
+			)
+
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", armorDetails)
 		} else if rCrafterEnd.GetWeapon() != nil {
-			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", rCrafterEnd.GetWeapon().GetName())
+			weaponDetails := fmt.Sprintf(
+				"<b>%s</b> (%s) - [%v, %v%%, %v] 🎖%v",
+				rCrafterEnd.GetWeapon().Name,
+				strings.ToUpper(rCrafterEnd.GetWeapon().Rarity.Slug),
+				math.Round(rCrafterEnd.GetWeapon().RawDamage),
+				math.Round(rCrafterEnd.GetWeapon().Precision),
+				rCrafterEnd.GetWeapon().Durability,
+				rCrafterEnd.GetWeapon().Rarity.LevelToEuip,
+			)
+
+			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", weaponDetails)
 		}
 
 		msg := helpers.NewMessage(c.Player.ChatID, endCraftMessage)
