@@ -41,6 +41,7 @@ route.planet.domain: "🏴 Dominio"
 # Safe planet
 route.safeplanet.coalition.daily_reward: "📦 Ricompensa giornaliera"
 route.safeplanet.bank: "🏦 Banca"
+route.safeplanet.bank.resources: "📦 Magazzino"
 route.safeplanet.crafter: "🛠 Armaiolo"
 route.safeplanet.crafter.create: "🛠 Realizza"
 route.safeplanet.crafter.repair: "✨ Ripara Arma"
