@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -598,28 +597,10 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		var endCraftMessage string
 		if rCrafterEnd.GetArmor() != nil {
-			armorDetails := fmt.Sprintf(
-				"<b>%s</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
-				rCrafterEnd.GetArmor().Name,
-				strings.ToUpper(rCrafterEnd.GetArmor().Rarity.Slug),
-				math.Round(rCrafterEnd.GetArmor().Defense),
-				math.Round(rCrafterEnd.GetArmor().Evasion),
-				math.Round(rCrafterEnd.GetArmor().Halving),
-				rCrafterEnd.GetArmor().Rarity.LevelToEuip,
-			)
-
+			armorDetails := helpers.ArmorFormatter(rCrafterEnd.GetArmor())
 			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", armorDetails)
 		} else if rCrafterEnd.GetWeapon() != nil {
-			weaponDetails := fmt.Sprintf(
-				"<b>%s</b> (%s) - [%v, %v%%, %v] 🎖%v",
-				rCrafterEnd.GetWeapon().Name,
-				strings.ToUpper(rCrafterEnd.GetWeapon().Rarity.Slug),
-				math.Round(rCrafterEnd.GetWeapon().RawDamage),
-				math.Round(rCrafterEnd.GetWeapon().Precision),
-				rCrafterEnd.GetWeapon().Durability,
-				rCrafterEnd.GetWeapon().Rarity.LevelToEuip,
-			)
-
+			weaponDetails := helpers.WeaponFormatter(rCrafterEnd.GetWeapon())
 			endCraftMessage = helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.craft_completed", weaponDetails)
 		}
 
