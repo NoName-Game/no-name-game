@@ -18,11 +18,27 @@ func SortItemByCategory(inventory []*pb.PlayerInventory) []*pb.PlayerInventory {
 	return inventory
 }
 
+func GetWeaponEfficencyBySlug(efficencySlug string) string {
+	switch efficencySlug {
+	case "fire":
+		return "🔥"
+	case "water":
+		return "💧"
+	case "electric":
+		return "⚡️"
+	case "void":
+		return "🌀"
+	}
+
+	return ""
+}
+
 func WeaponFormatter(weapon *pb.Weapon) string {
 	return fmt.Sprintf(
-		"<b>%s</b> (%s) - [%v, %v%%, %v] 🎖%v",
+		"%s (%s) %s [%v, %v%%, %v] 🎖%v",
 		weapon.Name,
 		strings.ToUpper(weapon.Rarity.Slug),
+		GetWeaponEfficencyBySlug(weapon.Efficency.Slug),
 		math.Round(weapon.RawDamage),
 		math.Round(weapon.Precision),
 		weapon.Durability,
@@ -32,7 +48,7 @@ func WeaponFormatter(weapon *pb.Weapon) string {
 
 func ArmorFormatter(armor *pb.Armor) string {
 	return fmt.Sprintf(
-		"\n<b>%s</b> (%s) - [%v, %v%%, %v%%] 🎖%v",
+		"%s (%s) 🛡 [%v, %v%%, %v%%] 🎖%v",
 		armor.Name,
 		strings.ToUpper(armor.Rarity.Slug),
 		math.Round(armor.Defense),
