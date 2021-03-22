@@ -212,8 +212,8 @@ func (c *SafePlanetMarketGiftController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-				if resource.GetQuantity() > 0 {
+			for i, resource := range rGetPlayerResources.GetPlayerInventory() {
+				if resource.GetQuantity() > 0 && i <= 200 {
 					keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(

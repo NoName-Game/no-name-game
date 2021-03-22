@@ -74,7 +74,7 @@ func main() {
 			logrus.Panic(err)
 		}
 
-		logrus.Infof("[*] Player Titan Drop Notifications found: %d", len(rGetPlayerActivityToNotify.GetPlayerActivities()))
+		logrus.Infof("[*] Player Titan Drop Notifications found: %d", len(rGetTitanDropToNotify.GetTitanDrops()))
 		for _, drops := range rGetTitanDropToNotify.GetTitanDrops() {
 			go handleTitanDropNotification(drops)
 		}
@@ -243,7 +243,7 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 
 	if dropPlus != "" {
 		text += helpers.Trans(playerTitanDrop.GetPlayer().GetLanguage().GetSlug(),
-			"notification.titan_drop.message", dropPlus,
+			"notification.titan_drop.plus", dropPlus,
 		)
 	}
 
