@@ -18,12 +18,8 @@ type SafePlanetResearchController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetResearchController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -39,7 +35,15 @@ func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi
 				0: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetResearchController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

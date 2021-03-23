@@ -25,6 +25,24 @@ type TitanPlanetTackleController struct {
 	}
 }
 
+func (c *TitanPlanetTackleController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
+		Player: player,
+		Update: update,
+		CurrentState: ControllerCurrentState{
+			Controller: "route.titanplanet.tackle",
+			Payload:    &c.Payload,
+		},
+		Configurations: ControllerConfigurations{
+			ControllerBack: ControllerBack{
+				To:        &MenuController{},
+				FromStage: 0,
+			},
+			PlanetType: []string{"titan"},
+		},
+	}
+}
+
 // Settings generali
 var (
 	fightTitanDie = helpers.InlineDataStruct{
@@ -47,21 +65,7 @@ var (
 // ====================================
 func (c *TitanPlanetTackleController) Handle(player *pb.Player, update tgbotapi.Update) {
 	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
-		Player: player,
-		Update: update,
-		CurrentState: ControllerCurrentState{
-			Controller: "route.titanplanet.tackle",
-			Payload:    &c.Payload,
-		},
-		Configurations: ControllerConfigurations{
-			ControllerBack: ControllerBack{
-				To:        &MenuController{},
-				FromStage: 0,
-			},
-			PlanetType: []string{"titan"},
-		},
-	}) {
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

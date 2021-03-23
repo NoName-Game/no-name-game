@@ -27,6 +27,10 @@ type MenuController struct {
 	Payload      interface{}
 }
 
+func (c *MenuController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{}
+}
+
 // ====================================
 // Handle
 // ====================================

@@ -19,12 +19,8 @@ type SafePlanetProtectorsJoinController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetProtectorsJoinController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -42,7 +38,15 @@ func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tg
 				2: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetProtectorsJoinController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

@@ -23,12 +23,8 @@ type SafePlanetRelaxThreeCardController struct {
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetRelaxThreeCardController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetRelaxThreeCardController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -46,7 +42,15 @@ func (c *SafePlanetRelaxThreeCardController) Handle(player *pb.Player, update tg
 				3: {"route.breaker.clears"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetRelaxThreeCardController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

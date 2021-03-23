@@ -18,12 +18,8 @@ type ShipRestsController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *ShipRestsController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -39,8 +35,19 @@ func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) 
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"ship.rests.wakeup",
+			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *ShipRestsController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

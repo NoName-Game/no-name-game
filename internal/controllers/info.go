@@ -13,12 +13,8 @@ type InfoController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *InfoController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *InfoController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -33,7 +29,15 @@ func (c *InfoController) Handle(player *pb.Player, update tgbotapi.Update) {
 				0: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *InfoController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

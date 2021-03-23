@@ -17,12 +17,8 @@ type SafePlanetCoalitionDailyRewardController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetCoalitionDailyRewardController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -35,7 +31,15 @@ func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, upd
 			},
 			PlanetType: []string{"safe"},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetCoalitionDailyRewardController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

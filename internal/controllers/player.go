@@ -14,14 +14,8 @@ type PlayerController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *PlayerController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -36,7 +30,17 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 				0: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

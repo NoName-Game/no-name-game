@@ -14,6 +14,7 @@ import (
 
 // Controller - Intereffaccia base di tutti i controller
 type ControllerInterface interface {
+	Configuration(player *pb.Player, update tgbotapi.Update) Controller
 	Handle(*pb.Player, tgbotapi.Update)
 	Validator() bool
 	Stage()
@@ -47,11 +48,12 @@ type ControllerCurrentState struct {
 }
 
 type ControllerConfigurations struct {
-	CustomBreaker     []string
-	ControllerBlocked []string
-	ControllerBack    ControllerBack
-	PlanetType        []string
-	BreakerPerStage   map[int32][]string
+	CustomBreaker      []string
+	ControllerBlocked  []string
+	ControllerBack     ControllerBack
+	PlanetType         []string
+	BreakerPerStage    map[int32][]string
+	AllowedControllers []string
 }
 
 type ControllerBack struct {

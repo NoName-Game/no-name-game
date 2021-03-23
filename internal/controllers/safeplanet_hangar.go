@@ -17,14 +17,8 @@ type SafePlanetHangarController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetHangarController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -40,7 +34,17 @@ func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.U
 				0: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetHangarController) Handle(player *pb.Player, update tgbotapi.Update) {
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

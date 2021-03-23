@@ -24,12 +24,8 @@ type DarkMerchantController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *DarkMerchantController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -46,10 +42,18 @@ func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Updat
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.back"},
 				2: {"route.breaker.clears"},
-				3: {"route.breaker.clears","route.breaker.menu"},
+				3: {"route.breaker.clears", "route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *DarkMerchantController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

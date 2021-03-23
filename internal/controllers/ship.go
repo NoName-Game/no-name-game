@@ -20,15 +20,8 @@ type ShipController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Inizializzo variabili del controler
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *ShipController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -43,8 +36,23 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.ship.rests",
+				"route.ship.travel",
+			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Inizializzo variabili del controler
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
