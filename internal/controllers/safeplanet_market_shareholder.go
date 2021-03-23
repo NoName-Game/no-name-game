@@ -299,6 +299,10 @@ func (c *SafePlanetMarketShareHolderController) Stage() {
 				msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.shareholder.error_no_money"))
 			} else if strings.Contains(err.Error(), "item quantity less than zero") || strings.Contains(err.Error(), "no resource") {
 				msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safaplanet.shareholder.error_no_resources"))
+			} else if strings.Contains(err.Error(), "inventory full") {
+				msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.inventory_full"))
+			} else {
+				c.Logger.Panic(err)
 			}
 			if _, err = helpers.SendMessage(msg); err != nil {
 				c.Logger.Panic(err)

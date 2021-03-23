@@ -291,7 +291,11 @@ func (c *SafePlanetResourceBankController) Stage() {
 				PlayerID:   c.Player.ID,
 				Quantity:   int32(value),
 			}); err != nil {
-				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.resource.transaction_error")
+				if strings.Contains(err.Error(), "inventory full") {
+					text = helpers.Trans(c.Player.Language.Slug, "inventory.inventory_full")
+				} else {
+					text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.resource.transaction_error")
+				}
 			}
 		case "withdraws":
 			if _, err = config.App.Server.Connection.WithdrawResource(helpers.NewContext(1), &pb.WithdrawResourceRequest{
@@ -299,7 +303,11 @@ func (c *SafePlanetResourceBankController) Stage() {
 				PlayerID:   c.Player.ID,
 				Quantity:   int32(value),
 			}); err != nil {
-				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.resource.transaction_error")
+				if strings.Contains(err.Error(), "inventory full") {
+					text = helpers.Trans(c.Player.Language.Slug, "inventory.inventory_full")
+				} else {
+					text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.resource.transaction_error")
+				}
 			}
 		}
 
