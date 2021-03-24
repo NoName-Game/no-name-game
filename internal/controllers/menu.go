@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -106,7 +105,8 @@ func (c *MenuController) GetRecap(currentPosition *pb.Planet) (message string) {
 		}
 
 		// Menu se il player si trova in viaggio
-	} else if c.CheckInTravel() {
+	} else if intTravel, destinationPlanet := c.CheckInTravel(); intTravel {
+		c.TravelPlanet = destinationPlanet
 		message += helpers.Trans(c.Player.Language.Slug, "menu.travel",
 			currentPosition.GetName(),
 			c.TravelPlanet.GetName(),
@@ -152,33 +152,6 @@ func (c *MenuController) CheckInTitanPlanet(position *pb.Planet) bool {
 	}
 
 	return inPlanet
-}
-
-// CheckInTravel
-// Verifico se il player sta effettuando un viaggio
-func (c *MenuController) CheckInTravel() bool {
-	type travelDataStruct struct {
-		PlanetID uint32
-	}
-
-	// Verifico se il player si trova in viaggio
-	var travelData travelDataStruct
-	for _, activity := range c.Data.PlayerActiveStates {
-		if activity.Controller == "route.ship.travel.finding" {
-			_ = json.Unmarshal([]byte(activity.Payload), &travelData)
-
-			// Recupero pianeta che si vuole raggiungere
-			var rGetPlanetByID *pb.GetPlanetByIDResponse
-			rGetPlanetByID, _ = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
-				PlanetID: travelData.PlanetID,
-			})
-
-			c.TravelPlanet = rGetPlanetByID.GetPlanet()
-			return true
-		}
-	}
-
-	return false
 }
 
 // GetPlayerLife
