@@ -22,12 +22,8 @@ type SafePlanetCrafterDecomposeController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetCrafterDecomposeController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetCrafterDecomposeController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -47,7 +43,15 @@ func (c *SafePlanetCrafterDecomposeController) Handle(player *pb.Player, update 
 				3: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetCrafterDecomposeController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

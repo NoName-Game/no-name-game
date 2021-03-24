@@ -18,14 +18,8 @@ type PlanetDomainController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlanetDomainController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *PlanetDomainController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -41,7 +35,17 @@ func (c *PlanetDomainController) Handle(player *pb.Player, update tgbotapi.Updat
 				0: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlanetDomainController) Handle(player *pb.Player, update tgbotapi.Update) {
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

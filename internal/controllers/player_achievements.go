@@ -21,12 +21,8 @@ type PlayerAchievementsController struct {
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerAchievementsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *PlayerAchievementsController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -39,10 +35,18 @@ func (c *PlayerAchievementsController) Handle(player *pb.Player, update tgbotapi
 				FromStage: 0,
 			},
 			BreakerPerStage: map[int32][]string{
-				1: {"route.breaker.menu","route.breaker.back"},
+				1: {"route.breaker.menu", "route.breaker.back"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerAchievementsController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

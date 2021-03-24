@@ -34,20 +34,8 @@ type HuntingController struct {
 	Enemy *pb.Enemy
 }
 
-// ====================================
-// HuntingController - Settings
-// ====================================
-var (
-	// Parti di corpo disponibili per l'attacco
-	bodyParts = [4]string{"helmet", "chest", "glove", "boots"}
-)
-
-// ====================================
-// Handle
-// ====================================
-func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *HuntingController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -62,7 +50,23 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 			},
 			PlanetType: []string{"default", "titan"},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// HuntingController - Settings
+// ====================================
+var (
+	// Parti di corpo disponibili per l'attacco
+	bodyParts = [4]string{"helmet", "chest", "glove", "boots"}
+)
+
+// ====================================
+// Handle
+// ====================================
+func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -617,7 +621,7 @@ func (c *HuntingController) Hit(enemy *pb.Enemy, planetMap *pb.PlanetMap, inline
 func (c *HuntingController) PlayerDie(rHitEnemy *pb.HitEnemyResponse) {
 	var moneyLost int32 = 0
 	if rHitEnemy.GetEnemyDrop().GetTransaction() != nil {
-		moneyLost = rHitEnemy.GetEnemyDrop().GetTransaction().GetValue()*-1
+		moneyLost = rHitEnemy.GetEnemyDrop().GetTransaction().GetValue() * -1
 	}
 	// Aggiorno messaggio notificando al player che è morto
 	playerDieMessage := helpers.NewEditMessage(

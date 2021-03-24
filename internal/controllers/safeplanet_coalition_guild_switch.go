@@ -13,17 +13,13 @@ import (
 type SafePlanetProtectorsSwitchController struct {
 	Payload struct {
 		Visibility bool
-		GuildID uint32
+		GuildID    uint32
 	}
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetProtectorsSwitchController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetProtectorsSwitchController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -40,7 +36,15 @@ func (c *SafePlanetProtectorsSwitchController) Handle(player *pb.Player, update 
 				1: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetProtectorsSwitchController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -144,7 +148,7 @@ func (c *SafePlanetProtectorsSwitchController) Stage() {
 		// Recuero gilda corrente
 		if _, err = config.App.Server.Connection.ChangeGuildVisibility(helpers.NewContext(1), &pb.ChangeVisibilityGuildRequest{
 			Visibility: !c.Payload.Visibility,
-			GuildID: c.Payload.GuildID,
+			GuildID:    c.Payload.GuildID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
