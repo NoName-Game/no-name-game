@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -451,4 +452,31 @@ func (c *Controller) CheckInDarkMerchantPlanet(position *pb.Planet) (inDarkMerch
 // Verifico se il player si trova su un pianeta sicuro
 func (c *Controller) CheckInSafePlanet(position *pb.Planet) bool {
 	return position.GetSafe()
+}
+
+// CheckInTravel
+// Verifico se il player sta effettuando un viaggio
+func (c *Controller) CheckInTravel() (inTravel bool, destinationPlanet *pb.Planet) {
+	type travelDataStruct struct {
+		PlanetID uint32
+	}
+
+	// Verifico se il player si trova in viaggio
+	var travelData travelDataStruct
+	for _, activity := range c.Data.PlayerActiveStates {
+		if activity.Controller == "route.ship.travel.finding" {
+			_ = json.Unmarshal([]byte(activity.Payload), &travelData)
+
+			// Recupero pianeta che si vuole raggiungere
+			var rGetPlanetByID *pb.GetPlanetByIDResponse
+			rGetPlanetByID, _ = config.App.Server.Connection.GetPlanetByID(helpers.NewContext(1), &pb.GetPlanetByIDRequest{
+				PlanetID: travelData.PlanetID,
+			})
+
+			// c.TravelPlanet = rGetPlanetByID.GetPlanet()
+			return true, rGetPlanetByID.GetPlanet()
+		}
+	}
+
+	return false, nil
 }
