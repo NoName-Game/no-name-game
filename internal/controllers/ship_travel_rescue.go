@@ -22,12 +22,8 @@ type ShipTravelRescueController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *ShipTravelRescueController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -43,10 +39,18 @@ func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.U
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.clears","route.breaker.menu"},
+				2: {"route.breaker.clears", "route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -69,13 +73,13 @@ func (c *ShipTravelRescueController) Handle(player *pb.Player, update tgbotapi.U
 func (c *ShipTravelRescueController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	case 0:
-	// ##################################################################################################
-	// Verifico che la nave equipaggiata non sia in riparazione
-	// ##################################################################################################
+		// ##################################################################################################
+		// Verifico che la nave equipaggiata non sia in riparazione
+		// ##################################################################################################
 		for _, state := range c.Data.PlayerActiveStates {
 			if state.GetController() == "route.ship.travel.finding" {
-					c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
-					return true
+				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.controller.blocked")
+				return true
 			}
 		}
 	// ##################################################################################################

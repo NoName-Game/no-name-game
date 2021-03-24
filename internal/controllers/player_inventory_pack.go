@@ -26,12 +26,8 @@ type PlayerInventoryPackController struct {
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerInventoryPackController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *PlayerInventoryPackController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -49,7 +45,15 @@ func (c *PlayerInventoryPackController) Handle(player *pb.Player, update tgbotap
 				2: {"route.breaker.menu", "route.breaker.back"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerInventoryPackController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

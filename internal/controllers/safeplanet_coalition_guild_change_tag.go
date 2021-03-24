@@ -19,12 +19,8 @@ type SafePlanetProtectorsChangeTagController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetProtectorsChangeTagController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetProtectorsChangeTagController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -43,7 +39,15 @@ func (c *SafePlanetProtectorsChangeTagController) Handle(player *pb.Player, upda
 				2: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetProtectorsChangeTagController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

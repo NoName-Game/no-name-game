@@ -23,12 +23,8 @@ type SafePlanetHangarShipsController struct {
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetHangarShipsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetHangarShipsController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -48,7 +44,15 @@ func (c *SafePlanetHangarShipsController) Handle(player *pb.Player, update tgbot
 				3: {"route.breaker.back"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetHangarShipsController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

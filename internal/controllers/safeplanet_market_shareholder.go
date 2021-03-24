@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"strconv"
-	"strings"
 )
 
 // ====================================
@@ -15,21 +16,17 @@ import (
 // ====================================
 type SafePlanetMarketShareHolderController struct {
 	Payload struct {
-		ActionID uint32
+		ActionID   uint32
 		ResourceID uint32
-		SystemID uint32
-		Quantity int32
-		Action   string // BUY SELL
+		SystemID   uint32
+		Quantity   int32
+		Action     string // BUY SELL
 	}
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetMarketShareHolderController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetMarketShareHolderController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -45,12 +42,20 @@ func (c *SafePlanetMarketShareHolderController) Handle(player *pb.Player, update
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.back","route.breaker.menu","route.breaker.clears"},
-				3: {"route.breaker.back","route.breaker.menu","route.breaker.clears"},
-				4: {"route.breaker.menu","route.breaker.clears"},
+				2: {"route.breaker.back", "route.breaker.menu", "route.breaker.clears"},
+				3: {"route.breaker.back", "route.breaker.menu", "route.breaker.clears"},
+				4: {"route.breaker.menu", "route.breaker.clears"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetMarketShareHolderController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -121,7 +126,7 @@ func (c *SafePlanetMarketShareHolderController) Validator() (hasErrors bool) {
 		if rGetActionByID, err = config.App.Server.Connection.GetActionByID(helpers.NewContext(1), &pb.GetActionByIDRequest{ID: c.Payload.ActionID}); err != nil {
 			c.Logger.Panic(err)
 		}
-		if rGetActionByID.GetQuantity() < c.Payload.Quantity  && c.Payload.Action == "buy" {
+		if rGetActionByID.GetQuantity() < c.Payload.Quantity && c.Payload.Action == "buy" {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "safeplanet.shareholder.error_no_resources_left")
 			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -185,7 +190,7 @@ func (c *SafePlanetMarketShareHolderController) Stage() {
 			} else {
 				trend = "🔻"
 			}
-			text += fmt.Sprintf("%s <code>%d x %s (%s) ~%d</code> %s\n", avaible,rGetActionByID.GetQuantity(), action.Resource.GetName(), action.GetResource().GetRarity().GetSlug(), rGetActionByID.GetCurrentValue(), trend)
+			text += fmt.Sprintf("%s <code>%d x %s (%s) ~%d</code> %s\n", avaible, rGetActionByID.GetQuantity(), action.Resource.GetName(), action.GetResource().GetRarity().GetSlug(), rGetActionByID.GetCurrentValue(), trend)
 			keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(action.GetResource().GetName())))
 		}
 
@@ -258,7 +263,7 @@ func (c *SafePlanetMarketShareHolderController) Stage() {
 		if rGetBidInfo, err = config.App.Server.Connection.GetBidInfo(helpers.NewContext(1), &pb.GetBidInfoRequest{
 			ActionID: c.Payload.ActionID,
 			Quantity: c.Payload.Quantity,
-			Type: t,
+			Type:     t,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

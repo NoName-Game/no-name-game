@@ -16,12 +16,8 @@ type SafePlanetTitanController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetTitanController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -38,7 +34,15 @@ func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Up
 				1: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetTitanController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
