@@ -31,6 +31,12 @@ func (c *PlayerPartyController) Configuration(player *pb.Player, update tgbotapi
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.player.party.leave",
+				"route.player.party.add_player",
+				"route.player.party.remove_player",
+				"route.player.party.create",
+			},
 		},
 	}
 }

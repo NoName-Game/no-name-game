@@ -31,6 +31,11 @@ func (c *SafePlanetMarketAuctionsController) Configuration(player *pb.Player, up
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.market.auctions.buy",
+				"route.safeplanet.market.auctions.sell",
+				"route.safeplanet.market.auctions.my_auction",
+			},
 		},
 	}
 }

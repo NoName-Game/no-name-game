@@ -34,6 +34,12 @@ func (c *PlanetController) Configuration(player *pb.Player, update tgbotapi.Upda
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.planet.conqueror",
+				"route.planet.domain",
+				"route.planet.bookmark.add",
+				"route.planet.bookmark.remove",
+			},
 		},
 	}
 }

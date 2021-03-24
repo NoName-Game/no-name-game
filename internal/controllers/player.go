@@ -29,6 +29,13 @@ func (c *PlayerController) Configuration(player *pb.Player, update tgbotapi.Upda
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.player.inventory",
+				"route.player.inventory.equip",
+				"route.player.guild",
+				"route.player.party",
+				"route.player.achievements",
+			},
 		},
 	}
 }

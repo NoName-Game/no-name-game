@@ -33,6 +33,11 @@ func (c *SafePlanetHangarController) Configuration(player *pb.Player, update tgb
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.hangar.ships",
+				"route.safeplanet.hangar.repair",
+				"route.safeplanet.hangar.create",
+			},
 		},
 	}
 }

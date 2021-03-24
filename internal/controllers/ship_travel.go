@@ -37,6 +37,13 @@ func (c *ShipTravelController) Configuration(player *pb.Player, update tgbotapi.
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.ship.travel.finding",
+				"ship.travel.land",
+				"route.ship.travel.favorite",
+				"route.ship.travel.manual",
+				"route.ship.travel.rescue",
+			},
 		},
 	}
 }

@@ -14,39 +14,18 @@ type InfoController struct {
 }
 
 func (c *InfoController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
-	return Controller{
-		Player: player,
-		Update: update,
-		CurrentState: ControllerCurrentState{
-			Controller: "route.info",
-		},
-		Configurations: ControllerConfigurations{
-			ControllerBack: ControllerBack{
-				To:        &MenuController{},
-				FromStage: 0,
-			},
-			BreakerPerStage: map[int32][]string{
-				0: {"route.breaker.menu"},
-			},
-		},
-	}
+	return Controller{}
 }
 
 // ====================================
 // Handle
 // ====================================
 func (c *InfoController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(c.Configuration(player, update)) {
-		return
-	}
-
-	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "info"))
+	msg := helpers.NewMessage(player.ChatID, helpers.Trans(player.Language.Slug, "info"))
 	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err := helpers.SendMessage(msg); err != nil {
 		c.Logger.Panic(err)
 	}
-	new(MenuController).Handle(c.Player, c.Update)
 }
 
 func (c *InfoController) Validator() bool {

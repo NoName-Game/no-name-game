@@ -39,6 +39,7 @@ func (c *ShipController) Configuration(player *pb.Player, update tgbotapi.Update
 			AllowedControllers: []string{
 				"route.ship.rests",
 				"route.ship.travel",
+				"route.ship.laboratory",
 			},
 		},
 	}

@@ -29,6 +29,16 @@ func (c *SafePlanetCoalitionController) Configuration(player *pb.Player, update 
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.coalition.daily_reward",
+				"route.safeplanet.coalition.mission",
+				"route.safeplanet.coalition.titan",
+				"route.safeplanet.coalition.expansion",
+				"route.safeplanet.coalition.research",
+				"route.safeplanet.coalition.protectors",
+				"route.safeplanet.coalition.statistics",
+				"route.info",
+			},
 		},
 	}
 }

@@ -151,10 +151,10 @@ func Routing(player *pb.Player, update tgbotapi.Update) {
 		cachedRoute := getRoute(cachedRouteString)
 
 		// Verifico se viene richiamato un nuovo metodo
-		isRoute2, calledRoute := isRoutes(player.Language.Slug, callingRoute)
+		calledIsRoute, calledRoute := isRoutes(player.Language.Slug, callingRoute)
 
 		// Verifico se nella cached route è permesso chimare il nuovo metodo
-		if cachedRoute.Route != "" && isRoute2 && cachedRoute.Route != calledRoute.Route {
+		if cachedRoute.Route != "" && calledIsRoute && cachedRoute.Route != calledRoute.Route {
 			// Recupero configurazione controller
 			config := cachedRoute.Controller.Configuration(player, update)
 			for _, allowed := range config.Configurations.AllowedControllers {

@@ -29,6 +29,11 @@ func (c *SafePlanetCrafterController) Configuration(player *pb.Player, update tg
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.crafter.create",
+				"route.safeplanet.crafter.repair",
+				"route.safeplanet.crafter.decompose",
+			},
 		},
 	}
 }

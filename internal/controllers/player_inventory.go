@@ -28,6 +28,11 @@ func (c *PlayerInventoryController) Configuration(player *pb.Player, update tgbo
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.player.inventory.resources",
+				"route.player.inventory.items",
+				"route.player.inventory.packs",
+			},
 		},
 	}
 }

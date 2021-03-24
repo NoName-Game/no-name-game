@@ -34,6 +34,9 @@ func (c *SafePlanetResearchController) Configuration(player *pb.Player, update t
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.coalition.research.donation",
+			},
 		},
 	}
 }

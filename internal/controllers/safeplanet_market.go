@@ -29,6 +29,12 @@ func (c *SafePlanetMarketController) Configuration(player *pb.Player, update tgb
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.market.dealer",
+				"route.safeplanet.market.gift",
+				"route.safeplanet.market.shareholder",
+				"route.safeplanet.market.auctions",
+			},
 		},
 	}
 }

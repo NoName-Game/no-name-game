@@ -29,6 +29,9 @@ func (c *SafePlanetRelaxController) Configuration(player *pb.Player, update tgbo
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.relax.threecard",
+			},
 		},
 	}
 }
