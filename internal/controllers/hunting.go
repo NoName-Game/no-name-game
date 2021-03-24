@@ -49,6 +49,9 @@ func (c *HuntingController) Configuration(player *pb.Player, update tgbotapi.Upd
 				FromStage: 0,
 			},
 			PlanetType: []string{"default", "titan"},
+			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.clears"},
+			},
 		},
 	}
 }
@@ -97,11 +100,21 @@ func (c *HuntingController) Handle(player *pb.Player, update tgbotapi.Update) {
 func (c *HuntingController) Validator() (hasErrors bool) {
 	switch c.CurrentState.Stage {
 	case 0:
-		// ##################################################################################################
 		// Verifico che sul pianeta non ci sia un titano
-		// ##################################################################################################
 		if inTitanPlanet, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition); inTitanPlanet {
 			c.CurrentState.Completed = true
+		}
+
+		// Verifico che il player non sia in viaggio
+		if inTravel, _ := c.CheckInTravel(); inTravel {
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					),
+				),
+			)
+			return true
 		}
 	}
 

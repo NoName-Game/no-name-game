@@ -37,6 +37,7 @@ func (c *ExplorationController) Configuration(player *pb.Player, update tgbotapi
 			},
 			PlanetType: []string{"default", "titan"},
 			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.clears"},
 				1: {"route.breaker.menu"},
 				2: {"exploration.breaker.continue"},
 			},
@@ -79,6 +80,25 @@ func (c *ExplorationController) Validator() (hasErrors bool) {
 		// ##################################################################################################
 		if inTitanPlanet, _ := c.CheckInTitanPlanet(c.Data.PlayerCurrentPosition); inTitanPlanet {
 			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.titan_in_planet")
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					),
+				),
+			)
+			return true
+		}
+
+		// Verifico che il player non sia in viaggio
+		if inTravel, _ := c.CheckInTravel(); inTravel {
+			c.Validation.ReplyKeyboard = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.clears"),
+					),
+				),
+			)
 			return true
 		}
 
