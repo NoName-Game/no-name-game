@@ -25,6 +25,12 @@ func (c *TutorialController) Configuration(player *pb.Player, update tgbotapi.Up
 		CurrentState: ControllerCurrentState{
 			Controller: "route.tutorial",
 		},
+		Configurations: ControllerConfigurations{
+			AllowedControllers: []string{
+				"route.exploration",
+				"route.ship.travel.finding",
+			},
+		},
 	}
 }
 
