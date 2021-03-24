@@ -273,13 +273,20 @@ func (c *ExplorationController) Stage() {
 				c.Logger.Panic(err)
 			}
 
+			// Verifico se se la risorsa ha bonus
+			var bonus string
+			if dropResult.GetBonus() {
+				bonus = helpers.Trans(c.Player.Language.Slug, "exploration.extraction_resource_duplicated")
+			}
+
 			// Aggiungo dettaglio risorsa
-			cycleResourcesMessage += fmt.Sprintf("%s <b>%v</b> x <b>%s</b> (%s) %s\n",
+			cycleResourcesMessage += fmt.Sprintf("%s <b>%v</b> x <b>%s</b> (%s) %s %s\n",
 				helpers.GetResourceCategoryIcons(rGetResourceByID.GetResource().GetResourceCategoryID()),
 				dropResult.GetQuantity(),
 				rGetResourceByID.GetResource().GetName(),
 				rGetResourceByID.GetResource().GetRarity().GetSlug(),
 				helpers.GetResourceBaseIcons(rGetResourceByID.GetResource().GetBase()),
+				bonus,
 			)
 		}
 
