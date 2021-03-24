@@ -15,14 +15,8 @@ type SafePlanetMarketAuctionsController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetMarketAuctionsController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -37,8 +31,23 @@ func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tg
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.market.auctions.buy",
+				"route.safeplanet.market.auctions.sell",
+				"route.safeplanet.market.auctions.my_auction",
+			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetMarketAuctionsController) Handle(player *pb.Player, update tgbotapi.Update) {
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

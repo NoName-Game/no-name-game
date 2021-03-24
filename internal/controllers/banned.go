@@ -13,12 +13,8 @@ type BannedController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *BannedController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -30,7 +26,15 @@ func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
 				FromStage: 0,
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *BannedController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

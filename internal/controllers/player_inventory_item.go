@@ -23,17 +23,13 @@ import (
 type PlayerInventoryItemController struct {
 	Controller
 	Payload struct {
-		Item *pb.Item
+		Item     *pb.Item
 		Quantity int32
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *PlayerInventoryItemController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -51,7 +47,15 @@ func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotap
 				3: {"route.breaker.back"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerInventoryItemController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -282,7 +286,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		}
 
 		// Invio messaggio
-		msg := helpers.NewMessage(c.ChatID,text)
+		msg := helpers.NewMessage(c.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)

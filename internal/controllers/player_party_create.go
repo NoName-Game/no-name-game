@@ -14,12 +14,8 @@ type PlayerPartyCreateController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerPartyCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *PlayerPartyCreateController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -31,7 +27,15 @@ func (c *PlayerPartyCreateController) Handle(player *pb.Player, update tgbotapi.
 				FromStage: 0,
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerPartyCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

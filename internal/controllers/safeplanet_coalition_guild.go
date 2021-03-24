@@ -14,12 +14,8 @@ type SafePlanetProtectorsController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *SafePlanetProtectorsController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -34,8 +30,27 @@ func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbota
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.safeplanet.coalition.protectors.create",
+				"route.safeplanet.coalition.protectors.join",
+				"route.safeplanet.coalition.protectors.leave",
+				"route.safeplanet.coalition.protectors.add_player",
+				"route.safeplanet.coalition.protectors.remove_player",
+				"route.safeplanet.coalition.protectors.change_leader",
+				"route.safeplanet.coalition.protectors.switch",
+				"route.safeplanet.coalition.protectors.change_name",
+				"route.safeplanet.coalition.protectors.change_tag",
+			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetProtectorsController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

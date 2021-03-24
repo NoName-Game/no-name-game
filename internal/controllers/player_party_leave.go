@@ -17,12 +17,8 @@ type PlayerPartyLeaveController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlayerPartyLeaveController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *PlayerPartyLeaveController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -38,7 +34,15 @@ func (c *PlayerPartyLeaveController) Handle(player *pb.Player, update tgbotapi.U
 				1: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlayerPartyLeaveController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

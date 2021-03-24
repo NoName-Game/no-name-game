@@ -25,12 +25,8 @@ type ShipTravelManualController struct {
 	}
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *ShipTravelManualController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -46,11 +42,19 @@ func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.U
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu","route.breaker.continue"},
+				2: {"route.breaker.menu", "route.breaker.continue"},
 				3: {"route.breaker.continue"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *ShipTravelManualController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -132,9 +136,9 @@ func (c *ShipTravelManualController) Validator() (hasErrors bool) {
 
 	switch c.CurrentState.Stage {
 	case 0:
-	// ##################################################################################################
-	// Verifico che la nave equipaggiata non sia in riparazione
-	// ##################################################################################################
+		// ##################################################################################################
+		// Verifico che la nave equipaggiata non sia in riparazione
+		// ##################################################################################################
 		for _, state := range c.Data.PlayerActiveStates {
 			if state.GetController() == "route.safeplanet.hangar.repair" {
 				var repairingData struct {
@@ -165,12 +169,12 @@ func (c *ShipTravelManualController) Validator() (hasErrors bool) {
 			PlayerID:   c.Player.GetID(),
 			Coordinate: c.Update.Message.Text,
 		}); err != nil {
-			if strings.Contains(err.Error(),"player rank below player system id") {
+			if strings.Contains(err.Error(), "player rank below player system id") {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "ship.error.rank")
 			} else {
 				c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "validator.not_valid")
 			}
-			
+
 			return true
 		}
 	}

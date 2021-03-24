@@ -21,12 +21,8 @@ type ExplorationController struct {
 	ExplorationTypeChoiched string // Esplorazione scelta dall'utente
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *ExplorationController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -45,7 +41,15 @@ func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update
 				2: {"exploration.breaker.continue"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *ExplorationController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

@@ -30,12 +30,8 @@ type SafePlanetCrafterCreateController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetCrafterCreateController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -51,14 +47,22 @@ func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgb
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
-				2: {"route.breaker.menu"},
+				2: {"route.breaker.menu", "route.breaker.clears"},
 				3: {"route.breaker.back", "route.breaker.clears"},
 				4: {"route.breaker.menu", "route.breaker.clears"},
 				5: {"route.breaker.menu", "route.breaker.clears"},
 				6: {"route.breaker.continue"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetCrafterCreateController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -366,8 +370,8 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}
 
 		// Inserisco lista delle risorse
-		for _, resource := range playerResources {
-			if c.Payload.Resources[resource.ResourceID] <= resource.Quantity {
+		for i, resource := range playerResources {
+			if c.Payload.Resources[resource.ResourceID] <= resource.Quantity && i <= 200 {
 				// Verifico se la quantità disponibile sia sopra allo 0
 				availabeQuantity := resource.Quantity - c.Payload.Resources[resource.ResourceID]
 				if availabeQuantity > 0 {

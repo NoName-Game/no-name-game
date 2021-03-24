@@ -18,14 +18,8 @@ type PlanetController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
-	var err error
-
-	// Init Controller
-	if !c.InitController(Controller{
+func (c *PlanetController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -40,8 +34,24 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 			BreakerPerStage: map[int32][]string{
 				0: {"route.breaker.menu"},
 			},
+			AllowedControllers: []string{
+				"route.planet.conqueror",
+				"route.planet.domain",
+				"route.planet.bookmark.add",
+				"route.planet.bookmark.remove",
+			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
+	var err error
+
+	// Init Controller
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 

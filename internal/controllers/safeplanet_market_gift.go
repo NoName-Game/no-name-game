@@ -24,12 +24,8 @@ type SafePlanetMarketGiftController struct {
 	Controller
 }
 
-// ====================================
-// Handle
-// ====================================
-func (c *SafePlanetMarketGiftController) Handle(player *pb.Player, update tgbotapi.Update) {
-	// Verifico se è impossibile inizializzare
-	if !c.InitController(Controller{
+func (c *SafePlanetMarketGiftController) Configuration(player *pb.Player, update tgbotapi.Update) Controller {
+	return Controller{
 		Player: player,
 		Update: update,
 		CurrentState: ControllerCurrentState{
@@ -50,7 +46,15 @@ func (c *SafePlanetMarketGiftController) Handle(player *pb.Player, update tgbota
 				4: {"route.breaker.menu"},
 			},
 		},
-	}) {
+	}
+}
+
+// ====================================
+// Handle
+// ====================================
+func (c *SafePlanetMarketGiftController) Handle(player *pb.Player, update tgbotapi.Update) {
+	// Verifico se è impossibile inizializzare
+	if !c.InitController(c.Configuration(player, update)) {
 		return
 	}
 
@@ -212,8 +216,8 @@ func (c *SafePlanetMarketGiftController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-				if resource.GetQuantity() > 0 {
+			for i, resource := range rGetPlayerResources.GetPlayerInventory() {
+				if resource.GetQuantity() > 0 && i <= 200 {
 					keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 						tgbotapi.NewKeyboardButton(
 							fmt.Sprintf(
