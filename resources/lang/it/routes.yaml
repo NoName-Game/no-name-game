@@ -66,6 +66,8 @@ route.safeplanet.market.auctions.my_auction: "🧾 Le tue aste"
 # Coalition
 route.safeplanet.coalition: "💈 Coalizione"
 route.safeplanet.coalition.mission: "🏢 Centro Missioni"
+route.safeplanet.coalition.mission.search: "🔖 Cerca Missione"
+route.safeplanet.coalition.mission.complete: "🔖 Completa Missione"
 route.safeplanet.coalition.titan: "👁 Titani"
 route.safeplanet.coalition.expansion: "💫 Espansione"
 route.safeplanet.coalition.research: "🔬 Ricerca"

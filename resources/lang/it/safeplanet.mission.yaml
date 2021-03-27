@@ -1,21 +1,29 @@
 # Mission
-safeplanet.mission.info: "Benvenuto nel centro <b>missioni</b>.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: Al completamento di una di queste verrai ricompensato a dovere."
+safeplanet.mission.info: "Benvenuto nel centro 🏢 <b>Centro Missioni</b>.\nAbbiamo un'infinità di missioni da affidarti.\n\n📖: <i>Al completamento di una di queste potrai ricevere monete, esperienza e se davvero complessa anche diamanti.</i>"
 safeplanet.mission.start: "Avvia Missione"
 safeplanet.mission.check_nomission: "Sembra ci siano stati dei problemi con la missione."
 safeplanet.mission.check: "Non hai completato la missione in corso.\nCosa vuoi fare?"
 safeplanet.mission.type: "Sei stato affidato ad una missione di tipo: <b>%v!</b>\n\n<b>🗃 Codice Missione</b>: #M%v\n"
-safeplanet.mission.quotation: "📊 <b>Quotazione (attuale)</b>: +<b>%v</b>💰 +<b>%v</b>💎 +<b>%v</b>Exp\n"
-safeplanet.mission.reward: "<b>Complimenti!</b>\nSei riuscito a completare la missione, guadagnando così:\n +<b>%v!</b>💰\n+<b>%v!</b>💎\n+<b>%v!</b> Exp.\nLa Coalizione ti rigrazia!"
+safeplanet.mission.quotation: "📊 <b>Quotazione (attuale)</b>: %s\n"
+safeplanet.mission.reward: "<b>Complimenti!</b>\nSei riuscito a completare la missione, guadagnando così:\n %s\n\nLa 💈<b>Coalizione</b> ti rigrazia!"
 safeplanet.mission.leave_mission: "🏳 Abbandona Missione"
 
+safeplanet.mission.statistic.top: "📈 Top Completate"
+safeplanet.mission.statistic.bad: "📉 Top Abbandonate"
+
+safeplanet.mission.accept: "✅ Accetta Missione"
+safeplanet.mission.leave: "❌ Rifiuta Missione"
+
+safeplanet.mission.accepted: "✅ Hai accettato la missione. <b>Buona fortuna</b> esploratore."
+
 safeplanet.mission.type.planet_finding: "Trova il pianeta"
-safeplanet.mission.type.planet_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫%s (%v).\n\nBuona fortuna."
-safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫%s (%v)"
+safeplanet.mission.type.planet_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫<b>%s</b> (%v)"
+safeplanet.mission.type.planet_finding.description.small: "Trovare e raggiungere il pianeta 🌏<b>%s</b> nel sistema 💫<b>%s</b> (%v)"
 
 safeplanet.mission.type.kill_mob: "Uccidi il nemico"
-safeplanet.mission.type.kill_mob.description: "🔖 <b>Obbiettivo</b>:\nTrovare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫%s (%v) e annientarlo.\n\nBuona fortuna."
-safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫%s (%v)"
+safeplanet.mission.type.kill_mob.description: "🔖 <b>Obbiettivo</b>:\nTrovare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫<b>%s</b> (%v) e annientarlo"
+safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 <b>%s</b> avvistato sul pianeta 🌏<b>%s</b> del sistema 💫<b>%s</b> (%v)"
 
 safeplanet.mission.type.resources_finding: "Recupero risorse"
-safeplanet.mission.type.resources_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e recuperare:\n- 💠 <b>%v</b> x %s<b>%v</b> (%s) %s\n\nBuona fortuna."
+safeplanet.mission.type.resources_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e recuperare 💠 <b>%v</b> x %s<b>%v</b> (%s) %s"
 safeplanet.mission.type.resources_finding.description.small: "Trovare <b>%v</b> x %s<b>%v</b> (%s) %s"
