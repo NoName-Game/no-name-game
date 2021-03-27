@@ -1,6 +1,6 @@
 ---
-route.safeplanet.coalition.mission.activity.progress: "<b>🏢 Mission</b> #M%v: %s"
-route.safeplanet.coalition.mission.activity.done: "✅ <b>🏢 Mission</b> completed, go back to the mission center to claim your reward"
+route.safeplanet.coalition.mission.search.activity.progress: "<b>🏢 Mission</b> #M%v: %s"
+route.safeplanet.coalition.mission.search.activity.done: "✅ <b>🏢 Mission</b> completed, go back to the mission center to claim your reward"
 route.safeplanet.hangar.create.activity.progress: "<b>🏗 Hangar</b>: Order submitted, ship available in %v minutes"
 route.safeplanet.hangar.create.activity.done: "✅ <b>🏗 Hangar</b>: Your new ship is ready to be collected! Go back to the hangar to complete"
 route.safeplanet.hangar.repair.activity.progress: "<b>🏗 Hangar</b>: Ship repair ongoing, <b>%v</b> minutes till the end"
