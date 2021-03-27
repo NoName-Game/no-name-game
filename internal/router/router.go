@@ -93,6 +93,8 @@ var router = []Route{
 
 	{Route: "route.safeplanet.coalition", Controller: &controllers.SafePlanetCoalitionController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetCoalitionController)(nil)).Elem()},
 	{Route: "route.safeplanet.coalition.mission", Controller: &controllers.SafePlanetMissionController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMissionController)(nil)).Elem()},
+	{Route: "route.safeplanet.coalition.mission.search", Controller: &controllers.SafePlanetMissionSearchController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMissionSearchController)(nil)).Elem()},
+	{Route: "route.safeplanet.coalition.mission.complete", Controller: &controllers.SafePlanetMissionSearchController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMissionSearchController)(nil)).Elem()},
 	{Route: "route.safeplanet.coalition.titan", Controller: &controllers.SafePlanetTitanController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetTitanController)(nil)).Elem()},
 	{Route: "route.safeplanet.coalition.expansion", Controller: &controllers.SafePlanetExpansionController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetExpansionController)(nil)).Elem()},
 	{Route: "route.safeplanet.coalition.research", Controller: &controllers.SafePlanetResearchController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetResearchController)(nil)).Elem()},
