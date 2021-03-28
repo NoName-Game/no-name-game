@@ -176,7 +176,7 @@ func (c *MenuController) FormatPlayerTasks(activity *pb.PlayerActivity) (tasks s
 	// Format Custom
 	switch activity.GetController() {
 	// Verifico se si tritta di una missione
-	case "route.safeplanet.coalition.mission":
+	case "route.safeplanet.coalition.mission.search":
 		var rCheckMission *pb.CheckMissionResponse
 		if rCheckMission, err = config.App.Server.Connection.CheckMission(helpers.NewContext(1), &pb.CheckMissionRequest{
 			PlayerID: c.Player.GetID(),
