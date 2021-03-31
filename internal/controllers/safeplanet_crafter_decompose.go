@@ -179,12 +179,20 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			})
 
 			for _, armor := range rGetPlayerArmors.GetArmors() {
+				// Recupero costo in base alla rarità
+				var rCrafterGetDecomposePrice *pb.CrafterGetDecomposePriceResponse
+				rCrafterGetDecomposePrice, _ = config.App.Server.Connection.CrafterGetDecomposePrice(helpers.NewContext(1), &pb.CrafterGetDecomposePriceRequest{
+					RarityID: armor.GetRarityID(),
+				})
+
+				armorDetails := fmt.Sprintf("%s 💰%v",
+					helpers.ArmorFormatter(armor),
+					rCrafterGetDecomposePrice.GetPrice(),
+				)
+
 				rowsKeyboard = append(rowsKeyboard, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						fmt.Sprintf("%s (%s)",
-							armor.GetName(),
-							armor.GetRarity().GetSlug(),
-						),
+						armorDetails,
 					),
 				))
 			}
@@ -196,12 +204,20 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 			})
 
 			for _, weapon := range rGetPlayerWeapons.GetWeapons() {
+				// Recupero costo in base alla rarità
+				var rCrafterGetDecomposePrice *pb.CrafterGetDecomposePriceResponse
+				rCrafterGetDecomposePrice, _ = config.App.Server.Connection.CrafterGetDecomposePrice(helpers.NewContext(1), &pb.CrafterGetDecomposePriceRequest{
+					RarityID: weapon.GetRarityID(),
+				})
+
+				weaponDetails := fmt.Sprintf("%s 💰%v",
+					helpers.WeaponFormatter(weapon),
+					rCrafterGetDecomposePrice.GetPrice(),
+				)
+
 				rowsKeyboard = append(rowsKeyboard, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						fmt.Sprintf("%s (%s)",
-							weapon.GetName(),
-							weapon.GetRarity().GetSlug(),
-						),
+						weaponDetails,
 					),
 				))
 			}
@@ -238,7 +254,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemDetails = fmt.Sprintf("%s (%s)", rGetArmorByID.GetArmor().GetName(), rGetArmorByID.GetArmor().GetRarity().GetSlug())
+			itemDetails = helpers.ArmorFormatter(rGetArmorByID.GetArmor())
 		case "weapon":
 			// Recupero dettagli arma
 			var rGetWeaponByID *pb.GetWeaponByIDResponse
@@ -248,7 +264,7 @@ func (c *SafePlanetCrafterDecomposeController) Stage() {
 				c.Logger.Panic(err)
 			}
 
-			itemDetails = fmt.Sprintf("%s (%s)", rGetWeaponByID.GetWeapon().GetName(), rGetWeaponByID.GetWeapon().GetRarity().GetSlug())
+			itemDetails = helpers.WeaponFormatter(rGetWeaponByID.GetWeapon())
 		}
 
 		msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.decompose.confirm",
