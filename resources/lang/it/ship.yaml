@@ -1,10 +1,11 @@
 # SHIP
-ship.intro: "Sali a bordo della tua nave 🚀 <b>%s</b> (<b>%s</b>) - <b>%s</b>\n\nQuale attività vorresti eseguire?"
+ship.intro: "Sali a bordo della tua nave 🚀 <b>%s</b>\nQuale attività vorresti eseguire?"
 
 # Travel
 ship.travel.land: "Atterra! 🛬"
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 <b>Pianeta</b>?"
-ship.travel.ship_stats: "\n\nStato della tua 🚀 <b>Nave</b>:"
+ship.travel.ship_stats: "\n\nNave: 🚀 <b>%s</b> (<b>%s</b>)"
+ship.travel.ship_type: "\nTipologia: <b>%s</b>"
 ship.travel.ship_engine: "\nMotori di livello: <b>%v</b>"
 ship.travel.ship_scanner: "\nScanner di livello: <b>%v</b>"
 ship.travel.ship_integrity: "\nIntegrità: 🔧<b>%v</b>%%"
