@@ -1,6 +1,6 @@
 ---
 #PLAYER
-player.datails.card: "👨🏼‍🚀 <b>%s</b> \n♥️ <b>%v</b>/%v HP\n🏵 Exp: <b>%v</b>/<b>%v</b> 🎖LvL: <b>%v</b>\n🏷 Rank: <b>%s</b> -> <b>%v</b>/<b>%v</b>\n💰 <b>%v</b> 💎 <b>%v</b> 🧿 <b>%v</b>\n"
+player.datails.card: "👨🏼‍🚀 <b>%s</b> \n💢 <b>%s</b> \n♥️ <b>%v</b>/%v HP\n🏵 Exp: <b>%v</b>/<b>%v</b> 🎖LvL: <b>%v</b>\n🏷 Rank: <b>%s</b> -> <b>%v</b>/<b>%v</b>\n💰 <b>%v</b> 💎 <b>%v</b> 🧿 <b>%v</b>\n"
 player.datails.planet_visited: "\n🌏 <b>Planets</b> visited: <b>%d</b>"
 player.datails.system_visited: "\n💫 <b>Systems</b> visited: <b>%d</b>"
 #Guild

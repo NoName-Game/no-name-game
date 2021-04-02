@@ -82,6 +82,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}); err != nil {
 		c.Logger.Panic(err)
 	}
+
 	// *************************
 	// Recupero rank player
 	// *************************
@@ -104,10 +105,26 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	rank := helpers.Trans(c.Player.Language.Slug, "rank."+c.Player.Rank.NameCode)
 
+	// *************************
+	// Recupero gilda player
+	// *************************
+	var rGetPlayerGuild *pb.GetPlayerGuildResponse
+	if rGetPlayerGuild, err = config.App.Server.Connection.GetPlayerGuild(helpers.NewContext(1), &pb.GetPlayerGuildRequest{
+		PlayerID: c.Player.ID,
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var guildName = "--"
+	if rGetPlayerGuild.GetGuild().GetID() > 0 {
+		guildName = rGetPlayerGuild.GetGuild().GetName()
+	}
+
 	recapPlayer := helpers.Trans(
 		c.Player.Language.Slug,
 		"player.datails.card",
 		c.Player.GetUsername(),
+		guildName,
 		c.Player.GetLifePoint(),                                                         // Life point player
 		c.Player.GetLevel().GetPlayerMaxLife(),                                          // Vita massima del player
 		rGetPlayerExperience.GetValue(), rGetLevelByID.GetLevel().GetExperienceNeeded(), // Esperienza
