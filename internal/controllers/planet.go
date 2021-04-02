@@ -84,6 +84,13 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	var rCountPlayerCurrentPlanet *pb.CountPlayerCurrentPlanetResponse
+	if rCountPlayerCurrentPlanet, err = config.App.Server.Connection.CountPlayerCurrentPlanet(helpers.NewContext(1), &pb.CountPlayerCurrentPlanetRequest{
+		PlanetID: playerPosition.GetID(),
+	}); err != nil {
+		c.Logger.Panic(err)
+	}
+
 	// Recupero conquistatore
 	var rGetCurrentConquerorByPlanetID *pb.GetCurrentConquerorByPlanetIDResponse
 	if rGetCurrentConquerorByPlanetID, err = config.App.Server.Connection.GetCurrentConquerorByPlanetID(helpers.NewContext(1), &pb.GetCurrentConquerorByPlanetIDRequest{
@@ -116,7 +123,8 @@ func (c *PlanetController) Handle(player *pb.Player, update tgbotapi.Update) {
 	}
 
 	// Aggiunto informazioni aggiuntive
-	planetDetailsMsg += fmt.Sprintf("%s\n%s\n%s\n",
+	planetDetailsMsg += fmt.Sprintf("%s\n%s\n%s\n%s\n",
+		helpers.Trans(player.Language.Slug, "planet.details.count_current_player", rCountPlayerCurrentPlanet.GetValue()),
 		helpers.Trans(player.Language.Slug, "planet.details.count_visited_player", rCountPlayerVisitedCurrentPlanet.GetValue()),
 		helpers.Trans(player.Language.Slug, "planet.details.conqueror", conquerorTag, rGetCurrentConquerorByPlanetID.GetPlayer().GetUsername()),
 		helpers.Trans(player.Language.Slug, "planet.details.domain", rGetCurrentDomainByPlanetID.GetGuild().GetName()),
