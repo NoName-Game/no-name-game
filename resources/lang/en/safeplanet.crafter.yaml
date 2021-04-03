@@ -22,7 +22,7 @@ safeplanet.crafting.repair.what: "Which one of your damaged weapons would you li
 safeplanet.crafting.repair.confirm: "I can repair your <b>%s</b> immediately!\nAre you sure you want to repair it for 💰<b>%v</b>?"
 safeplanet.crafting.repair.completed: "There you have it, it's as brand as new, make good use of it!"
 #Crafter - Decompose
-safeplanet.crafting.decompose.info: "By dismantling a piece of equipment of your choice it's possible to retrieve some of the resources used to forge it.\nThe service's cost is: 💰<b>1000</b>"
+safeplanet.crafting.decompose.info: "Scomponendo un equipaggiamento da te scelto è possibile recuperare delle risorse miste.\nIl costo del servizio varia in base alla rarità scelta."
 safeplanet.crafting.decompose.what: "Which category would you like to view?"
 safeplanet.crafting.decompose.which: "Which piece of equipment would you like to dismantle?"
 safeplanet.crafting.decompose.confirm: "Are you sure you want to dismantle <b>%s</b>?\n\n⚠️ <b>Caution</b>: You'll lose this item forever"

@@ -24,7 +24,7 @@ safeplanet.crafting.repair.confirm: "Posso ripararti <b>%s</b> immediatamente!\n
 safeplanet.crafting.repair.completed: "Ecco a te ora è come nuova, fanne buon uso!"
 
 # Crafter - Decompose
-safeplanet.crafting.decompose.info: "Scomponendo un equipaggiamento da te scelto è possibile recuperare delle risorse con il quale è stato forgiato.\nIl costo del servizio è di: 💰<b>1000</b>"
+safeplanet.crafting.decompose.info: "Scomponendo un equipaggiamento da te scelto è possibile recuperare delle risorse miste.\nIl costo del servizio varia in base alla rarità scelta."
 safeplanet.crafting.decompose.what: "Quale categoria vorresti visualizzare?"
 safeplanet.crafting.decompose.which: "Quale equipaggiamento vorresti scomporre?"
 safeplanet.crafting.decompose.confirm: "Sei sicuro di volere procedere alla scomposizione di <b>%s</b>?\n\n⚠️ <b>Attenzione</b>: Perderai per sempre questo equipaggiamento"
