@@ -86,10 +86,11 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 
 	// Invio messaggio con recap
 	msg := helpers.NewMessage(c.ChatID,
-		fmt.Sprintf("%s %s %s %s %s %s %s",
+		fmt.Sprintf("%s %s %s %s %s %s %s %s",
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats"),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats", rGetPlayerShipEquipped.GetShip().GetName(), rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetEngine()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_type", helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("ship.category.%s", rGetPlayerShipEquipped.GetShip().GetShipCategory().GetSlug()))),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetRadar()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_integrity", rGetPlayerShipEquipped.GetShip().GetIntegrity()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),

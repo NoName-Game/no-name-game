@@ -4,7 +4,8 @@ ship.intro: "You get in your ship 🚀 <b>%s</b> (<b>%s</b>) - <b>%s</b>\n\nWhic
 #Travel
 ship.travel.land: "Land! 🛬"
 ship.travel.info: "Do you want to reach a new 🌏 <b>Planet</b>?"
-ship.travel.ship_stats: "\n\nStatus of your 🚀 <b>Ship</b>:"
+ship.travel.ship_stats: "\n\nShip: 🚀 <b>%s</b> (<b>%s</b>)"
+ship.travel.ship_type: "\nTipologia: <b>%s</b>"
 ship.travel.ship_engine: "\nEngines level: <b>%v</b>"
 ship.travel.ship_scanner: "\nScanner level: <b>%v</b>"
 ship.travel.ship_integrity: "\nIntegrity: 🔧<b>%v</b>%%"
