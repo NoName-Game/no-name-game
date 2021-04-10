@@ -96,3 +96,6 @@ route.breaker.clears: "⬅️ Abbandona"
 
 #INFO
 route.info: "🗒 Regolamento"
+
+#ASSAULT:
+route.assault: "Assalto"
