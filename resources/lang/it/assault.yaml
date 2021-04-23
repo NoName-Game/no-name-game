@@ -11,3 +11,7 @@ route.assault.scan.next: "Prossima Scansione."
 
 route.assault.attacker: "Attaccanti"
 route.assault.defender: "Difensori"
+
+route.assault.ingage: "Inizio battaglia..."
+ruote.assault.turn_recap: "Turno %d:\n\t\tIl tuo PARTY ha inflitto <b>%.1f</b> danni\n\te subito <b>%.1f</b> danni."
+route.assault.ship_status: "🚀 <b>%s</b> %s: <b>%s</b> %d%%"

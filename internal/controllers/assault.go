@@ -6,6 +6,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	"fmt"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -204,7 +205,47 @@ func (c *AssaultController) Stage() {
 		}); err != nil {
 			c.Logger.Panic(err.Error())
 		}
-		var winner string
+		// Fase di stampa.
+		// Turno X:
+		//		Il tuo PARTY ha inflitto: X danni e subito: X danni.
+		// Recap Party:
+		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
+		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
+		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
+		var rGetFormation *pb.GetFormationResponse
+		if rGetFormation, err = config.App.Server.Connection.GetFormation(helpers.NewContext(1), &pb.GetFormationRequest{
+			PlayerID: c.Player.ID,
+			PartyID:  attackerPartyID,
+		}); err != nil {
+			c.Logger.Panic(err.Error())
+		}
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.ingage"))
+		var msg_sended tgbotapi.Message
+		if msg_sended, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err.Error())
+		}
+		for i := uint32(1); i < rStartAssault.GetTurns()+1; i++ {
+			// Recap turno
+			damagePerTurnAttacker := rStartAssault.GetAttackerTotalDamage()/float64(rStartAssault.GetTurns())
+			damagePerTurnDefender := rStartAssault.GetDefenderTotalDamage()/float64(rStartAssault.GetTurns())
+
+			recap := "%s\n%s"
+			turn_recap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", i, damagePerTurnAttacker, damagePerTurnDefender)
+
+			party_recap := "<b>Party</b>:\n"
+			for _, ship := range rGetFormation.Formation {
+				party_recap += helpers.Trans(c.Player.Language.Slug, "route.assault.ship_status", ship.GetName()[0:4]+"...", helpers.GetShipCategoryIcons(ship.GetShipCategoryID()), helpers.GenerateHealthBar(ship.GetIntegrity()), ship.GetIntegrity())
+				party_recap += "\n"
+			}
+
+			edit := helpers.NewEditMessage(c.Player.ChatID, msg_sended.MessageID, fmt.Sprintf(recap, turn_recap, party_recap))
+			edit.ParseMode = tgbotapi.ModeHTML
+			if _, err = helpers.SendMessage(edit); err != nil {
+				c.Logger.Panic(err.Error())
+			}
+			time.Sleep(1 * time.Second)
+		}
+		/*var winner string
 		if rStartAssault.AttackerDefeated {
 			winner = helpers.Trans(c.Player.Language.Slug, "route.assault.defender")
 		} else {
@@ -213,7 +254,7 @@ func (c *AssaultController) Stage() {
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.ingage.results", rStartAssault.GetTurns(), rStartAssault.GetAttackerTotalDamage(), rStartAssault.GetDefenderTotalDamage(), winner))
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err.Error())
-		}
+		}*/
 
 		c.CurrentState.Completed = true
 	}
