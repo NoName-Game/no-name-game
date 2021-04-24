@@ -32,11 +32,12 @@ func (c *AssaultController) Configuration(player *pb.Player, update tgbotapi.Upd
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
-				To:        &PlanetController{},
+				To:        &ShipController{},
 				FromStage: 0,
 			},
 			PlanetType: []string{"default", "titan"},
 			BreakerPerStage: map[int32][]string{
+				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
 				2: {"route.breaker.menu"},
 			},
@@ -55,6 +56,7 @@ func (c *AssaultController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	if c.Validator() {
 		c.Validate()
+		return
 	}
 
 	// Ok! Run!
@@ -65,7 +67,23 @@ func (c *AssaultController) Handle(player *pb.Player, update tgbotapi.Update) {
 }
 
 func (c *AssaultController) Validator() bool {
+	var err error
 	switch c.CurrentState.Stage {
+	case 0:
+		// Controllo che la nave sia integra
+		// Recupero nave attualemente attiva
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		if rGetPlayerShipEquipped.GetShip().GetIntegrity() == 0 {
+			// Non può startare l'attività
+			c.Validation.Message = helpers.Trans(c.Player.Language.Slug, "route.assault.error.no_integrity")
+			return true
+		}
 	case 1:
 		if c.Update.Message.Text != helpers.Trans(c.Player.Language.Slug, "route.assault.scan.start") {
 			return true
@@ -245,16 +263,17 @@ func (c *AssaultController) Stage() {
 			}
 			time.Sleep(1 * time.Second)
 		}
-		/*var winner string
+		var text string
 		if rStartAssault.AttackerDefeated {
-			winner = helpers.Trans(c.Player.Language.Slug, "route.assault.defender")
+			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat")
 		} else {
-			winner = helpers.Trans(c.Player.Language.Slug, "route.assault.attacker")
+			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win")
 		}
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.ingage.results", rStartAssault.GetTurns(), rStartAssault.GetAttackerTotalDamage(), rStartAssault.GetDefenderTotalDamage(), winner))
+		msg = helpers.NewMessage(c.Player.ChatID, text)
+		msg.ParseMode = tgbotapi.ModeHTML
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err.Error())
-		}*/
+		}
 
 		c.CurrentState.Completed = true
 	}
