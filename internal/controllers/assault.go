@@ -74,7 +74,7 @@ func (c *AssaultController) Validator() bool {
 		// Recupero nave attualemente attiva
 		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
 		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
-			PlayerID: c.Player.GetID(),
+			PlayerID: c.Player.ID,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
@@ -242,6 +242,7 @@ func (c *AssaultController) Stage() {
 		if msg_sended, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err.Error())
 		}
+		total_recap := ""
 		for i := uint32(1); i < rStartAssault.GetTurns()+1; i++ {
 			// Recap turno
 			damagePerTurnAttacker := rStartAssault.GetAttackerTotalDamage()/float64(rStartAssault.GetTurns())
@@ -249,7 +250,7 @@ func (c *AssaultController) Stage() {
 
 			recap := "%s\n%s"
 			turn_recap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", i, damagePerTurnAttacker, damagePerTurnDefender)
-
+			total_recap += turn_recap+"\n"
 			party_recap := "<b>Party</b>:\n"
 			for _, ship := range rGetFormation.Formation {
 				party_recap += helpers.Trans(c.Player.Language.Slug, "route.assault.ship_status", ship.GetName()[0:4]+"...", helpers.GetShipCategoryIcons(ship.GetShipCategoryID()), helpers.GenerateHealthBar(ship.GetIntegrity()), ship.GetIntegrity())
@@ -261,13 +262,13 @@ func (c *AssaultController) Stage() {
 			if _, err = helpers.SendMessage(edit); err != nil {
 				c.Logger.Panic(err.Error())
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(3 * time.Second)
 		}
 		var text string
 		if rStartAssault.AttackerDefeated {
-			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat")
+			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat", total_recap)
 		} else {
-			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win")
+			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win", total_recap)
 		}
 		msg = helpers.NewMessage(c.Player.ChatID, text)
 		msg.ParseMode = tgbotapi.ModeHTML
