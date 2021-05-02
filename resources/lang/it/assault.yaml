@@ -17,3 +17,4 @@ ruote.assault.turn_recap: "Turno %d:\nIl tuo <b>PARTY</b> ha inflitto 🗡<b>%.1
 route.assault.ship_status: "🚀 <b>%s</b> %s: <b>%s</b> %d%%"
 route.assault.end_win: "La tua <b>Flotta</b> ha sconfitto gli avversari!\n<b>RECAP SCONTRO</b>:\n%s"
 route.assault.end_defeat: "La tua <b>Flotta</b> è stata sconfitta gli avversari!\n<b>RECAP SCONTRO</b>:\n%s"
+route.assault.tie: "La <b>Flotta</b> avversaria riesce a fuggire dallo scontro!\nTorni alla base a mani vuote..."

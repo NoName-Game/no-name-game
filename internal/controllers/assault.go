@@ -214,42 +214,46 @@ func (c *AssaultController) Stage() {
 			}
 		}
 
-		var rStartAssault *pb.StartAssaultResponse
-		if rStartAssault, err = config.App.Server.Connection.StartAssault(helpers.NewContext(1), &pb.StartAssaultRequest{
-			AttackerID:      c.Player.ID,
-			AttackerPartyID: attackerPartyID,
-			DefenderID:      c.Payload.DefenderID,
-			DefenderPartyID: defenderPartyID,
-		}); err != nil {
-			c.Logger.Panic(err.Error())
-		}
-		// Fase di stampa.
+
+		// Fase di assalto.
 		// Turno X:
 		//		Il tuo PARTY ha inflitto: X danni e subito: X danni.
 		// Recap Party:
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
-		var rGetFormation *pb.GetFormationResponse
-		if rGetFormation, err = config.App.Server.Connection.GetFormation(helpers.NewContext(1), &pb.GetFormationRequest{
-			PlayerID: c.Player.ID,
-			PartyID:  attackerPartyID,
-		}); err != nil {
-			c.Logger.Panic(err.Error())
-		}
 		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.ingage"))
 		var msg_sended tgbotapi.Message
 		if msg_sended, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err.Error())
 		}
 		total_recap := ""
-		for i := uint32(1); i < rStartAssault.GetTurns()+1; i++ {
+		endBattle := false
+		turn := 0
+		for !endBattle && turn < 10{
+			turn++
+			var rGetFormation *pb.GetFormationResponse
+			if rGetFormation, err = config.App.Server.Connection.GetFormation(helpers.NewContext(1), &pb.GetFormationRequest{
+				PlayerID: c.Player.ID,
+				PartyID:  attackerPartyID,
+			}); err != nil {
+				c.Logger.Panic(err.Error())
+			}
 			// Recap turno
-			damagePerTurnAttacker := rStartAssault.GetAttackerTotalDamage()/float64(rStartAssault.GetTurns())
-			damagePerTurnDefender := rStartAssault.GetDefenderTotalDamage()/float64(rStartAssault.GetTurns())
+			var rAssault *pb.AssaultResponse
+			if rAssault, err = config.App.Server.Connection.Assault(helpers.NewContext(1), &pb.AssaultRequest{
+				AttackerID:      c.Player.ID,
+				AttackerPartyID: attackerPartyID,
+				DefenderID:      c.Payload.DefenderID,
+				DefenderPartyID: defenderPartyID,
+			}); err != nil {
+				c.Logger.Panic(err.Error())
+			}
+
+			endBattle = rAssault.AttackerDefeated || rAssault.DefenderDefeated
 
 			recap := "%s\n%s"
-			turn_recap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", i, damagePerTurnAttacker, damagePerTurnDefender)
+			turn_recap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", turn, rAssault.GetAttackerDamage(), rAssault.GetDefenderDamage())
 			total_recap += turn_recap+"\n"
 			party_recap := "<b>Party</b>:\n"
 			for _, ship := range rGetFormation.Formation {
@@ -262,18 +266,33 @@ func (c *AssaultController) Stage() {
 			if _, err = helpers.SendMessage(edit); err != nil {
 				c.Logger.Panic(err.Error())
 			}
+
+			if endBattle {
+				// Messaggio finale
+				var text string
+				if rAssault.AttackerDefeated {
+					text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat", total_recap)
+				} else {
+					text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win", total_recap)
+				}
+				msg = helpers.NewMessage(c.Player.ChatID, text)
+				msg.ParseMode = tgbotapi.ModeHTML
+				if _, err = helpers.SendMessage(msg); err != nil {
+					c.Logger.Panic(err.Error())
+				}
+				break
+			}
+
 			time.Sleep(3 * time.Second)
 		}
-		var text string
-		if rStartAssault.AttackerDefeated {
-			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat", total_recap)
-		} else {
-			text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win", total_recap)
-		}
-		msg = helpers.NewMessage(c.Player.ChatID, text)
-		msg.ParseMode = tgbotapi.ModeHTML
-		if _, err = helpers.SendMessage(msg); err != nil {
-			c.Logger.Panic(err.Error())
+
+		// Controllo se è finita in parità
+		if !endBattle {
+			msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.tie"))
+			msg.ParseMode = tgbotapi.ModeHTML
+			if _, err = helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err.Error())
+			}
 		}
 
 		c.CurrentState.Completed = true
