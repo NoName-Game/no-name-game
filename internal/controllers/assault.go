@@ -19,6 +19,7 @@ type AssaultController struct {
 	Payload struct {
 		DefenderID uint32
 		DefenderInParty bool
+		AttackerWin bool
 	}
 }
 
@@ -40,6 +41,7 @@ func (c *AssaultController) Configuration(player *pb.Player, update tgbotapi.Upd
 				0: {"route.breaker.menu"},
 				1: {"route.breaker.menu"},
 				2: {"route.breaker.menu"},
+				3: {"route.breaker.menu"},
 			},
 		},
 	}
@@ -95,7 +97,10 @@ func (c *AssaultController) Validator() bool {
 			c.CurrentState.Stage = 1
 			return false
 		}
-
+	case 3:
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "route.assault.approach") && c.Payload.AttackerWin {
+			return false
+		}
 		return true
 	}
 
@@ -214,7 +219,11 @@ func (c *AssaultController) Stage() {
 			}
 		}
 
-
+		initMessage := helpers.NewMessage(c.Player.ChatID, "...")
+		initMessage.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		if _, err = helpers.SendMessage(initMessage); err != nil {
+			c.Logger.Panic(err.Error())
+		}
 		// Fase di assalto.
 		// Turno X:
 		//		Il tuo PARTY ha inflitto: X danni e subito: X danni.
@@ -222,12 +231,12 @@ func (c *AssaultController) Stage() {
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
 		//		🚀 NAME 💨: ▰▰▰▰▰▱▱▱▱▱ 50%
-		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.ingage"))
-		var msg_sended tgbotapi.Message
-		if msg_sended, err = helpers.SendMessage(msg); err != nil {
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.start"))
+		var msgSent tgbotapi.Message
+		if msgSent, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err.Error())
 		}
-		total_recap := ""
+		totalRecap := ""
 		endBattle := false
 		turn := 0
 		for !endBattle && turn < 10{
@@ -251,50 +260,77 @@ func (c *AssaultController) Stage() {
 			}
 
 			endBattle = rAssault.AttackerDefeated || rAssault.DefenderDefeated
+			c.Payload.AttackerWin = rAssault.DefenderDefeated
 
-			recap := "%s\n%s"
-			turn_recap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", turn, rAssault.GetAttackerDamage(), rAssault.GetDefenderDamage())
-			total_recap += turn_recap+"\n"
-			party_recap := "<b>Party</b>:\n"
+			turnRecap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", turn, rAssault.GetAttackerDamage(), rAssault.GetDefenderDamage())
+			totalRecap += turnRecap+"\n"
+			partyRecap := "<b>Party</b>:\n"
 			for _, ship := range rGetFormation.Formation {
-				party_recap += helpers.Trans(c.Player.Language.Slug, "route.assault.ship_status", ship.GetName()[0:4]+"...", helpers.GetShipCategoryIcons(ship.GetShipCategoryID()), helpers.GenerateHealthBar(ship.GetIntegrity()), ship.GetIntegrity())
-				party_recap += "\n"
+				partyRecap += helpers.Trans(c.Player.Language.Slug, "route.assault.ship_status", ship.GetName()[0:4]+"...", helpers.GetShipCategoryIcons(ship.GetShipCategoryID()), helpers.GenerateHealthBar(ship.GetIntegrity()), ship.GetIntegrity())
+				partyRecap += "\n"
 			}
 
-			edit := helpers.NewEditMessage(c.Player.ChatID, msg_sended.MessageID, fmt.Sprintf(recap, turn_recap, party_recap))
+			edit := helpers.NewEditMessage(c.Player.ChatID, msgSent.MessageID, fmt.Sprintf("%s\n%s", turnRecap, partyRecap))
 			edit.ParseMode = tgbotapi.ModeHTML
 			if _, err = helpers.SendMessage(edit); err != nil {
 				c.Logger.Panic(err.Error())
 			}
 
-			if endBattle {
-				// Messaggio finale
-				var text string
-				if rAssault.AttackerDefeated {
-					text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat", total_recap)
-				} else {
-					text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win", total_recap)
-				}
-				msg = helpers.NewMessage(c.Player.ChatID, text)
-				msg.ParseMode = tgbotapi.ModeHTML
-				if _, err = helpers.SendMessage(msg); err != nil {
-					c.Logger.Panic(err.Error())
-				}
-				break
-			}
-
-			time.Sleep(3 * time.Second)
+			time.Sleep(2 * time.Second)
 		}
 
 		// Controllo se è finita in parità
 		if !endBattle {
 			msg = helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.tie"))
 			msg.ParseMode = tgbotapi.ModeHTML
+			msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+				),
+			)
+			if _, err = helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err.Error())
+			}
+		} else {
+			// Messaggio finale
+			var text string
+			var keyboard tgbotapi.ReplyKeyboardMarkup
+			if !c.Payload.AttackerWin {
+				text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_defeat", totalRecap)
+				keyboard = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+					),
+				)
+			} else {
+				text = helpers.Trans(c.Player.Language.Slug, "route.assault.end_win", totalRecap)
+				keyboard = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.assault.approach")),
+					),
+				)
+			}
+			msg = helpers.NewMessage(c.Player.ChatID, text)
+			msg.ParseMode = tgbotapi.ModeHTML
+			msg.ReplyMarkup = keyboard
 			if _, err = helpers.SendMessage(msg); err != nil {
 				c.Logger.Panic(err.Error())
 			}
 		}
 
+		c.CurrentState.Stage = 3
+	case 3:
+		// Stage finale, assegno i reward
+		var rGetRewards *pb.GetAssaultRewardResponse
+		if rGetRewards, err = config.App.Server.Connection.GetAssaultReward(helpers.NewContext(1), &pb.GetAssaultRewardRequest{PlayerID: c.Player.ID}); err != nil {
+			c.Logger.Panic(err.Error())
+		}
+
+		msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.rewards", rGetRewards.GetDebridPerPlayer(), rGetRewards.GetExpPerPlayer()))
+		msg.ParseMode = tgbotapi.ModeHTML
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err.Error())
+		}
 		c.CurrentState.Completed = true
 	}
 }
