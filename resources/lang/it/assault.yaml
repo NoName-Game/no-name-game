@@ -4,6 +4,7 @@ route.assault.error.no_integrity: "La tua nave è troppo danneggiata per prosegu
 route.assault.error.no_player: "Non ci sono player sul pianeta."
 route.assault.scan.info_party: "Hai intercettato una nave di tipo: <b>%s</b>.\nSeguita a sua volta da altre navi.\n\nCosa vuoi fare?"
 route.assault.scan.info_noparty: "Hai intercettato una nave di tipo: <b>%s</b>.\n\nCosa vuoi fare?"
+route.assault.error.cooldown: "Le <b>Autorità Galattiche</b> sono in allerta per il recente ingaggio non autorizzato, attendi che si plachino le acque..."
 
 route.assault.scan.start: "Scansiona!"
 route.assault.scan.ingage: "Ingaggia!"

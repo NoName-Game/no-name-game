@@ -156,6 +156,20 @@ func (c *AssaultController) Stage() {
 				}
 				c.CurrentState.Completed = true
 				return
+			} else if strings.Contains(err.Error(), "assault waiting time") {
+				// é in cooldown
+				msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.error.cooldown"))
+				msg.ParseMode = tgbotapi.ModeHTML
+				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+					tgbotapi.NewKeyboardButtonRow(
+						tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+					),
+				)
+				if _, err = helpers.SendMessage(msg); err != nil {
+					c.Logger.Panic(err.Error())
+				}
+				c.CurrentState.Completed = true
+				return
 			}
 			c.Logger.Panic(err.Error())
 		}
