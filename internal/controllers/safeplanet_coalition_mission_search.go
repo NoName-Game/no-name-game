@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
+	"fmt"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -141,6 +141,21 @@ func (c *SafePlanetMissionSearchController) Stage() {
 			if rNewMission, err = config.App.Server.Connection.NewMission(helpers.NewContext(1), &pb.NewMissionRequest{
 				PlayerID: c.Player.GetID(),
 			}); err != nil {
+				if strings.Contains(err.Error(), "mission cooldown") {
+					msg := helpers.NewMessage(c.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.mission.cooldown"))
+					msg.ParseMode = tgbotapi.ModeHTML
+					msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+						tgbotapi.NewKeyboardButtonRow(
+							tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
+						),
+					)
+					if _, err = helpers.SendMessage(msg); err != nil {
+						c.Logger.Panic(err)
+					}
+
+					c.CurrentState.Completed = true
+					return
+				}
 				c.Logger.Panic(err)
 			}
 
@@ -192,8 +207,7 @@ func (c *SafePlanetMissionSearchController) Stage() {
 				PlayerID: c.Player.GetID(),
 			})
 
-			c.CurrentState.Stage = 0
-			c.Stage()
+			c.CurrentState.Completed = true
 		}
 
 	// Il Player ha completato la missione
