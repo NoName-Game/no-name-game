@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
-	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	"fmt"
 	"strings"
 	"time"
+
+	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"bitbucket.org/no-name-game/nn-telegram/config"
+	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -17,9 +18,9 @@ import (
 type AssaultController struct {
 	Controller
 	Payload struct {
-		DefenderID uint32
+		DefenderID      uint32
 		DefenderInParty bool
-		AttackerWin bool
+		AttackerWin     bool
 	}
 }
 
@@ -29,7 +30,7 @@ func (c *AssaultController) Configuration(player *pb.Player, update tgbotapi.Upd
 		Update: update,
 		CurrentState: ControllerCurrentState{
 			Controller: "route.assault",
-			Payload: &c.Payload,
+			Payload:    &c.Payload,
 		},
 		Configurations: ControllerConfigurations{
 			ControllerBack: ControllerBack{
@@ -143,7 +144,7 @@ func (c *AssaultController) Stage() {
 				}
 				c.CurrentState.Completed = true
 				return
-			} else if strings.Contains(err.Error(),"no players in planet") {
+			} else if strings.Contains(err.Error(), "no players in planet") {
 				// Non ci sono player
 				msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "route.assault.error.no_player"))
 				msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -213,7 +214,7 @@ func (c *AssaultController) Stage() {
 		if rGetPlayerParty, err = config.App.Server.Connection.GetPartyDetails(helpers.NewContext(1), &pb.GetPartyDetailsRequest{
 			PlayerID: c.Player.ID,
 		}); err != nil {
-			if strings.Contains(err.Error(),"player not in party") {
+			if strings.Contains(err.Error(), "player not in party") {
 				attackerPartyID = 0
 			} else {
 				c.Logger.Panic(err.Error())
@@ -253,7 +254,7 @@ func (c *AssaultController) Stage() {
 		totalRecap := ""
 		endBattle := false
 		turn := 0
-		for !endBattle && turn < 10{
+		for !endBattle && turn < 10 {
 			turn++
 			var rGetFormation *pb.GetFormationResponse
 			if rGetFormation, err = config.App.Server.Connection.GetFormation(helpers.NewContext(1), &pb.GetFormationRequest{
@@ -277,7 +278,7 @@ func (c *AssaultController) Stage() {
 			c.Payload.AttackerWin = rAssault.DefenderDefeated
 
 			turnRecap := helpers.Trans(c.Player.Language.Slug, "ruote.assault.turn_recap", turn, rAssault.GetAttackerDamage(), rAssault.GetDefenderDamage())
-			totalRecap += turnRecap+"\n"
+			totalRecap += turnRecap + "\n"
 			partyRecap := "<b>Party</b>:\n"
 			for _, ship := range rGetFormation.Formation {
 				partyRecap += helpers.Trans(c.Player.Language.Slug, "route.assault.ship_status", ship.GetName()[0:4]+"...", helpers.GetShipCategoryIcons(ship.GetShipCategoryID()), helpers.GenerateHealthBar(ship.GetIntegrity()), ship.GetIntegrity())
@@ -290,7 +291,7 @@ func (c *AssaultController) Stage() {
 				c.Logger.Panic(err.Error())
 			}
 
-			time.Sleep(2 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 
 		// Controllo se è finita in parità
