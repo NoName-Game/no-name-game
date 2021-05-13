@@ -440,6 +440,7 @@ func (c *ExplorationController) Stage() {
 			// Invio messaggio di chiusura missione
 			msg = helpers.NewMessage(c.Player.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended",
+					c.Data.PlayerCurrentPosition.Name,
 					dropList,
 					rExplorationEnd.GetExp(),
 				),
