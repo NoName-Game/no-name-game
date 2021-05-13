@@ -60,3 +60,6 @@ titan_event.test_event: "QUESTO E' UN EVENTO DI TEST"
 titanplanet.event.event1.choice1: "SCELTA UNO"
 titanplanet.event.event1.choice2: "SCELTA UNO"
 ################################################################################################################
+
+# GlobalMessage
+global.message: "⚠️ <b>Comunicazione Ufficiale N.%d</b> in Arrivo...⚠️\n%s"

@@ -56,3 +56,6 @@ info: "Welcome to the universe of 💫 <b>NoName</b> 💫! <b> Travel</b>, <b>ga
 titan_event.test_event: "THIS IS A TEST EVENT"
 titanplanet.event.event1.choice1: "CHOICE ONE"
 titanplanet.event.event1.choice2: "CHOICE TWO"
+
+# GlobalMessage
+global.message: "⚠️ <b>Comunicazione Ufficiale N.%d</b> in Arrivo...⚠️\n%s"
