@@ -31,6 +31,7 @@ inventory.armors.zero_equipment: "\n❌ None\n"
 inventory.weapons.no_one: "You don't have any weapon to equip"
 inventory.weapons.what: "Which one from your 🗡<b>Weapons</b> would you like to equip?"
 inventory.weapons.zero_equipment: "\n❌ None\n"
+inventory.inventory_full: "La stiva é al completo. Non puoi trasportare altre risorse!"
 #Equip
 inventory.equip.equipped: "<b>Your current equipment:</b>"
 inventory.equip.error: "The item you selected cannot be equipped."

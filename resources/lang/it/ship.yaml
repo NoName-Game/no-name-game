@@ -1,5 +1,5 @@
 # SHIP
-ship.intro: "Sali a bordo della tua nave 🚀 <b>%s</b>\nQuale attività vorresti eseguire?"
+ship.intro: "Sali a bordo della tua nave 🚀\nQuale attività vorresti eseguire?\n\nStatistiche Nave:"
 
 # Travel
 ship.travel.land: "Atterra! 🛬"

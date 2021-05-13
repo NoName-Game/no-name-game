@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bitbucket.org/no-name-game/nn-telegram/config"
+	"fmt"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
@@ -35,6 +36,7 @@ func (c *ShipController) Configuration(player *pb.Player, update tgbotapi.Update
 				0: {"route.breaker.menu"},
 			},
 			AllowedControllers: []string{
+				"route.assault",
 				"route.ship.rests",
 				"route.ship.travel",
 				"route.ship.laboratory",
@@ -67,10 +69,15 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 
 	// Invio messaggio
 	msg := helpers.NewMessage(c.ChatID,
-		helpers.Trans(c.Player.Language.Slug, "ship.intro",
-			rGetPlayerShipEquipped.GetShip().Name,
-		),
-	)
+		fmt.Sprintf("%s %s %s %s %s %s %s",
+			helpers.Trans(c.Player.Language.Slug, "ship.intro"),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats", rGetPlayerShipEquipped.GetShip().GetName(), rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetEngine()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_type", helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("ship.category.%s", rGetPlayerShipEquipped.GetShip().GetShipCategory().GetSlug()))),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetRadar()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_integrity", rGetPlayerShipEquipped.GetShip().GetIntegrity()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),
+		))
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -80,6 +87,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.rests")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.laboratory")),
 		),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.assault"))),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		),

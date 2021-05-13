@@ -205,6 +205,7 @@ func (c *Controller) BackTo(canBackFromStage int32, controller ControllerInterfa
 		}
 		breakers := c.Configurations.BreakerPerStage[c.CurrentState.Stage]
 		breakers = append(breakers, c.Configurations.CustomBreaker...)
+		breakers = append(breakers, "route.breaker.clears") // Se c'è un errore devo sempre riuscire a tornare al menù
 		if helpers.MessageInCustomBreakers(c.Update.Message.Text, c.Player.Language.Slug, breakers) {
 			switch c.Update.Message.Text {
 			// Questo braker forza il player a tornare al menu precedente senza cancellare lo stato

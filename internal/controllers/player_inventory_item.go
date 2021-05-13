@@ -152,7 +152,7 @@ func (c *PlayerInventoryItemController) Stage() {
 		for _, item := range inv {
 			// Rimuovo amuleti dalla visualizzazione
 			// Nel caso diventassero pìu oggetti creare un metodo dedicato
-			if item.Item.ID == 7 || item.Item.ID == 10 || item.Item.ID == 11 || item.Item.ID == 12 {
+			if item.Item.ID == 7 || item.Item.ID > 9 {
 				continue
 			}
 

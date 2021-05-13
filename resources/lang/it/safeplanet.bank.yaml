@@ -8,3 +8,7 @@ safeplanet.bank.withdraws: "🔼 Prelievo"
 safeplanet.bank.withdraws_message: "Quanto desidera prelevare?\n\nPuò indicare anche manualmente l'importo che desidera prelevare."
 safeplanet.bank.operation_done: "🧾 La sua transazione è avvenuta con <b>successo</b>!\n\nI nostri servizi sono sempre a sua disposizione."
 safeplanet.bank.transaction_error: "Non è stato possibile completare la transazione! Riprovi più tardi."
+
+safeplanet.bank.what_resource: "Con quale risorsa desideri effettuare la transazione?"
+safeplanet.bank.resource.account_details: "Ecco i dettagli del suo conto:\nRisorse depositate al momento: <b>%v</b>📦"
+safeplanet.bank.resource.transaction_error: "Non possiedi le risorse richieste! Riprova più tardi."
