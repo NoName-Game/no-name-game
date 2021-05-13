@@ -34,3 +34,7 @@ items.medium_value_pack: "Pacchetto Generoso"
 items.description.medium_value_pack: "📖: Pacchetto contente una fornitura generosa di risorse, <b>5</b> 💎 e <b>20</b> risorse miste tra C,U,R assicurate."
 items.high_value_pack: "Pacchetto Leggendario"
 items.description.high_value_pack: "📖: Pacchetto contente una ricca fornitura di risorse, <b>10</b> 💎 e <b>30</b> risorse miste tra UR,L assicurate."
+
+# PVP
+items.debrid: "Rottame"
+items.description.debrid: "📖:  Rottame recuperato da un relitto, utile per scambi profiqui all'<b>Hangar</b>"

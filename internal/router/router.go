@@ -114,6 +114,8 @@ var router = []Route{
 
 	// Titan Planet
 	{Route: "route.titanplanet.tackle", Controller: &controllers.TitanPlanetTackleController{}, Reflect: reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem()},
+
+	{Route: "route.assault", Controller: &controllers.AssaultController{}, Reflect: reflect.TypeOf((*controllers.AssaultController)(nil)).Elem()},
 }
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing
