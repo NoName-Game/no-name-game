@@ -17,6 +17,7 @@ safeplanet.coalition.protectors.creation_completed_ok: "Gilda registrata con suc
 safeplanet.coalition.protectors.join_start: "Inserisci il nome della 💢<b>Gilda</b> alla quale vuoi unirti o selezionane una dalla lista qui sotto:"
 safeplanet.coalition.protectors.join_confirm: "Confermi di voler entrare nella gilda <b>%s</b>?"
 safeplanet.coalition.protectors.join_completed_ok: "Da questo momento fai parte della gilda!"
+safeplanet.coalition.protectors.join_notify: "<b>%s</b> si è unito alla tua Gilda!"
 
 safeplanet.coalition.protectors.leave_confirm: "Sei sicuro di voler abbandonare i <b>%s</b>?"
 safeplanet.coalition.protectors.leave_completed_ok: "Ora non appartieni più a nessun gruppo."
