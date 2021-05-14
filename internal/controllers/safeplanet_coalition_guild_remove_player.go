@@ -224,6 +224,20 @@ func (c *SafePlanetProtectorsRemovePlayerController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Dopo aver rimosso segnalo al malcapitato l'esito della rimozione
+		var rGetPlayerByUsername *pb.GetPlayerByUsernameResponse
+		rGetPlayerByUsername, _ = config.App.Server.Connection.GetPlayerByUsername(helpers.NewContext(1), &pb.GetPlayerByUsernameRequest{
+			Username: c.Payload.Username,
+		})
+
+		if rGetPlayerByUsername.GetPlayer().GetID() <= 0 {
+			c.Logger.Panic("Can't retrieve player")
+		}
+		msg = helpers.NewMessage(rGetPlayerByUsername.GetPlayer().ChatID, helpers.Trans(rGetPlayerByUsername.GetPlayer().Language.Slug, "safeplanet.coalition.protectors.remove_notify"))
+		msg.ParseMode = tgbotapi.ModeHTML
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
 		c.CurrentState.Completed = true
 	}
 }
