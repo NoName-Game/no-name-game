@@ -209,6 +209,23 @@ func (c *SafePlanetProtectorsJoinController) Stage() {
 			c.Logger.Panic(err)
 		}
 
+		// Avviso l'owner dell'ingresso
+		var rGetGuildByName *pb.GetGuildByNameResponse
+		if rGetGuildByName, err = config.App.Server.Connection.GetGuildByName(helpers.NewContext(1), &pb.GetGuildByNameRequest{GuildName: c.Payload.Name}); err != nil {
+			c.Logger.Panic(err)
+		}
+		var rGetPlayerByID *pb.GetPlayerByIDResponse
+		if rGetPlayerByID, err = config.App.Server.Connection.GetPlayerByID(helpers.NewContext(1), &pb.GetPlayerByIDRequest{ID: rGetGuildByName.GetGuild().GetOwnerID()}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		msg = helpers.NewMessage(rGetPlayerByID.GetPlayer().ChatID, helpers.Trans(rGetPlayerByID.GetPlayer().Language.Slug, "safeplanet.coalition.protectors.join_notify", c.Player.Username))
+		msg.ParseMode = tgbotapi.ModeHTML
+
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		c.CurrentState.Completed = true
 	}
 }
