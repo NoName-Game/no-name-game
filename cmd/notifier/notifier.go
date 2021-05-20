@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
@@ -79,9 +80,49 @@ func main() {
 			go handleTitanDropNotification(drops)
 		}
 
+		// ***************
+		// Global Messages
+		// ***************
+		var rGetMessages *pb.RetrieveMessageResponse
+		if rGetMessages, err = config.App.Server.Connection.RetrieveMessage(helpers.NewContext(1), &pb.RetrieveMessageRequest{}); err != nil {
+			logrus.Panic(err)
+		}
+		logrus.Infof("[*] Global Notifications: %d", len(rGetMessages.GetMessages()))
+		go handleGlobalMessage(rGetMessages.GetMessages())
+
 		// Sleep for minute
 		time.Sleep(SleepTimer)
 	}
+}
+
+func handleGlobalMessage(messages []*pb.Message) {
+	if len(messages) == 0 {
+		return
+	}
+	var err error
+
+	var rGetAllPlayers *pb.GetAllPlayersResponse
+	if rGetAllPlayers, err = config.App.Server.Connection.GetAllPlayers(helpers.NewContext(1), &pb.GetAllPlayersRequest{}); err != nil {
+		logrus.Panic(err)
+	}
+
+	for _, player := range rGetAllPlayers.GetPlayers() {
+		for _, message := range messages {
+			text := helpers.Trans(player.GetLanguage().GetSlug(), "global.message", message.GetID(), message.GetText())
+
+			msg := helpers.NewMessage(player.GetChatID(), text)
+			msg.ParseMode = tgbotapi.ModeHTML
+			if _, err = helpers.SendMessage(msg); err != nil {
+				// Se l'errore è dovuto alla chat non presente skippo.
+				if strings.Contains(err.Error(), "Forbidden: user is deactivated") || strings.Contains(err.Error(), "Bad Request: chat not found") || strings.Contains(err.Error(), "Forbidden: bot was blocked by the user") {
+					// non importa, skippa
+					break
+				}
+				logrus.Panic(err)
+			}
+		}
+	}
+
 }
 
 func handleNotification(notification *pb.Notification) {
@@ -173,7 +214,11 @@ func handleNotification(notification *pb.Notification) {
 	msg := helpers.NewMessage(notification.GetPlayer().GetChatID(), message)
 	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
-		logrus.Panic(err)
+		if strings.Contains(err.Error(), "Forbidden: user is deactivated") || strings.Contains(err.Error(), "Bad Request: chat not found") || strings.Contains(err.Error(), "Forbidden: bot was blocked by the user") {
+			// non importa, skippa
+		} else {
+			logrus.Panic(err)
+		}
 	}
 
 	// Setto messaggio come notificato
@@ -251,7 +296,11 @@ func handleTitanDropNotification(playerTitanDrop *pb.PlayerTitanDrop) {
 	msg := helpers.NewMessage(playerTitanDrop.GetPlayer().GetChatID(), text)
 	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
-		logrus.Panic(err)
+		if strings.Contains(err.Error(), "Forbidden: user is deactivated") || strings.Contains(err.Error(), "Bad Request: chat not found") || strings.Contains(err.Error(), "Forbidden: bot was blocked by the user") {
+			// non importa, skippa
+		} else {
+			logrus.Panic(err)
+		}
 	}
 
 	// Aggiorno lo stato levando la notifica
@@ -292,7 +341,11 @@ func handleActivityNotification(activity *pb.PlayerActivity) {
 	msg := helpers.NewMessage(rGetPlayerByID.GetPlayer().GetChatID(), text)
 	msg.ParseMode = tgbotapi.ModeHTML
 	if _, err = helpers.SendMessage(msg); err != nil {
-		logrus.Panic(err)
+		if strings.Contains(err.Error(), "Forbidden: user is deactivated") || strings.Contains(err.Error(), "Bad Request: chat not found") || strings.Contains(err.Error(), "Forbidden: bot was blocked by the user") {
+			// non importa, skippa
+		} else {
+			logrus.Panic(err)
+		}
 	}
 
 	// Aggiorno lo stato levando la notifica
