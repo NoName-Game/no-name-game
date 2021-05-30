@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-telegram/config"
 
@@ -157,7 +158,7 @@ func (c *SafePlanetBankController) Stage() {
 		// Inserisco le quantità di default per il prelievo/deposito
 		for i := 1; i <= 5; i++ {
 			keyboardRow := tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(fmt.Sprintf("%d", i)),
+				tgbotapi.NewKeyboardButton(fmt.Sprintf("%d%%", i*5)),
 			)
 			keyboardRowQuantities = append(keyboardRowQuantities, keyboardRow)
 		}
@@ -184,11 +185,40 @@ func (c *SafePlanetBankController) Stage() {
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
 		// in base alla tipologia scelta
-
-		// Converto valore richiesto in int
+		// Controllo in primis che non ci sia il % che indica un tipo diverso (accettiamo sia percentuali sia valori diretti)
 		var value int
-		if value, err = strconv.Atoi(c.Update.Message.Text); err != nil {
-			c.Logger.Panic(err)
+		if strings.Contains(c.Update.Message.Text, "%") {
+			var percentage int
+			if percentage, err = strconv.Atoi(strings.ReplaceAll(c.Update.Message.Text, "%", "")); err != nil {
+				c.Logger.Panic(err)
+			}
+			switch c.Payload.Type {
+			case "deposit":
+				// Money
+				var rGetPlayerEconomyMoney *pb.GetPlayerEconomyResponse
+				if rGetPlayerEconomyMoney, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+					PlayerID:    c.Player.GetID(),
+					EconomyType: pb.GetPlayerEconomyRequest_MONEY,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+				value = (int(rGetPlayerEconomyMoney.GetValue()) * percentage) / 100
+			case "withdraws":
+				// Bank
+				var rGetPlayerEconomy *pb.GetPlayerEconomyResponse
+				if rGetPlayerEconomy, err = config.App.Server.Connection.GetPlayerEconomy(helpers.NewContext(1), &pb.GetPlayerEconomyRequest{
+					PlayerID:    c.Player.GetID(),
+					EconomyType: pb.GetPlayerEconomyRequest_BANK,
+				}); err != nil {
+					c.Logger.Panic(err)
+				}
+				value = (int(rGetPlayerEconomy.GetValue()) * percentage) / 100
+			}
+		} else {
+			// Converto valore richiesto in int
+			if value, err = strconv.Atoi(c.Update.Message.Text); err != nil {
+				c.Logger.Panic(err)
+			}
 		}
 
 		var text string
