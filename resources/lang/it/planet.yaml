@@ -15,3 +15,4 @@ planet.details.domain: "🏴 Dominio: <b>%s</b>"
 
 planet.bookmark.add_ok: "✅ Il pianeta è stato <b>aggiunto</b> tra i preferiti."
 planet.bookmark.remove_ok: "✅ Il pianeta è stato <b>rimosso</b> dai preferiti."
+planet.bookmark.error: "❌ <b>Limite raggiunto!</b>"

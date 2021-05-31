@@ -12,3 +12,5 @@ safeplanet.bank.transaction_error: "It wasn't possible to complete the transacti
 safeplanet.bank.what_resource: "Con quale risorsa desideri effettuare la transazione?"
 safeplanet.bank.resource.account_details: "Ecco i dettagli del suo conto:\nRisorse depositate al momento: <b>%v</b>📦"
 safeplanet.bank.resource.transaction_error: "Non possiedi le risorse richieste! Riprova più tardi."
+
+safeplanet.bank.all: "Deposit All"

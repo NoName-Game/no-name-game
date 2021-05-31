@@ -264,9 +264,13 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		}); err != nil {
 			c.Logger.Panic(err)
 		}
+		var rGetDepositedResources *pb.GetDepositedResourcesResponse
+		if rGetDepositedResources, err = config.App.Server.Connection.GetDepositedResources(helpers.NewContext(1), &pb.GetDepositedResourcesRequest{PlayerID: c.Player.ID}); err != nil {
+			c.Logger.Panic(err)
+		}
 
 		// Se l'inventario è vuoto allora concludi
-		if len(rGetPlayerResources.GetPlayerInventory()) <= 0 {
+		if len(rGetPlayerResources.GetPlayerInventory()) <= 0 || len(rGetDepositedResources.GetPlayerInventory()) <= 0 {
 			message := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resources"))
 			message.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -294,6 +298,16 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		// Mappo tutte le risorse del player
 		var playerResources []CraftResourceStruct
+		for _, resource := range rGetDepositedResources.GetPlayerInventory() {
+			playerResources = append(playerResources, CraftResourceStruct{
+				ResourceID:         resource.GetResource().GetID(),
+				ResourceName:       resource.GetResource().GetName(),
+				ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
+				ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
+				Quantity:           resource.GetQuantity(),
+				ResourceBase:       resource.GetResource().GetBase(),
+			})
+		}
 		for _, resource := range rGetPlayerResources.GetPlayerInventory() {
 			playerResources = append(playerResources, CraftResourceStruct{
 				ResourceID:         resource.GetResource().GetID(),

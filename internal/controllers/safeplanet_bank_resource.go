@@ -18,7 +18,7 @@ import (
 // ====================================
 type SafePlanetResourceBankController struct {
 	Payload struct {
-		Type string
+		Type       string
 		ResourceID uint32
 	}
 	Controller
@@ -86,6 +86,10 @@ func (c *SafePlanetResourceBankController) Validator() (hasErrors bool) {
 			c.CurrentState.Stage = 1
 		}
 	case 2:
+		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.all") && c.Payload.Type == "deposit" {
+			c.CurrentState.Stage = 3
+			return false
+		}
 		var haveResource bool
 		// Recupero nome item che il player vuole usare
 		var itemChoosed string
@@ -194,6 +198,8 @@ func (c *SafePlanetResourceBankController) Stage() {
 			}
 			playerInventories = rGetPlayerResources.GetPlayerInventory()
 			c.Payload.Type = "deposit"
+			// Aggiungo alla tastiera un tasto per recuperare tutto
+			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.all"))))
 		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
 			// Recupero Risorse e le metto
 			var rGetDepositedResources *pb.GetDepositedResourcesResponse
@@ -273,8 +279,32 @@ func (c *SafePlanetResourceBankController) Stage() {
 		if _, err = helpers.SendMessage(msg); err != nil {
 			c.Logger.Panic(err)
 		}
-		c.CurrentState.Stage = 3
+		c.CurrentState.Stage = 4
 	case 3:
+		// DEPOSITO TUTTO
+		var text string
+		text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.operation_done")
+
+		if _, err = config.App.Server.Connection.DepositAllResources(helpers.NewContext(1), &pb.DepositAllResourcesRequest{
+			PlayerID: c.Player.ID,
+		}); err != nil {
+			if strings.Contains(err.Error(), "no resources in inventory") {
+				text = helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.resource.transaction_error")
+			} else {
+				c.Logger.Panic(err)
+			}
+		}
+		// Invio messaggio
+		msg := helpers.NewMessage(c.ChatID, text)
+		msg.ParseMode = tgbotapi.ModeHTML
+		if _, err = helpers.SendMessage(msg); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Completo lo stato
+		c.CurrentState.Completed = true
+		c.Configurations.ControllerBack.To = &SafePlanetResourceBankController{}
+	case 4:
 		// Se la validazione è passata vuol dire che è stato
 		// inserito un importo valido e quindi posso eseguiore la transazione
 		// in base alla tipologia scelta

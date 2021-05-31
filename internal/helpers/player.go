@@ -39,12 +39,12 @@ func HandleUser(update tgbotapi.Update) (player *pb.Player, err error) {
 	}
 
 	// Verifico se esiste già un player registrato
-	rGetPlayerByUsername, _ := config.App.Server.Connection.GetPlayerByUsername(NewContext(1), &pb.GetPlayerByUsernameRequest{
-		Username: user.UserName,
+	rGetPlayerByChatID, _ := config.App.Server.Connection.GetPlayerByChatID(NewContext(1), &pb.GetPlayerByChatIDRequest{
+		ChatID: int64(user.ID),
 	})
 
 	// Recupero player
-	player = rGetPlayerByUsername.GetPlayer()
+	player = rGetPlayerByChatID.GetPlayer()
 
 	// Se il player non esiste allora lo registro
 	if player.GetID() == 0 {
