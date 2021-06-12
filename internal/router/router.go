@@ -72,7 +72,7 @@ var router = []Route{
 	{Route: "route.safeplanet.crafter.create", Controller: &controllers.SafePlanetCrafterCreateController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetCrafterCreateController)(nil)).Elem()},
 	{Route: "route.safeplanet.crafter.repair", Controller: &controllers.SafePlanetCrafterRepairController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetCrafterRepairController)(nil)).Elem()},
 	{Route: "route.safeplanet.crafter.decompose", Controller: &controllers.SafePlanetCrafterDecomposeController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetCrafterDecomposeController)(nil)).Elem()},
-
+	{Route: "route.safeplanet.bank.resources", Controller: &controllers.SafePlanetResourceBankController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetResourceBankController)(nil)).Elem()},
 	{Route: "route.safeplanet.market", Controller: &controllers.SafePlanetMarketController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMarketController)(nil)).Elem()},
 	{Route: "route.safeplanet.market.dealer", Controller: &controllers.SafePlanetMarketDealerController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMarketDealerController)(nil)).Elem()},
 	{Route: "route.safeplanet.market.gift", Controller: &controllers.SafePlanetMarketGiftController{}, Reflect: reflect.TypeOf((*controllers.SafePlanetMarketGiftController)(nil)).Elem()},
@@ -114,6 +114,8 @@ var router = []Route{
 
 	// Titan Planet
 	{Route: "route.titanplanet.tackle", Controller: &controllers.TitanPlanetTackleController{}, Reflect: reflect.TypeOf((*controllers.TitanPlanetTackleController)(nil)).Elem()},
+
+	{Route: "route.assault", Controller: &controllers.AssaultController{}, Reflect: reflect.TypeOf((*controllers.AssaultController)(nil)).Elem()},
 }
 
 // Routing - Effetua check sul tipo di messagio ed esegue un routing

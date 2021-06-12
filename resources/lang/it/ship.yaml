@@ -1,14 +1,16 @@
 # SHIP
-ship.intro: "Sali a bordo della tua nave 🚀 <b>%s</b> (<b>%s</b>) - <b>%s</b>\n\nQuale attività vorresti eseguire?"
+ship.intro: "Sali a bordo della tua nave 🚀\nQuale attività vorresti eseguire?\n\nStatistiche Nave:"
 
 # Travel
 ship.travel.land: "Atterra! 🛬"
 ship.travel.info: "Vuoi raggiungere un nuovo 🌏 <b>Pianeta</b>?"
-ship.travel.ship_stats: "\n\nStato della tua 🚀 <b>Nave</b>:"
+ship.travel.ship_stats: "\n\nNave: 🚀 <b>%s</b> (<b>%s</b>)"
+ship.travel.ship_type: "\nTipologia: <b>%s</b>"
 ship.travel.ship_engine: "\nMotori di livello: <b>%v</b>"
 ship.travel.ship_scanner: "\nScanner di livello: <b>%v</b>"
 ship.travel.ship_integrity: "\nIntegrità: 🔧<b>%v</b>%%"
 ship.travel.ship_carburante: "\nCarburante: ⛽<b>%v</b>%%"
+ship.travel.ship_cargo: "\nStiva: 📦<b>%d/%d</b>"
 ship.travel.tip: "\n\n📖: Effettuando una ricerca potrai trovare nuovi pianeti in base alla posizione attuale e alla potenza dello scanner della tua nave.\nIl tempo di raggiungimento è dato dalla forza dei motori della nave."
 ship.travel.current_position: "🗺 Coordinate correnti:"
 ship.travel.research: "Sono stati rilevati 🌏<b>%d</b> pianeti!\nQuale di questi vorresti raggiungere?"
@@ -54,7 +56,7 @@ ship.laboratory.wait_validator: "Il termine per la realizzazione del tuo oggetto
 ship.laboratory.item_does_not_exist: "L'item scelto non esiste!"
 
 # Rescue
-ship.travel.rescue.info: "🧰 Sei rimasto bloccato su questo pianeta?\n\nRichiedi supporto alla Coalzione.\nTramite un segnale la coalizione è in grado di teletrasportarti direttamente al pianeta sicuro più vicino.\n\nPer effettuare il soccorso sarà necessaria <b>1</b>💎"
+ship.travel.rescue.info: "🧰 Sei rimasto bloccato su questo pianeta?\n\nRichiedi supporto alla Coalizione.\nTramite un segnale la coalizione è in grado di teletrasportarti direttamente al pianeta sicuro più vicino.\n\nPer effettuare il soccorso sarà necessaria <b>1</b>💎"
 ship.travel.rescue.diamond: "💎 Richiedi Soccorso 💎"
 ship.travel.rescue.confirm: "<b>Sei sicuro di voler richiedere il soccorso?</b>\n⚠️ Verrà consumata <b>1</b>💎"
 ship.travel.rescue.confirmed: "Richiesta di soccorso inviata con successo, la coalizione risponde!"

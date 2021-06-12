@@ -34,6 +34,7 @@ func (c *PlayerPartyAddPlayerController) Configuration(player *pb.Player, update
 			},
 			BreakerPerStage: map[int32][]string{
 				1: {"route.breaker.menu"},
+				2: {"route.breaker.menu"},
 			},
 		},
 	}

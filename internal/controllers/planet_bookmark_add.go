@@ -5,6 +5,7 @@ import (
 	"bitbucket.org/no-name-game/nn-telegram/config"
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"strings"
 )
 
 // ====================================
@@ -51,10 +52,23 @@ func (c *PlanetBookmarkAddController) Handle(player *pb.Player, update tgbotapi.
 	}
 
 	// Aggiungo pianeta ai preferiti
-	_, _ = config.App.Server.Connection.AddPlanetBookmark(helpers.NewContext(1), &pb.AddPlanetBookmarkRequest{
+	if _, err = config.App.Server.Connection.AddPlanetBookmark(helpers.NewContext(1), &pb.AddPlanetBookmarkRequest{
 		PlanetID: playerPosition.GetID(),
 		PlayerID: c.Player.GetID(),
-	})
+	}); err != nil {
+		if strings.Contains(err.Error(), "bookmarks limit reached") {
+			// Raggiunto limite bookmark
+			msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "planet.bookmark.error"))
+			msg.ParseMode = tgbotapi.ModeHTML
+
+			if _, err := helpers.SendMessage(msg); err != nil {
+				c.Logger.Panic(err)
+			}
+
+			c.CurrentState.Completed = true
+			return
+		}
+	}
 
 	msg := helpers.NewMessage(c.ChatID, helpers.Trans(player.Language.Slug, "planet.bookmark.add_ok"))
 	msg.ParseMode = tgbotapi.ModeHTML

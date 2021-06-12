@@ -41,6 +41,7 @@ route.planet.domain: "🏴 Domination"
 #Safe planet
 route.safeplanet.coalition.daily_reward: "📦 Daily reward"
 route.safeplanet.bank: "🏦 Bank"
+route.safeplanet.bank.resources: "📦 Magazzino"
 route.safeplanet.crafter: "🛠 Gunsmith"
 route.safeplanet.crafter.create: "🛠 Create"
 route.safeplanet.crafter.repair: "✨ Repair Weapon"
@@ -90,3 +91,6 @@ route.breaker.back: "⬅️ Back"
 route.breaker.clears: "⬅️ Leave"
 #INFO
 route.info: "🗒 Rules"
+
+#ASSAULT:
+route.assault: "🛰 Orbita"

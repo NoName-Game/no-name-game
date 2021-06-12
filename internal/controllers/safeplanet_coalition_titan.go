@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 	"bitbucket.org/no-name-game/nn-telegram/config"
@@ -101,8 +103,9 @@ func (c *SafePlanetTitanController) Validator() (hasErrors bool) {
 		}
 
 		if len(rTitanDiscovered.GetTitans()) > 0 {
+			titanMsg := strings.Split(c.Update.Message.Text, " ")[1]
 			for _, titan := range rTitanDiscovered.GetTitans() {
-				if c.Update.Message.Text == titan.GetName() {
+				if titanMsg == titan.GetName() {
 					return false
 				}
 			}
@@ -134,9 +137,19 @@ func (c *SafePlanetTitanController) Stage() {
 		if len(rTitanDiscovered.GetTitans()) > 0 {
 			restsRecap += helpers.Trans(c.Player.Language.Slug, "safeplanet.titan.choice")
 			for _, titan := range rTitanDiscovered.GetTitans() {
+				var titanStatus = "⚔️"
+				if titan.GetKilledAt() != nil {
+					titanStatus = "☠️"
+				}
+
 				newKeyboardRow := tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
-						titan.GetName(),
+						fmt.Sprintf("%s %s 💫 %v 🎖%v",
+							titanStatus,
+							titan.GetName(),
+							titan.GetPlanetSystemID(),
+							titan.GetPlanetSystemID()*15,
+						),
 					),
 				)
 				keyboardRow = append(keyboardRow, newKeyboardRow)
@@ -166,10 +179,12 @@ func (c *SafePlanetTitanController) Stage() {
 
 	// In questo stage avvio effettivamente il riposo
 	case 1:
+		titanMsg := strings.Split(c.Update.Message.Text, " ")[1]
+
 		// Recupero pianeta da titano
 		var rGetTitanByName *pb.GetTitanByNameResponse
 		if rGetTitanByName, err = config.App.Server.Connection.GetTitanByName(helpers.NewContext(1), &pb.GetTitanByNameRequest{
-			Name: c.Update.Message.Text,
+			Name: titanMsg,
 		}); err != nil {
 			c.Logger.Panic(err)
 		}

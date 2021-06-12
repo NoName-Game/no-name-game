@@ -13,6 +13,6 @@ menu.titanplanet.titan_dead: "Defeated by brave explorers! Now everything seems 
 #Travel
 menu.travel: "🚀Travelling from 🌏<b>%s</b> towards 🌏<b>%s</b>...\n"
 #Annuncement
-menu.annuncement_1: "We're waiting for you on @nonamegroupofficial"
-menu.annuncement_2: "Follow @nonamechangelog for the latests updates"
-menu.annuncement_3: "Follow @nonamegamenews for the latest news"
+menu.annuncement_1: "<i>We're waiting for you on @nonamegroupofficial</i>"
+menu.annuncement_2: "<i>Follow @nonamechangelog for the latests updates</i>"
+menu.annuncement_3: "<i>Follow @nonamegamenews for the latest news</i>"

@@ -27,3 +27,5 @@ safeplanet.mission.type.kill_mob.description.small: "Eliminare 🐺 <b>%s</b> av
 safeplanet.mission.type.resources_finding: "Recupero risorse"
 safeplanet.mission.type.resources_finding.description: "🔖 <b>Obbiettivo</b>:\nTrovare e recuperare 💠 <b>%v</b> x %s<b>%v</b> (%s) %s"
 safeplanet.mission.type.resources_finding.description.small: "Trovare <b>%v</b> x %s<b>%v</b> (%s) %s"
+
+safeplanet.mission.cooldown: "La Coalizione ha bisogno di un po' di tempo per registrare l'ultima pratica effettuata, <b>riprova più tardi</b>.\n\nRicorda 📖:\nIl tempo di attesa fra una missione e l'altra è di circa <b>15 Minuti</b>!"

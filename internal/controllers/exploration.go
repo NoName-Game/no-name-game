@@ -410,7 +410,18 @@ func (c *ExplorationController) Stage() {
 			PlayerID: c.Player.ID,
 			QuickEnd: quickEnd,
 		}); err != nil {
-			c.Logger.Panic(err)
+			if strings.Contains(err.Error(), "inventory full") {
+				msg := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "inventory.inventory_full"))
+				msg.ParseMode = tgbotapi.ModeHTML
+				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				if _, err = helpers.SendMessage(msg); err != nil {
+					c.Logger.Panic(err)
+				}
+				c.CurrentState.Completed = true
+				return
+			} else {
+				c.Logger.Panic(err)
+			}
 		}
 
 		var msg tgbotapi.MessageConfig
@@ -440,6 +451,7 @@ func (c *ExplorationController) Stage() {
 			// Invio messaggio di chiusura missione
 			msg = helpers.NewMessage(c.Player.ChatID,
 				helpers.Trans(c.Player.Language.Slug, "exploration.extraction_ended",
+					c.Data.PlayerCurrentPosition.Name,
 					dropList,
 					rExplorationEnd.GetExp(),
 				),

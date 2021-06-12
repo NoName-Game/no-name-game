@@ -1,6 +1,6 @@
 ---
 #PLAYER
-player.datails.card: "👨🏼‍🚀 <b>%s</b> \n♥️ <b>%v</b>/%v HP\n🏵 Exp: <b>%v</b>/<b>%v</b> 🎖LvL: <b>%v</b>\n🏷 Rank: <b>%s</b> -> <b>%v</b>/<b>%v</b>\n💰 <b>%v</b> 💎 <b>%v</b> 🧿 <b>%v</b>\n"
+player.datails.card: "👨🏼‍🚀 <b>%s</b> \n💢 <b>%s</b> \n♥️ <b>%v</b>/%v HP\n🏵 Exp: <b>%v</b>/<b>%v</b> 🎖LvL: <b>%v</b>\n🏷 Rank: <b>%s</b> -> <b>%v</b>/<b>%v</b>\n💰 <b>%v</b> 💎 <b>%v</b> 🧿 <b>%v</b>\n"
 player.datails.planet_visited: "\n🌏 <b>Planets</b> visited: <b>%d</b>"
 player.datails.system_visited: "\n💫 <b>Systems</b> visited: <b>%d</b>"
 #Guild
@@ -31,6 +31,7 @@ inventory.armors.zero_equipment: "\n❌ None\n"
 inventory.weapons.no_one: "You don't have any weapon to equip"
 inventory.weapons.what: "Which one from your 🗡<b>Weapons</b> would you like to equip?"
 inventory.weapons.zero_equipment: "\n❌ None\n"
+inventory.inventory_full: "La stiva é al completo. Non puoi trasportare altre risorse!"
 #Equip
 inventory.equip.equipped: "<b>Your current equipment:</b>"
 inventory.equip.error: "The item you selected cannot be equipped."

@@ -17,6 +17,6 @@ menu.titanplanet.titan_dead: "Sconfitto da valorosi viaggiatori! Ora tutto sembr
 menu.travel: "In 🚀viaggio da 🌏<b>%s</b> verso 🌏<b>%s</b>...\n"
 
 # Annuncement
-menu.annuncement_1: "Ti aspettiamo su @nonamegroupofficial"
-menu.annuncement_2: "Segui @nonamechangelog per gli ultimi aggiornamenti"
-menu.annuncement_3: "Segui @nonamegamenews per le ultime notizie"
+menu.annuncement_1: "<i>Ti aspettiamo su @nonamegroupofficial</i>"
+menu.annuncement_2: "<i>Segui @nonamechangelog per gli ultimi aggiornamenti</i>"
+menu.annuncement_3: "<i>Segui @nonamegamenews per le ultime notizie</i>"

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
-
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
 	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
@@ -60,14 +58,6 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 		return
 	}
 
-	// Recupero nave attualemente attiva
-	var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
-	if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
-		PlayerID: c.Player.GetID(),
-	}); err != nil {
-		c.Logger.Panic(err)
-	}
-
 	// Sostituisco bottone navigazione con atterra
 	var travel = "route.ship.travel.finding"
 	for _, state := range c.Data.PlayerActiveStates {
@@ -86,13 +76,8 @@ func (c *ShipTravelController) Handle(player *pb.Player, update tgbotapi.Update)
 
 	// Invio messaggio con recap
 	msg := helpers.NewMessage(c.ChatID,
-		fmt.Sprintf("%s %s %s %s %s %s %s",
+		fmt.Sprintf("%s %s",
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.info"),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats"),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetEngine()),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetRadar()),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_integrity", rGetPlayerShipEquipped.GetShip().GetIntegrity()),
-			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),
 			helpers.Trans(c.Player.Language.Slug, "ship.travel.tip"),
 		))
 	msg.ParseMode = tgbotapi.ModeHTML

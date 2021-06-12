@@ -113,28 +113,30 @@ func (c *PlayerInventoryResourceController) GetResourcesRecap() string {
 	var undergroundCounter, surfaceCounter, atmosphereCounter int32
 	var vcCounter, cCounter, uCounter, rCounter, urCounter, lCoutner int32
 	for _, inventory := range rGetPlayerResource.GetPlayerInventory() {
-		switch inventory.GetResource().GetResourceCategoryID() {
-		case 1:
-			undergroundCounter++
-		case 2:
-			surfaceCounter++
-		case 3:
-			atmosphereCounter++
-		}
+		if inventory.Quantity > 0 {
+			switch inventory.GetResource().GetResourceCategoryID() {
+			case 1:
+				undergroundCounter++
+			case 2:
+				surfaceCounter++
+			case 3:
+				atmosphereCounter++
+			}
 
-		switch inventory.GetResource().GetRarityID() {
-		case 1:
-			vcCounter += inventory.GetQuantity()
-		case 2:
-			cCounter += inventory.GetQuantity()
-		case 3:
-			uCounter += inventory.GetQuantity()
-		case 4:
-			rCounter += inventory.GetQuantity()
-		case 5:
-			urCounter += inventory.GetQuantity()
-		case 6:
-			lCoutner += inventory.GetQuantity()
+			switch inventory.GetResource().GetRarityID() {
+			case 1:
+				vcCounter += inventory.GetQuantity()
+			case 2:
+				cCounter += inventory.GetQuantity()
+			case 3:
+				uCounter += inventory.GetQuantity()
+			case 4:
+				rCounter += inventory.GetQuantity()
+			case 5:
+				urCounter += inventory.GetQuantity()
+			case 6:
+				lCoutner += inventory.GetQuantity()
+			}
 		}
 	}
 

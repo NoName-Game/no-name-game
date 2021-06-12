@@ -1,9 +1,8 @@
 package controllers
 
 import (
-	"strings"
-
 	"bitbucket.org/no-name-game/nn-telegram/config"
+	"fmt"
 
 	"bitbucket.org/no-name-game/nn-grpc/build/pb"
 
@@ -37,6 +36,7 @@ func (c *ShipController) Configuration(player *pb.Player, update tgbotapi.Update
 				0: {"route.breaker.menu"},
 			},
 			AllowedControllers: []string{
+				"route.assault",
 				"route.ship.rests",
 				"route.ship.travel",
 				"route.ship.laboratory",
@@ -67,13 +67,28 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 		c.Logger.Panic(err)
 	}
 
+	var rPlayerInventory *pb.GetPlayerResourcesResponse
+	if rPlayerInventory, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{PlayerID: c.Player.ID}); err != nil {
+		c.Logger.Panic(err)
+	}
+
+	var inventoryLen int32 = 0
+	for _, resource := range rPlayerInventory.GetPlayerInventory() {
+		inventoryLen += resource.Quantity
+	}
+
 	// Invio messaggio
 	msg := helpers.NewMessage(c.ChatID,
-		helpers.Trans(c.Player.Language.Slug, "ship.intro",
-			rGetPlayerShipEquipped.GetShip().Name, strings.ToUpper(rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
-			rGetPlayerShipEquipped.GetShip().GetShipCategory().GetName(),
-		),
-	)
+		fmt.Sprintf("%s %s %s %s %s %s %s %s",
+			helpers.Trans(c.Player.Language.Slug, "ship.intro"),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_stats", rGetPlayerShipEquipped.GetShip().GetName(), rGetPlayerShipEquipped.GetShip().GetRarity().GetSlug()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_engine", rGetPlayerShipEquipped.GetShip().GetEngine()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_type", helpers.Trans(c.Player.GetLanguage().GetSlug(), fmt.Sprintf("ship.category.%s", rGetPlayerShipEquipped.GetShip().GetShipCategory().GetSlug()))),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_scanner", rGetPlayerShipEquipped.GetShip().GetRadar()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_integrity", rGetPlayerShipEquipped.GetShip().GetIntegrity()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_carburante", rGetPlayerShipEquipped.GetShip().GetTank()),
+			helpers.Trans(c.Player.Language.Slug, "ship.travel.ship_cargo", inventoryLen, rGetPlayerShipEquipped.GetShip().GetCargo()),
+		))
 	msg.ParseMode = tgbotapi.ModeHTML
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -83,6 +98,7 @@ func (c *ShipController) Handle(player *pb.Player, update tgbotapi.Update) {
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.rests")),
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.ship.laboratory")),
 		),
+		//tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.assault"))),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.breaker.menu")),
 		),
