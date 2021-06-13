@@ -80,10 +80,18 @@ func (c *SafePlanetResourceBankController) Validator() (hasErrors bool) {
 	// Verifico tipologia di transazione
 	// ##################################################################################################
 	case 1:
-		if helpers.InArray(c.Update.Message.Text, []string{
+		/*if helpers.InArray(c.Update.Message.Text, []string{
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"),
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"),
 		}) {
+			c.CurrentState.Stage = 1
+		}*/
+		switch c.Update.Message.Text {
+		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
+			c.Payload.Type = "deposit"
+			c.CurrentState.Stage = 1
+		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
+			c.Payload.Type = "withdraws"
 			c.CurrentState.Stage = 1
 		}
 	case 2:
@@ -200,8 +208,8 @@ func (c *SafePlanetResourceBankController) Stage() {
 	case 1:
 		var keyboardRow [][]tgbotapi.KeyboardButton
 		var playerInventories []*pb.PlayerInventory
-		switch c.Update.Message.Text {
-		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.deposit"):
+		switch c.Payload.Type {
+		case "deposit":
 			// Recupero tutte le risorse del player
 			var rGetPlayerResources *pb.GetPlayerResourcesResponse
 			if rGetPlayerResources, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
@@ -210,10 +218,9 @@ func (c *SafePlanetResourceBankController) Stage() {
 				c.Logger.Panic(err)
 			}
 			playerInventories = rGetPlayerResources.GetPlayerInventory()
-			c.Payload.Type = "deposit"
 			// Aggiungo alla tastiera un tasto per recuperare tutto
 			keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.all"))))
-		case helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.withdraws"):
+		case "withdraws":
 			// Recupero Risorse e le metto
 			var rGetDepositedResources *pb.GetDepositedResourcesResponse
 			if rGetDepositedResources, err = config.App.Server.Connection.GetDepositedResources(helpers.NewContext(1), &pb.GetDepositedResourcesRequest{
@@ -222,9 +229,7 @@ func (c *SafePlanetResourceBankController) Stage() {
 				c.Logger.Error(err.Error())
 			}
 			playerInventories = rGetDepositedResources.GetPlayerInventory()
-			c.Payload.Type = "withdraws"
 		}
-
 		var start, end int
 		if start = int(c.Payload.Offset) * 50; start >= len(playerInventories) {
 			start = 0
