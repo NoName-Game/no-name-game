@@ -20,6 +20,7 @@ type SafePlanetResourceBankController struct {
 	Payload struct {
 		Type       string
 		ResourceID uint32
+		Offset     uint32
 	}
 	Controller
 }
@@ -86,6 +87,18 @@ func (c *SafePlanetResourceBankController) Validator() (hasErrors bool) {
 			c.CurrentState.Stage = 1
 		}
 	case 2:
+		switch c.Update.Message.Text {
+		case helpers.Trans(c.Player.Language.Slug, "back"):
+			if c.Payload.Offset > 0 {
+				c.Payload.Offset--
+			}
+			c.CurrentState.Stage = 1
+			return false
+		case helpers.Trans(c.Player.Language.Slug, "next"):
+			c.Payload.Offset++
+			c.CurrentState.Stage = 1
+			return false
+		}
 		if c.Update.Message.Text == helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.all") && c.Payload.Type == "deposit" {
 			c.CurrentState.Stage = 3
 			return false
@@ -212,12 +225,19 @@ func (c *SafePlanetResourceBankController) Stage() {
 			c.Payload.Type = "withdraws"
 		}
 
-		for _, resource := range playerInventories {
+		var start, end int
+		if start = int(c.Payload.Offset) * 50; start >= len(playerInventories) {
+			start = 0
+		}
+		if end = start + 50; end >= len(playerInventories) {
+			end = len(playerInventories)
+		}
+		for _, resource := range playerInventories[start:end] {
 			if resource.GetQuantity() > 0 {
 				keyboardRow = append(keyboardRow, tgbotapi.NewKeyboardButtonRow(
 					tgbotapi.NewKeyboardButton(
 						fmt.Sprintf(
-							"%s - %s (%s) (%v) %s\n",
+							"%s - %s (%s) (%v) %s",
 							helpers.GetResourceCategoryIcons(resource.GetResource().GetResourceCategoryID()),
 							resource.GetResource().GetName(),
 							strings.ToUpper(resource.GetResource().GetRarity().GetSlug()),
@@ -227,6 +247,16 @@ func (c *SafePlanetResourceBankController) Stage() {
 					),
 				))
 			}
+		}
+
+		if len(playerInventories) > 50 {
+			// appendo i bottoni next e back per cambiare l'offset
+			var row []tgbotapi.KeyboardButton
+			if c.Payload.Offset > 0 {
+				row = append(row, tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "back")))
+			}
+			row = append(row, tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "next")))
+			keyboardRow = append(keyboardRow, row)
 		}
 
 		// Aggiungo tasti back and clears
