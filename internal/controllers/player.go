@@ -35,6 +35,7 @@ func (c *PlayerController) Configuration(player *pb.Player, update tgbotapi.Upda
 				"route.player.guild",
 				"route.player.party",
 				"route.player.achievements",
+				"route.player.emblems",
 			},
 		},
 	}
@@ -180,6 +181,7 @@ func (c *PlayerController) Handle(player *pb.Player, update tgbotapi.Update) {
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.player.achievements")),
+			tgbotapi.NewKeyboardButton(helpers.Trans(c.Player.Language.Slug, "route.player.emblems")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(helpers.Trans(player.Language.Slug, "route.breaker.menu")),
