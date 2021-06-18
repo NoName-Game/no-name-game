@@ -36,6 +36,8 @@ armors: "🛡 Armature"
 weapon: "🗡 Arma"
 weapons: "🗡 Armi"
 complete_with_diamond: "💎 Concludi Rapidamente 💎"
+next: "Prossimo"
+back: "Indietro"
 
 # Ship Category
 ship.category.light: "Leggera"

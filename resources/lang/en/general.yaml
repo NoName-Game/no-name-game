@@ -37,6 +37,8 @@ armors: "🛡 Armors"
 weapon: "🗡 Weapon"
 weapons: "🗡 Weapons"
 complete_with_diamond: "💎 Finish now 💎"
+next: "Next"
+back: "Back"
 #Ship Category
 ship.category.light: "Light"
 ship.category.normal: "Normal"
