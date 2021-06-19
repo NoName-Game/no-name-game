@@ -52,6 +52,7 @@ var router = []Route{
 	{Route: "route.player.party.add_player", Controller: &controllers.PlayerPartyAddPlayerController{}, Reflect: reflect.TypeOf((*controllers.PlayerPartyAddPlayerController)(nil)).Elem()},
 	{Route: "route.player.party.remove_player", Controller: &controllers.PlayerPartyRemovePlayerController{}, Reflect: reflect.TypeOf((*controllers.PlayerPartyRemovePlayerController)(nil)).Elem()},
 	{Route: "route.player.achievements", Controller: &controllers.PlayerAchievementsController{}, Reflect: reflect.TypeOf((*controllers.PlayerAchievementsController)(nil)).Elem()},
+	{Route: "route.player.emblems", Controller: &controllers.PlayerEmblemsController{}, Reflect: reflect.TypeOf((*controllers.PlayerEmblemsController)(nil)).Elem()},
 	{Route: "route.player.inventory", Controller: &controllers.PlayerInventoryController{}, Reflect: reflect.TypeOf((*controllers.PlayerInventoryController)(nil)).Elem()},
 	{Route: "route.player.inventory.resources", Controller: &controllers.PlayerInventoryResourceController{}, Reflect: reflect.TypeOf((*controllers.PlayerInventoryResourceController)(nil)).Elem()},
 	{Route: "route.player.inventory.items", Controller: &controllers.PlayerInventoryItemController{}, Reflect: reflect.TypeOf((*controllers.PlayerInventoryItemController)(nil)).Elem()},
