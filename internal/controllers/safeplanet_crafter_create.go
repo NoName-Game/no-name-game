@@ -258,19 +258,13 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 		// Aggiorno stato
 		c.CurrentState.Stage = 2
 	case 2:
-		var rGetPlayerResources *pb.GetPlayerResourcesResponse
-		if rGetPlayerResources, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{
-			PlayerID: c.Player.ID,
-		}); err != nil {
-			c.Logger.Panic(err)
-		}
 		var rGetDepositedResources *pb.GetDepositedResourcesResponse
 		if rGetDepositedResources, err = config.App.Server.Connection.GetDepositedResources(helpers.NewContext(1), &pb.GetDepositedResourcesRequest{PlayerID: c.Player.ID}); err != nil {
 			c.Logger.Panic(err)
 		}
 
 		// Se l'inventario è vuoto allora concludi
-		if len(rGetPlayerResources.GetPlayerInventory()) <= 0 || len(rGetDepositedResources.GetPlayerInventory()) <= 0 {
+		if len(rGetDepositedResources.GetPlayerInventory()) <= 0 {
 			message := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resources"))
 			message.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 				tgbotapi.NewKeyboardButtonRow(
@@ -308,16 +302,6 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				ResourceBase:       resource.GetResource().GetBase(),
 			})
 		}
-		for _, resource := range rGetPlayerResources.GetPlayerInventory() {
-			playerResources = append(playerResources, CraftResourceStruct{
-				ResourceID:         resource.GetResource().GetID(),
-				ResourceName:       resource.GetResource().GetName(),
-				ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
-				ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
-				Quantity:           resource.GetQuantity(),
-				ResourceBase:       resource.GetResource().GetBase(),
-			})
-		}
 
 		// Se è stato aggiunto una risorsa ovvero quando viene processto il messaggio "aggiungi"
 		if c.Payload.AddResource {
@@ -343,11 +327,12 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 				if resource.ResourceID == choosedResource.GetID() {
 					// Controllo che il player abbia effettivamente la quantità richiesta.
 					if resource.Quantity >= c.Payload.SingleQuantity {
+
 						hasResource = true
 						// Se il player ha effettivamente la risorsa creo/incremento
 						// Incremento quantitativo risorse
 						if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
-							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity < resource.Quantity {
+							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity <=	 resource.Quantity {
 								c.Payload.Resources[choosedResource.GetID()] += c.Payload.SingleQuantity
 								c.Payload.Price += int32(10*choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
 							}
