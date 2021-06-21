@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -333,7 +332,6 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 						// Se il player ha effettivamente la risorsa creo/incremento
 						// Incremento quantitativo risorse
 						if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
-							log.Println("Ehy? ", c.Payload.SingleQuantity)
 							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity <=	 resource.Quantity {
 								c.Payload.Resources[choosedResource.GetID()] += c.Payload.SingleQuantity
 								c.Payload.Price += int32(10*choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
