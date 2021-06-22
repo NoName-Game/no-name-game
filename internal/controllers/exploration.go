@@ -331,6 +331,24 @@ func (c *ExplorationController) Stage() {
 			)
 		}
 
+		// TODO modificare con un metodo apposito che recuperi il quantitativo
+		var rPlayerInventory *pb.GetPlayerResourcesResponse
+		if rPlayerInventory, err = config.App.Server.Connection.GetPlayerResources(helpers.NewContext(1), &pb.GetPlayerResourcesRequest{PlayerID: c.Player.ID}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		var inventoryLen int32 = 0
+		for _, resource := range rPlayerInventory.GetPlayerInventory() {
+			inventoryLen += resource.Quantity
+		}
+
+		var rGetPlayerShipEquipped *pb.GetPlayerShipEquippedResponse
+		if rGetPlayerShipEquipped, err = config.App.Server.Connection.GetPlayerShipEquipped(helpers.NewContext(1), &pb.GetPlayerShipEquippedRequest{
+			PlayerID: c.Player.GetID(),
+		}); err != nil {
+			c.Logger.Panic(err)
+		}
+
 		// Invio messaggio di riepilogo con le materie recuperate e chiedo se vuole continuare o ritornare
 		msg := helpers.NewMessage(c.Player.ChatID,
 			helpers.Trans(
@@ -338,6 +356,7 @@ func (c *ExplorationController) Stage() {
 				"exploration.extraction_recap",
 				cycleResourcesMessage,
 				allResourcesMessage,
+				rGetPlayerShipEquipped.GetShip().GetCargo()-inventoryLen,
 			),
 		)
 

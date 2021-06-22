@@ -9,7 +9,7 @@ safeplanet.crafting.info: "📖: Select what type of weapon or armor you would l
 safeplanet.crafting.armor.type: "Which part of the body would you like to protect?"
 safeplanet.crafting.add: "Add"
 safeplanet.crafting.choose_resources: "Which 💠 <b>Resources</b> would you like to use?\n\nThe production cost: <b>%v</b>💰\n%s\n"
-safeplanet.crafting.min_resources: "⚠️ Minimum resources required for the craft: <b>%v</b>"
+safeplanet.crafting.min_resources: "⚠️ Resources required to start the craft: <b>%v</b>"
 safeplanet.crafting.confirm_choose_resources: "Are you sure you want to proceed with the following order?\n\nThe production cost: <b>%v</b>💰\n%s"
 safeplanet.crafting.wait: "<b>Perfect!</b> I'll get immediately to work!\nYour order will be ready by <b>%s</b>, come back later."
 safeplanet.crafting.wait_validation: "I'm still working on you request.\nIt will be ready at <b>%s</b>, come back later."
@@ -17,6 +17,7 @@ safeplanet.crafting.craft_completed: "Here's your order!\nI hope you like it and
 safeplanet.crafting.no_resources: "I'm sorry but you can't add any more units of this resource!"
 safeplanet.crafting.no_resource: "You don't have this resource!"
 safeplanet.crafting.how_many: "How many resources do you want to use?"
+safeplanet.crafting.zero_inventory: "Il tuo inventario è vuoto!"
 #Crafter - Repair
 safeplanet.crafting.repair.what: "Which one of your damaged weapons would you like to repair?"
 safeplanet.crafting.repair.confirm: "I can repair your <b>%s</b> immediately!\nAre you sure you want to repair it for 💰<b>%v</b>?"

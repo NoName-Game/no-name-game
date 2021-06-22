@@ -43,6 +43,7 @@ func (c *SafePlanetResourceBankController) Configuration(player *pb.Player, upda
 				1: {"route.breaker.menu", "route.breaker.back"},
 				2: {"route.breaker.back"},
 				3: {"route.breaker.back"},
+				4: {"route.breaker.back"},
 			},
 		},
 	}

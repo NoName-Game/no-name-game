@@ -196,6 +196,31 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 	switch c.CurrentState.Stage {
 	// Invio messaggio con recap stats
 	case 0:
+		// Controllo che l'inventario non sia vuoto
+		var rGetDepositedResources *pb.GetDepositedResourcesResponse
+		if rGetDepositedResources, err = config.App.Server.Connection.GetDepositedResources(helpers.NewContext(1), &pb.GetDepositedResourcesRequest{PlayerID: c.Player.ID}); err != nil {
+			c.Logger.Panic(err)
+		}
+
+		// Se l'inventario è vuoto allora concludi
+		if len(rGetDepositedResources.GetPlayerInventory()) <= 0 {
+
+			message := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.zero_inventory"))
+			message.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+				tgbotapi.NewKeyboardButtonRow(
+					tgbotapi.NewKeyboardButton(
+						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
+					),
+				),
+			)
+			if _, err = helpers.SendMessage(message); err != nil {
+				c.Logger.Panic(err)
+			}
+			// Completo lo stato
+			c.CurrentState.Completed = true
+			return
+		}
+
 		startMsg := fmt.Sprintf("%s\n\n%s",
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.what"),
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.info"),
@@ -263,24 +288,6 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 			c.Logger.Panic(err)
 		}
 
-		// Se l'inventario è vuoto allora concludi
-		if len(rGetDepositedResources.GetPlayerInventory()) <= 0 {
-			message := helpers.NewMessage(c.Player.ChatID, helpers.Trans(c.Player.Language.Slug, "safeplanet.crafting.no_resources"))
-			message.ReplyMarkup = tgbotapi.NewReplyKeyboard(
-				tgbotapi.NewKeyboardButtonRow(
-					tgbotapi.NewKeyboardButton(
-						helpers.Trans(c.Player.Language.Slug, "route.breaker.back"),
-					),
-				),
-			)
-
-			if _, err = helpers.SendMessage(message); err != nil {
-				c.Logger.Panic(err)
-			}
-			// Completo lo stato
-			c.CurrentState.Completed = true
-		}
-
 		type CraftResourceStruct struct {
 			ResourceName       string
 			ResourceRarity     string
@@ -292,15 +299,19 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 
 		// Mappo tutte le risorse del player
 		var playerResources []CraftResourceStruct
-		for _, resource := range rGetDepositedResources.GetPlayerInventory() {
-			playerResources = append(playerResources, CraftResourceStruct{
-				ResourceID:         resource.GetResource().GetID(),
-				ResourceName:       resource.GetResource().GetName(),
-				ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
-				ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
-				Quantity:           resource.GetQuantity(),
-				ResourceBase:       resource.GetResource().GetBase(),
-			})
+
+		// Se l'inventario è vuoto allora concludi
+		if len(rGetDepositedResources.GetPlayerInventory()) > 0 {
+			for _, resource := range rGetDepositedResources.GetPlayerInventory() {
+				playerResources = append(playerResources, CraftResourceStruct{
+					ResourceID:         resource.GetResource().GetID(),
+					ResourceName:       resource.GetResource().GetName(),
+					ResourceRarity:     resource.GetResource().GetRarity().GetSlug(),
+					ResourceCategoryID: resource.GetResource().GetResourceCategoryID(),
+					Quantity:           resource.GetQuantity(),
+					ResourceBase:       resource.GetResource().GetBase(),
+				})
+			}
 		}
 
 		// Se è stato aggiunto una risorsa ovvero quando viene processto il messaggio "aggiungi"
