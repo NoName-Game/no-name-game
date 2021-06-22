@@ -116,11 +116,11 @@ func (c *PlayerInventoryResourceController) GetResourcesRecap() string {
 		if inventory.Quantity > 0 {
 			switch inventory.GetResource().GetResourceCategoryID() {
 			case 1:
-				undergroundCounter++
+				undergroundCounter += inventory.GetQuantity()
 			case 2:
-				surfaceCounter++
+				surfaceCounter += inventory.GetQuantity()
 			case 3:
-				atmosphereCounter++
+				atmosphereCounter += inventory.GetQuantity()
 			}
 
 			switch inventory.GetResource().GetRarityID() {
