@@ -183,8 +183,11 @@ func (c *SafePlanetResourceBankController) Stage() {
 			}
 		}
 
-		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s",
+		resourceRecap := c.GetResourcesRecap(rGetDepositedResources.GetPlayerInventory())
+
+		msg := helpers.NewMessage(c.Player.ChatID, fmt.Sprintf("%s\n\n%s\n%s",
 			helpers.Trans(c.Player.Language.Slug, "safeplanet.bank.info"),
+			resourceRecap,
 			helpers.Trans(
 				c.Player.Language.Slug,
 				"safeplanet.bank.resource.account_details",
@@ -394,4 +397,41 @@ func (c *SafePlanetResourceBankController) Stage() {
 	}
 
 	return
+}
+
+func (c *SafePlanetResourceBankController) GetResourcesRecap(playerInventory []*pb.PlayerInventory) string {
+
+	var undergroundCounter, surfaceCounter, atmosphereCounter int32
+	var vcCounter, cCounter, uCounter, rCounter, urCounter, lCounter int32
+	for _, inventory := range playerInventory {
+		if inventory.Quantity > 0 {
+			switch inventory.GetResource().GetResourceCategoryID() {
+			case 1:
+				undergroundCounter += inventory.GetQuantity()
+			case 2:
+				surfaceCounter += inventory.GetQuantity()
+			case 3:
+				atmosphereCounter += inventory.GetQuantity()
+			}
+
+			switch inventory.GetResource().GetRarityID() {
+			case 1:
+				vcCounter += inventory.GetQuantity()
+			case 2:
+				cCounter += inventory.GetQuantity()
+			case 3:
+				uCounter += inventory.GetQuantity()
+			case 4:
+				rCounter += inventory.GetQuantity()
+			case 5:
+				urCounter += inventory.GetQuantity()
+			case 6:
+				lCounter += inventory.GetQuantity()
+			}
+		}
+	}
+	return helpers.Trans(c.Player.GetLanguage().GetSlug(), "inventory.recap.all",
+		undergroundCounter, surfaceCounter, atmosphereCounter,
+		vcCounter, cCounter, uCounter, rCounter, urCounter, lCounter,
+	)
 }
