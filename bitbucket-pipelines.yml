@@ -2,6 +2,10 @@ image: golang
 
 pipelines:
   default:
+    - step:
+        name: Test echo
+        script:
+          - echo "test echo"
       - step:
           name: Runner Setup
           image: guglio/dind-buildx:latest
@@ -12,12 +16,8 @@ pipelines:
             - docker
           script:
             - echo "Executing on self-hosted runner"
-            - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
-            - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 .
-      - step:
-          name: Test echo
-          script:
-            - echo "test echo"
+#            - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+#            - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 .
 definitions:
   services:
     docker: # can only be used with a self-hosted runner
