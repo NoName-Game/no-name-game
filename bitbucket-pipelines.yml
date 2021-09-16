@@ -1,0 +1,43 @@
+image: golang
+
+pipelines:
+  default:
+      - step:
+          name: Runner Setup
+          image: guglio/dind-buildx:latest
+          runs-on:
+            - valkyrie
+            - self.hosted
+          services:
+            - docker
+          script:
+            - echo "Executing on self-hosted runner"
+            - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+            - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 .
+      - step:
+          name: Test echo
+          script:
+            - echo "test echo"
+definitions:
+  services:
+    docker: # can only be used with a self-hosted runner
+      image: docker:dind
+
+#pipelines:
+#  pull-requests:
+#    "**":
+#      - step:
+#          script:
+#            - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game
+#            - cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
+#
+#            # Clono SDK
+#            - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
+#
+#            # Linter checks
+#            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.30.0
+#
+#            # Build and test
+#            - cd ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
+#            - golangci-lint run
+#            - go build -v
