@@ -2,10 +2,10 @@ image: golang
 
 pipelines:
   default:
-    - step:
-        name: Test echo
-        script:
-          - echo "test echo"
+#    - step:
+#        name: Test echo
+#        script:
+#          - echo "test echo"
 #    - step:
 #        name: Runner Setup
 #        image: guglio/dind-buildx:latest
@@ -29,8 +29,8 @@ pipelines:
           - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game
           - cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
           - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
-          - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
-          - docker buildx build --platform linux/arm/v8 -t valkyrie00/nn-telegram:testing -f deployment/docker/Dockerfile .
+#          - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+#          - docker buildx build --platform linux/arm/v8 -t valkyrie00/nn-telegram:testing -f deployment/docker/Dockerfile .
 
 definitions:
   services:
