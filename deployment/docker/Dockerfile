@@ -21,7 +21,7 @@ RUN GOARCH=arm64 GOOS=linux CGO_ENABLED=0 go build -tags=nn-telegram-notifier -i
 
 FROM arm64v8/alpine:latest
 
-RUN apk add --update coreutils tzdata && rm -rf /var/cache/apk/*
+# RUN apk add --update coreutils tzdata && rm -rf /var/cache/apk/*
 
 WORKDIR /
 
