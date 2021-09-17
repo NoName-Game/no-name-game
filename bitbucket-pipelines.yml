@@ -12,16 +12,27 @@ pipelines:
           - echo "test"
           - echo $BITBUCKET_BRANCH
           - echo $BITBUCKET_TAG
+        - step:
+            # trigger: manual
+            name: Deploy to Kubernetes
+            image: atlassian/pipelines-kubectl
+            script:
+              # NOTE: $KUBECONFIG is secret stored as a base64 encoded string
+              # Base64 decode our kubeconfig file into a temporary kubeconfig.yml file (this will be destroyed automatically after this step runs)
+              - echo $KUBECONFIG | base64 -d > kubeconfig.yml
+              # Tell our Kubernetes deployment to use the new Docker image tag
+#              - kubectl --kubeconfig=kubeconfig.yml --namespace=<namespace> set image deployment/<deployment-name> <deployment-name>=<docker-username>/<docker-image>:$BITBUCKET_COMMIT
   tags:
     '**':
       - step:
           name: Testing
+          trigger: manual
           script:
             - echo "test"
             - echo $BITBUCKET_BRANCH
             - echo $BITBUCKET_TAG
       - step:
-          name: Build
+          name: Build And Push
           image: valkyrie00/buildx:latest
           runs-on:
             - self.hosted
