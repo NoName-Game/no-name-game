@@ -8,6 +8,7 @@ pipelines:
           - echo "test echo"
     - step:
         name: Runner Setup
+        image: guglio/dind-buildx:latest
         runs-on:
           - self.hosted
           - valkyrie
