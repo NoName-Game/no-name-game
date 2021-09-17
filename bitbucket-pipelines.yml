@@ -13,7 +13,7 @@ pipelines:
           - echo $BITBUCKET_BRANCH
           - echo $BITBUCKET_TAG
     - step:
-        # trigger: manual
+        trigger: manual
         name: Deploy to Kubernetes
         image: atlassian/pipelines-kubectl
         runs-on:
