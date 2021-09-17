@@ -19,6 +19,11 @@ pipelines:
 #          - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
     - step:
         name: Setup Project
+        runs-on:
+          - self.hosted
+          - valkyrie
+        services:
+          - docker
         script:
           - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game
           - cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
