@@ -20,6 +20,7 @@ pipelines:
           # NOTE: $KUBECONFIG is secret stored as a base64 encoded string
           # Base64 decode our kubeconfig file into a temporary kubeconfig.yml file (this will be destroyed automatically after this step runs)
           - echo $KUBECONFIG | base64 -d > kubeconfig.yml
+          - cat kubeconfig.yml
           # Tell our Kubernetes deployment to use the new Docker image tag
           #- kubectl --kubeconfig=kubeconfig.yml --namespace=<namespace> set image deployment/<deployment-name> <deployment-name>=<docker-username>/<docker-image>:$BITBUCKET_COMMIT
   tags:
