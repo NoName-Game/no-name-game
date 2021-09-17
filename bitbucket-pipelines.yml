@@ -5,35 +5,8 @@ definitions:
       image: docker:dind
 
 pipelines:
-  default:
-    - step:
-        name: Testing
-        script:
-          - echo "test"
-          - echo $BITBUCKET_BRANCH
-          - echo $BITBUCKET_TAG
-    - step:
-        trigger: manual
-        name: Deploy to Kubernetes
-        image: atlassian/pipelines-kubectl
-        runs-on:
-          - self.hosted
-          - valkyrie
-        script:
-          - echo $KUBECONFIG | base64 -d > kubeconfig.yml
-          - sed -i s/BRANCH_NAME/3.3.5-alpha.2/g deployment/k8s/*
-          - cat deployment/k8s/deployment-client.yml
-          - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-client.yml
-          - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-client.yml
   tags:
     '**':
-      - step:
-          name: Testing
-          trigger: manual
-          script:
-            - echo "test"
-            - echo $BITBUCKET_BRANCH
-            - echo $BITBUCKET_TAG
       - step:
           name: Build And Push
           image: valkyrie00/buildx:latest
@@ -50,3 +23,16 @@ pipelines:
             - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
             - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
             - docker buildx build --push --platform linux/arm64 -t valkyrie00/nn-telegram:$BITBUCKET_TAG -f deployment/docker/Dockerfile .
+      - step:
+          name: Deploy To Production
+          image: atlassian/pipelines-kubectl
+#          trigger: manual
+          runs-on:
+            - self.hosted
+            - valkyrie
+          script:
+            - echo $KUBECONFIG | base64 -d > kubeconfig.yml
+            - sed -i s/BRANCH_NAME/$BITBUCKET_TAG/g deployment/k8s/*
+            - cat deployment/k8s/deployment-client.yml
+            - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-client.yml
+            - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-notifier.yml
