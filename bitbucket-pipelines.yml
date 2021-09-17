@@ -33,6 +33,5 @@ pipelines:
           script:
             - echo $KUBECONFIG | base64 -d > kubeconfig.yml
             - sed -i s/BRANCH_NAME/$BITBUCKET_TAG/g deployment/k8s/*
-            - cat deployment/k8s/deployment-client.yml
             - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-client.yml
             - kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-notifier.yml
