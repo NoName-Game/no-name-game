@@ -15,8 +15,8 @@ pipelines:
         services:
           - docker
         script:
-          - echo "Executing on self-hosted runner"
           - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+          - echo "Executing on self-hosted runner"
     - step:
         name: Build
         runs-on:
