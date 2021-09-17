@@ -41,6 +41,7 @@ pipelines:
           - mkdir -p /go/src/bitbucket.org/no-name-game
           - cp -R $(pwd) /go/src/bitbucket.org/no-name-game/nn-telegram
           - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git /go/src/bitbucket.org/no-name-game/nn-grpc
+          - cd /go/src/bitbucket.org/no-name-game/nn-telegram
           - pwd
           - ls -al
 #          - mkdir -p ~/.docker/cli-plugins/
