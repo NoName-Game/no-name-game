@@ -40,11 +40,10 @@ pipelines:
         script:
 #          - mkdir -p ${GOPATH}/src/bitbucket.org/no-name-game
 #          - cp -R $(pwd) ${GOPATH}/src/bitbucket.org/no-name-game/nn-telegram
-#          - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
+          - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git ${GOPATH}/src/bitbucket.org/no-name-game/nn-grpc
 #          - mkdir -p ~/.docker/cli-plugins/
 #          - wget -o ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64
 #          - chmod a+x ~/.docker/cli-plugins/docker-buildx
-          - docker buildx install
           - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
           - docker buildx build --platform linux/arm/v8 -t valkyrie00/nn-telegram:testing -f deployment/docker/Dockerfile .
 
