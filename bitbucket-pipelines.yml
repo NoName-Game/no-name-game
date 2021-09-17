@@ -12,6 +12,13 @@ pipelines:
           - echo "test"
           - echo $BITBUCKET_BRANCH
           - echo $BITBUCKET_TAG
+  tags:
+    - step:
+        name: Testing
+        script:
+          - echo "test"
+          - echo $BITBUCKET_BRANCH
+          - echo $BITBUCKET_TAG
   custom:
     build-and-push:
       - step:
