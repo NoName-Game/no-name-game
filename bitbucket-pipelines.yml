@@ -23,6 +23,7 @@ pipelines:
           - cat kubeconfig.yml
           - sed -i s/BRANCH_NAME/3.3.5-alpha.2/g deployment/k8s/*
           - cat deployment/k8s/deployment-client.yml
+          - kubectl get pods
           # Tell our Kubernetes deployment to use the new Docker image tag
           #- kubectl --kubeconfig=kubeconfig.yml --namespace=<namespace> set image deployment/<deployment-name> <deployment-name>=<docker-username>/<docker-image>:$BITBUCKET_COMMIT
   tags:
