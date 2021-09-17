@@ -27,7 +27,6 @@ pipelines:
             - cp -R $(pwd) /go/src/bitbucket.org/no-name-game/nn-telegram
             - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git /go/src/bitbucket.org/no-name-game/nn-telegram/nn-grpc
             - cd /go/src/bitbucket.org/no-name-game/nn-telegram
-            - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
-            - docker buildx build --platform linux/arm64 -t valkyrie00/nn-telegram:testing -f deployment/docker/Dockerfile .
             - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
-            - docker push valkyrie00/nn-telegram:testing
+            - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+            - docker buildx build --push --platform linux/arm64 -t valkyrie00/nn-telegram:testing -f deployment/docker/Dockerfile .
