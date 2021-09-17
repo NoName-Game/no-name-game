@@ -19,18 +19,7 @@ pipelines:
           - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git /go/src/bitbucket.org/no-name-game/nn-telegram/nn-grpc
           - cd /go/src/bitbucket.org/no-name-game/nn-telegram
   custom:
-    - step:
-        name: Setup Project
-        runs-on:
-          - self.hosted
-          - valkyrie
-        services:
-          - docker
-        script:
-          - mkdir -p /go/src/bitbucket.org/no-name-game
-          - cp -R $(pwd) /go/src/bitbucket.org/no-name-game/nn-telegram
-          - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git /go/src/bitbucket.org/no-name-game/nn-telegram/nn-grpc
-          - cd /go/src/bitbucket.org/no-name-game/nn-telegram
+    BuildAndDeploy:
     - step:
         name: Build
         image: valkyrie00/buildx:latest
