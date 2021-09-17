@@ -44,7 +44,6 @@ pipelines:
           - cd /go/src/bitbucket.org/no-name-game/nn-telegram
           - pwd
           - ls -al
-          - ls -al /go/src/bitbucket.org/no-name-game/nn-grpc
 #          - mkdir -p ~/.docker/cli-plugins/
 #          - wget -o ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64
 #          - chmod a+x ~/.docker/cli-plugins/docker-buildx
