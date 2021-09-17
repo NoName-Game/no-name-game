@@ -31,7 +31,7 @@ pipelines:
     - step:
         name: Build
 #        image: guglio/dind-buildx:latest
-        image: golang
+        image: valkyrie00/buildx:latest
         runs-on:
           - self.hosted
           - valkyrie
