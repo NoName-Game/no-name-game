@@ -16,6 +16,9 @@ pipelines:
         # trigger: manual
         name: Deploy to Kubernetes
         image: atlassian/pipelines-kubectl
+        runs-on:
+          - self.hosted
+          - valkyrie
         script:
           # NOTE: $KUBECONFIG is secret stored as a base64 encoded string
           # Base64 decode our kubeconfig file into a temporary kubeconfig.yml file (this will be destroyed automatically after this step runs)
