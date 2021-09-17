@@ -19,9 +19,8 @@ pipelines:
           - git clone -b develop git@bitbucket.org:no-name-game/nn-grpc.git /go/src/bitbucket.org/no-name-game/nn-telegram/nn-grpc
           - cd /go/src/bitbucket.org/no-name-game/nn-telegram
   custom:
-    BuildAndDeploy:
     - step:
-        name: Build
+        name: Build And Push
         image: valkyrie00/buildx:latest
         runs-on:
           - self.hosted
