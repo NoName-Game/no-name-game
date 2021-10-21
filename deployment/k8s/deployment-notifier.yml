@@ -36,11 +36,11 @@ spec:
             - "/notifier"
           resources:
             limits:
-              cpu: 50m
-              memory: 50Mi
+              cpu: 100m
+              memory: 80Mi
             requests:
-              cpu: 40m
-              memory: 40Mi
+              cpu: 80m
+              memory: 50Mi
           env:
             - name: VERSION
               value: BRANCH_NAME
