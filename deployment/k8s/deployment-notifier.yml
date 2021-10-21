@@ -36,10 +36,10 @@ spec:
             - "/notifier"
           resources:
             limits:
-              cpu: 100m
+              cpu: 180m
               memory: 80Mi
             requests:
-              cpu: 80m
+              cpu: 150m
               memory: 50Mi
           env:
             - name: VERSION
