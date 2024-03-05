@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-grpc/build/pb"
+	"nn-telegram/config"
 )
 
 func CheckAndReturnCategorySlug(locale string, text string) (result string) {

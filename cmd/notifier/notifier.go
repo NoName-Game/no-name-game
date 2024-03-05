@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
-	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 	"github.com/sirupsen/logrus"
+	"nn-grpc/build/pb"
+	"nn-telegram/config"
+	"nn-telegram/internal/helpers"
 )
 
 var (

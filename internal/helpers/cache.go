@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-telegram/config"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 )
 
 // =================

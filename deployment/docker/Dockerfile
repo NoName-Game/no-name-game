@@ -2,13 +2,13 @@ FROM arm64v8/golang:1.15-alpine AS builder
 
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$PATH
-ENV PROJECT_PATH=/go/src/bitbucket.org/no-name-game/nn-telegram
+ENV PROJECT_PATH=/go/src/nn-telegram
 
-RUN mkdir -p $GOPATH/src/bitbucket.org/no-name-game/nn-grpc && \
+RUN mkdir -p $GOPATH/src/nn-grpc && \
     mkdir -p $PROJECT_PATH
 
 COPY . $PROJECT_PATH
-COPY ./nn-grpc $GOPATH/src/bitbucket.org/no-name-game/nn-grpc
+COPY ./nn-grpc $GOPATH/src/nn-grpc
 
 # go build server
 WORKDIR $PROJECT_PATH/cmd/client
@@ -25,7 +25,7 @@ RUN apk add --update coreutils tzdata && rm -rf /var/cache/apk/*
 
 WORKDIR /
 
-COPY --from=builder /go/src/bitbucket.org/no-name-game/nn-telegram/resources resources
+COPY --from=builder /go/src/nn-telegram/resources resources
 
 COPY --from=builder /go/bin/client /client
 COPY --from=builder /go/bin/notifier /notifier

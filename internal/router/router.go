@@ -4,13 +4,13 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/no-name-game/nn-telegram/internal/controllers"
+	"nn-telegram/internal/controllers"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
+	"nn-telegram/internal/helpers"
 )
 
 type Route struct {

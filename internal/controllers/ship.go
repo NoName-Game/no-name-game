@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/config"
 	"fmt"
+	"nn-telegram/config"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 
-	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"nn-telegram/internal/helpers"
 )
 
 // ====================================

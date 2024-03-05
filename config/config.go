@@ -1,13 +1,13 @@
 package config
 
 import (
-	"bitbucket.org/no-name-game/nn-telegram/init/antiflood"
-	"bitbucket.org/no-name-game/nn-telegram/init/connections/bot"
-	"bitbucket.org/no-name-game/nn-telegram/init/connections/redis"
-	"bitbucket.org/no-name-game/nn-telegram/init/connections/server"
-	"bitbucket.org/no-name-game/nn-telegram/init/limiter"
-	"bitbucket.org/no-name-game/nn-telegram/init/localization"
-	"bitbucket.org/no-name-game/nn-telegram/init/logger"
+	"nn-telegram/init/antiflood"
+	"nn-telegram/init/connections/bot"
+	"nn-telegram/init/connections/redis"
+	"nn-telegram/init/connections/server"
+	"nn-telegram/init/limiter"
+	"nn-telegram/init/localization"
+	"nn-telegram/init/logger"
 
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 )

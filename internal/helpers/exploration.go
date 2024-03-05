@@ -1,9 +1,9 @@
 package helpers
 
 import (
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
 	"github.com/sirupsen/logrus"
+	"nn-grpc/build/pb"
+	"nn-telegram/config"
 )
 
 // GetExplorationCategories - Recupera dalla cache o dal DB le categorie di esplorazione

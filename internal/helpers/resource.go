@@ -3,7 +3,7 @@ package helpers
 import (
 	"sort"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 )
 
 // GetResourceCategoryIcons

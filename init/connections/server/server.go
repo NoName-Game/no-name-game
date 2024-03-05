@@ -13,7 +13,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload" // Autload .env
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 )
 
 // Server

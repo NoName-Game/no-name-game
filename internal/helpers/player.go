@@ -5,8 +5,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-grpc/build/pb"
+	"nn-telegram/config"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )

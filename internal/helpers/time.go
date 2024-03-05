@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogo/protobuf/types"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
+	"nn-grpc/build/pb"
 )
 
 func GetEndTime(timestamp *types.Timestamp, player *pb.Player) (t time.Time, err error) {

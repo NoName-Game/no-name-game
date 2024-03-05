@@ -6,8 +6,8 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-grpc/build/pb"
+	"nn-telegram/config"
 )
 
 func AuctionItemFormatter(auctionID uint32) (itemDetails string, err error) {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-telegram/config"
 )
 
 // Trans - late shortCut

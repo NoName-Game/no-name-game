@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/no-name-game/nn-telegram/config"
+	"nn-telegram/config"
 
-	"bitbucket.org/no-name-game/nn-grpc/build/pb"
-	"bitbucket.org/no-name-game/nn-telegram/internal/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"nn-grpc/build/pb"
+	"nn-telegram/internal/helpers"
 )
 
 // ====================================
@@ -343,7 +343,7 @@ func (c *SafePlanetCrafterCreateController) Stage() {
 						// Se il player ha effettivamente la risorsa creo/incremento
 						// Incremento quantitativo risorse
 						if helpers.KeyInMap(choosedResource.GetID(), c.Payload.Resources) && hasResource {
-							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity <=	 resource.Quantity {
+							if c.Payload.Resources[choosedResource.GetID()]+c.Payload.SingleQuantity <= resource.Quantity {
 								c.Payload.Resources[choosedResource.GetID()] += c.Payload.SingleQuantity
 								c.Payload.Price += int32(10*choosedResource.GetRarity().GetID()) * c.Payload.SingleQuantity
 							}
