@@ -11,9 +11,6 @@ jobs:
     container:
       image: valkyrie00/buildx:latest
     steps:
-      - name: Set permissions
-        run: sudo chown -R $(whoami) $(pwd)
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -35,9 +32,6 @@ jobs:
     container:
       image: bitnami/kubectl:latest
     steps:
-      - name: Set permissions
-        run: sudo chown -R $(whoami) $(pwd)
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
