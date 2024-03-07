@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NN_PAT_TOKEN }}
 
       - name: Deploy To Production
         run: |
