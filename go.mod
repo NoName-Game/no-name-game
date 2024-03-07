@@ -2,7 +2,7 @@ module nn-telegram
 
 go 1.16
 
-replace nn-grpc => ../no-name-grpc
+replace nn-grpc => ../nn-grpc
 
 require (
 	nn-grpc v1.0.0
