@@ -30,10 +30,10 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.NN_PAT_TOKEN }}
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          token: ${{ secrets.NN_PAT_TOKEN }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v1
