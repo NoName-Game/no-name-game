@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  release:
+    runs-on: self-hosted
+    container:
+      image: valkyrie00/buildx:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NN_PAT_TOKEN }}
+
+      - name: Build And Push
+        run: |
+          mkdir -p /go/src/github.com/no-name-game
+          cp -R $(pwd) /go/src/github.com/no-name-game/nn-telegram
+          git clone -b develop https://github.com/NoName-Game/no-name-grpc.git /go/src/github.com/no-name-game/nn-telegram/nn-grpc
+          cd /go/src/github.com/no-name-game/nn-telegram
+          echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; docker buildx create --use
+          docker buildx build --push --platform linux/arm64 -t valkyrie00/nn-telegram:${GITHUB_REF#refs/tags/} -f deployment/docker/Dockerfile .
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Deploy To Production
+        run: |
+          echo ${{ secrets.KUBECONFIG }} | base64 -d > kubeconfig.yml
+          sed -i s/BRANCH_NAME/${GITHUB_REF#refs/tags/}/g deployment/k8s/*
+          kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-client.yml
+          kubectl --kubeconfig=kubeconfig.yml apply -f deployment/k8s/deployment-notifier.yml
